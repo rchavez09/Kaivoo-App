@@ -21,7 +21,7 @@
 | Product | `Agents/Product/` | Agent 8 (Product Manager) |
 | Engineering | `Agents/Engineering/` | Agent 2 (Software Engineer), Agent 3 (Architect), Agent 4 (Security) |
 | DevOps | `Agents/DevOps/` | Agent 9 (DevOps Engineer) |
-| Quality | `Agents/Quality/` | Agent 7 (Code Reviewer), Agent 10 (QA Architect — activates Sprint 4+) |
+| Quality | `Agents/Quality/` | Agent 7 (Code Reviewer), Agent 10 (QA Architect — activates Sprint 4+), Agent 11 (Feature Integrity Guardian) |
 | Design | `Agents/Design/` | Agent 1 (UI Designer), Agent 6 (Usability Architect) |
 | Research | `Agents/Research/` | Agent 5 (Research Analyst) |
 | Marketing | `Agents/Marketing/` | TBD |
@@ -39,3 +39,5 @@
 4. **Sprint files** are never deleted — they are historical records
 5. **Agent documents** are archived (`ARCHIVED-` prefix), never deleted
 6. **The Director** orchestrates all sprint planning through `Vision.md` and `Sprint-Protocol.md`
+7. **Sprint work** happens on dedicated branches (`sprint/N-theme`), never directly on `main` — see Sprint Protocol v1.1
+8. **Before merging to main**, Agent 7 (code) AND Agent 11 (feature integrity) must both pass

@@ -13,13 +13,73 @@
 | Product | Agent 8 | Market intelligence, pricing, go-to-market, feature prioritization |
 | Engineering | Agent 2, Agent 3, Agent 4 | Implementation, architecture, security |
 | DevOps | Agent 9 | CI/CD, Docker, packaging, deployment, monitoring |
-| Quality | Agent 7, Agent 10 | Code review, test strategy, test infrastructure |
+| Quality | Agent 7, Agent 10, Agent 11 | Code review, test strategy, feature integrity |
 | Design | Agent 1, Agent 6 | Visual design, UX, interaction patterns |
 | Research | Agent 5 | Technology scouting, competitive analysis |
 | Marketing | TBD | Content, growth, brand |
 
 ### The Director
 Sits above all departments at `Agents/Director.md`. Owns the product vision (`Agents/Vision.md`), orchestrates sprint planning, and coordinates cross-department work. The Director is the single entry point for all sprint lifecycle operations.
+
+---
+
+## 1B. Version Control & Sandbox Strategy
+
+### Git Branching Protocol
+
+Every sprint MUST be developed on a dedicated branch. The `main` branch is the stable, user-approved baseline.
+
+```
+BRANCH NAMING:
+  sprint/N-theme-slug     (e.g., sprint/3-restore-define)
+  hotfix/description      (e.g., hotfix/capture-input-fix)
+
+LIFECYCLE:
+  1. Sprint approved → Create branch: git checkout -b sprint/N-theme-slug
+  2. All sprint work happens on the sprint branch
+  3. Sprint completes → Agent 7 audit on the branch
+  4. User signs off on functionality (UX review, not just code review)
+  5. Merge to main: git merge sprint/N-theme-slug
+  6. Tag main: git tag post-sprint-N
+  7. If sprint is rejected → branch is abandoned, main is untouched
+
+RULES:
+  - NEVER commit sprint work directly to main
+  - Tag main after every successful sprint merge: post-sprint-N
+  - If a sprint breaks core functionality, the user can revert:
+      git checkout main (returns to last approved state)
+  - Sprint branches are preserved after merge (never deleted)
+  - Hotfix branches are for critical fixes between sprints
+```
+
+### Pre-Merge Checklist (Sprint Branch → Main)
+
+Before any sprint branch merges to main, ALL of the following must pass:
+
+```
+□ Agent 7 code audit completed (no P0 issues)
+□ Agent 11 feature integrity check passed (no regressions)
+□ Build succeeds: tsc --noEmit && vite build
+□ User has reviewed the running app and approved the UX
+□ Sprint retrospective section added to sprint file
+```
+
+### Recovery Protocol
+
+If a sprint has already been merged and causes regressions:
+
+```
+1. Create a hotfix branch from main
+2. Fix the specific regressions (do NOT revert the entire sprint)
+3. If regressions are too extensive to hotfix:
+   a. git revert the merge commit
+   b. Create a new sprint branch to redo the work properly
+4. Document what went wrong in the sprint retrospective
+```
+
+### Why This Exists
+
+Sprint 2 (Core Experience) was merged without a branching strategy. The Unified Day View replaced the widget-based Today dashboard, causing regressions in routine management, todo configuration, journal entry flow, and capture functionality. This protocol ensures that never happens again. Main is always safe.
 
 ---
 
@@ -46,6 +106,8 @@ Agents/
     Agent-7-Code-Reviewer.md              # Code review gate (note: spec file in Engineering/)
     Agent-10-QA-Architect.md              # Test strategy, CI test suite
     Agent-10-Docs/
+    Agent-11-Feature-Integrity-Guardian.md # Feature regression gate
+    Agent-11-Docs/                         # Feature Use Case Bible, regression checks
 
   Design/
     Agent-{N}-{Role}.md
@@ -242,4 +304,6 @@ Vision.md updated (mark phase progress)
 
 ---
 
-*Sprint Protocol v1.0 — February 22, 2026*
+*Sprint Protocol v1.1 — February 22, 2026*
+*v1.0: Initial protocol*
+*v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
