@@ -1,0 +1,353 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Kaivoo Design System */
+
+:root {
+  --background: 36 38% 97%;
+  /* Warm Sand */
+  --foreground: 225 28% 14%;
+  /* Deep Navy */
+  --card: 0 0% 100%;
+  /* White */
+  --card-foreground: 225 28% 14%;
+  /* Deep Navy */
+  --popover: 0 0% 100%;
+  --popover-foreground: 225 28% 14%;
+  --primary: 180 41% 39%;
+  /* Resonance Teal */
+  --primary-foreground: 0 0% 100%;
+  /* White */
+  --secondary: 220 14% 95%;
+  /* Cloud */
+  --secondary-foreground: 225 28% 14%;
+  /* Deep Navy */
+  --muted: 220 14% 95%;
+  /* Cloud */
+  --muted-foreground: 223 11% 36%;
+  /* Slate */
+  --accent: 146 12% 61%;
+  /* Sage Mist */
+  --accent-foreground: 225 28% 14%;
+  /* Deep Navy */
+  --destructive: 11 54% 50%;
+  /* Ember */
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 14% 91%;
+  /* Mist */
+  --input: 220 14% 91%;
+  /* Mist */
+  --ring: 180 41% 39%;
+  /* Resonance Teal */
+
+  --radius: 1rem;
+  /* 16px */
+  --font-sans: "Inter", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+
+  /* GlowingEffect: required var */
+  --black: #000000;
+
+  /* === Ocean Gradient System (Kaivoo Design System v2.0) === */
+  --ocean-foam: #D4EDE4;
+  --ocean-shallow: #7EC8C8;
+  --ocean-surface: #3B8C8C;
+  --ocean-mid: #2B6E8A;
+  --ocean-deep: #1E4D7A;
+  --ocean-twilight: #1E3364;
+  --ocean-abyss: #2A1B4E;
+  --ocean-trench: #1A1232;
+
+  /* Named gradients */
+  --gradient-depth-full: linear-gradient(
+    90deg,
+    #D4EDE4 0%,
+    #7EC8C8 20%,
+    #3B8C8C 40%,
+    #2B6E8A 55%,
+    #1E4D7A 70%,
+    #1E3364 85%,
+    #2A1B4E 100%
+  );
+  --gradient-depth-surface: linear-gradient(90deg, #D4EDE4 0%, #7EC8C8 40%, #3B8C8C 100%);
+  --gradient-depth-deep: linear-gradient(90deg, #3B8C8C 0%, #1E4D7A 50%, #2A1B4E 100%);
+  --gradient-depth-abyss: linear-gradient(90deg, #1E4D7A 0%, #1E3364 40%, #2A1B4E 70%, #1A1232 100%);
+  --gradient-chart-fill: linear-gradient(180deg, rgba(59, 140, 140, 0.20) 0%, rgba(30, 77, 122, 0.05) 100%);
+
+  --spacing-sm: 0.5rem;
+  /* 8px */
+  --spacing-md: 1rem;
+  /* 16px */
+  --spacing-lg: 1.5rem;
+  /* 24px */
+  --spacing-xl: 2rem;
+  /* 32px */
+
+  --success: 152 69% 96%;
+  --success-foreground: 152 64% 29%;
+  --warning: 48 100% 96%;
+  --warning-foreground: 23 82% 31%;
+  --info: 214 100% 97%;
+  --info-foreground: 226 71% 40%;
+
+  /* === Sidebar — Light Mode === */
+  --sidebar-background: 36 38% 97%;
+  /* Warm Sand — same as page bg, seamless */
+  --sidebar-foreground: 225 28% 14%;
+  /* Deep Navy */
+  --sidebar-primary: 180 41% 39%;
+  /* Resonance Teal */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 14% 93%;
+  /* Slightly darker than Cloud for hover */
+  --sidebar-accent-foreground: 225 28% 14%;
+  /* Deep Navy */
+  --sidebar-border: 220 14% 88%;
+  /* Mist — slightly more visible than global border */
+  --sidebar-ring: 180 41% 39%;
+
+  /* === Widget Shadows — Light Mode === */
+  --widget-shadow: 0 1px 4px rgba(26, 31, 46, 0.06), 0 1px 2px rgba(26, 31, 46, 0.04);
+  --widget-shadow-hover: 0 4px 16px rgba(26, 31, 46, 0.10), 0 2px 6px rgba(26, 31, 46, 0.06);
+}
+
+.dark {
+  /* === The Abyss — Kaivoo Design System v2.0 Dark Mode === */
+  --background: 249 30% 9%;
+  /* Canvas #12101E — deep purple-navy base */
+  --foreground: 37 21% 93%;
+  /* #F0EDE8 — warm off-white, never pure white */
+  --card: 245 35% 15%;
+  /* Layer 1 — Card #1A1832 */
+  --card-foreground: 37 21% 93%;
+  /* Warm off-white */
+  --popover: 246 31% 23%;
+  /* Layer 3 — Overlay #2D294E */
+  --popover-foreground: 37 21% 93%;
+  --primary: 180 43% 46%;
+  /* Resonance Teal brightened #4DB8B8 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 246 34% 19%;
+  /* Layer 2 — Elevated #232040 */
+  --secondary-foreground: 37 21% 93%;
+  --muted: 246 34% 19%;
+  /* Elevated */
+  --muted-foreground: 220 9% 64%;
+  /* Silver #9CA3AF */
+  --accent: 146 20% 68%;
+  /* Sage Mist brightened #A3C4B2 */
+  --accent-foreground: 246 34% 19%;
+  --destructive: 14 67% 62%;
+  /* Ember brightened #E07A5C */
+  --destructive-foreground: 0 0% 100%;
+  --border: 246 26% 28%;
+  /* Visible separation — L28% vs card L15% gives 13% contrast */
+  --input: 246 28% 22%;
+  /* Slightly lighter than card for input fields */
+  --ring: 180 43% 46%;
+
+  /* Fix accent-foreground: light text on sage-tinted backgrounds */
+  --accent-foreground: 37 21% 93%;
+  /* Warm off-white — readable on sage accent bg */
+
+  --success: 145 80% 10%;
+  --success-foreground: 142 71% 58%;
+  --warning: 21 92% 14%;
+  --warning-foreground: 46 96% 65%;
+  --info: 226 57% 21%;
+  --info-foreground: 212 100% 78%;
+
+  /* === Sidebar — Dark Mode (The Abyss) === */
+  --sidebar-background: 245 38% 12%;
+  /* Slightly deeper than Card — creates panel depth */
+  --sidebar-foreground: 37 21% 93%;
+  /* Warm off-white #F0EDE8 */
+  --sidebar-primary: 180 43% 46%;
+  /* Resonance Teal brightened */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 246 34% 22%;
+  /* Overlay layer — hover highlight */
+  --sidebar-accent-foreground: 37 21% 93%;
+  /* Warm off-white */
+  --sidebar-border: 246 28% 20%;
+  /* Visible border within sidebar depth */
+  --sidebar-ring: 180 43% 46%;
+
+  /* === Widget Shadows — Dark Mode === */
+  --widget-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --widget-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.40);
+}
+
+@theme inline {
+  --color-card: var(--card);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-radius: var(--radius);
+  --color-popover: var(--popover);
+  --color-primary: var(--primary);
+  --color-font-sans: var(--font-sans);
+  --color-secondary: var(--secondary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-spacing-lg: var(--spacing-lg);
+  --color-spacing-md: var(--spacing-md);
+  --color-spacing-sm: var(--spacing-sm);
+  --color-spacing-xl: var(--spacing-xl);
+  --color-destructive: var(--destructive);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "calt", "tnum", "case";
+  }
+
+  h1 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  h3 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+
+  h4 {
+    @apply text-lg font-semibold tracking-tight;
+  }
+
+  h5 {
+    @apply text-base font-medium tracking-tight;
+  }
+
+  h6 {
+    @apply text-sm font-medium tracking-tight;
+  }
+
+  p {
+    @apply text-sm leading-relaxed;
+  }
+
+  small {
+    @apply text-xs leading-normal;
+  }
+}
+
+@layer components {
+  .widget-card {
+    @apply bg-card rounded-2xl p-5 transition-all duration-200 border border-border/50;
+    box-shadow: var(--widget-shadow);
+  }
+
+  .widget-card:hover {
+    box-shadow: var(--widget-shadow-hover);
+  }
+
+  .widget-header {
+    @apply flex items-center justify-between mb-4;
+  }
+
+  .widget-title {
+    @apply text-sm font-semibold text-muted-foreground uppercase tracking-wider;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground transition-all duration-200 ease-out;
+  }
+
+  .nav-item:hover {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground translate-x-0.5;
+  }
+
+  .nav-item.active {
+    @apply bg-primary/10 text-primary font-medium shadow-sm;
+    box-shadow: inset 3px 0 0 hsl(var(--primary));
+  }
+
+  .tag-chip {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 cursor-pointer transition-colors hover:bg-primary/20;
+  }
+
+  .topic-chip {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-accent/20 text-accent-foreground border border-accent/30 cursor-pointer transition-colors hover:bg-accent/30;
+  }
+
+  /* Glassmorphism effect for special cards */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-md rounded-2xl border border-white/20;
+    box-shadow: var(--widget-shadow);
+  }
+
+  /* Progress bar styling */
+  .progress-bar {
+    @apply h-2 rounded-full bg-muted overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  /* Depth Bar — Kaivoo signature 4px gradient stripe (Design System v2.0) */
+  .depth-bar {
+    height: 4px;
+    width: 100%;
+    background: var(--gradient-depth-full);
+    border-radius: 0;
+    flex-shrink: 0;
+  }
+
+  .dark .depth-bar {
+    opacity: 0.8;
+    box-shadow: 0 1px 8px rgba(126, 200, 200, 0.15);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  /* Gradient text utility */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+}
