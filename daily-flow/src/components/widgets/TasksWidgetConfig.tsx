@@ -278,6 +278,7 @@ export function TasksWidgetConfigDialog({
           size="sm"
           className="text-muted-foreground hover:text-foreground h-8 px-2"
           title="Customize Tasks Widget"
+          aria-label="Customize Tasks Widget"
         >
           <Settings className="w-4 h-4" />
         </Button>
@@ -356,11 +357,12 @@ export function TasksWidgetConfigDialog({
                 </Select>
               )}
 
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="h-9 px-3"
                 onClick={handleAddSection}
                 disabled={(addType === 'builtin' && !selectedBuiltin) || (addType === 'topic' && !selectedTopic) || (addType === 'tag' && !selectedTag)}
+                aria-label="Add section"
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -411,6 +413,7 @@ export function TasksWidgetConfigDialog({
                         className="h-7 w-7 p-0"
                         onClick={() => moveSection(index, 'up')}
                         disabled={index === 0}
+                        aria-label={`Move ${section.label} up`}
                       >
                         <ChevronUp className="w-4 h-4" />
                       </Button>
@@ -420,6 +423,7 @@ export function TasksWidgetConfigDialog({
                         className="h-7 w-7 p-0"
                         onClick={() => moveSection(index, 'down')}
                         disabled={index === sortedSections.length - 1}
+                        aria-label={`Move ${section.label} down`}
                       >
                         <ChevronDown className="w-4 h-4" />
                       </Button>
@@ -428,6 +432,7 @@ export function TasksWidgetConfigDialog({
                         size="sm"
                         className="h-7 w-7 p-0"
                         onClick={() => onUpdateSection(section.id, { visible: !section.visible })}
+                        aria-label={section.visible ? `Hide ${section.label}` : `Show ${section.label}`}
                       >
                         {section.visible ? (
                           <Eye className="w-4 h-4 text-primary" />
@@ -440,6 +445,7 @@ export function TasksWidgetConfigDialog({
                         size="sm"
                         className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
                         onClick={() => onRemoveSection(section.id)}
+                        aria-label={`Remove ${section.label} section`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

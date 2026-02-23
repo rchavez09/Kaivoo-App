@@ -218,11 +218,12 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
           {/* Add to Today picker */}
           <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-muted-foreground hover:text-foreground h-8 px-2"
                 title="Add existing tasks to today"
+                aria-label="Add existing tasks to today"
               >
                 <CalendarPlus className="w-4 h-4" />
               </Button>

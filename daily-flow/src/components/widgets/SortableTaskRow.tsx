@@ -64,6 +64,7 @@ const TaskRowContent = React.memo(function TaskRowContent({
             {...(dragProps.listeners as React.HTMLAttributes<HTMLButtonElement>)}
             className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-muted-foreground/50 hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none"
             onClick={(e) => e.stopPropagation()}
+            aria-label={`Reorder ${task.title}`}
           >
             <GripVertical className="w-4 h-4" />
           </button>
@@ -72,6 +73,7 @@ const TaskRowContent = React.memo(function TaskRowContent({
         {/* Quick complete circle */}
         <button
           onClick={(e) => onQuickComplete(task, e)}
+          aria-label={isDone ? `Mark "${task.title}" incomplete` : `Mark "${task.title}" complete`}
           className={cn(
             "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors",
             isDone
@@ -104,6 +106,7 @@ const TaskRowContent = React.memo(function TaskRowContent({
           {hasSubtasks && (
             <button
               onClick={(e) => onToggleExpanded(task.id, e)}
+              aria-label={isExpanded ? `Collapse subtasks for "${task.title}"` : `Expand subtasks for "${task.title}"`}
               className={cn(
                 "flex items-center gap-1.5 text-xs w-fit px-1.5 py-0.5 -ml-1.5 rounded hover:bg-secondary transition-colors",
                 isDone ? "text-muted-foreground" : "text-muted-foreground hover:text-foreground"
@@ -129,6 +132,7 @@ const TaskRowContent = React.memo(function TaskRowContent({
             >
               <button
                 onClick={(e) => onSubtaskToggle(task.id, subtask.id, e)}
+                aria-label={subtask.completed ? `Mark "${subtask.title}" incomplete` : `Mark "${subtask.title}" complete`}
                 className={cn(
                   "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
                   subtask.completed

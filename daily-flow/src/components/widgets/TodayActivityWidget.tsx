@@ -338,6 +338,7 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
           size="sm"
           className="h-8 px-2"
           onClick={() => setExpanded(!expanded)}
+          aria-label={expanded ? "Collapse activity feed" : "Expand activity feed"}
         >
           {expanded ? (
             <ChevronUp className="w-4 h-4" />
@@ -393,6 +394,7 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
                         variant="ghost"
                         size="sm"
                         className="h-6 px-2"
+                        aria-label={`Edit ${item.type === 'journal' ? 'journal entry' : 'capture'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           if (item.type === 'journal' && onEditJournal) {
@@ -411,6 +413,7 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
                             variant="ghost"
                             size="sm"
                             className="h-6 px-2"
+                            aria-label={`Delete ${item.type === 'journal' ? 'journal entry' : 'capture'}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Trash2 className="w-3 h-3" />

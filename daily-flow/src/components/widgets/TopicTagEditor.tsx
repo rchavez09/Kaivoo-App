@@ -174,6 +174,7 @@ export function TopicTagEditor({
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0"
+                          aria-label={isExpanded ? `Collapse ${topic.name} pages` : `Expand ${topic.name} pages`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setExpandedTopic(isExpanded ? null : topic.id);
@@ -226,6 +227,7 @@ export function TopicTagEditor({
                   className="h-7 w-7 p-0"
                   onClick={handleCreateNewTopic}
                   disabled={!newTopicName.trim()}
+                  aria-label="Create new topic"
                 >
                   <Check className="h-3.5 w-3.5" />
                 </Button>
@@ -254,6 +256,7 @@ export function TopicTagEditor({
             <button
               onClick={() => handleRemoveTag(tag)}
               className="ml-0.5 opacity-50 hover:opacity-100 group-hover:opacity-100"
+              aria-label={`Remove ${tagName} tag`}
             >
               <X className="h-3 w-3" />
             </button>
@@ -346,6 +349,7 @@ export function TopicTagEditor({
                     setTagOpen(false);
                   }}
                   disabled={!newTagName.trim()}
+                  aria-label="Create new tag"
                 >
                   <Check className="h-3.5 w-3.5" />
                 </Button>

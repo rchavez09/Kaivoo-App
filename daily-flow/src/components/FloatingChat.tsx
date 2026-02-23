@@ -149,10 +149,11 @@ const FloatingChat = () => {
         });
         addMessage('assistant', 'Saved as a capture. You can process it later.');
       }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Something went wrong';
-      addMessage('assistant', msg);
-      toast.error(msg);
+    } catch (e: unknown) {
+      console.error('[FloatingChat]', e);
+      const userMsg = 'Something went wrong. Please try again.';
+      addMessage('assistant', userMsg);
+      toast.error(userMsg);
     }
   }, [input, addMessage, addTask, addCapture, addJournalEntry, toggleRoutineCompletion, routines]);
 
