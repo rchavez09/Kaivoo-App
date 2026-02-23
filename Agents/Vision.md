@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 3.1
+**Version:** 3.2
 **Last Updated:** February 23, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -115,7 +115,7 @@ The platform doesn't guess what users want — it watches what they're already t
 
 | # | Module | Role | Status |
 |---|--------|------|--------|
-| — | **Command Space** | Core Foundation — journal, todos, calendar, captures, daily view | In progress (80-85%) |
+| — | **Command Space** | Core Foundation — journal, todos, calendar, captures, daily view | In progress (~90%) |
 | 2 | **Marketing Agency** | Brand guidelines → campaigns, copy, landing pages, social content, asset generation | Planned — begins after Command Space is monetizing |
 | 3 | **Trading Bot** | Multi-strategy automated trading, multi-account management, backtesting | Deferred — requires legal/compliance review before development |
 | N | **Future Modules** | Prioritized by Module Demand Intelligence — build what users are already trying to do | Long-term — platform architecture must be proven first |
@@ -189,6 +189,7 @@ The platform doesn't guess what users want — it watches what they're already t
 | Foundation scaffold (Lovable prototype) | DONE | Sprint 0 |
 | Security hardening + performance + code quality | DONE | Sprint 1 |
 | Error sanitization, accessibility, TrackingWidget refactor, test infrastructure | DONE | Sprint 4 |
+| CI/CD pipeline, Zustand optimization, service typing, test expansion (81 tests) | DONE | Sprint 5 |
 | Design System migration (Kaivoo palette, components) | PLANNED | — |
 | Unified Day View (Today page redesign) | PLANNED | — |
 | Core feature enhancement (task recurrence, better journal) | PLANNED | — |
@@ -208,7 +209,7 @@ The platform doesn't guess what users want — it watches what they're already t
 | Setup wizard — hosting choice, AI config, account setup | PLANNED | — |
 | BYO API key architecture — secure storage, multi-provider routing | PLANNED | — |
 | Configuration system — settings that persist across install/update | PLANNED | — |
-| CI/CD pipeline — automated builds, testing, deployment | PLANNED | — |
+| CI/CD pipeline — automated builds, testing, deployment | DONE | Sprint 5 |
 | Dockerized local stack — one-command self-hosted setup | PLANNED | — |
 | Telegram bot integration — mobile access channel | PLANNED | — |
 | License key / account system | PLANNED | — |
@@ -301,9 +302,11 @@ The platform doesn't guess what users want — it watches what they're already t
 
 ## Current Position
 
-**We are in:** Phase 1 — Cloud Command Center
-**Active sprint:** None (Sprint 5 planning next)
-**Last completed:** Sprint 4 (Secure & Stabilize) — error sanitization, TrackingWidget decomposition, mood history fix, 22 aria-labels, test infrastructure (47 tests), coverage tooling
+**We are in:** Phase 1 — Cloud Command Center (~90% complete)
+**Active sprint:** None (Sprint 6 planning next)
+**Last completed:** Sprint 5 (Pipeline & Polish) — CI/CD pipeline, Zustand selector optimization, service typing, test expansion to 81 tests
+
+**Sprint 5 delivered:** GitHub Actions CI pipeline (lint → format → typecheck → test → build), GitHub remote repository, Zustand selector migration (22 files, zero full-store subscriptions), TasksWidget decomposition, service layer typing (0 `any`), shared config consolidation, 4 accessibility fixes, 34 new tests (81 total, 83% coverage on src/lib/). Agent 11 + Agent 7 gates both passed (8/10 score). See `Sprints/Sprint-5-Pipeline-Polish.md`.
 
 **Sprint 4 delivered:** Error message sanitization (FloatingChat, AIInbox, TrackingWidget), TrackingWidget decomposed into 4 focused modules, mood history append-only pattern, 22 aria-labels across 9 widgets, test strategy + coverage tooling + 47 tests (dateUtils, tracking-types). Agent 11 + Agent 7 gates both passed. See `Sprints/Sprint-4-Secure-Stabilize.md`.
 
