@@ -2,13 +2,15 @@ import { ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useKaivooStore } from '@/stores/useKaivooStore';
+import FloatingChat from '@/components/FloatingChat';
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
 const AppLayout = ({ children }: AppLayoutProps) => {
-  const { sidebarCollapsed, toggleSidebar } = useKaivooStore();
+  const sidebarCollapsed = useKaivooStore(s => s.sidebarCollapsed);
+  const toggleSidebar = useKaivooStore(s => s.toggleSidebar);
 
   return (
     <TooltipProvider>
@@ -25,6 +27,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </main>
         </div>
       </div>
+      <FloatingChat />
     </TooltipProvider>
   );
 };
