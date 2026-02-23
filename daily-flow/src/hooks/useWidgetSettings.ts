@@ -3,6 +3,7 @@
  * Falls back to localStorage for guests or while loading.
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -106,6 +107,7 @@ export function useWidgetSettings<T extends Record<string, any>>(
             );
           if (upsertError) {
             console.error('Failed to persist widget settings:', upsertError);
+            toast.error('Could not save widget settings. Your changes are saved locally.');
           }
         }, 400);
       }

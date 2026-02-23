@@ -1,174 +1,188 @@
-# Next Sprint Planning — Sprint 3: Restore & Define
+# Sprint 3 — Phase 1B: Widget Flexibility & Activity Trace
 
-**Status:** PLANNING — Awaiting Use Case Bible from Agent 6 + User
 **Compiled by:** The Director
 **Date:** February 22, 2026
-**Vision Position:** Phase 1 — Cloud Command Center
-**Last Completed:** Sprint 2 — Core Experience (in progress, regressions identified)
+**Sprint:** 3 (Restore & Define) — continuation of Phase 1
+**Branch:** `sprint/3-restore-define`
+**Status:** AWAITING USER APPROVAL
 
 ---
 
-## Sprint 3 Context
+## Context
 
-Sprint 2 (Core Experience) delivered real wins — date navigation, calendar improvements, design system overhaul, React Query migration — but the Unified Day View replaced the widget-based Today dashboard, causing significant regressions in core daily-use functionality. The user's command center no longer works the way they need it to.
+Sprint 3 Phase 1 (Parcels P1–P7) has been implemented on the sprint branch. The widget-based Today dashboard is restored with DayBriefWidget, TasksWidget, TrackingWidget, ScheduleWidget, FloatingChat, and DailyShutdown. All widgets are date-aware. Build passes (`tsc --noEmit` + `vite build`).
 
-**Sprint 3 priorities:**
-1. Restore lost functionality to the Today page and core features
-2. Establish the Feature Use Case Bible so this never happens again
-3. Keep Sprint 2 wins (date nav, design system, React Query) intact
-4. Platform ambitions (modules, marketplace, self-hosting) are ON HOLD until the core daily flow is solid
+**User review surfaced three issues before we can proceed to Phase 2 (audit + merge):**
 
-**New process for Sprint 3:**
-- First sprint under the git branching/sandbox strategy (Sprint Protocol v1.1)
-- Agent 11 (Feature Integrity Guardian) is active starting this sprint
-- Use Case Bible must be complete BEFORE any code parcels begin
+1. **Layout is hardcoded** — Tasks and Routines are forced into a side-by-side 2-column grid. User wants them **stacked vertically** and wants to **choose their own layout**.
+2. **Activity trace is missing** — The `TodayActivityWidget` (a collapsible live feed of completed tasks, routines, journal entries, and captures) was not wired into the new dashboard. User explicitly misses this feature: *"I used to have a live trace of everything I got completed. This was on a dropdown, so I could hide it if necessary."*
+3. **No widget configurability** — User cannot add/remove/reorder widgets. The existing `WidgetContainer.tsx` (348 lines, complete with @dnd-kit drag-to-reorder, add/remove picker, vertical/horizontal layout toggle) exists but is not used by TodayDashboard.
 
 ---
 
-## Phase 0: Use Case Bible (Pre-Code — Blocks All Other Phases)
+## Input Sources
 
-**Owner:** Agent 6 (Usability Architect) + Agent 11 (Feature Integrity Guardian) + User
-
-The Feature Use Case Bible defines for every page and widget: what it does, how it's used, what "working" looks like, and what it must never lose. This document becomes the contract for Sprint 3 and all future sprints.
-
-**Pages to cover:**
-| Page | Key Questions |
-|------|--------------|
-| **Today** | What widgets belong here? What's the primary use case? How should routines, todos, journal, and captures appear? What role does the timeline play? |
-| **Tasks** | How does the dashboard view work? What configurable sections exist (by topic, due tomorrow, this week, etc.)? How do Kanban and list views coexist? |
-| **Journal** | What does a full journal entry look like vs. a quick thought? How does the AI extraction flow work? How do past entries work? |
-| **Calendar** | What are the view modes? How does day drilling work? How do routines appear? |
-| **Captures** | What is the capture input flow? Where can captures be created from? How are they processed? |
-| **Insights** | What metrics matter? What are the zoom levels? Where do heatmaps and streaks live? |
-| **Settings** | What can be configured? Routine add/delete/edit? Widget configuration? Todo section settings? |
-| **Topics** | How does the knowledge base hierarchy work? How are topics linked to other entities? |
-
-**Output:** `Agents/Quality/Agent-11-Docs/Feature-Use-Case-Bible.md`
-
-**This phase is being handled in a separate conversation with the user and Agent 6.**
+| Source | Attribution | Key Takeaway |
+|--------|------------|--------------|
+| User feedback (Session Feb 22) | User | Stacked vertical layout, user-configurable arrangement, activity trace restored |
+| `Agents/Vision.md` v3.0 | Director | Phase 1 — Cloud Command Center. Principle #3: Day-centric design. Principle #4: Edit where you see it. |
+| `Agents/Quality/Agent-11-Docs/Feature-Use-Case-Bible.md` v0.4 | Agent 11 | Must-Never-Lose: activity feed showing today's completions |
+| `Agents/Quality/Agent-11-Docs/Feature-Bible-Settings.md` v0.1 | Agent 11 | Widget arrangement is a user preference that should persist |
+| `daily-flow/src/components/widgets/WidgetContainer.tsx` | Existing code | Complete drag-to-reorder system, layout toggle, add/remove picker — already built |
+| `daily-flow/src/components/widgets/TodayActivityWidget.tsx` | Existing code | 499-line widget, fully functional with expand/collapse — not wired to TodayDashboard |
+| `daily-flow/src/hooks/useWidgetSettings.ts` | Existing code | Persistence hook for widget config (Supabase + localStorage fallback, 400ms debounce) |
+| `Agents/Design/Agent-6-Docs/Use-Case-Prioritization-Sprint-0.md` | Agent 6 | Foundation-tier use cases include configurable dashboard layout |
 
 ---
 
-## Phase 1: Restore What Was Lost (Depends on Phase 0)
+## Agent Assignments
 
-These items restore functionality that was working pre-Sprint 2 and was lost or degraded by the Unified Day View rebuild. Specific parcels TBD after Use Case Bible is finalized.
+| Agent | Role | Involvement | Rationale |
+|-------|------|-------------|-----------|
+| **Agent 2** (Staff Software Engineer) | Implementation | All 3 parcels | Code changes to TodayDashboard, ScheduleWidget, TodayActivityWidget |
+| **Agent 6** (Usability Architect) | Consult | Default widget order, layout toggle placement | Ensures the default experience feels right before user customizes |
+| **Agent 11** (Feature Integrity Guardian) | Gate | Post-implementation Bible regression check | Verify activity trace, widget config, and all Phase 1 features are intact |
+| **Agent 7** (Code Reviewer) | Gate | Code audit on full sprint branch before merge | Quality gate per protocol |
 
-### Known Regressions to Address
-
-| Regression | What Was Lost | What Replaced It | Priority |
-|-----------|--------------|-----------------|----------|
-| **Todo dashboard widget** | Configurable sections (by topic, due tomorrow, due this week, etc.) with settings tab | Flat TaskPanel with only pending/completed | Critical |
-| **Routine management** | Add/delete/edit routines, big icon buttons to check off | Small toggles in timeline, no add/delete UI | Critical |
-| **Journal entry from Today** | Full journal entry creation from the Today page | Compact InlineJournal that feels like a thought | Major |
-| **Capture input** | Working quick-capture flow | CapturesList exists but input flow is broken | Critical |
-| **Today page layout** | Widget-based dashboard — YOUR command center | Timeline-heavy layout optimized for meeting-heavy days | Major |
-
-### Approach: Extend, Don't Replace
-
-The Sprint 2 components (date navigation, DaySummaryBar, DateChip, design system) are **kept**. The goal is to bring back the widget-based dashboard experience while keeping the good things Sprint 2 added. Specifically:
-
-- Today page returns to a widget-based layout with routines, todos, journal, captures as distinct widgets
-- Date navigation and day-drilling from Sprint 2 are layered on top
-- Routine widget gets big icon buttons back + add/delete/edit in Settings
-- Todo widget gets configurable sections back + settings tab
-- Journal widget supports full entry creation, not just compact inline
-- Capture widget gets a working input flow
-- Timeline becomes an optional/secondary view, not the main highlight
+**Not needed for this phase:**
+- Agent 1 (no new visual design — using existing WidgetContainer UI)
+- Agent 3 (no architecture changes — using existing hooks and patterns)
+- Agent 4 (no security implications — no new data access patterns)
+- Agent 5 (no research needed)
+- Agent 8 (no business model impact)
+- Agent 9 (no DevOps changes)
+- Agent 10 (test infra not yet active — Sprint 4+)
 
 ---
 
-## Phase 2: Solidify the Foundation (Parallel with Phase 1)
+## Parcels
 
-### Agent 11 First Assignments
-| Parcel | Description | Owner |
-|--------|------------|-------|
-| Feature Use Case Bible | Finalize and maintain the Bible (started in Phase 0) | Agent 11 + Agent 6 |
-| Sprint 3 Impact Assessment | Verify Phase 1 parcels don't break Sprint 2 wins | Agent 11 |
-| Pre-Merge Regression Check | Run full Bible checklist before sprint branch merges to main | Agent 11 |
+### P1B-1: Make ScheduleWidget Self-Contained
+**Owner:** Agent 2
 
-### Process Improvements
-| Parcel | Description | Owner |
-|--------|------------|-------|
-| Git branching setup | Sprint 3 branch: `sprint/3-restore-define` | Agent 2 |
-| Sprint Protocol v1.1 | Branching rules added (DONE — Feb 22, 2026) | Director |
-| Agent 11 activation | Feature Integrity Guardian spec (DONE — Feb 22, 2026) | Director |
+**Problem:** ScheduleWidget currently receives `meetings` as a prop filtered externally by TodayDashboard. For WidgetContainer to render it, each widget must be self-contained (receive only `date` and fetch its own data).
 
----
+**Changes:**
+- Add `date?: Date` prop to ScheduleWidget
+- Read meetings from `useKaivooStore` directly, filtered by `date`
+- Remove `meetings` prop (or keep as optional override)
+- Keep `onMeetingClick` callback prop
 
-## Candidate Items (Carried from Sprint 2 Backlog)
-
-These items are ON HOLD. They will not be included in Sprint 3 unless the core daily flow is solid first.
-
-### Deferred Platform Work
-| Item | Source | Notes |
-|------|--------|-------|
-| Task recurrence system | Vision.md Phase 1 | After core restore |
-| Search & file attachments | Vision.md Phase 1 | Separate sprint |
-| Notifications & reminders | Vision.md Phase 1 | Separate sprint |
-| PWA (installable, offline) | Vision.md Phase 1 | Separate sprint |
-| Quarterly Insights view | UC5, Research P1 | After core restore |
-| Auto-detected patterns | Research Finding 6 | Needs correlation engine (Phase 4+) |
-
-### Deferred Agent 8 (Product) Items
-| Item | Source | Notes |
-|------|--------|-------|
-| Data import tools (Notion + Obsidian) | Customer Persona Research | After core is solid |
-| CalDAV support | Customer Persona Research | Phase 3+ |
-| Pricing page / calculator | Competitive Landscape Report | Pre-launch |
-| Source-available licensing decision | Customer Persona Research | Strategic decision |
-
-### Deferred Agent 9 (DevOps) Items
-| Item | Source | Notes |
-|------|--------|-------|
-| Dockerfile + docker-compose | Agent 9 spec | Can start after Sprint 3 |
-| CI/CD pipeline (GitHub Actions) | Agent 9 spec | Can start after Sprint 3 |
-| Electron vs Tauri evaluation | Agent 9 spec | Research task, no dependency |
+**Files:** `daily-flow/src/components/today/ScheduleWidget.tsx`
 
 ---
 
-## Agent Load (Preliminary)
+### P1B-2: Make TodayActivityWidget Date-Aware
+**Owner:** Agent 2
 
-| Agent | Sprint 3 Role | Load |
-|-------|--------------|------|
-| Agent 2 (Engineer) | Restore widgets, fix regressions | Heavy |
-| Agent 6 (Usability) | Co-author Feature Use Case Bible | Medium (Phase 0) |
-| Agent 7 (Code Review) | Audit sprint branch before merge | Medium |
-| Agent 11 (Feature Integrity) | Bible, impact assessment, regression check | Medium |
-| Agent 1 (UI Designer) | Widget redesign guidance | Light |
-| Agent 3 (Architect) | Review restore approach | Light |
+**Problem:** TodayActivityWidget is hardcoded to `new Date()`. It needs to show activity for the selected date when navigating to past/future days.
+
+**Changes:**
+- Add optional `date?: Date` prop
+- When `date` is provided, filter journal entries, tasks, captures, routine completions for that date instead of today
+- Keep all existing functionality: expand/collapse, click-through to drawers, edit/delete actions, timeline UI
+
+**Files:** `daily-flow/src/components/widgets/TodayActivityWidget.tsx`
 
 ---
 
-## Definition of Done (Sprint 3)
+### P1B-3: Refactor TodayDashboard to Use WidgetContainer
+**Owner:** Agent 2 | **Consult:** Agent 6
+
+**Problem:** TodayDashboard has a hardcoded 2-column grid layout. User can't choose vertical vs horizontal, can't reorder widgets, can't hide/show them.
+
+**Changes:**
+- Replace the hardcoded layout in `TodayDashboard.tsx` with `WidgetContainer`
+- Define available widget types: `day-brief`, `tasks`, `routines`, `schedule`, `activity`
+- Implement `renderWidget(config)` function that maps widget type → React component with `date` prop
+- Use `useWidgetSettings('today-dashboard', defaultConfig)` for persistence
+- DayHeader and DailyShutdown remain **outside** the WidgetContainer (structural, not optional)
+- Wire callback props through: `onTaskClick`, `onMeetingClick`, journal/capture actions
+
+**Agent 6 guidance — Default widget order (vertical layout):**
+1. Day Brief (insight chips + summary + mood)
+2. Tasks (configurable sections)
+3. Routines (icon buttons + progress bars)
+4. Today's Activity (live completion trace, collapsible)
+5. Schedule (meetings, auto-hides when empty)
+
+**Default layout:** Vertical (stacked). User can switch to horizontal via WidgetContainer's built-in toggle.
+
+**Files:** `daily-flow/src/components/today/TodayDashboard.tsx`
+
+---
+
+## Dependencies
 
 ```
-Phase 0 Gate:
-  □ Feature Use Case Bible is complete and user-approved
-  □ Every page and major widget is documented
+P1B-1 (ScheduleWidget self-contained) ──┐
+                                          ├──→ P1B-3 (WidgetContainer refactor)
+P1B-2 (ActivityWidget date-aware) ───────┘
+                                          │
+                                          ↓
+                                    Phase 2 Gates
+                                    (Agent 11 + Agent 7 + User UX Review)
+```
 
-Phase 1 Gate:
-  □ Today page has widget-based layout with routines, todos, journal, captures
-  □ Routine add/delete/edit works from Settings
-  □ Routine widget has big icon buttons for check-off
-  □ Todo widget has configurable sections (by topic, due date, etc.)
-  □ Journal entry creation works from Today page (not just compact inline)
-  □ Capture input flow works
-  □ Sprint 2 wins preserved: date navigation, design system, React Query
+P1B-1 and P1B-2 can run **in parallel** — they're independent widget changes. P1B-3 depends on both being complete (all widgets must be self-contained before wiring into WidgetContainer).
 
-Phase 2 Gate:
-  □ Agent 11 regression check passes (all Bible items verified)
-  □ Agent 7 code audit passes (no P0 issues)
-  □ User has reviewed the running app and approved the UX
+---
+
+## Definition of Done
+
+```
+P1B-1 (ScheduleWidget):
+  □ Accepts date prop, reads meetings from store
+  □ No external data passing needed from parent
+
+P1B-2 (TodayActivityWidget):
+  □ Accepts optional date prop
+  □ Shows activity for selected date (not hardcoded to today)
+  □ Collapsible via chevron toggle
+  □ Click-through works (task → drawer, journal/capture → edit/delete)
+
+P1B-3 (WidgetContainer Integration):
+  □ TodayDashboard uses WidgetContainer for layout
+  □ Default layout is vertical (stacked)
+  □ User can toggle to horizontal (2-column) via built-in control
+  □ User can drag-to-reorder widgets in edit mode
+  □ User can add/remove widgets via picker
+  □ Widget order and layout persist across sessions (useWidgetSettings)
+  □ DayHeader and DailyShutdown remain outside the container
 
 Sprint-Level:
-  □ Sprint branch merged to main after all gates pass
-  □ Main tagged as post-sprint-3
-  □ Sprint retrospective added to Sprint-3 file
-  □ Vision.md updated
+  □ tsc --noEmit passes with 0 errors
+  □ vite build succeeds
+  □ Visual review on dev server confirms all widgets render correctly
 ```
 
 ---
 
-*Next-Sprint-Planning — Updated February 22, 2026*
-*Sprint 3 planning initiated in response to Sprint 2 regressions*
-*Awaiting Use Case Bible completion before finalizing code parcels*
+## After Phase 1B Completes
+
+Once these 3 parcels are done, we proceed to the existing Phase 2 gates:
+
+1. **Agent 11 regression check** — Run full Bible checklist on sprint branch
+2. **Agent 7 code audit** — Audit all Sprint 3 changes (P1 through P1B)
+3. **User UX review** — User reviews running app on dev server, approves before merge
+4. **Merge to main** — `git merge sprint/3-restore-define`
+5. **Tag** — `git tag post-sprint-3`
+6. **Sprint retrospective** — Added to Sprint-3 file
+
+---
+
+## Deferred Items (Not In Scope)
+
+These remain on the backlog for future sprints:
+- Task recurrence system (Vision Phase 1)
+- Search & file attachments (Vision Phase 1)
+- Notifications & reminders (Vision Phase 1)
+- PWA support (Vision Phase 1)
+- Data import tools — Notion, Obsidian (Agent 8)
+- CI/CD pipeline (Agent 9)
+- Electron vs Tauri evaluation (Agent 9)
+
+---
+
+*Compiled by the Director — February 22, 2026*
+*Pending user approval before implementation begins*

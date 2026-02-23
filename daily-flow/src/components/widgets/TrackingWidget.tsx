@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
-import { 
-  RotateCcw, Check, Droplets, Brain, Dumbbell, BookOpen, Coffee, 
+import { useState, useMemo, useCallback } from 'react';
+import {
+  RotateCcw, Check, Droplets, Brain, Dumbbell, BookOpen, Coffee,
   Pencil, Plus, X, Sun, Moon, Heart, Utensils, ChevronDown, ChevronRight,
   GripVertical, FolderPlus, Trash2
 } from 'lucide-react';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { Button } from '@/components/ui/button';
@@ -276,7 +277,11 @@ const GroupSection = ({
   );
 };
 
-const TrackingWidget = () => {
+interface TrackingWidgetProps {
+  date?: Date;
+}
+
+const TrackingWidget = ({ date }: TrackingWidgetProps = {}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newRoutineName, setNewRoutineName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('sun');
@@ -286,12 +291,22 @@ const TrackingWidget = () => {
   const [activeRoutine, setActiveRoutine] = useState<RoutineItem | null>(null);
   
   const { user } = useAuth();
-  const { 
-    routines,
-    routineGroups,
-    isRoutineCompleted,
-  } = useKaivooStore();
-  const { toggleRoutineCompletion } = useKaivooActions();
+  const routines = useKaivooStore(s => s.routines);
+  const routineGroups = useKaivooStore(s => s.routineGroups);
+  const storeIsCompleted = useKaivooStore(s => s.isRoutineCompleted);
+  const { toggleRoutineCompletion: storeToggle } = useKaivooActions();
+
+  const dateStr = useMemo(() => date ? format(date, 'yyyy-MM-dd') : undefined, [date]);
+
+  const isRoutineCompleted = useCallback(
+    (routineId: string) => storeIsCompleted(routineId, dateStr),
+    [storeIsCompleted, dateStr]
+  );
+
+  const toggleRoutineCompletion = useCallback(
+    (routineId: string) => storeToggle(routineId, dateStr),
+    [storeToggle, dateStr]
+  );
   const db = useDatabaseOperations();
   const { invalidate } = useInvalidate();
 
@@ -346,8 +361,8 @@ const TrackingWidget = () => {
       invalidate('routines');
       setNewRoutineName('');
       setSelectedIcon('sun');
-    } catch (e: any) {
-      toast.error(e?.message ?? 'Failed to add routine');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to add routine');
     }
   };
 
@@ -365,8 +380,8 @@ const TrackingWidget = () => {
       setNewGroupName('');
       setShowGroupForm(false);
       toast.success(`Created "${newGroupName.trim()}" group`);
-    } catch (e: any) {
-      toast.error(e?.message ?? 'Failed to add group');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to add group');
     }
   };
 
@@ -375,8 +390,8 @@ const TrackingWidget = () => {
     try {
       await db.deleteRoutine(id);
       invalidate('routines');
-    } catch (e: any) {
-      toast.error(e?.message ?? 'Failed to delete routine');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to delete routine');
     }
   };
 
@@ -386,8 +401,8 @@ const TrackingWidget = () => {
       await db.deleteRoutineGroup(groupId);
       invalidate('routines', 'routineGroups');
       toast.success('Group deleted, routines moved to Uncategorized');
-    } catch (e: any) {
-      toast.error(e?.message ?? 'Failed to delete group');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to delete group');
     }
   };
 
@@ -427,13 +442,13 @@ const TrackingWidget = () => {
         ? routineGroups.find(g => g.id === newGroupId)?.name 
         : 'Uncategorized';
       toast.success(`Moved "${routine.name}" to ${targetGroupName}`);
-    } catch (e: any) {
-      toast.error(e?.message ?? 'Failed to move routine');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to move routine');
     }
   };
 
   return (
-    <div className="widget-card animate-fade-in" style={{ animationDelay: '0.15s' }}>
+    <div className="widget-card animate-fade-in" style={{ animationDelay: '0.15s' }} id="day-section-routines">
       <div className="widget-header">
         <div className="flex items-center gap-2">
           <RotateCcw className="w-4 h-4 text-primary" />

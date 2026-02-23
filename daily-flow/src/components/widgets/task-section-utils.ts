@@ -1,6 +1,6 @@
 import { Task, TaskStatus } from '@/types';
-import { parseDate, isToday as isTodayUtil, isOverdue as isOverdueUtil, isSameDayAs } from '@/lib/dateUtils';
-import { startOfDay, addDays, isAfter, isBefore } from 'date-fns';
+import { parseDate, isSameDayAs } from '@/lib/dateUtils';
+import { startOfDay, addDays, isAfter, isBefore, isSameDay } from 'date-fns';
 import type { TasksWidgetSection, TasksWidgetSettings, SectionId } from './TasksWidgetConfig';
 
 export type TaskVariant = 'overdue' | 'default' | 'completed';
@@ -13,40 +13,59 @@ export const statusConfig: Record<TaskStatus, { color: string }> = {
   done: { color: 'text-white' },
 };
 
-const today = () => startOfDay(new Date());
+/**
+ * Date-aware section utility functions.
+ * When `referenceDate` is provided, comparisons use it instead of `new Date()`.
+ */
 
-export const isDueToday = (dueDate: string | undefined): boolean => isTodayUtil(dueDate);
-
-export const isOverdue = (dueDate: string | undefined): boolean => isOverdueUtil(dueDate);
-
-export const isDueThisWeek = (dueDate: string | undefined): boolean => {
+export const isDueToday = (dueDate: string | undefined, referenceDate?: Date): boolean => {
   if (!dueDate) return false;
-  if (isTodayUtil(dueDate)) return false;
+  const parsed = parseDate(dueDate);
+  if (!parsed) return false;
+  const ref = referenceDate ? startOfDay(referenceDate) : startOfDay(new Date());
+  return isSameDay(startOfDay(parsed), ref);
+};
+
+export const isOverdue = (dueDate: string | undefined, referenceDate?: Date): boolean => {
+  if (!dueDate) return false;
+  const parsed = parseDate(dueDate);
+  if (!parsed) return false;
+  const ref = referenceDate ? startOfDay(referenceDate) : startOfDay(new Date());
+  return startOfDay(parsed) < ref;
+};
+
+export const isDueThisWeek = (dueDate: string | undefined, referenceDate?: Date): boolean => {
+  if (!dueDate) return false;
+  if (isDueToday(dueDate, referenceDate)) return false;
 
   const parsed = parseDate(dueDate);
   if (!parsed) return false;
 
-  const t = today();
+  const ref = referenceDate ? startOfDay(referenceDate) : startOfDay(new Date());
   const parsedDay = startOfDay(parsed);
-  return isAfter(parsedDay, t) && isBefore(parsedDay, addDays(t, 7));
+  return isAfter(parsedDay, ref) && isBefore(parsedDay, addDays(ref, 7));
 };
 
-export const wasCompletedToday = (task: Task): boolean => {
+export const wasCompletedOnDate = (task: Task, referenceDate?: Date): boolean => {
   if (task.status !== 'done' || !task.completedAt) return false;
-  return isSameDayAs(task.completedAt, new Date());
+  const ref = referenceDate || new Date();
+  return isSameDayAs(task.completedAt, ref);
 };
+
+export const wasCompletedToday = (task: Task): boolean => wasCompletedOnDate(task);
 
 export function getTasksForSection(
   section: TasksWidgetSection,
   tasks: Task[],
-  taskOrder?: TasksWidgetSettings['taskOrder']
+  taskOrder?: TasksWidgetSettings['taskOrder'],
+  referenceDate?: Date
 ): { pending: Task[]; completed: Task[] } {
   const pending: Task[] = [];
   const completed: Task[] = [];
 
   tasks.forEach(task => {
     const isDone = task.status === 'done';
-    if (isDone && !wasCompletedToday(task)) return;
+    if (isDone && !wasCompletedOnDate(task, referenceDate)) return;
 
     let matches = false;
 
@@ -56,9 +75,9 @@ export function getTasksForSection(
       matches = task.tags?.includes(section.tagName) ?? false;
     } else {
       switch (section.id) {
-        case 'overdue': matches = isOverdue(task.dueDate); break;
-        case 'dueToday': matches = isDueToday(task.dueDate); break;
-        case 'dueThisWeek': matches = isDueThisWeek(task.dueDate); break;
+        case 'overdue': matches = isOverdue(task.dueDate, referenceDate); break;
+        case 'dueToday': matches = isDueToday(task.dueDate, referenceDate); break;
+        case 'dueThisWeek': matches = isDueThisWeek(task.dueDate, referenceDate); break;
         case 'highPriority': matches = task.priority === 'high'; break;
         case 'mediumPriority': matches = task.priority === 'medium'; break;
         case 'lowPriority': matches = task.priority === 'low'; break;

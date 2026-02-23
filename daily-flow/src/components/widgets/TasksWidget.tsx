@@ -28,10 +28,11 @@ const COLLAPSED_COMPLETED_KEY = 'kaivoo-tasks-widget-collapsed-completed';
 const EXPANDED_TASKS_KEY = 'kaivoo-tasks-widget-expanded-tasks';
 
 interface TasksWidgetProps {
+  date?: Date;
   onTaskClick?: (taskId: string) => void;
 }
 
-const TasksWidget = ({ onTaskClick }: TasksWidgetProps) => {
+const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
   const tasks = useKaivooStore(s => s.tasks);
   const topics = useKaivooStore(s => s.topics);
   const tags = useKaivooStore(s => s.tags);
@@ -162,7 +163,7 @@ const TasksWidget = ({ onTaskClick }: TasksWidgetProps) => {
   const totalPending = useMemo(() => {
     let count = 0;
     settings.sections.forEach(section => {
-      if (section.visible) count += getTasksForSection(section, tasks, settings.taskOrder).pending.length;
+      if (section.visible) count += getTasksForSection(section, tasks, settings.taskOrder, date).pending.length;
     });
     return count;
   }, [tasks, settings.sections, settings.taskOrder]);
@@ -172,7 +173,7 @@ const TasksWidget = ({ onTaskClick }: TasksWidgetProps) => {
 
   if (settingsLoading) {
     return (
-      <div className="widget-card animate-fade-in" style={{ animationDelay: '0.05s' }}>
+      <div className="widget-card animate-fade-in" style={{ animationDelay: '0.05s' }} id="day-section-tasks">
         <div className="widget-header">
           <div className="flex items-center gap-2">
             <CheckSquare className="w-4 h-4 text-primary" />
@@ -185,7 +186,7 @@ const TasksWidget = ({ onTaskClick }: TasksWidgetProps) => {
   }
 
   return (
-    <div className="widget-card animate-fade-in" style={{ animationDelay: '0.05s' }}>
+    <div className="widget-card animate-fade-in" style={{ animationDelay: '0.05s' }} id="day-section-tasks">
       <div className="widget-header">
         <div className="flex items-center gap-2">
           <CheckSquare className="w-4 h-4 text-primary" />
@@ -224,7 +225,7 @@ const TasksWidget = ({ onTaskClick }: TasksWidgetProps) => {
         {sortedSections.map(section => {
           if (!section.visible) return null;
           const config = getSectionDisplayConfig(section);
-          const { pending, completed } = getTasksForSection(section, tasks, settings.taskOrder);
+          const { pending, completed } = getTasksForSection(section, tasks, settings.taskOrder, date);
           return (
             <TaskSection
               key={section.id}

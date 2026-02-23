@@ -69,6 +69,7 @@ interface ActivityItem {
 }
 
 interface TodayActivityWidgetProps {
+  date?: Date;
   onEditJournal?: (entry: JournalEntry) => void;
   onDeleteJournal?: (entryId: string) => void;
   onTaskClick?: (taskId: string) => void;
@@ -76,7 +77,7 @@ interface TodayActivityWidgetProps {
   onDeleteCapture?: (captureId: string) => void;
 }
 
-const TodayActivityWidget = ({ onEditJournal, onDeleteJournal, onTaskClick, onEditCapture, onDeleteCapture }: TodayActivityWidgetProps) => {
+const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick, onEditCapture, onDeleteCapture }: TodayActivityWidgetProps) => {
   const [expanded, setExpanded] = useState(true);
   const tasks = useKaivooStore(s => s.tasks);
   const journalEntries = useKaivooStore(s => s.journalEntries);
@@ -87,10 +88,10 @@ const TodayActivityWidget = ({ onEditJournal, onDeleteJournal, onTaskClick, onEd
   const getCompletionsForDate = useKaivooStore(s => s.getCompletionsForDate);
   const { logs } = useAIActionLog();
 
-  const today = new Date();
-  const todayStr = formatStorageDate(today);
-  const todayStart = startOfDay(today);
-  const todayEnd = endOfDay(today);
+  const todayStr = useMemo(() => formatStorageDate(date || new Date()), [date]);
+  const refDate = useMemo(() => date || new Date(), [todayStr]);
+  const todayStart = useMemo(() => startOfDay(refDate), [refDate]);
+  const todayEnd = useMemo(() => endOfDay(refDate), [refDate]);
 
   const undoneIds = useMemo(() => {
     const undoneTaskIds = new Set<string>();
