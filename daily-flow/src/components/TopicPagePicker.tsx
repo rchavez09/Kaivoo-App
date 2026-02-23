@@ -10,7 +10,8 @@ interface TopicPagePickerProps {
 }
 
 const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) => {
-  const { topics, getTopicPages } = useKaivooStore();
+  const topics = useKaivooStore(s => s.topics);
+  const getTopicPages = useKaivooStore(s => s.getTopicPages);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
   const [newPageName, setNewPageName] = useState('');
   const [creatingPageFor, setCreatingPageFor] = useState<string | null>(null);

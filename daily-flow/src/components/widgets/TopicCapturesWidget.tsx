@@ -16,7 +16,7 @@ interface TopicCapturesWidgetProps {
 }
 
 const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }: TopicCapturesWidgetProps) => {
-  const { updateCapture } = useKaivooStore();
+  const updateCapture = useKaivooStore(s => s.updateCapture);
   const [editingCapture, setEditingCapture] = useState<Capture | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 

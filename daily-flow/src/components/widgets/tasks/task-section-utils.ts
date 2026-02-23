@@ -2,16 +2,9 @@ import { Task, TaskStatus } from '@/types';
 import { parseDate, isSameDayAs } from '@/lib/dateUtils';
 import { startOfDay, addDays, isAfter, isBefore, isSameDay } from 'date-fns';
 import type { TasksWidgetSection, TasksWidgetSettings, SectionId } from './TasksWidgetConfig';
+export { statusConfig } from '@/lib/task-config';
 
 export type TaskVariant = 'overdue' | 'default' | 'completed';
-
-export const statusConfig: Record<TaskStatus, { color: string }> = {
-  backlog: { color: 'text-muted-foreground' },
-  todo: { color: 'text-foreground' },
-  doing: { color: 'text-info-foreground' },
-  blocked: { color: 'text-destructive' },
-  done: { color: 'text-white' },
-};
 
 /**
  * Date-aware section utility functions.

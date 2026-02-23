@@ -17,24 +17,14 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { 
-  Circle, CheckCircle2, Clock, Pause, Archive, Flag, Calendar, GripVertical 
-} from 'lucide-react';
+import { Flag, Calendar, GripVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { Task, TaskStatus } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
-import { priorityConfig } from '@/lib/task-config';
-
-const statusConfig: Record<TaskStatus, { label: string; icon: React.ReactNode; color: string; bgHeader: string }> = {
-  backlog: { label: 'Backlog', icon: <Archive className="w-4 h-4" />, color: 'text-muted-foreground', bgHeader: 'bg-muted/50' },
-  todo: { label: 'To Do', icon: <Circle className="w-4 h-4" />, color: 'text-foreground', bgHeader: 'bg-secondary' },
-  doing: { label: 'Doing', icon: <Clock className="w-4 h-4" />, color: 'text-info', bgHeader: 'bg-info/10' },
-  blocked: { label: 'Blocked', icon: <Pause className="w-4 h-4" />, color: 'text-destructive', bgHeader: 'bg-destructive/10' },
-  done: { label: 'Done', icon: <CheckCircle2 className="w-4 h-4" />, color: 'text-success', bgHeader: 'bg-success/10' },
-};
+import { statusConfig, priorityConfig } from '@/lib/task-config';
 
 const COLUMNS: TaskStatus[] = ['backlog', 'todo', 'doing', 'blocked', 'done'];
 
@@ -49,7 +39,8 @@ interface SortableTaskCardProps {
 }
 
 const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
-  const { topics, topicPages } = useKaivooStore();
+  const topics = useKaivooStore(s => s.topics);
+  const topicPages = useKaivooStore(s => s.topicPages);
   
   const {
     attributes,
@@ -172,7 +163,8 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
 };
 
 const TaskCard = ({ task, onTaskClick }: { task: Task; onTaskClick: (task: Task) => void }) => {
-  const { topics, topicPages } = useKaivooStore();
+  const topics = useKaivooStore(s => s.topics);
+  const topicPages = useKaivooStore(s => s.topicPages);
 
   const getTopicName = (topicId: string) => {
     const topic = topics.find(t => t.id === topicId);

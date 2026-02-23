@@ -17,7 +17,8 @@ interface JournalCalendarSidebarProps {
 
 const JournalCalendarSidebar = ({ selectedDate, onDateSelect, onEntrySelect, onNewEntry, activeEntryId }: JournalCalendarSidebarProps) => {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(selectedDate));
-  const { journalEntries, captures } = useKaivooStore();
+  const journalEntries = useKaivooStore(s => s.journalEntries);
+  const captures = useKaivooStore(s => s.captures);
 
   // Get days with entries
   const daysWithEntries = useMemo(() => {

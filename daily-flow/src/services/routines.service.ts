@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { RoutineItem, RoutineGroup } from '@/types';
-import { Tables } from '@/integrations/supabase/types';
+import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
 // DB row → App type converters
 export const dbToRoutine = (row: Tables<'routines'>): RoutineItem => ({
@@ -65,7 +65,7 @@ export const createRoutine = async (userId: string, name: string, icon?: string,
 };
 
 export const updateRoutine = async (userId: string, id: string, updates: Partial<RoutineItem> & { groupId?: string | null }) => {
-  const dbUpdates: Record<string, unknown> = {};
+  const dbUpdates: TablesUpdate<'routines'> = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
   if (updates.order !== undefined) dbUpdates.order = updates.order;
@@ -92,7 +92,7 @@ export const createRoutineGroup = async (userId: string, name: string, icon?: st
 };
 
 export const updateRoutineGroup = async (userId: string, id: string, updates: Partial<RoutineGroup>) => {
-  const dbUpdates: Record<string, unknown> = {};
+  const dbUpdates: TablesUpdate<'routine_groups'> = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
   if (updates.color !== undefined) dbUpdates.color = updates.color;

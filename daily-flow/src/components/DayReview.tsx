@@ -43,7 +43,8 @@ const DayReview = ({
   onCaptureUpdate,
   onToggleRoutine,
 }: DayReviewProps) => {
-  const { getTopicPath, updateCapture } = useKaivooStore();
+  const getTopicPath = useKaivooStore(s => s.getTopicPath);
+  const updateCapture = useKaivooStore(s => s.updateCapture);
   const [editingCapture, setEditingCapture] = useState<Capture | null>(null);
   const [confirmRoutine, setConfirmRoutine] = useState<{ id: string; name: string; isCompleted: boolean } | null>(null);
 

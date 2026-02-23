@@ -31,7 +31,7 @@ interface MeetingDetailsDrawerProps {
 }
 
 const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsDrawerProps) => {
-  const { meetings } = useKaivooStore();
+  const meetings = useKaivooStore(s => s.meetings);
   const { updateMeeting, deleteMeeting } = useKaivooActions();
 
   const meeting = useMemo(() => meetings.find(m => m.id === meetingId), [meetings, meetingId]);

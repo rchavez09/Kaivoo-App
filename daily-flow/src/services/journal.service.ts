@@ -1,9 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
 import { JournalEntry } from '@/types';
-import { Tables } from '@/integrations/supabase/types';
+import { Tables, TablesUpdate } from '@/integrations/supabase/types';
+
+// NOTE: The `mood_score` column exists in the DB but is not yet reflected in the
+// generated Supabase types file.  We extend the row/update types here so that the
+// rest of the service can remain fully typed.  Once `supabase gen types` is re-run
+// after the column migration, these local extensions can be removed.
+type JournalEntryRow = Tables<'journal_entries'> & { mood_score?: number | null };
+type JournalEntryUpdate = TablesUpdate<'journal_entries'> & { mood_score?: number | null };
 
 // DB row → App type converter
-export const dbToJournalEntry = (row: Tables<'journal_entries'>): JournalEntry => ({
+export const dbToJournalEntry = (row: JournalEntryRow): JournalEntry => ({
   id: row.id,
   date: row.date,
   content: row.content,
@@ -45,13 +52,13 @@ export const createJournalEntry = async (userId: string, entry: Omit<JournalEntr
 };
 
 export const updateJournalEntry = async (userId: string, id: string, updates: Partial<JournalEntry>) => {
-  const dbUpdates: Record<string, unknown> = {};
+  const dbUpdates: JournalEntryUpdate = {};
   if (updates.content !== undefined) dbUpdates.content = updates.content;
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
   if (updates.topicIds !== undefined) dbUpdates.topic_ids = updates.topicIds;
   if (updates.moodScore !== undefined) dbUpdates.mood_score = updates.moodScore;
 
-  const { error } = await supabase.from('journal_entries').update(dbUpdates).eq('id', id).eq('user_id', userId);
+  const { error } = await supabase.from('journal_entries').update(dbUpdates as TablesUpdate<'journal_entries'>).eq('id', id).eq('user_id', userId);
   if (error) throw error;
 };
 

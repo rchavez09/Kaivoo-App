@@ -33,3 +33,6 @@ Thumbs.db
 
 # Local overrides
 *.local
+
+# Local Netlify folder
+.netlify

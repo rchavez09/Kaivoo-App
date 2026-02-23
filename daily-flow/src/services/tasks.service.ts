@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Task, Subtask, TaskStatus, TaskPriority } from '@/types';
-import { Tables } from '@/integrations/supabase/types';
+import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
 // DB row → App type converters
 export const dbToTask = (row: Tables<'tasks'>, subtasks: Subtask[] = []): Task => ({
@@ -63,7 +63,7 @@ export const createTask = async (userId: string, task: Omit<Task, 'id' | 'create
 };
 
 export const updateTask = async (userId: string, id: string, updates: Partial<Task>) => {
-  const dbUpdates: Record<string, unknown> = {};
+  const dbUpdates: TablesUpdate<'tasks'> = {};
   if (updates.title !== undefined) dbUpdates.title = updates.title;
   if (updates.description !== undefined) dbUpdates.description = updates.description;
   if (updates.status !== undefined) dbUpdates.status = updates.status;
@@ -96,7 +96,7 @@ export const createSubtask = async (userId: string, taskId: string, title: strin
 };
 
 export const updateSubtask = async (userId: string, id: string, updates: { completed?: boolean; completedAt?: Date; title?: string; tags?: string[] }) => {
-  const dbUpdates: Record<string, unknown> = {};
+  const dbUpdates: TablesUpdate<'subtasks'> = {};
   if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
   if (updates.completedAt !== undefined) dbUpdates.completed_at = updates.completedAt?.toISOString();
   if (updates.title !== undefined) dbUpdates.title = updates.title;

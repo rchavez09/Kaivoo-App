@@ -30,7 +30,7 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
   const [content, setContent] = useState('');
   const [chips, setChips] = useState<ParsedChip[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { resolveTopicPath } = useKaivooStore();
+  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
 
   useEffect(() => {
     if (capture) {

@@ -160,7 +160,7 @@ const TaskRowContent = React.memo(function TaskRowContent({
   );
 });
 
-/** Draggable task row — wraps TaskRowContent with dnd-kit sortable. */
+/** Draggable task row -- wraps TaskRowContent with dnd-kit sortable. */
 export const SortableTaskRow = React.memo(function SortableTaskRow(props: TaskRowProps) {
   const { task } = props;
   const {
@@ -185,7 +185,7 @@ export const SortableTaskRow = React.memo(function SortableTaskRow(props: TaskRo
   );
 });
 
-/** Static task row — no drag support (for completed tasks, Day View, etc.). */
+/** Static task row -- no drag support (for completed tasks, Day View, etc.). */
 export const TaskRow = React.memo(function TaskRow(props: TaskRowProps) {
   return (
     <div>

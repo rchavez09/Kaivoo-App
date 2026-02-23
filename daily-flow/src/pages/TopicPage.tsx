@@ -11,7 +11,11 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const TopicPage = () => {
   const { topicId, pageId } = useParams();
-  const { topics, topicPages, getJournalEntriesByTopic, getCapturesByTopic, getTasksByTopic } = useKaivooStore();
+  const topics = useKaivooStore(s => s.topics);
+  const topicPages = useKaivooStore(s => s.topicPages);
+  const getJournalEntriesByTopic = useKaivooStore(s => s.getJournalEntriesByTopic);
+  const getCapturesByTopic = useKaivooStore(s => s.getCapturesByTopic);
+  const getTasksByTopic = useKaivooStore(s => s.getTasksByTopic);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   // Get the current topic or page

@@ -11,10 +11,14 @@ import {
   TasksWidgetConfigDialog,
   useTasksWidgetSettings,
   type SectionId,
-} from './TasksWidgetConfig';
-import TaskSection from './TaskSection';
-import AddToTodayPicker from './AddToTodayPicker';
-import { getTasksForSection, getSectionDisplayConfig, isDueToday, isOverdue, isDueThisWeek } from './task-section-utils';
+  TaskSection,
+  AddToTodayPicker,
+  getTasksForSection,
+  getSectionDisplayConfig,
+  isDueToday,
+  isOverdue,
+  isDueThisWeek,
+} from './tasks';
 import {
   KeyboardSensor,
   PointerSensor,

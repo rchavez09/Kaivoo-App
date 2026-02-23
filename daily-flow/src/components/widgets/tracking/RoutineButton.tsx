@@ -22,6 +22,7 @@ export const RoutineItemButtonContent = ({ routine, completed, isEditing, onTogg
       <button
         onClick={() => !isEditing && onToggle()}
         disabled={isEditing}
+        aria-label={`${completed ? 'Unmark' : 'Mark'} ${routine.name} as ${completed ? 'incomplete' : 'complete'}`}
         className={cn(
           'w-full flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200',
           completed

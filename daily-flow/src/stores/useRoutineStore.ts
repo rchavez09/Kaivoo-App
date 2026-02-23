@@ -3,8 +3,9 @@ import { persist } from 'zustand/middleware';
 import { RoutineItem, RoutineGroup } from '@/types';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 
+import { getTodayStorageDate } from '@/lib/dateUtils';
 const generateId = () => Math.random().toString(36).substring(2, 11);
-const getTodayString = () => format(new Date(), 'yyyy-MM-dd');
+const getTodayString = getTodayStorageDate;
 
 export interface RoutineCompletionRecord {
   routineId: string;
