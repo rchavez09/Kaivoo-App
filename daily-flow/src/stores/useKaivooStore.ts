@@ -119,8 +119,9 @@ interface KaivooStore {
 // Generate simple IDs
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
-// Get today's date string
-const getTodayString = () => format(new Date(), 'yyyy-MM-dd');
+// Get today's date string — uses centralized dateUtils
+import { getTodayStorageDate } from '@/lib/dateUtils';
+const getTodayString = getTodayStorageDate;
 
 // Initial mock data
 const initialTopics: Topic[] = [

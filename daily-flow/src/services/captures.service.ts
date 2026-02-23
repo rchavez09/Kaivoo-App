@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Capture } from '@/types';
-import { Tables } from '@/integrations/supabase/types';
+import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
 // DB row → App type converter
 export const dbToCapture = (row: Tables<'captures'>): Capture => ({
@@ -45,7 +45,7 @@ export const createCapture = async (userId: string, capture: Omit<Capture, 'id' 
 };
 
 export const updateCapture = async (userId: string, id: string, updates: Partial<Capture>) => {
-  const dbUpdates: Record<string, unknown> = {};
+  const dbUpdates: TablesUpdate<'captures'> = {};
   if (updates.content !== undefined) dbUpdates.content = updates.content;
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
   if (updates.topicIds !== undefined) dbUpdates.topic_ids = updates.topicIds;

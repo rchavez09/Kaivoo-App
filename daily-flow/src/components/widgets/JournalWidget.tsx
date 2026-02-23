@@ -28,7 +28,8 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { resolveTopicPath, getTopicPath } = useKaivooStore();
+  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
+  const getTopicPath = useKaivooStore(s => s.getTopicPath);
   const { addTask, addJournalEntry, resolveTopicPathAsync } = useKaivooActions();
 
   const today = new Date();

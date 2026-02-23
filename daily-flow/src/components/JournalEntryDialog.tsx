@@ -30,7 +30,7 @@ interface JournalEntryDialogProps {
 const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryDialogProps) => {
   const [content, setContent] = useState('');
   const [chips, setChips] = useState<ParsedChip[]>([]);
-  const { resolveTopicPath } = useKaivooStore();
+  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
 
   useEffect(() => {
     if (entry) {

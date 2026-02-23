@@ -15,15 +15,13 @@ const CalendarPage = () => {
   const [mode, setMode] = useState<CalendarMode>('combined');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCalendarPanel, setShowCalendarPanel] = useState(true);
-  const {
-    tasks,
-    getMeetingsForDate,
-    getJournalEntriesForDate,
-    routines,
-    getCompletionsForDate,
-    getTasksForDate,
-    getCapturesForDate
-  } = useKaivooStore();
+  const tasks = useKaivooStore(s => s.tasks);
+  const getMeetingsForDate = useKaivooStore(s => s.getMeetingsForDate);
+  const getJournalEntriesForDate = useKaivooStore(s => s.getJournalEntriesForDate);
+  const routines = useKaivooStore(s => s.routines);
+  const getCompletionsForDate = useKaivooStore(s => s.getCompletionsForDate);
+  const getTasksForDate = useKaivooStore(s => s.getTasksForDate);
+  const getCapturesForDate = useKaivooStore(s => s.getCapturesForDate);
   const { toggleRoutineCompletion } = useKaivooActions();
 
   const selectedMeetings = getMeetingsForDate(selectedDate);

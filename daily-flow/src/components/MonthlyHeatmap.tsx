@@ -25,12 +25,10 @@ const MonthlyHeatmap = memo(() => {
   const [monthOffset, setMonthOffset] = useState(0);
   const [colorMode, setColorMode] = useState<ColorMode>('activity');
 
-  const {
-    tasks,
-    journalEntries,
-    routineCompletions,
-    captures,
-  } = useKaivooStore();
+  const tasks = useKaivooStore(s => s.tasks);
+  const journalEntries = useKaivooStore(s => s.journalEntries);
+  const routineCompletions = useKaivooStore(s => s.routineCompletions);
+  const captures = useKaivooStore(s => s.captures);
 
   const currentMonth = useMemo(() => {
     const base = new Date();

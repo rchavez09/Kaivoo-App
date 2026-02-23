@@ -73,7 +73,9 @@ const DEFAULT_PREFS: TasksViewPrefs = {
 };
 
 const Tasks = () => {
-  const { tasks, topics, topicPages } = useKaivooStore();
+  const tasks = useKaivooStore(s => s.tasks);
+  const topics = useKaivooStore(s => s.topics);
+  const topicPages = useKaivooStore(s => s.topicPages);
   const { addTask, updateTask, toggleSubtask, updateSubtask } = useKaivooActions();
 
   const [prefs, setPrefs] = useLocalStorage<TasksViewPrefs>(TASKS_VIEW_PREFS_KEY, DEFAULT_PREFS);

@@ -197,16 +197,16 @@ export function TasksWidgetConfigDialog({
   const [selectedBuiltin, setSelectedBuiltin] = useState<BuiltInSectionId | ''>('');
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
-  
+
   const sortedSections = [...settings.sections].sort((a, b) => a.order - b.order);
 
   // Get available built-in sections (not already added)
   const existingSectionIds = new Set(settings.sections.map(s => s.id));
   const availableBuiltins = AVAILABLE_BUILTIN_SECTIONS.filter(s => !existingSectionIds.has(s.id));
-  
+
   // Get available topics (not already added)
   const availableTopics = topics.filter(t => !existingSectionIds.has(`topic:${t.id}`));
-  
+
   // Get available tags (not already added)
   const availableTags = tags.filter(t => !existingSectionIds.has(`tag:${t.name}`));
 
@@ -385,7 +385,7 @@ export function TasksWidgetConfigDialog({
                     )}
                   >
                     <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    
+
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {getSectionIcon(section)}
                       <span className={cn(

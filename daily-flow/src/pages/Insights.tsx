@@ -17,14 +17,12 @@ import { Button } from '@/components/ui/button';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 
 const Insights = () => {
-  const { 
-    getWeeklySummary, 
-    getWeeklyRoutineStats, 
-    routines, 
-    routineGroups,
-    routineCompletions,
-    getRoutinesByGroup,
-  } = useKaivooStore();
+  const getWeeklySummary = useKaivooStore(s => s.getWeeklySummary);
+  const getWeeklyRoutineStats = useKaivooStore(s => s.getWeeklyRoutineStats);
+  const routines = useKaivooStore(s => s.routines);
+  const routineGroups = useKaivooStore(s => s.routineGroups);
+  const routineCompletions = useKaivooStore(s => s.routineCompletions);
+  const getRoutinesByGroup = useKaivooStore(s => s.getRoutinesByGroup);
   
   const { preferences } = useUserPreferences();
   const weekStartsOn = preferences.weekStartsOn;

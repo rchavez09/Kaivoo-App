@@ -46,7 +46,12 @@ const JournalPage = () => {
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const draftKeyRef = useRef(`journal-draft-${format(new Date(), 'yyyy-MM-dd')}`);
 
-  const { topics, topicPages, tags: existingTags, tasks, resolveTopicPath, getTopicPath } = useKaivooStore();
+  const topics = useKaivooStore(s => s.topics);
+  const topicPages = useKaivooStore(s => s.topicPages);
+  const existingTags = useKaivooStore(s => s.tags);
+  const tasks = useKaivooStore(s => s.tasks);
+  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
+  const getTopicPath = useKaivooStore(s => s.getTopicPath);
   const { addJournalEntry, updateJournalEntry, addTask, addSubtask, resolveTopicPathAsync } = useKaivooActions();
 
   // Load draft from localStorage on mount

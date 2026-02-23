@@ -62,7 +62,7 @@ const RoutineGroupSection = ({
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-2">
       <div className="flex items-center gap-2">
         <CollapsibleTrigger asChild>
-          <button className="flex items-center gap-2 flex-1 hover:bg-secondary/50 rounded-lg p-1.5 -ml-1.5 transition-colors">
+          <button className="flex items-center gap-2 flex-1 hover:bg-secondary/50 rounded-lg p-1.5 -ml-1.5 transition-colors" aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${groupName} routines — ${completedCount} of ${routines.length} complete`}>
             {isOpen ? (
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             ) : (

@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Meeting } from '@/types';
-import { Tables } from '@/integrations/supabase/types';
+import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
 // DB row → App type converter
 export const dbToMeeting = (row: Tables<'meetings'>): Meeting => ({
@@ -48,7 +48,7 @@ export const createMeeting = async (userId: string, meeting: Omit<Meeting, 'id'>
 };
 
 export const updateMeeting = async (userId: string, id: string, updates: Partial<Meeting>) => {
-  const dbUpdates: Record<string, unknown> = {};
+  const dbUpdates: TablesUpdate<'meetings'> = {};
   if (updates.title !== undefined) dbUpdates.title = updates.title;
   if (updates.startTime !== undefined) dbUpdates.start_time = updates.startTime.toISOString();
   if (updates.endTime !== undefined) dbUpdates.end_time = updates.endTime.toISOString();

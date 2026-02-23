@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { 
-  CheckSquare, Circle, CheckCircle2, ChevronRight, Plus, Clock, Archive, Pause,
+import {
+  CheckSquare, CheckCircle2, ChevronRight, Plus,
   CalendarPlus, Check, Video, MapPin, Calendar, AlertTriangle, Flag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,14 +21,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { toast } from 'sonner';
-
-const statusConfig: Record<TaskStatus, { icon: React.ReactNode; color: string }> = {
-  backlog: { icon: <Archive className="w-4 h-4" />, color: 'text-muted-foreground' },
-  todo: { icon: <Circle className="w-4 h-4" />, color: 'text-foreground' },
-  doing: { icon: <Clock className="w-4 h-4" />, color: 'text-info' },
-  blocked: { icon: <Pause className="w-4 h-4" />, color: 'text-destructive' },
-  done: { icon: <CheckCircle2 className="w-4 h-4" />, color: 'text-success' },
-};
+import { statusConfig } from '@/lib/task-config';
 
 interface TodayAgendaWidgetProps {
   onTaskClick?: (taskId: string) => void;
@@ -47,7 +40,8 @@ const isDueToday = (task: Task): boolean => {
 };
 
 const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
-  const { tasks, getTodaysMeetings } = useKaivooStore();
+  const tasks = useKaivooStore(s => s.tasks);
+  const getTodaysMeetings = useKaivooStore(s => s.getTodaysMeetings);
   const { addTask, updateTask } = useKaivooActions();
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [showInput, setShowInput] = useState(false);

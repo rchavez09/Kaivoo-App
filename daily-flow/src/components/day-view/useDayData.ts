@@ -15,14 +15,12 @@ export interface DayStats {
 
 export const useDayData = (date: Date) => {
   const dateStr = format(date, 'yyyy-MM-dd');
-  const {
-    tasks,
-    meetings,
-    routines,
-    routineCompletions,
-    journalEntries,
-    captures,
-  } = useKaivooStore();
+  const tasks = useKaivooStore(s => s.tasks);
+  const meetings = useKaivooStore(s => s.meetings);
+  const routines = useKaivooStore(s => s.routines);
+  const routineCompletions = useKaivooStore(s => s.routineCompletions);
+  const journalEntries = useKaivooStore(s => s.journalEntries);
+  const captures = useKaivooStore(s => s.captures);
 
   const dayTasks = useMemo(() => {
     const dueTodayOrOverdue = tasks.filter(t => {

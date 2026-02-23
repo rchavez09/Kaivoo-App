@@ -1,14 +1,18 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [main]
   push:
+    branches: [main, 'sprint/*']
+  pull_request:
     branches: [main]
 
 jobs:
-  ci:
+  build-and-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daily-flow
+
     steps:
       - uses: actions/checkout@v4
 
@@ -16,8 +20,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: daily-flow/package-lock.json
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
       - name: Lint
         run: npm run lint
@@ -25,11 +31,11 @@ jobs:
       - name: Format check
         run: npm run format:check
 
-      - name: Type check
+      - name: Typecheck
         run: npm run typecheck
 
-      - name: Test
-        run: npm run test
+      - name: Run tests
+        run: npm test
 
       - name: Build
         run: npm run build

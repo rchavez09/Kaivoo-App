@@ -13,7 +13,7 @@ interface JournalTimelineWidgetProps {
 
 const JournalTimelineWidget = ({ entries, onEdit }: JournalTimelineWidgetProps) => {
   const [expanded, setExpanded] = useState(true);
-  const { getTopicPath } = useKaivooStore();
+  const getTopicPath = useKaivooStore(s => s.getTopicPath);
 
   if (entries.length === 0) {
     return null;
@@ -97,6 +97,7 @@ const JournalTimelineWidget = ({ entries, onEdit }: JournalTimelineWidgetProps) 
                     ))}
                     {entry.topicIds.map((topicId) => {
                       const path = getTopicPath(topicId);
+                      if (!path) return null;
                       const isPage = path.includes('/');
                       return (
                         <span key={topicId} className="topic-chip text-[10px] py-0.5 px-1.5">

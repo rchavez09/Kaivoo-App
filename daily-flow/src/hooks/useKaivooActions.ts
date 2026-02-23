@@ -259,7 +259,7 @@ export const useKaivooActions = () => {
         const topic = await db.createTopic(topicData);
         const alreadyInStore = store.topics.some((t) => t.id === topic.id);
         if (!alreadyInStore) {
-          store.addTopic({ ...topicData, id: topic.id, createdAt: topic.createdAt } as any);
+          useKaivooStore.setState(s => ({ topics: [...s.topics, topic] }));
         }
         invalidate('topics');
         return topic;
@@ -277,7 +277,7 @@ export const useKaivooActions = () => {
         const page = await db.createTopicPage(pageData);
         const alreadyInStore = store.topicPages.some((p) => p.id === page.id);
         if (!alreadyInStore) {
-          store.addTopicPage({ ...pageData, id: page.id, createdAt: page.createdAt } as any);
+          useKaivooStore.setState(s => ({ topicPages: [...s.topicPages, page] }));
         }
         invalidate('topicPages');
         return page;

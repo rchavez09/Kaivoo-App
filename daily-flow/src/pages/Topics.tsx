@@ -27,15 +27,13 @@ import { toast } from 'sonner';
 
 const Topics = () => {
   const navigate = useNavigate();
-  const {
-    topics,
-    topicPages,
-    addTopic,
-    addTopicPage,
-    getJournalEntriesByTopic,
-    getCapturesByTopic,
-    getTasksByTopic,
-  } = useKaivooStore();
+  const topics = useKaivooStore(s => s.topics);
+  const topicPages = useKaivooStore(s => s.topicPages);
+  const addTopic = useKaivooStore(s => s.addTopic);
+  const addTopicPage = useKaivooStore(s => s.addTopicPage);
+  const getJournalEntriesByTopic = useKaivooStore(s => s.getJournalEntriesByTopic);
+  const getCapturesByTopic = useKaivooStore(s => s.getCapturesByTopic);
+  const getTasksByTopic = useKaivooStore(s => s.getTasksByTopic);
   const { deleteTopic } = useKaivooActions();
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(['topic-1']));
   const [searchQuery, setSearchQuery] = useState('');

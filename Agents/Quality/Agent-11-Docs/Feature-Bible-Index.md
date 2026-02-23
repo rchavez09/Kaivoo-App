@@ -1,8 +1,8 @@
 # Feature Use Case Bible — Index
 
 **Purpose:** Master map of all Feature Bible files. Each Bible covers one page or module of the Kaivoo app.
-**Version:** 1.0
-**Date:** February 22, 2026
+**Version:** 1.1
+**Date:** February 23, 2026
 
 ---
 
@@ -12,9 +12,9 @@
 |-------|------|--------|--------|
 | **Today Page** | `Feature-Use-Case-Bible.md` | v0.4 — All questions resolved, settings extracted | Day Brief, Tasks widget, Routines widget, Schedule widget, Floating Chat, Daily Shutdown, Date Navigation |
 | **Settings** | `Feature-Bible-Settings.md` | v0.1 — Extracted from Today Bible | All user-facing settings consolidated: Day Brief AI, Tasks widget, Schedule Mode, Routines management, Daily Shutdown, Concierge |
-| **Journal Page** | TBD | Not started | Journal editor, calendar navigation, folder structure, AI features |
+| **Tasks Page** | `Feature-Bible-Tasks-Page.md` | v0.1 DRAFT — Awaiting user Q&A | List/Kanban views, filtering, sorting, task detail drawer, subtasks, creation flow |
+| **Journal Page** | `Feature-Bible-Journal-Page.md` | v0.1 DRAFT — Awaiting user Q&A | Rich text editor, calendar sidebar, AI extraction, mood, draft auto-save, entry editing |
 | **Routines & Habits Page** | TBD | Not started | Full category management, goal tracking, gamification, challenges (discovered from Today Bible Q11/Q12) |
-| **Tasks Page** | TBD | Not started | Full task management outside the Today widget |
 | **Calendar Page** | TBD | Not started | Calendar integrations, event management |
 | **Captures** | TBD | Not started | Quick capture, processing, organization |
 | **Insights Page** | TBD | Not started | Analytics, correlations, trends |
@@ -38,4 +38,5 @@
 
 ---
 
-*Feature Bible Index v1.0 — February 22, 2026*
+*Feature Bible Index v1.1 — February 23, 2026*
+*Updated: Tasks Page and Journal Page Bibles drafted (v0.1)*

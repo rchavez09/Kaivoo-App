@@ -26,7 +26,10 @@ export function TopicTagEditor({
   onTopicChange,
   onTagsChange,
 }: TopicTagEditorProps) {
-  const { topics, getTopicPages, tags: storeTags, tasks } = useKaivooStore();
+  const topics = useKaivooStore(s => s.topics);
+  const getTopicPages = useKaivooStore(s => s.getTopicPages);
+  const storeTags = useKaivooStore(s => s.tags);
+  const tasks = useKaivooStore(s => s.tasks);
   const [topicOpen, setTopicOpen] = useState(false);
   const [tagOpen, setTagOpen] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');

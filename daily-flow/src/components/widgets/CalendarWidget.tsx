@@ -13,7 +13,7 @@ interface CalendarWidgetProps {
 }
 
 const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
-  const { getTodaysMeetings } = useKaivooStore();
+  const getTodaysMeetings = useKaivooStore(s => s.getTodaysMeetings);
   const { addMeeting } = useKaivooActions();
   const meetings = getTodaysMeetings();
   const [showInput, setShowInput] = useState(false);

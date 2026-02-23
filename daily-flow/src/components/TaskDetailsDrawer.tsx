@@ -43,7 +43,10 @@ interface TaskDetailsDrawerProps {
 }
 
 const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProps) => {
-  const { tasks, topics, topicPages, resolveTopicPath } = useKaivooStore();
+  const tasks = useKaivooStore(s => s.tasks);
+  const topics = useKaivooStore(s => s.topics);
+  const topicPages = useKaivooStore(s => s.topicPages);
+  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
   const { updateTask, deleteTask, addSubtask, toggleSubtask, updateSubtask, deleteSubtask } = useKaivooActions();
   
   // State for inline subtask editing

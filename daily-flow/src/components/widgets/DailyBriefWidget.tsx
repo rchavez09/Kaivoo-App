@@ -246,7 +246,7 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
                   ? 'bg-primary/15 ring-2 ring-primary scale-110'
                   : 'hover:bg-secondary/60 hover:scale-105'
               )}
-              title={mood.label}
+              aria-label={`Set mood to ${mood.label}`}
             >
               {mood.emoji}
             </button>
