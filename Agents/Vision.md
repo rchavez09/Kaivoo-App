@@ -301,10 +301,10 @@ The platform doesn't guess what users want — it watches what they're already t
 ## Current Position
 
 **We are in:** Phase 1 — Cloud Command Center
-**Active sprint:** Sprint 2 — Core Experience (approved Feb 22, 2026)
-**Last completed:** Sprint 1 (Security, Performance & Foundation) — raised audit score from 4.1 to 7.5+ target
+**Active sprint:** None (Sprint 4 planning next)
+**Last completed:** Sprint 3 (Restore & Define) — restored widget-based Today dashboard, WidgetContainer integration, Feature Use Case Bible
 
-**Sprint 2 delivers:** Widget decomposition, React Query full migration, Kaivoo Design System overhaul, Unified Day View, Daily Shutdown ritual. See `Sprints/Sprint-2-Core-Experience.md`.
+**Sprint 3 delivered:** Widget-based TodayDashboard with configurable layout (drag-to-reorder, add/remove, vertical/horizontal toggle), date-aware activity trace, self-contained ScheduleWidget, FloatingChat, Feature Use Case Bible. See `Sprints/Sprint-3-Restore-Define.md`.
 
 **Key decisions resolved:**
 - ~~Design System migration vs. feature work~~ → **Both in Sprint 2** (merged sprint)
