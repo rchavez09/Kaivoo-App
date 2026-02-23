@@ -43,7 +43,7 @@ The Feature Use Case Bible is a living document that defines for every page, wid
 
 The Bible is authored collaboratively with Agent 6 (Usability Architect) who designs the use cases, and maintained by Agent 11 who keeps it current as features evolve.
 
-**Location:** `Agents/Quality/Agent-11-Docs/Feature-Use-Case-Bible.md`
+**Location:** `Agents/Quality/Agent-11-Docs/Feature-Bible-Today-Page.md` (and other page-specific Bibles — see `Feature-Bible-Index.md`)
 
 ### 2. Pre-Merge Regression Check
 

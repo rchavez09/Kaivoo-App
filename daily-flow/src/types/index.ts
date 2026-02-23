@@ -44,6 +44,12 @@ export interface Subtask {
 
 export type TaskStatus = 'backlog' | 'todo' | 'doing' | 'blocked' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
+export type RecurrenceType = 'daily' | 'weekly' | 'monthly';
+
+export interface RecurrenceRule {
+  type: RecurrenceType;
+  interval: number; // every N days/weeks/months (default 1)
+}
 
 export interface Task {
   id: string;
@@ -57,6 +63,7 @@ export interface Task {
   topicIds: string[];
   subtasks: Subtask[];
   sourceLink?: string; // Where task was created from
+  recurrence?: RecurrenceRule;
   createdAt: Date;
   completedAt?: Date;
 }

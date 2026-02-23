@@ -11,7 +11,7 @@
 
 ## How This Document Relates to the Today Bible
 
-The **Today page** has a Tasks *widget* — a focused, day-scoped view of your tasks (Due Today, Overdue, High Priority, etc.) embedded in the dashboard. That widget is fully documented in `Feature-Use-Case-Bible.md` (Today Page Bible).
+The **Today page** has a Tasks *widget* — a focused, day-scoped view of your tasks (Due Today, Overdue, High Priority, etc.) embedded in the dashboard. That widget is fully documented in `Feature-Bible-Today-Page.md` (Today Page Bible).
 
 The **Tasks page** (`/tasks`) is the *full* task management surface — every task you've ever created, across all dates, with powerful filtering, sorting, multiple view modes, and a Kanban board. It's where you go when you need to plan, organize, and manage your entire task inventory.
 
