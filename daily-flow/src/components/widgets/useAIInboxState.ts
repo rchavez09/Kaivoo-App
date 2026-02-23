@@ -65,7 +65,7 @@ export function useAIInboxState() {
       }
     } catch (error) {
       console.error('AI processing error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to process with AI');
+      toast.error('Failed to process with AI. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -98,7 +98,7 @@ export function useAIInboxState() {
       }
     } catch (error) {
       console.error('Link processing error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to process link');
+      toast.error('Failed to process link. Please try again.');
     } finally {
       setIsProcessing(false);
     }

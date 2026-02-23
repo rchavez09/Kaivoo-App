@@ -46,7 +46,7 @@ const AIActionHistory = React.memo(function AIActionHistory({
                  (log.actionData as Record<string, string>).content?.substring(0, 30)}
               </span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onUndo(log.id)}>
+            <Button variant="ghost" size="sm" onClick={() => onUndo(log.id)} aria-label={`Undo ${log.actionType.replace('_', ' ')}`}>
               <Undo2 className="h-4 w-4" />
             </Button>
           </div>

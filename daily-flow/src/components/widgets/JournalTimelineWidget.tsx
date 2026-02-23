@@ -37,6 +37,7 @@ const JournalTimelineWidget = ({ entries, onEdit }: JournalTimelineWidgetProps) 
           size="sm"
           className="h-8 px-2"
           onClick={() => setExpanded(!expanded)}
+          aria-label={expanded ? "Collapse journal entries" : "Expand journal entries"}
         >
           {expanded ? (
             <ChevronUp className="w-4 h-4" />
@@ -71,6 +72,7 @@ const JournalTimelineWidget = ({ entries, onEdit }: JournalTimelineWidgetProps) 
                     variant="ghost"
                     size="sm"
                     className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Edit journal entry"
                     onClick={(e) => {
                       e.stopPropagation();
                       onEdit(entry);

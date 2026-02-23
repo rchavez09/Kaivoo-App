@@ -32,7 +32,7 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
   const routines = useKaivooStore(s => s.routines);
   const routineCompletions = useKaivooStore(s => s.routineCompletions);
   const journalEntries = useKaivooStore(s => s.journalEntries);
-  const { addJournalEntry, updateJournalEntry } = useKaivooActions();
+  const { addJournalEntry } = useKaivooActions();
 
   const dateStr = useMemo(() => formatStorageDate(date || new Date()), [date]);
   const refDate = useMemo(() => date || new Date(), [dateStr]);
@@ -129,24 +129,17 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
     return QUOTES[dayOfYear % QUOTES.length];
   }, [eventsOnDate, taskStats, routineStats, refDate]);
 
-  // Mood setter
+  // Mood setter — always appends a new entry to preserve mood timeline history.
+  // The most recent mood entry for the date is used for display (see currentMood above).
   const handleMoodSelect = useCallback(async (score: number) => {
-    const existingMoodEntry = journalEntries
-      .filter(e => e.date === dateStr && e.moodScore != null)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-
-    if (existingMoodEntry) {
-      await updateJournalEntry(existingMoodEntry.id, { moodScore: score });
-    } else {
-      await addJournalEntry({
-        date: dateStr,
-        content: '',
-        tags: ['mood'],
-        topicIds: [],
-        moodScore: score,
-      });
-    }
-  }, [journalEntries, dateStr, updateJournalEntry, addJournalEntry]);
+    await addJournalEntry({
+      date: dateStr,
+      content: '',
+      tags: ['mood'],
+      topicIds: [],
+      moodScore: score,
+    });
+  }, [dateStr, addJournalEntry]);
 
   const handleChipClick = useCallback((section: string) => {
     const el = document.getElementById(`day-section-${section}`);

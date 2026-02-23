@@ -28,7 +28,7 @@ const AddToTodayPicker = React.memo(function AddToTodayPicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-8 px-2" title="Add existing tasks to today">
+        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-8 px-2" title="Add existing tasks to today" aria-label="Add existing tasks to today">
           <CalendarPlus className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
