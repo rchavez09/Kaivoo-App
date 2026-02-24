@@ -10,7 +10,7 @@
 
 | Bible | File | Status | Covers |
 |-------|------|--------|--------|
-| **Today Page** | `Feature-Use-Case-Bible.md` | v0.4 — All questions resolved, settings extracted | Day Brief, Tasks widget, Routines widget, Schedule widget, Floating Chat, Daily Shutdown, Date Navigation |
+| **Today Page** | `Feature-Bible-Today-Page.md` | v0.4 — All questions resolved, settings extracted | Day Brief, Tasks widget, Routines widget, Schedule widget, Floating Chat, Daily Shutdown, Date Navigation |
 | **Settings** | `Feature-Bible-Settings.md` | v0.1 — Extracted from Today Bible | All user-facing settings consolidated: Day Brief AI, Tasks widget, Schedule Mode, Routines management, Daily Shutdown, Concierge |
 | **Tasks Page** | `Feature-Bible-Tasks-Page.md` | v0.1 DRAFT — Awaiting user Q&A | List/Kanban views, filtering, sorting, task detail drawer, subtasks, creation flow |
 | **Journal Page** | `Feature-Bible-Journal-Page.md` | v0.1 DRAFT — Awaiting user Q&A | Rich text editor, calendar sidebar, AI extraction, mood, draft auto-save, entry editing |

@@ -1,6 +1,17 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Task, Subtask, TaskStatus, TaskPriority } from '@/types';
+import { Task, Subtask, TaskStatus, TaskPriority, RecurrenceRule } from '@/types';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
+
+// Parse JSONB recurrence_rule into typed RecurrenceRule
+const VALID_RECURRENCE_TYPES = new Set(['daily', 'weekly', 'monthly']);
+const parseRecurrenceRule = (raw: unknown): RecurrenceRule | undefined => {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const obj = raw as Record<string, unknown>;
+  if (typeof obj.type === 'string' && VALID_RECURRENCE_TYPES.has(obj.type) && typeof obj.interval === 'number' && obj.interval > 0) {
+    return { type: obj.type as RecurrenceRule['type'], interval: obj.interval };
+  }
+  return undefined;
+};
 
 // DB row → App type converters
 export const dbToTask = (row: Tables<'tasks'>, subtasks: Subtask[] = []): Task => ({
@@ -15,6 +26,7 @@ export const dbToTask = (row: Tables<'tasks'>, subtasks: Subtask[] = []): Task =
   topicIds: row.topic_ids || [],
   subtasks,
   sourceLink: row.source_link,
+  recurrence: parseRecurrenceRule(row.recurrence_rule),
   createdAt: new Date(row.created_at),
   completedAt: row.completed_at ? new Date(row.completed_at) : undefined,
 });
@@ -55,6 +67,7 @@ export const createTask = async (userId: string, task: Omit<Task, 'id' | 'create
       tags: task.tags,
       topic_ids: task.topicIds,
       source_link: task.sourceLink,
+      recurrence_rule: task.recurrence ? task.recurrence : null,
     })
     .select()
     .single();
@@ -73,7 +86,8 @@ export const updateTask = async (userId: string, id: string, updates: Partial<Ta
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
   if (updates.topicIds !== undefined) dbUpdates.topic_ids = updates.topicIds;
   if (updates.sourceLink !== undefined) dbUpdates.source_link = updates.sourceLink;
-  if (updates.completedAt !== undefined) dbUpdates.completed_at = updates.completedAt?.toISOString();
+  if (updates.recurrence !== undefined) dbUpdates.recurrence_rule = updates.recurrence ? updates.recurrence : null;
+  if ('completedAt' in updates) dbUpdates.completed_at = updates.completedAt ? updates.completedAt.toISOString() : null;
 
   const { error } = await supabase.from('tasks').update(dbUpdates).eq('id', id).eq('user_id', userId);
   if (error) throw error;
@@ -98,7 +112,7 @@ export const createSubtask = async (userId: string, taskId: string, title: strin
 export const updateSubtask = async (userId: string, id: string, updates: { completed?: boolean; completedAt?: Date; title?: string; tags?: string[] }) => {
   const dbUpdates: TablesUpdate<'subtasks'> = {};
   if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
-  if (updates.completedAt !== undefined) dbUpdates.completed_at = updates.completedAt?.toISOString();
+  if ('completedAt' in updates) dbUpdates.completed_at = updates.completedAt ? updates.completedAt.toISOString() : null;
   if (updates.title !== undefined) dbUpdates.title = updates.title;
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
 

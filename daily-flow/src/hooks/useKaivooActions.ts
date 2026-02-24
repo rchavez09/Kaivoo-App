@@ -5,6 +5,7 @@ import { useAuth } from './useAuth';
 import { Task, Topic, TopicPage, JournalEntry, Capture, Meeting } from '@/types';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { computeNextDueDate } from '@/lib/recurrence';
 
 // Helper to check if a string is a valid UUID
 const isValidUUID = (str: string) => {
@@ -44,6 +45,28 @@ export const useKaivooActions = () => {
         if (prev) store.updateTask(id, prev);
         toast.error('Failed to save task changes.');
         console.error('[updateTask]', e);
+        return;
+      }
+    }
+
+    // Auto-generate next occurrence for recurring tasks when marked done
+    if (updates.status === 'done' && prev?.recurrence && prev.status !== 'done') {
+      const nextDueDate = computeNextDueDate(prev.dueDate, prev.recurrence);
+      const nextTask = await addTask({
+        title: prev.title,
+        description: prev.description,
+        status: 'todo',
+        priority: prev.priority,
+        dueDate: nextDueDate,
+        startDate: undefined,
+        tags: [...prev.tags],
+        topicIds: [...prev.topicIds],
+        subtasks: [],
+        sourceLink: prev.sourceLink,
+        recurrence: prev.recurrence,
+      });
+      if (nextTask) {
+        toast.success(`Next occurrence created for ${nextDueDate}`);
       }
     }
   };

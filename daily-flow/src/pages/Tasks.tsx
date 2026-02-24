@@ -3,7 +3,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import {
   CheckSquare, Plus, Search, SlidersHorizontal, Circle, CheckCircle2,
   Calendar, X, Flag, ChevronRight, LayoutList, Columns3,
-  ChevronDown, ArrowUpDown, Hash
+  ChevronDown, ArrowUpDown
 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
@@ -26,11 +26,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -38,16 +33,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
-import { Task, TaskStatus, TaskPriority, Subtask } from '@/types';
+import { Task, TaskStatus, TaskPriority } from '@/types';
 import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
+import BulkActionBar from '@/components/BulkActionBar';
 import KanbanBoard from '@/components/KanbanBoard';
 import { isToday, isTomorrow, isThisWeek } from '@/lib/dateUtils';
 import { statusConfig, priorityConfig, statusOrder } from '@/lib/task-config';
+import { toast } from 'sonner';
 
 type ViewTab = 'open' | 'today' | 'tomorrow' | 'week' | 'completed';
 type ViewMode = 'list' | 'kanban';
@@ -62,6 +57,8 @@ interface TasksViewPrefs {
   sortBy: SortOption;
   sortDirection: SortDirection;
   expandedTasks: string[];
+  topicFilter: string;
+  tagFilter: string;
 }
 
 const DEFAULT_PREFS: TasksViewPrefs = {
@@ -70,13 +67,15 @@ const DEFAULT_PREFS: TasksViewPrefs = {
   sortBy: 'created',
   sortDirection: 'desc',
   expandedTasks: [],
+  topicFilter: 'all',
+  tagFilter: 'all',
 };
 
 const Tasks = () => {
   const tasks = useKaivooStore(s => s.tasks);
   const topics = useKaivooStore(s => s.topics);
   const topicPages = useKaivooStore(s => s.topicPages);
-  const { addTask, updateTask, toggleSubtask, updateSubtask } = useKaivooActions();
+  const { addTask, updateTask, deleteTask, toggleSubtask } = useKaivooActions();
 
   const [prefs, setPrefs] = useLocalStorage<TasksViewPrefs>(TASKS_VIEW_PREFS_KEY, DEFAULT_PREFS);
 
@@ -85,6 +84,8 @@ const Tasks = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TaskStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'all'>('all');
+  const [topicFilter, setTopicFilter] = useState<string>(prefs.topicFilter);
+  const [tagFilter, setTagFilter] = useState<string>(prefs.tagFilter);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -103,6 +104,72 @@ const Tasks = () => {
   // Quick filter chips
   const [quickStatus, setQuickStatus] = useState<TaskStatus | null>(null);
   const [quickDue, setQuickDue] = useState<'today' | 'week' | null>(null);
+
+  // Bulk selection
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+
+  const toggleSelectionMode = () => {
+    if (selectionMode) {
+      setSelectedTaskIds(new Set());
+    }
+    setSelectionMode(!selectionMode);
+  };
+
+  const toggleTaskSelection = (taskId: string) => {
+    setSelectedTaskIds(prev => {
+      const next = new Set(prev);
+      if (next.has(taskId)) next.delete(taskId);
+      else next.add(taskId);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedTaskIds(new Set(filteredTasks.map(t => t.id)));
+  };
+
+  const deselectAll = () => {
+    setSelectedTaskIds(new Set());
+  };
+
+  const handleBulkStatusChange = async (status: TaskStatus) => {
+    const ids = [...selectedTaskIds];
+    const results = await Promise.allSettled(
+      ids.map(id => updateTask(id, { status, completedAt: status === 'done' ? new Date() : undefined }))
+    );
+    const failed = results.filter(r => r.status === 'rejected').length;
+    if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to update.`);
+    setSelectedTaskIds(new Set());
+    setSelectionMode(false);
+  };
+
+  const handleBulkPriorityChange = async (priority: TaskPriority) => {
+    const ids = [...selectedTaskIds];
+    const results = await Promise.allSettled(ids.map(id => updateTask(id, { priority })));
+    const failed = results.filter(r => r.status === 'rejected').length;
+    if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to update.`);
+    setSelectedTaskIds(new Set());
+    setSelectionMode(false);
+  };
+
+  const handleBulkDueDateChange = async (date: string | null) => {
+    const ids = [...selectedTaskIds];
+    const results = await Promise.allSettled(ids.map(id => updateTask(id, { dueDate: date ?? undefined })));
+    const failed = results.filter(r => r.status === 'rejected').length;
+    if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to update.`);
+    setSelectedTaskIds(new Set());
+    setSelectionMode(false);
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selectedTaskIds];
+    const results = await Promise.allSettled(ids.map(id => deleteTask(id)));
+    const failed = results.filter(r => r.status === 'rejected').length;
+    if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to delete.`);
+    setSelectedTaskIds(new Set());
+    setSelectionMode(false);
+  };
 
   const handleSetActiveTab = (tab: ViewTab) => {
     setActiveTab(tab);
@@ -123,6 +190,40 @@ const Tasks = () => {
     setSortDirection(dir);
     setPrefs(prev => ({ ...prev, sortDirection: dir }));
   };
+
+  const handleSetTopicFilter = (value: string) => {
+    setTopicFilter(value);
+    setPrefs(prev => ({ ...prev, topicFilter: value }));
+  };
+
+  const handleSetTagFilter = (value: string) => {
+    setTagFilter(value);
+    setPrefs(prev => ({ ...prev, tagFilter: value }));
+  };
+
+  // Compute available topics and tags for filter dropdowns
+  const availableTopics = useMemo(() => {
+    const topicIdSet = new Set(tasks.flatMap(t => t.topicIds));
+    const result: { id: string; name: string }[] = [];
+    topicIdSet.forEach(id => {
+      const topic = topics.find(t => t.id === id);
+      if (topic) {
+        result.push({ id, name: topic.name });
+        return;
+      }
+      const page = topicPages.find(p => p.id === id);
+      if (page) {
+        const parent = topics.find(t => t.id === page.topicId);
+        result.push({ id, name: parent ? `${parent.name}/${page.name}` : page.name });
+      }
+    });
+    return result.sort((a, b) => a.name.localeCompare(b.name));
+  }, [tasks, topics, topicPages]);
+
+  const availableTags = useMemo(() => {
+    const tagSet = new Set(tasks.flatMap(t => t.tags));
+    return [...tagSet].sort();
+  }, [tasks]);
 
   const getTopicName = (topicId: string) => {
     const topic = topics.find(t => t.id === topicId);
@@ -159,10 +260,33 @@ const Tasks = () => {
     return isThisWeek(dueDate);
   };
 
-  // Filter logic
+  // Pre-tab filtered tasks — all filters except tab (used for tab counts)
+  const preTabFilteredTasks = useMemo(() => {
+    return tasks.filter(task => {
+      if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (quickStatus && task.status !== quickStatus) return false;
+      if (quickDue === 'today' && !isTaskDueToday(task.dueDate)) return false;
+      if (quickDue === 'week' && !isTaskDueThisWeek(task.dueDate)) return false;
+      if (statusFilter !== 'all' && task.status !== statusFilter) return false;
+      if (priorityFilter !== 'all' && task.priority !== priorityFilter) return false;
+      if (topicFilter !== 'all' && !task.topicIds.includes(topicFilter)) return false;
+      if (tagFilter !== 'all' && !task.tags.includes(tagFilter)) return false;
+      return true;
+    });
+  }, [tasks, searchQuery, quickStatus, quickDue, statusFilter, priorityFilter, topicFilter, tagFilter]);
+
+  // Tab counts respect active filters (P2)
+  const tabs = useMemo<{ id: ViewTab; label: string; count: number }[]>(() => [
+    { id: 'open', label: 'Open', count: preTabFilteredTasks.filter(t => t.status !== 'done').length },
+    { id: 'today', label: 'Today', count: preTabFilteredTasks.filter(t => isTaskDueToday(t.dueDate) && t.status !== 'done').length },
+    { id: 'tomorrow', label: 'Tomorrow', count: preTabFilteredTasks.filter(t => isTaskDueTomorrow(t.dueDate) && t.status !== 'done').length },
+    { id: 'week', label: 'Week', count: preTabFilteredTasks.filter(t => isTaskDueThisWeek(t.dueDate) && t.status !== 'done').length },
+    { id: 'completed', label: 'Done', count: preTabFilteredTasks.filter(t => t.status === 'done').length },
+  ], [preTabFilteredTasks]);
+
+  // Final filtered + sorted tasks (tab filter + sort on top of pre-tab)
   const filteredTasks = useMemo(() => {
-    let result = tasks.filter(task => {
-      // Tab filters (skip for kanban mode on 'open' tab to show all)
+    const result = preTabFilteredTasks.filter(task => {
       if (viewMode === 'list' || activeTab !== 'open') {
         if (activeTab === 'open' && task.status === 'done') return false;
         if (activeTab === 'today' && !isTaskDueToday(task.dueDate)) return false;
@@ -170,32 +294,16 @@ const Tasks = () => {
         if (activeTab === 'week' && !isTaskDueThisWeek(task.dueDate)) return false;
         if (activeTab === 'completed' && task.status !== 'done') return false;
       }
-
-      // Search
-      if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-
-      // Quick filters
-      if (quickStatus && task.status !== quickStatus) return false;
-      if (quickDue === 'today' && !isTaskDueToday(task.dueDate)) return false;
-      if (quickDue === 'week' && !isTaskDueThisWeek(task.dueDate)) return false;
-
-      // Advanced filters (from drawer)
-      if (statusFilter !== 'all' && task.status !== statusFilter) return false;
-      if (priorityFilter !== 'all' && task.priority !== priorityFilter) return false;
-
       return true;
     });
-    
-    // Sort logic
+
     result.sort((a, b) => {
       let comparison = 0;
-      
       switch (sortBy) {
         case 'created':
           comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           break;
         case 'due':
-          // Tasks without due dates go last, otherwise sort by actual date
           if (!a.dueDate && !b.dueDate) comparison = 0;
           else if (!a.dueDate) comparison = 1;
           else if (!b.dueDate) comparison = -1;
@@ -211,29 +319,22 @@ const Tasks = () => {
           comparison = statusOrder[a.status] - statusOrder[b.status];
           break;
       }
-      
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-    
+
     return result;
-  }, [tasks, viewMode, activeTab, searchQuery, quickStatus, quickDue, statusFilter, priorityFilter, sortBy, sortDirection]);
+  }, [preTabFilteredTasks, viewMode, activeTab, sortBy, sortDirection]);
 
   const clearFilters = () => {
     setQuickStatus(null);
     setQuickDue(null);
     setStatusFilter('all');
     setPriorityFilter('all');
+    handleSetTopicFilter('all');
+    handleSetTagFilter('all');
   };
 
-  const hasActiveFilters = quickStatus || quickDue || statusFilter !== 'all' || priorityFilter !== 'all';
-
-  const tabs: { id: ViewTab; label: string; count: number }[] = [
-    { id: 'open', label: 'Open', count: tasks.filter(t => t.status !== 'done').length },
-    { id: 'today', label: 'Today', count: tasks.filter(t => isTaskDueToday(t.dueDate) && t.status !== 'done').length },
-    { id: 'tomorrow', label: 'Tomorrow', count: tasks.filter(t => isTaskDueTomorrow(t.dueDate) && t.status !== 'done').length },
-    { id: 'week', label: 'Week', count: tasks.filter(t => isTaskDueThisWeek(t.dueDate) && t.status !== 'done').length },
-    { id: 'completed', label: 'Done', count: tasks.filter(t => t.status === 'done').length },
-  ];
+  const hasActiveFilters = quickStatus || quickDue || statusFilter !== 'all' || priorityFilter !== 'all' || topicFilter !== 'all' || tagFilter !== 'all';
 
   const handleOpenTask = (task: Task) => {
     setSelectedTaskId(task.id);
@@ -271,14 +372,6 @@ const Tasks = () => {
     });
   };
 
-  const handleStatusChange = (taskId: string, status: TaskStatus, e: React.MouseEvent) => {
-    e.stopPropagation();
-    void updateTask(taskId, { 
-      status,
-      completedAt: status === 'done' ? new Date() : undefined,
-    });
-  };
-
   const toggleTaskExpansion = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedTasks(prev => {
@@ -289,7 +382,7 @@ const Tasks = () => {
         next.add(taskId);
       }
       // Persist expanded tasks
-      persistPrefs({ expandedTasks: Array.from(next) });
+      setPrefs(prev => ({ ...prev, expandedTasks: Array.from(next) }));
       return next;
     });
   };
@@ -319,6 +412,18 @@ const Tasks = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Selection mode toggle (list only) */}
+            {viewMode === 'list' && (
+              <Button
+                variant={selectionMode ? 'default' : 'outline'}
+                size="sm"
+                onClick={toggleSelectionMode}
+                className="gap-1.5"
+              >
+                <CheckSquare className="w-4 h-4" />
+                {selectionMode ? 'Cancel' : 'Select'}
+              </Button>
+            )}
             {/* View mode toggle */}
             <div className="flex items-center p-1 bg-secondary/50 rounded-lg">
               <button
@@ -418,6 +523,26 @@ const Tasks = () => {
                 Due Today
               </button>
             </div>
+          )}
+
+          {/* Active topic/tag filter chips */}
+          {topicFilter !== 'all' && (
+            <button
+              onClick={() => handleSetTopicFilter('all')}
+              className="px-2.5 py-1 text-xs font-medium rounded-full border bg-info/10 text-info border-info/30 flex items-center gap-1"
+            >
+              [[{availableTopics.find(t => t.id === topicFilter)?.name}]]
+              <X className="w-3 h-3" />
+            </button>
+          )}
+          {tagFilter !== 'all' && (
+            <button
+              onClick={() => handleSetTagFilter('all')}
+              className="px-2.5 py-1 text-xs font-medium rounded-full border bg-primary/10 text-primary border-primary/30 flex items-center gap-1"
+            >
+              #{tagFilter}
+              <X className="w-3 h-3" />
+            </button>
           )}
 
           {/* Clear filters */}
@@ -522,8 +647,40 @@ const Tasks = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button 
-                  variant="outline" 
+                {availableTopics.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Topic</label>
+                    <Select value={topicFilter} onValueChange={handleSetTopicFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All topics" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All topics</SelectItem>
+                        {availableTopics.map(t => (
+                          <SelectItem key={t.id} value={t.id}>[[{t.name}]]</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {availableTags.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tag</label>
+                    <Select value={tagFilter} onValueChange={handleSetTagFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All tags" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All tags</SelectItem>
+                        {availableTags.map(tag => (
+                          <SelectItem key={tag} value={tag}>#{tag}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <Button
+                  variant="outline"
                   className="w-full"
                   onClick={() => {
                     clearFilters();
@@ -569,6 +726,23 @@ const Tasks = () => {
           </div>
         )}
 
+        {/* Selection mode bar */}
+        {selectionMode && viewMode === 'list' && (
+          <div className="flex items-center gap-3 mb-3 px-3 py-2 bg-secondary/40 rounded-lg border border-border">
+            <span className="text-sm font-medium text-foreground">
+              {selectedTaskIds.size} of {filteredTasks.length} selected
+            </span>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={selectAll}>
+                Select All
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={deselectAll}>
+                Deselect All
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Task views */}
         {viewMode === 'kanban' ? (
           <KanbanBoard tasks={filteredTasks} onTaskClick={handleOpenTask} />
@@ -580,14 +754,28 @@ const Tasks = () => {
                   const progress = getProgress(task);
                   const isExpanded = expandedTasks.has(task.id);
                   const hasSubtasks = task.subtasks.length > 0;
-                  
+
                   return (
                     <div key={task.id} className="py-1">
                       <div
-                        className="flex items-center gap-3 py-2 px-2 -mx-2 hover:bg-secondary/30 rounded-lg transition-colors cursor-pointer group"
-                        onClick={() => handleOpenTask(task)}
+                        className={cn(
+                          "flex items-center gap-3 py-2 px-2 -mx-2 hover:bg-secondary/30 rounded-lg transition-colors cursor-pointer group",
+                          selectionMode && selectedTaskIds.has(task.id) && "bg-primary/5"
+                        )}
+                        onClick={() => selectionMode ? toggleTaskSelection(task.id) : handleOpenTask(task)}
                       >
+                        {/* Selection checkbox */}
+                        {selectionMode && (
+                          <Checkbox
+                            checked={selectedTaskIds.has(task.id)}
+                            onCheckedChange={() => toggleTaskSelection(task.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-shrink-0"
+                          />
+                        )}
+
                         {/* Quick complete circle */}
+                        {!selectionMode && (
                         <button
                           onClick={(e) => handleQuickComplete(task.id, e)}
                           className={cn(
@@ -601,6 +789,7 @@ const Tasks = () => {
                             <CheckCircle2 className="w-3.5 h-3.5" />
                           )}
                         </button>
+                        )}
 
                         {/* Expand arrow for subtasks */}
                         {hasSubtasks ? (
@@ -639,10 +828,23 @@ const Tasks = () => {
                                 {task.dueDate}
                               </Badge>
                             )}
+                            {task.recurrence && (
+                              <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal text-info border-info/30">
+                                <span>↻</span>
+                                {task.recurrence.type === 'daily' && 'Daily'}
+                                {task.recurrence.type === 'weekly' && 'Weekly'}
+                                {task.recurrence.type === 'monthly' && 'Monthly'}
+                              </Badge>
+                            )}
                             {task.topicIds.slice(0, 2).map(topicId => {
                               const name = getTopicName(topicId);
                               return name ? (
-                                <Badge key={topicId} variant="secondary" className="text-[10px] h-5 px-1.5 text-info font-normal">
+                                <Badge
+                                  key={topicId}
+                                  variant="secondary"
+                                  className="text-[10px] h-5 px-1.5 text-info font-normal cursor-pointer hover:bg-info/20"
+                                  onClick={(e) => { e.stopPropagation(); handleSetTopicFilter(topicId); }}
+                                >
                                   [[{name}]]
                                 </Badge>
                               ) : null;
@@ -653,7 +855,12 @@ const Tasks = () => {
                               </Badge>
                             )}
                             {task.tags.slice(0, 2).map(tag => (
-                              <Badge key={tag} variant="secondary" className="text-[10px] h-5 px-1.5 text-primary font-normal">
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="text-[10px] h-5 px-1.5 text-primary font-normal cursor-pointer hover:bg-primary/20"
+                                onClick={(e) => { e.stopPropagation(); handleSetTagFilter(tag); }}
+                              >
                                 #{tag}
                               </Badge>
                             ))}
@@ -745,11 +952,22 @@ const Tasks = () => {
       </div>
 
       {/* Task Details Drawer */}
-      <TaskDetailsDrawer 
-        taskId={selectedTaskId} 
-        open={drawerOpen} 
+      <TaskDetailsDrawer
+        taskId={selectedTaskId}
+        open={drawerOpen}
         onOpenChange={setDrawerOpen}
       />
+
+      {/* Bulk Action Bar */}
+      {selectionMode && selectedTaskIds.size > 0 && (
+        <BulkActionBar
+          selectedCount={selectedTaskIds.size}
+          onBulkStatusChange={handleBulkStatusChange}
+          onBulkPriorityChange={handleBulkPriorityChange}
+          onBulkDueDateChange={handleBulkDueDateChange}
+          onBulkDelete={handleBulkDelete}
+        />
+      )}
     </AppLayout>
   );
 };

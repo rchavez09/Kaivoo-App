@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Calendar, Flag, Hash, Link2, Plus, Trash2,
-  Circle, CheckCircle2, X as XIcon, Check, PlayCircle
+  Circle, CheckCircle2, X as XIcon, Check, PlayCircle, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { TaskStatus, TaskPriority } from '@/types';
+import { TaskStatus, TaskPriority, RecurrenceType } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { toast } from 'sonner';
@@ -333,6 +333,46 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
                 </PopoverContent>
               </Popover>
             </div>
+          </div>
+
+          {/* Recurrence - card section */}
+          <div className="bg-panel-task-section rounded-xl p-4 space-y-2 shadow-sm">
+            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <RefreshCw className="w-3.5 h-3.5" />
+              Recurrence
+            </label>
+            <Select
+              value={task.recurrence?.type ?? 'none'}
+              onValueChange={(v) => {
+                if (v === 'none') {
+                  updateTask(task.id, { recurrence: undefined });
+                } else {
+                  updateTask(task.id, { recurrence: { type: v as RecurrenceType, interval: 1 } });
+                }
+                showSavedFeedback();
+              }}
+            >
+              <SelectTrigger className="bg-card/50 border-0 text-xs h-8">
+                <span className="flex items-center gap-1.5">
+                  {task.recurrence ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 text-info" />
+                      {task.recurrence.type === 'daily' && 'Daily'}
+                      {task.recurrence.type === 'weekly' && 'Weekly'}
+                      {task.recurrence.type === 'monthly' && 'Monthly'}
+                    </>
+                  ) : (
+                    'None'
+                  )}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Description - card section */}
