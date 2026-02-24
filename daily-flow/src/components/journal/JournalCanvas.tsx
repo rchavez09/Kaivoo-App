@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -105,6 +105,12 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
 
   const { addJournalEntry, updateJournalEntry } = useKaivooActions();
 
+  // Subscribe to journalEntries for re-initialization when data arrives
+  const journalEntries = useKaivooStore(s => s.journalEntries);
+
+  // Track whether initial load populated the canvas
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+
   // Refs for state that shouldn't cause re-renders
   const savedContentsRef = useRef<Map<string, string>>(new Map());
   const sectionsRef = useRef<CanvasSection[]>([]);
@@ -112,6 +118,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
   const isComposingRef = useRef(false);
   const pendingNewEntryRef = useRef(false);
   const dateStrRef = useRef(dateStr);
+  const latestHTMLRef = useRef('');
 
   // Stable callback refs to avoid stale closures
   const onSectionsChangeRef = useRef(onSectionsChange);
@@ -160,8 +167,11 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     pendingNewEntryRef.current = true;
 
     try {
+      // Get the current content BEFORE the async call (user may still be typing)
+      const typedContent = editorInstance ? editorInstance.getHTML() : editorHTML;
+
       const newEntry = await addJournalEntry({
-        content: '',
+        content: typedContent, // Save content immediately, not empty
         date: dateStrRef.current,
         tags: [],
         topicIds: [],
@@ -171,15 +181,22 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
         isComposingRef.current = true;
 
         const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
-        // Get the current content the user typed
-        const typedContent = editorInstance.getHTML();
-        // Rebuild: divider + typed content
-        const html = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>${typedContent}`;
+        // Get the LATEST content (user may have typed more during the await)
+        const latestContent = editorInstance.getHTML();
+        // Rebuild: divider + latest content
+        const html = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>${latestContent}`;
         editorInstance.commands.setContent(html);
 
-        savedContentsRef.current.set(newEntry.id, '');
+        savedContentsRef.current.set(newEntry.id, typedContent);
         sectionsRef.current = [{ entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) }];
         onSectionsChangeRef.current(sectionsRef.current);
+        setInitialLoadDone(true);
+
+        // If the user typed more during the await, save immediately
+        if (latestContent !== typedContent) {
+          void updateJournalEntry(newEntry.id, { content: latestContent });
+          savedContentsRef.current.set(newEntry.id, latestContent);
+        }
 
         // Restore cursor at end
         requestAnimationFrame(() => {
@@ -192,7 +209,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     } finally {
       pendingNewEntryRef.current = false;
     }
-  }, [addJournalEntry]);
+  }, [addJournalEntry, updateJournalEntry]);
 
   // --- TipTap editor ---
   const editor = useEditor({
@@ -211,9 +228,12 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     onUpdate: ({ editor: ed }) => {
       if (isComposingRef.current) return;
 
+      const html = ed.getHTML();
+      latestHTMLRef.current = html;
+
       // First-write detection
       if (sectionsRef.current.length === 0 && !pendingNewEntryRef.current) {
-        void handleFirstWrite(ed.getHTML(), ed);
+        void handleFirstWrite(html, ed);
         return;
       }
 
@@ -222,11 +242,11 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
       // Debounced save
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
-        void saveDirtySections(ed.getHTML());
+        void saveDirtySections(html);
       }, SAVE_DEBOUNCE_MS);
 
       // localStorage draft (immediate)
-      localStorage.setItem(`journal-canvas-draft-${dateStrRef.current}`, ed.getHTML());
+      localStorage.setItem(`journal-canvas-draft-${dateStrRef.current}`, html);
     },
     editorProps: {
       attributes: {
@@ -245,6 +265,10 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = null;
+      // Actually save instead of discarding
+      if (latestHTMLRef.current && sectionsRef.current.length > 0) {
+        void saveDirtySections(latestHTMLRef.current);
+      }
     }
 
     dateStrRef.current = dateStr;
@@ -272,6 +296,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     editor.commands.setContent(html || '');
 
     onSaveStatusChangeRef.current(entries.length > 0 ? 'saved' : 'idle');
+    setInitialLoadDone(entries.length > 0);
 
     // Auto-append: if today and latest entry is old, create new section
     if (isToday && entries.length > 0) {
@@ -316,11 +341,50 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, dateStr]);
 
+  // --- Re-initialize when store data arrives after mount ---
+  useEffect(() => {
+    // Skip if canvas already has content or editor isn't ready
+    if (!editor || initialLoadDone || pendingNewEntryRef.current) return;
+
+    const entries = journalEntries
+      .filter(e => e.date === dateStr)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+    if (entries.length === 0) return;
+
+    // Entries arrived — initialize canvas
+    isComposingRef.current = true;
+    savedContentsRef.current.clear();
+    entries.forEach(e => savedContentsRef.current.set(e.id, e.content || ''));
+    sectionsRef.current = entries.map(e => ({
+      entryId: e.id,
+      timestamp: new Date(e.timestamp),
+    }));
+    onSectionsChangeRef.current(sectionsRef.current);
+
+    const html = composeHTML(entries);
+    editor.commands.setContent(html);
+    onSaveStatusChangeRef.current('saved');
+    setInitialLoadDone(true);
+
+    requestAnimationFrame(() => {
+      editor.commands.focus('end');
+      isComposingRef.current = false;
+    });
+  }, [editor, dateStr, journalEntries, initialLoadDone]);
+
   // --- Flush saves on unmount ---
+  const saveDirtySectionsRef = useRef(saveDirtySections);
+  saveDirtySectionsRef.current = saveDirtySections;
+
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
+        // Flush pending save immediately instead of discarding
+        if (latestHTMLRef.current && sectionsRef.current.length > 0) {
+          void saveDirtySectionsRef.current(latestHTMLRef.current);
+        }
       }
     };
   }, []);
@@ -328,9 +392,9 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
   if (!editor) return null;
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-background flex flex-col">
+    <div className="flex flex-col">
       {/* Toolbar */}
-      <div className="border-b border-border bg-muted/30 px-2 py-1.5 flex items-center gap-0.5 flex-wrap" role="toolbar" aria-label="Text formatting">
+      <div className="border-b border-border/50 px-1 py-1.5 flex items-center gap-0.5 flex-wrap" role="toolbar" aria-label="Text formatting">
         <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className="h-8 w-8 p-0" aria-label="Undo">
           <Undo className="h-4 w-4" />
         </Button>
