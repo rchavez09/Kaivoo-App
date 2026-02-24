@@ -87,9 +87,9 @@ function extractSections(html: string): Array<{ entryId: string; content: string
   };
 
   for (const child of Array.from(body.childNodes)) {
-    if (child instanceof HTMLElement && child.hasAttribute('data-timestamp-divider')) {
+    if (child.nodeType === 1 && (child as Element).hasAttribute('data-timestamp-divider')) {
       flush();
-      currentEntryId = child.getAttribute('data-entry-id');
+      currentEntryId = (child as Element).getAttribute('data-entry-id');
     } else if (currentEntryId !== null) {
       currentNodes.push(child);
     }
@@ -276,10 +276,10 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     pendingNewEntryRef.current = false;
 
     // Read entries directly from store (not reactive to future store changes)
-    const entries = useKaivooStore.getState().journalEntries
+    const allEntries = useKaivooStore.getState().journalEntries;
+    const entries = allEntries
       .filter(e => e.date === dateStr)
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-
     // Store saved contents
     savedContentsRef.current.clear();
     entries.forEach(e => savedContentsRef.current.set(e.id, e.content || ''));

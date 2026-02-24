@@ -2,12 +2,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { JournalEntry } from '@/types';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
-// NOTE: The `mood_score` column exists in the DB but is not yet reflected in the
-// generated Supabase types file.  We extend the row/update types here so that the
-// rest of the service can remain fully typed.  Once `supabase gen types` is re-run
-// after the column migration, these local extensions can be removed.
+// The `mood_score` column may or may not exist in the remote DB yet (migration
+// 20260221000001_add_mood_score.sql).  We type-extend so the code compiles, but
+// NEVER send mood_score in insert/update payloads unless the column is confirmed
+// to exist.  The dbToJournalEntry converter safely reads it (undefined if absent).
 type JournalEntryRow = Tables<'journal_entries'> & { mood_score?: number | null };
 type JournalEntryUpdate = TablesUpdate<'journal_entries'> & { mood_score?: number | null };
+
+// Set to true once the mood_score migration has been applied.
+// TODO: Remove this flag after running the migration and regenerating types.
+const MOOD_SCORE_COLUMN_EXISTS = false;
 
 // DB row → App type converter
 export const dbToJournalEntry = (row: JournalEntryRow): JournalEntry => ({
@@ -35,16 +39,20 @@ export const fetchJournalEntries = async (userId: string) => {
 
 // CRUD
 export const createJournalEntry = async (userId: string, entry: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt' | 'timestamp'>) => {
+  const payload: Record<string, unknown> = {
+    user_id: userId,
+    date: entry.date,
+    content: entry.content,
+    tags: entry.tags,
+    topic_ids: entry.topicIds,
+  };
+  if (MOOD_SCORE_COLUMN_EXISTS && entry.moodScore != null) {
+    payload.mood_score = entry.moodScore;
+  }
+
   const { data, error } = await supabase
     .from('journal_entries')
-    .insert({
-      user_id: userId,
-      date: entry.date,
-      content: entry.content,
-      tags: entry.tags,
-      topic_ids: entry.topicIds,
-      mood_score: entry.moodScore ?? null,
-    })
+    .insert(payload)
     .select()
     .single();
   if (error) throw error;
@@ -56,7 +64,7 @@ export const updateJournalEntry = async (userId: string, id: string, updates: Pa
   if (updates.content !== undefined) dbUpdates.content = updates.content;
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
   if (updates.topicIds !== undefined) dbUpdates.topic_ids = updates.topicIds;
-  if (updates.moodScore !== undefined) dbUpdates.mood_score = updates.moodScore;
+  if (MOOD_SCORE_COLUMN_EXISTS && updates.moodScore !== undefined) dbUpdates.mood_score = updates.moodScore;
 
   const { error } = await supabase.from('journal_entries').update(dbUpdates as TablesUpdate<'journal_entries'>).eq('id', id).eq('user_id', userId);
   if (error) throw error;

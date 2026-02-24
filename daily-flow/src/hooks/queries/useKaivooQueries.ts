@@ -14,6 +14,12 @@ import * as RoutinesService from '@/services/routines.service';
 
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
+// Tracks the last dataUpdatedAt fingerprint that was synced to the Zustand store.
+// Module-level so it survives DataLoader mount/unmount cycles across route changes.
+// This prevents setFromDatabase() from re-running with stale cached data when
+// the user navigates between pages before a mutation's invalidation completes.
+let lastSyncedDataKey = '';
+
 /**
  * Master data sync hook — replaces useDatabase.
  * Uses React Query for caching/invalidation and syncs results to Zustand store.
@@ -96,10 +102,22 @@ export function useKaivooQueries() {
     combine: (queryResults) => {
       const allSuccess = queryResults.every(r => r.isSuccess);
       const anyLoading = queryResults.some(r => r.isLoading);
+      const anyFetching = queryResults.some(r => r.isFetching);
       const anyError = queryResults.find(r => r.error);
 
-      // Only sync to store when ALL queries have fresh data
-      if (allSuccess) {
+      // Only sync to store when ALL queries have settled with genuinely fresh data.
+      // Guard 1: !anyFetching — don't overwrite during background refetches
+      // Guard 2: dataKey — only sync when data was actually re-fetched from the
+      // server (dataUpdatedAt changes), not when stale cache is re-read on navigation.
+      // This prevents optimistic Zustand updates from being overwritten by cached
+      // data when the user navigates before a mutation's invalidation completes.
+      if (allSuccess && !anyFetching) {
+        const dataKey = queryResults.map(r => r.dataUpdatedAt).join(',');
+        if (dataKey === lastSyncedDataKey) {
+          return { isLoading: anyLoading, isSuccess: allSuccess, error: anyError?.error ?? null };
+        }
+        lastSyncedDataKey = dataKey;
+
         const [
           topicsResult, topicPagesResult, tagsResult, tasksResult,
           subtasksResult, journalResult, capturesResult, meetingsResult,
@@ -129,6 +147,8 @@ export function useKaivooQueries() {
           });
         });
 
+        const journalData = (journalResult.data || []).map(JournalService.dbToJournalEntry);
+
         setFromDatabase({
           topics: (topicsResult.data || []).map(TopicsService.dbToTopic),
           topicPages: (topicPagesResult.data || []).map(TopicsService.dbToTopicPage),
@@ -136,7 +156,7 @@ export function useKaivooQueries() {
           tasks: (tasksResult.data as Tables<'tasks'>[] || []).map(
             (t) => TasksService.dbToTask(t, subtasksByTask[t.id] || [])
           ),
-          journalEntries: (journalResult.data || []).map(JournalService.dbToJournalEntry),
+          journalEntries: journalData,
           captures: (capturesResult.data || []).map(CapturesService.dbToCapture),
           meetings: (meetingsResult.data || []).map(MeetingsService.dbToMeeting),
           routines: (routinesResult.data || []).map(RoutinesService.dbToRoutine),

@@ -363,19 +363,21 @@ export const useKaivooStore = create<KaivooStore>()(
   persist(
     (set, get) => ({
   // Database sync
-  setFromDatabase: (data) => set({
-    topics: data.topics,
-    topicPages: data.topicPages,
-    tags: data.tags,
-    tasks: data.tasks,
-    journalEntries: data.journalEntries,
-    captures: data.captures,
-    meetings: data.meetings,
-    routines: data.routines,
-    routineGroups: data.routineGroups,
-    routineCompletions: data.routineCompletions,
-    isLoaded: true,
-  }),
+  setFromDatabase: (data) => {
+    set({
+      topics: data.topics,
+      topicPages: data.topicPages,
+      tags: data.tags,
+      tasks: data.tasks,
+      journalEntries: data.journalEntries,
+      captures: data.captures,
+      meetings: data.meetings,
+      routines: data.routines,
+      routineGroups: data.routineGroups,
+      routineCompletions: data.routineCompletions,
+      isLoaded: true,
+    });
+  },
   isLoaded: false,
   
   // Topics

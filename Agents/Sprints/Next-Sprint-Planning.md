@@ -18,6 +18,8 @@ Source: `Sprints/Sprint-7-Journal-Canvas.md` — Deferred to Sprint 8+
 | Journal: Entry templates (Morning Pages, Meeting Notes, etc.) | Feature | Medium (user confirmed interest) |
 | Journal: Word count / writing stats / streaks | Enhancement | Medium |
 | Journal: Keyboard shortcuts | Enhancement | Low (auto-save eliminates Cmd+S) |
+| Journal: Configurable session gap threshold (Settings page) | Enhancement | Low (currently 30min hardcoded in `GAP_THRESHOLD_MINUTES`) |
+| Journal: Apply `mood_score` DB migration + flip `MOOD_SCORE_COLUMN_EXISTS` flag | Tech Debt | Medium (migration file exists, just needs to be applied) |
 | Tasks: Kanban improvements (empty column drops, search in Kanban) | Enhancement | Medium |
 | Tasks: "Ongoing" task label | Enhancement | Low |
 | Task templates, archive vs delete | Feature | Medium |
