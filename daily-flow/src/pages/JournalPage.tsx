@@ -296,7 +296,9 @@ const JournalPage = () => {
                   </p>
                 </div>
               </div>
-              {statusDisplay}
+              <div role="status" aria-live="polite">
+                {statusDisplay}
+              </div>
             </div>
           </div>
 

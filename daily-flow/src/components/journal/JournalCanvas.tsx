@@ -369,7 +369,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
                   onClick={() => c.color ? editor.chain().focus().setColor(c.color).run() : editor.chain().focus().unsetColor().run()}
                   className={cn("h-6 w-6 rounded border border-border hover:scale-110 transition-transform", !c.color && "bg-foreground")}
                   style={{ backgroundColor: c.color || undefined }}
-                  title={c.name}
+                  aria-label={`${c.name} text color`}
                 />
               ))}
             </div>
@@ -389,7 +389,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
                   onClick={() => c.color ? editor.chain().focus().toggleHighlight({ color: c.color }).run() : editor.chain().focus().unsetHighlight().run()}
                   className={cn("h-6 w-6 rounded border border-border hover:scale-110 transition-transform", !c.color && "bg-background line-through")}
                   style={{ backgroundColor: c.color || undefined }}
-                  title={c.name}
+                  aria-label={`${c.name} highlight`}
                 />
               ))}
             </div>
