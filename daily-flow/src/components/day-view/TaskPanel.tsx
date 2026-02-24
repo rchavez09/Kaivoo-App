@@ -21,16 +21,20 @@ const TaskPanel = memo(({ pendingTasks, completedTasks, dateStr, onTaskClick }: 
   const handleAddTask = useCallback(async () => {
     const title = newTaskTitle.trim();
     if (!title) return;
-    await addTask({
-      title,
-      status: 'todo',
-      priority: 'medium',
-      dueDate: dateStr,
-      tags: [],
-      topicIds: [],
-      subtasks: [],
-    });
-    setNewTaskTitle('');
+    try {
+      await addTask({
+        title,
+        status: 'todo',
+        priority: 'medium',
+        dueDate: dateStr,
+        tags: [],
+        topicIds: [],
+        subtasks: [],
+      });
+      setNewTaskTitle('');
+    } catch {
+      // Error toast already shown by addTask
+    }
   }, [newTaskTitle, dateStr, addTask]);
 
   const handleToggleComplete = useCallback(async (task: Task) => {

@@ -3,7 +3,6 @@ import { format } from 'date-fns';
 import { Clock, Edit3, ChevronDown, ChevronUp, Hash, FileText, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { JournalEntry } from '@/types';
-import { cn } from '@/lib/utils';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 
 interface JournalTimelineWidgetProps {
@@ -37,7 +36,7 @@ const JournalTimelineWidget = ({ entries, onEdit }: JournalTimelineWidgetProps) 
           size="sm"
           className="h-8 px-2"
           onClick={() => setExpanded(!expanded)}
-          aria-label={expanded ? "Collapse journal entries" : "Expand journal entries"}
+          aria-label={expanded ? "Collapse note entries" : "Expand note entries"}
         >
           {expanded ? (
             <ChevronUp className="w-4 h-4" />
@@ -72,7 +71,7 @@ const JournalTimelineWidget = ({ entries, onEdit }: JournalTimelineWidgetProps) 
                     variant="ghost"
                     size="sm"
                     className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Edit journal entry"
+                    aria-label="Edit note entry"
                     onClick={(e) => {
                       e.stopPropagation();
                       onEdit(entry);

@@ -194,7 +194,7 @@ const StepReview = ({ stats, onNext }: { stats: DayStats; onNext: () => void }) 
       </p>
       {stats.journalWordCount > 0 && (
         <p className="text-sm text-muted-foreground">
-          Wrote <strong className="text-foreground">{stats.journalWordCount}</strong> words in your journal.
+          Wrote <strong className="text-foreground">{stats.journalWordCount}</strong> words in your notes.
         </p>
       )}
       {stats.captureCount > 0 && (

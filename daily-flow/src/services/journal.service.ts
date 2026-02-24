@@ -2,16 +2,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { JournalEntry } from '@/types';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
-// The `mood_score` column may or may not exist in the remote DB yet (migration
-// 20260221000001_add_mood_score.sql).  We type-extend so the code compiles, but
-// NEVER send mood_score in insert/update payloads unless the column is confirmed
-// to exist.  The dbToJournalEntry converter safely reads it (undefined if absent).
+// mood_score column added by migration 20260221000001_add_mood_score.sql.
+// Type-extend until Supabase types are regenerated.
 type JournalEntryRow = Tables<'journal_entries'> & { mood_score?: number | null };
 type JournalEntryUpdate = TablesUpdate<'journal_entries'> & { mood_score?: number | null };
-
-// Set to true once the mood_score migration has been applied.
-// TODO: Remove this flag after running the migration and regenerating types.
-const MOOD_SCORE_COLUMN_EXISTS = false;
 
 // DB row → App type converter
 export const dbToJournalEntry = (row: JournalEntryRow): JournalEntry => ({
@@ -46,7 +40,7 @@ export const createJournalEntry = async (userId: string, entry: Omit<JournalEntr
     tags: entry.tags,
     topic_ids: entry.topicIds,
   };
-  if (MOOD_SCORE_COLUMN_EXISTS && entry.moodScore != null) {
+  if (entry.moodScore != null) {
     payload.mood_score = entry.moodScore;
   }
 
@@ -64,7 +58,7 @@ export const updateJournalEntry = async (userId: string, id: string, updates: Pa
   if (updates.content !== undefined) dbUpdates.content = updates.content;
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
   if (updates.topicIds !== undefined) dbUpdates.topic_ids = updates.topicIds;
-  if (MOOD_SCORE_COLUMN_EXISTS && updates.moodScore !== undefined) dbUpdates.mood_score = updates.moodScore;
+  if ('moodScore' in updates) dbUpdates.mood_score = updates.moodScore ?? null;
 
   const { error } = await supabase.from('journal_entries').update(dbUpdates as TablesUpdate<'journal_entries'>).eq('id', id).eq('user_id', userId);
   if (error) throw error;

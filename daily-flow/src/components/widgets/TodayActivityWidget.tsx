@@ -274,7 +274,7 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
   const getTypeLabel = (type: ActivityType, source?: string) => {
     switch (type) {
       case 'journal':
-        return 'Journal';
+        return 'Notes';
       case 'task':
         return 'Task Created';
       case 'subtask':

@@ -343,19 +343,23 @@ const Tasks = () => {
 
   const handleCreateTask = async () => {
     if (newTaskTitle.trim()) {
-      const task = await addTask({
-        title: newTaskTitle.trim(),
-        status: 'todo',
-        priority: 'medium',
-        tags: [],
-        topicIds: [],
-        subtasks: [],
-      });
-      setNewTaskTitle('');
-      setShowNewTaskInput(false);
-      if (task) {
-        setSelectedTaskId(task.id);
-        setDrawerOpen(true);
+      try {
+        const task = await addTask({
+          title: newTaskTitle.trim(),
+          status: 'todo',
+          priority: 'medium',
+          tags: [],
+          topicIds: [],
+          subtasks: [],
+        });
+        setNewTaskTitle('');
+        setShowNewTaskInput(false);
+        if (task) {
+          setSelectedTaskId(task.id);
+          setDrawerOpen(true);
+        }
+      } catch (e: unknown) {
+        toast.error(e instanceof Error ? e.message : 'Failed to add task');
       }
     }
   };
