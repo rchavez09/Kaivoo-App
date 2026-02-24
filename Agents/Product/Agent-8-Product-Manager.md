@@ -2,6 +2,7 @@
 
 **Role:** Product Manager
 **Department:** Product
+**Model:** Opus
 **Date:** February 22, 2026
 **Status:** Active
 

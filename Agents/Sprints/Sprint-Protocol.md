@@ -14,7 +14,7 @@
 | Engineering | Agent 2, Agent 3, Agent 4 | Implementation, architecture, security |
 | DevOps | Agent 9 | CI/CD, Docker, packaging, deployment, monitoring |
 | Quality | Agent 7, Agent 10, Agent 11 | Code review, test strategy, feature integrity |
-| Design | Agent 1, Agent 6 | Visual design, UX, interaction patterns |
+| Design | Design Agent | Visual design, UX, interaction patterns, accessibility |
 | Research | Agent 5 | Technology scouting, competitive analysis |
 | Marketing | TBD | Content, growth, brand |
 
@@ -117,8 +117,10 @@ Agents/
     Agent-11-Docs/                         # Feature Use Case Bible, regression checks
 
   Design/
-    Agent-{N}-{Role}.md
-    Agent-{N}-Docs/
+    Agent-Design.md                   # Combined UX + Visual design spec
+    Agent-Design-Docs/                # Design system, screen specs, use cases
+    ARCHIVED-Agent-1-Senior-UI-Designer.md
+    ARCHIVED-Agent-6-Usability-Architect.md
 
   Research/
     Agent-{N}-{Role}.md
@@ -170,7 +172,7 @@ Common document types:
 | `Code-Audit` | Agent 7 | Code review reports |
 | `Research-Brief` | Agent 5 | Research findings |
 | `Security-Concern` | Agent 4 | Security gap reports |
-| `Design-Note` | Agent 1, 6 | Design decisions |
+| `Design-Note` | Design Agent | Design decisions |
 | `Architecture-Decision` | Agent 3 | Architecture Decision Records |
 | `Implementation-Note` | Agent 2 | Technical notes |
 | `Concern` | Any agent | Generic concern |
@@ -207,20 +209,31 @@ Common document types:
 - The sprint file is updated only for status tracking (marking parcels complete)
 - Mid-sprint documents feed the NEXT sprint, not the current one
 
-### Phase 4: Completion
+### Phase 4: Verification & Completion
 
 **Trigger:** All parcels meet Definition of Done, or sprint is timeboxed.
 
 **Actions:**
-1. Agent 7 produces a final audit report: `Code-Audit-Sprint-{N}-Review.md`
-2. Add `## Sprint Retrospective` section to the sprint file:
+1. Run deterministic checks on sprint branch:
+   `npm run lint && npm run typecheck && npm run test && npm run build`
+2. Agent 7 produces a code audit report: `Code-Audit-Sprint-{N}-Review.md`
+3. Agent 11 runs feature integrity check against Feature Bible
+4. Fix all P0 issues from gates before proceeding
+5. **SANDBOX REVIEW:** Start dev server on sprint branch (`npm run dev`)
+   - User reviews the running application in their browser
+   - User approves UX or requests changes
+   - This is a **blocking gate** — do NOT proceed without user approval
+6. Add `## Sprint Retrospective` section to the sprint file:
    - Completed date
    - Parcels completed (X/Y)
    - What was delivered (brief summary)
-   - Verification results (build, typecheck, tests)
+   - Verification results (build, typecheck, tests, agent gates)
    - Deferred items
    - Key learnings
-3. Director updates `Vision.md` to reflect progress
+7. Merge to main: `git merge --no-ff sprint/N-theme-slug`
+8. Tag main: `git tag post-sprint-N`
+9. Deploy to production (Netlify)
+10. Director updates `Vision.md` to reflect progress
 
 ### Phase 5: Archival
 
@@ -303,7 +316,22 @@ User approves -> Sprint-{N}-{Theme}.md created
 Agents execute their parcels
          |
          v
-Sprint completes -> Retrospective added
+Deterministic checks (lint, typecheck, test, build)
+         |
+         v
+Agent gates (Agent 7 code audit + Agent 11 feature integrity)
+         |
+         v
+Fix all P0 issues
+         |
+         v
+SANDBOX REVIEW: User reviews running app on sprint branch
+         |
+         v
+Sprint retrospective added to sprint file
+         |
+         v
+Merge to main + tag + deploy
          |
          v
 Vision.md updated (mark phase progress)
@@ -311,7 +339,8 @@ Vision.md updated (mark phase progress)
 
 ---
 
-*Sprint Protocol v1.2 — February 23, 2026*
+*Sprint Protocol v1.3 — February 23, 2026*
 *v1.0: Initial protocol*
 *v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
 *v1.2: Explicit sandbox review step in lifecycle + pre-merge checklist. Deterministic checks before agent gates.*
+*v1.3: Sandbox review woven into Phase 4 lifecycle + user-perspective flow. Agent 1+6 merged to Design Agent. Design references updated throughout.*

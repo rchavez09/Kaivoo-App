@@ -2,8 +2,9 @@
 
 **Role:** Product Director
 **Department:** Above all departments (coordinates Engineering, Design, Research, Marketing)
-**Date:** February 22, 2026
-**Version:** 1.1
+**Model:** Opus
+**Date:** February 23, 2026
+**Version:** 1.3
 **Status:** Active
 
 ---
@@ -73,7 +74,7 @@ Map the work to departments and agents:
 |---|---|
 | **Product** (Agent 8) | Business model decisions, pricing, market validation, feature prioritization by commercial impact, go-to-market planning |
 | **Research** (Agent 5) | New feature domains, technology scouting, pattern research |
-| **Design** (Agent 1, 6) | UI changes, new screens, UX flows, accessibility |
+| **Design** (Design Agent) | UI changes, new screens, UX flows, interaction patterns, accessibility |
 | **Engineering** (Agent 2, 3, 4) | All code changes, architecture decisions, security |
 | **DevOps** (Agent 9) | Deployment, CI/CD, Docker, packaging, infrastructure, monitoring |
 | **Quality** (Agent 7, 10) | Code review (every parcel), test strategy, test infrastructure, CI test suite |
@@ -115,8 +116,7 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 ### Design
 | Agent | Role | Specialty |
 |---|---|---|
-| Agent 1 | Senior UI Designer | Kaivoo Design System, component specs, visual hierarchy |
-| Agent 6 | Usability Architect | Use cases, interaction patterns, accessibility, flows |
+| Design Agent | Lead Designer | Kaivoo Design System, use cases, interaction patterns, visual hierarchy, accessibility, component specs |
 
 ### Quality
 | Agent | Role | Specialty |
@@ -157,5 +157,6 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 
 ---
 
-*Director v1.2 — February 22, 2026*
-*Updated to include Product (Agent 8), DevOps (Agent 9), and Quality (Agent 7 + Agent 10) departments*
+*Director v1.3 — February 23, 2026*
+*v1.2: Added Product (Agent 8), DevOps (Agent 9), and Quality (Agent 7 + Agent 10) departments*
+*v1.3: Agent 1 + Agent 6 merged into Design Agent. Updated department directory and involvement table.*

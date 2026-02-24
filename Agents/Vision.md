@@ -81,7 +81,7 @@ The foundation stayed constant. The module made it powerful.
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Core Foundation (always present):** Journal, Daily View, Todos, Calendar, Captures, Second Brain, AI Orchestrator, Theming, Workshop, Auth, Data Layer.
+**Core Foundation (always present):** Journal, Daily View, Projects & Tasks, Calendar, Captures, Second Brain, AI Orchestrator, Theming, Workshop, Auth, Data Layer.
 
 **Modules (plug in):** Each module registers its own AI agents with the orchestrator, adds its own UI sections/pages, reads from and writes to core data (todos, calendar, journal), and has its own specialized tools and workflows.
 
@@ -115,7 +115,7 @@ The platform doesn't guess what users want — it watches what they're already t
 
 | # | Module | Role | Status |
 |---|--------|------|--------|
-| — | **Command Space** | Core Foundation — journal, todos, calendar, captures, daily view | In progress (~90%) |
+| — | **Command Space** | Core Foundation — journal, projects & tasks, calendar, captures, daily view | In progress (~85%) |
 | 2 | **Marketing Agency** | Brand guidelines → campaigns, copy, landing pages, social content, asset generation | Planned — begins after Command Space is monetizing |
 | 3 | **Trading Bot** | Multi-strategy automated trading, multi-account management, backtesting | Deferred — requires legal/compliance review before development |
 | N | **Future Modules** | Prioritized by Module Demand Intelligence — build what users are already trying to do | Long-term — platform architecture must be proven first |
@@ -193,7 +193,12 @@ The platform doesn't guess what users want — it watches what they're already t
 | Design System migration (Kaivoo palette, components) | DONE | Sprint 3–5 (incremental) |
 | Unified Day View (Today page redesign) | DONE | Sprint 3 |
 | Task recurrence (Daily/Weekly/Monthly), Tasks page filtering & bulk actions | DONE | Sprint 6 |
-| Core feature enhancement (better journal, search) | PLANNED | — |
+| Projects system — Topic → Project → Task → Subtask hierarchy, project date ranges | PLANNED | — |
+| Project templates — reusable task structures, per-project customization | PLANNED | — |
+| Tasks Timeline view — project-first calendar with layered filters (projects, tasks, meetings) | PLANNED | — |
+| Calendar page redesign — meetings-first view with project/task dots, shared filter system | PLANNED | — |
+| AI project kickoff — chat-driven project scaffolding from templates | PLANNED | — |
+| Core feature enhancement (better journal, search) | IN PROGRESS | Sprint 7 |
 | Search & file attachments | PLANNED | — |
 | Analytics & insights dashboard rebuild | PLANNED | — |
 | Notifications & reminders | PLANNED | — |
@@ -304,7 +309,7 @@ The platform doesn't guess what users want — it watches what they're already t
 ## Current Position
 
 **We are in:** Phase 1 — Cloud Command Center (~95% complete)
-**Active sprint:** None (Sprint 7 planning next)
+**Active sprint:** Sprint 7 (Journal Canvas) — Transform Journal from form-based entries to continuous writing surface
 **Last completed:** Sprint 6 (Feature Depth) — Task recurrence, Tasks page topic/tag filtering, bulk actions, 23 new tests (104 total)
 
 **Sprint 6 delivered:** Topic & tag filtering in Tasks page advanced filters with quick-filter chips and badge click activation. Filtered tab counts. Multi-select mode with bulk status/priority/due date/delete actions. Task recurrence (Daily/Weekly/Monthly) with auto-generation on completion. Recurrence badges on task rows. 23 new tests (104 total). Agent 11 (56/56 PASS) + Agent 7 (all P0s fixed) gates passed. See `Sprints/Sprint-6-Feature-Depth.md`.
@@ -321,6 +326,9 @@ The platform doesn't guess what users want — it watches what they're already t
 - ~~Business model validation~~ → **Agent 8 delivered** (Competitive Landscape + Customer Persona reports)
 
 **Key decisions ahead:**
+- **Projects data model** — Topic → Project → Task → Subtask hierarchy; how Projects relate to existing Topics across journal/captures; research needed (Agent 5)
+- **Tasks Timeline view** — Project-first calendar with layered filters; relationship to Calendar page (meetings-first vs. tasks-first visual weight)
+- **Project templates + AI kickoff** — Reusable task structures; chat-driven scaffolding; prerequisite for Module 2 (Marketing Agency campaign templates)
 - **Desktop framework choice** — Electron vs. Tauri (Agent 9 to evaluate)
 - **Platform architecture scoping** — When to begin module system design alongside core product work
 - **Module 2 revenue gate** — Command Space must be generating revenue before Marketing Agency development begins

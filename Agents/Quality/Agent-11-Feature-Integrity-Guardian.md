@@ -2,6 +2,7 @@
 
 **Role:** Feature Integrity Guardian
 **Department:** Quality
+**Model:** Sonnet
 **Date:** February 22, 2026
 **Status:** ACTIVE — Activates Sprint 3
 **Activation Gate:** Immediate — created in response to Sprint 2 regressions

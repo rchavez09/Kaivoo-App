@@ -22,7 +22,7 @@
 | Engineering | `Agents/Engineering/` | Agent 2 (Software Engineer), Agent 3 (Architect), Agent 4 (Security) |
 | DevOps | `Agents/DevOps/` | Agent 9 (DevOps Engineer) |
 | Quality | `Agents/Quality/` | Agent 7 (Code Reviewer), Agent 10 (QA Architect — activates Sprint 4+), Agent 11 (Feature Integrity Guardian) |
-| Design | `Agents/Design/` | Agent 1 (UI Designer), Agent 6 (Usability Architect) |
+| Design | `Agents/Design/` | Design Agent (combined UX + Visual) |
 | Research | `Agents/Research/` | Agent 5 (Research Analyst) |
 | Marketing | `Agents/Marketing/` | TBD |
 
