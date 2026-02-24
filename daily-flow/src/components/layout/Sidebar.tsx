@@ -21,8 +21,8 @@ const navItems = [{
   label: 'Today',
   icon: Sun
 }, {
-  path: '/journal',
-  label: 'Journal',
+  path: '/notes',
+  label: 'Notes',
   icon: BookOpen
 }, {
   path: '/tasks',

@@ -128,7 +128,7 @@ const DayReview = ({
         <div>
           <div className="flex items-center gap-2 mb-3">
             <BookOpen className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Journal Entries</h3>
+            <h3 className="text-sm font-medium text-foreground">Notes</h3>
           </div>
           <div className="space-y-3">
             {sortedEntries.map((entry) => (

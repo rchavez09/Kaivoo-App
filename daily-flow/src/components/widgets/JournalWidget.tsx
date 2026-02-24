@@ -206,7 +206,7 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
       });
 
       toast.success('Entry saved', {
-        description: `Added to today's journal at ${format(new Date(), 'h:mm a')}`,
+        description: `Added to today's notes at ${format(new Date(), 'h:mm a')}`,
       });
 
       setContent('');
@@ -241,7 +241,7 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
       <div className="widget-header">
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-primary" />
-          <span className="widget-title">Journal</span>
+          <span className="widget-title">Notes</span>
         </div>
         <Button 
           variant="ghost" 

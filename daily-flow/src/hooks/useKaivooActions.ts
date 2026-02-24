@@ -26,10 +26,17 @@ export const useKaivooActions = () => {
 
   const addTask = async (taskData: Omit<Task, 'id' | 'createdAt'>) => {
     if (user) {
-      const task = await db.createTask(taskData);
-      useKaivooStore.setState(s => ({ tasks: [...s.tasks, task] }));
-      invalidate('tasks');
-      return task;
+      try {
+        const task = await db.createTask(taskData);
+        useKaivooStore.setState(s => ({ tasks: [...s.tasks, task] }));
+        invalidate('tasks');
+        return task;
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : typeof e === 'object' && e !== null && 'message' in e ? String((e as Record<string, unknown>).message) : 'Unknown error';
+        toast.error(`Failed to add task: ${msg}`);
+        console.error('[addTask] details:', JSON.stringify(e, null, 2));
+        return undefined;
+      }
     }
     return store.addTask(taskData);
   };

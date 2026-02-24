@@ -34,7 +34,7 @@ const InlineJournal = memo(({ dateStr, entries, onEditEntry }: InlineJournalProp
   return (
     <div className="widget-card" aria-live="polite">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="widget-title">Journal</h3>
+        <h3 className="widget-title">Notes</h3>
         {!composing && (
           <Button variant="ghost" size="sm" onClick={() => setComposing(true)} className="h-7 text-xs gap-1">
             <Plus className="h-3 w-3" /> Write
@@ -65,7 +65,7 @@ const InlineJournal = memo(({ dateStr, entries, onEditEntry }: InlineJournalProp
 
       {/* Entry list */}
       {entries.length === 0 && !composing && (
-        <p className="text-xs text-muted-foreground text-center py-4">No journal entries yet</p>
+        <p className="text-xs text-muted-foreground text-center py-4">No notes yet</p>
       )}
       <div className="space-y-2">
         {entries.map(entry => (
@@ -85,10 +85,9 @@ const InlineJournal = memo(({ dateStr, entries, onEditEntry }: InlineJournalProp
                 </span>
               )}
             </div>
-            <div
-              className="text-sm text-foreground line-clamp-2 [&>p]:m-0"
-              dangerouslySetInnerHTML={{ __html: entry.content }}
-            />
+            <p className="text-sm text-foreground line-clamp-2">
+              {entry.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
+            </p>
           </button>
         ))}
       </div>

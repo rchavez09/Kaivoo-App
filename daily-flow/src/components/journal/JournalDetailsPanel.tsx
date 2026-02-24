@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, FolderOpen, FileText, X, Sparkles, Loader2, CheckCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, FolderOpen, FileText, X, Sparkles, Loader2, CheckCircle, MousePointerClick } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import TopicPagePicker from '@/components/TopicPagePicker';
 import InlineTagInput from './InlineTagInput';
+import { useKaivooStore } from '@/stores/useKaivooStore';
+import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { cn } from '@/lib/utils';
+import { MOODS } from './EntryMetadataPills';
 
 interface AIExtraction {
   suggestions: Array<{
@@ -21,17 +24,8 @@ interface AIExtraction {
 }
 
 interface JournalDetailsPanelProps {
-  tags: string[];
-  topicPaths: string[];
-  moodScore: number | undefined;
-  existingTags: Array<{ id: string; name: string }>;
-  onAddTag: (tag: string) => void;
-  onRemoveTag: (tag: string) => void;
-  onAddTopic: (path: string) => void;
-  onRemoveTopic: (path: string) => void;
-  onMoodChange: (score: number | undefined) => void;
-  topicExists: (path: string) => boolean;
-  // AI extraction
+  activeEntryId: string | null;
+  // AI extraction (day-level scope)
   isExtracting: boolean;
   extraction: AIExtraction | null;
   approvedItems: Set<number>;
@@ -40,22 +34,57 @@ interface JournalDetailsPanelProps {
   canExtract: boolean;
 }
 
-const MOODS = [
-  { score: 5, emoji: '\ud83d\ude0a', label: 'Great' },
-  { score: 4, emoji: '\ud83d\ude42', label: 'Good' },
-  { score: 3, emoji: '\ud83d\ude10', label: 'Okay' },
-  { score: 2, emoji: '\ud83d\ude14', label: 'Low' },
-  { score: 1, emoji: '\ud83d\ude1e', label: 'Rough' },
-];
-
 const JournalDetailsPanel = ({
-  tags, topicPaths, moodScore, existingTags,
-  onAddTag, onRemoveTag, onAddTopic, onRemoveTopic, onMoodChange,
-  topicExists,
+  activeEntryId,
   isExtracting, extraction, approvedItems, onExtract, onApproveItem, canExtract,
 }: JournalDetailsPanelProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const [showTopicPicker, setShowTopicPicker] = useState(false);
+
+  // Read active entry from store
+  const entry = useKaivooStore(s => activeEntryId ? s.journalEntries.find(e => e.id === activeEntryId) : undefined);
+  const getTopicPath = useKaivooStore(s => s.getTopicPath);
+  const existingTags = useKaivooStore(s => s.tags);
+
+  const { updateJournalEntry, resolveTopicPathAsync } = useKaivooActions();
+
+  const tags = entry?.tags || [];
+  const topicId = entry?.topicIds?.[0];
+  const topicPath = topicId ? getTopicPath(topicId) : null;
+  const moodScore = entry?.moodScore;
+
+  // --- Handlers (per-entry mutations) ---
+  const handleAddTag = async (tag: string) => {
+    if (!activeEntryId) return;
+    await updateJournalEntry(activeEntryId, { tags: [...tags, tag] });
+  };
+
+  const handleRemoveTag = async (tag: string) => {
+    if (!activeEntryId) return;
+    await updateJournalEntry(activeEntryId, { tags: tags.filter(t => t !== tag) });
+  };
+
+  const handleAddTopic = async (path: string) => {
+    if (!activeEntryId) return;
+    const ids = await resolveTopicPathAsync(path, true);
+    if (ids && ids.length > 0) {
+      const leafId = ids[ids.length - 1];
+      await updateJournalEntry(activeEntryId, { topicIds: [leafId] });
+    }
+    setShowTopicPicker(false);
+  };
+
+  const handleRemoveTopic = async () => {
+    if (!activeEntryId) return;
+    await updateJournalEntry(activeEntryId, { topicIds: [] });
+  };
+
+  const handleMoodChange = async (score: number | undefined) => {
+    if (!activeEntryId) return;
+    await updateJournalEntry(activeEntryId, { moodScore: score });
+  };
+
+  const isPage = topicPath?.includes('/');
 
   return (
     <div className="border-t border-border">
@@ -75,97 +104,97 @@ const JournalDetailsPanel = ({
 
       {isOpen && (
         <div className="px-4 pb-4 space-y-4">
-          {/* Topics */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Topics</label>
-            <div className="relative">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTopicPicker(true)}
-                className="gap-1.5 h-7 text-xs w-full justify-start"
-                aria-label="Add topic"
-              >
-                <FolderOpen className="w-3.5 h-3.5" />
-                Add Topic
-              </Button>
-              {showTopicPicker && (
-                <TopicPagePicker
-                  onSelect={(path: string) => {
-                    onAddTopic(path);
-                    setShowTopicPicker(false);
-                  }}
-                  onClose={() => setShowTopicPicker(false)}
-                  position={{ top: 32, left: 0 }}
-                />
-              )}
+          {!activeEntryId || !entry ? (
+            /* No entry selected placeholder */
+            <div className="text-center py-6">
+              <MousePointerClick className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Click in an entry to see its details</p>
             </div>
-            {topicPaths.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {topicPaths.map(path => {
-                  const exists = topicExists(path);
-                  const isPage = path.includes('/');
-                  return (
-                    <Badge
-                      key={path}
-                      variant="secondary"
-                      className={cn("gap-1 text-xs group", !exists && "opacity-70")}
-                    >
+          ) : (
+            <>
+              {/* Topic (single per entry) */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Topic</label>
+                {topicPath ? (
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant="secondary" className="gap-1 text-xs group">
                       {isPage ? <FileText className="w-3 h-3" /> : <FolderOpen className="w-3 h-3" />}
-                      {path}
-                      {!exists && <span className="text-[10px]">+</span>}
+                      {topicPath}
                       <button
-                        onClick={() => onRemoveTopic(path)}
+                        onClick={() => void handleRemoveTopic()}
                         className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
-                        aria-label={`Remove topic ${path}`}
+                        aria-label="Remove topic"
                       >
                         <X className="w-3 h-3" />
                       </button>
                     </Badge>
-                  );
-                })}
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTopicPicker(true)}
+                      className="gap-1.5 h-7 text-xs w-full justify-start"
+                      aria-label="Add topic"
+                    >
+                      <FolderOpen className="w-3.5 h-3.5" />
+                      Add Topic
+                    </Button>
+                    {showTopicPicker && (
+                      <TopicPagePicker
+                        onSelect={(path: string) => void handleAddTopic(path)}
+                        onClose={() => setShowTopicPicker(false)}
+                        position={{ top: 32, left: 0 }}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Tags */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Tags</label>
-            <InlineTagInput
-              tags={tags}
-              existingTags={existingTags}
-              onAddTag={onAddTag}
-              onRemoveTag={onRemoveTag}
-            />
-          </div>
+              {/* Tags */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Tags</label>
+                <InlineTagInput
+                  tags={tags}
+                  existingTags={existingTags}
+                  onAddTag={(tag) => void handleAddTag(tag)}
+                  onRemoveTag={(tag) => void handleRemoveTag(tag)}
+                />
+              </div>
 
-          {/* Mood */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Mood</label>
-            <div className="flex gap-1" role="radiogroup" aria-label="Mood selector">
-              {MOODS.map(({ score, emoji, label }) => (
-                <button
-                  key={score}
-                  type="button"
-                  role="radio"
-                  aria-checked={moodScore === score}
-                  aria-label={label}
-                  onClick={() => onMoodChange(moodScore === score ? undefined : score)}
-                  className={cn(
-                    'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-md transition-all text-xs',
-                    moodScore === score
-                      ? 'bg-primary/10 ring-1 ring-primary/30'
-                      : 'hover:bg-muted'
-                  )}
-                >
-                  <span className="text-sm leading-none">{emoji}</span>
-                  <span className="text-[9px] text-muted-foreground">{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+              {/* Mood */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Mood</label>
+                <div className="flex gap-1" role="radiogroup" aria-label="Mood selector">
+                  {Object.entries(MOODS).reverse().map(([scoreStr, { emoji, label }]) => {
+                    const score = Number(scoreStr);
+                    return (
+                      <button
+                        key={score}
+                        type="button"
+                        role="radio"
+                        aria-checked={moodScore === score}
+                        aria-label={label}
+                        onClick={() => void handleMoodChange(moodScore === score ? undefined : score)}
+                        className={cn(
+                          'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-md transition-all text-xs',
+                          moodScore === score
+                            ? 'bg-primary/10 ring-1 ring-primary/30'
+                            : 'hover:bg-muted'
+                        )}
+                      >
+                        <span className="text-sm leading-none">{emoji}</span>
+                        <span className="text-[9px] text-muted-foreground">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
 
-          {/* AI Extract */}
+          {/* AI Extract (day-level scope — always visible) */}
           <div className="space-y-2">
             <Button
               variant="outline"
@@ -202,7 +231,7 @@ const JournalDetailsPanel = ({
                           <p className="text-muted-foreground truncate">{item.topicPath}</p>
                         )}
                         {item.parentTaskTitle && (
-                          <p className="text-muted-foreground truncate">→ {item.parentTaskTitle}</p>
+                          <p className="text-muted-foreground truncate">&rarr; {item.parentTaskTitle}</p>
                         )}
                       </div>
                     </div>

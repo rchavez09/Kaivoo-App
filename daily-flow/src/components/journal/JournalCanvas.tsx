@@ -7,20 +7,21 @@ import Color from '@tiptap/extension-color';
 import Placeholder from '@tiptap/extension-placeholder';
 import {
   Bold, Italic, Strikethrough, Highlighter, List, ListOrdered,
-  Heading1, Heading2, Quote, Undo, Redo, Palette,
+  Heading1, Heading2, Quote, Undo, Redo, Palette, Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format, differenceInMinutes, isSameDay } from 'date-fns';
-import { TimestampDivider } from './TimestampDivider';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { EntryHeaderNode } from './EntryHeaderNode';
+import SplitToNewEntryMenu from './SplitToNewEntryMenu';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { JournalEntry } from '@/types';
 import { cn } from '@/lib/utils';
 
 // --- Constants ---
-const GAP_THRESHOLD_MINUTES = 30;
 const SAVE_DEBOUNCE_MS = 3000;
 
 const TEXT_COLORS = [
@@ -55,6 +56,7 @@ interface JournalCanvasProps {
   selectedDate: Date;
   onSectionsChange: (sections: CanvasSection[]) => void;
   onSaveStatusChange: (status: 'saved' | 'saving' | 'unsaved' | 'idle') => void;
+  onActiveEntryChange?: (entryId: string | null) => void;
 }
 
 // --- Helpers ---
@@ -99,9 +101,8 @@ function extractSections(html: string): Array<{ entryId: string; content: string
 }
 
 // --- Component ---
-const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: JournalCanvasProps) => {
+const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onActiveEntryChange }: JournalCanvasProps) => {
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
-  const isToday = isSameDay(selectedDate, new Date());
 
   const { addJournalEntry, updateJournalEntry } = useKaivooActions();
 
@@ -110,6 +111,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
 
   // Track whether initial load populated the canvas
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [hasSelection, setHasSelection] = useState(false);
 
   // Refs for state that shouldn't cause re-renders
   const savedContentsRef = useRef<Map<string, string>>(new Map());
@@ -125,6 +127,9 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
   onSectionsChangeRef.current = onSectionsChange;
   const onSaveStatusChangeRef = useRef(onSaveStatusChange);
   onSaveStatusChangeRef.current = onSaveStatusChange;
+  const onActiveEntryChangeRef = useRef(onActiveEntryChange);
+  onActiveEntryChangeRef.current = onActiveEntryChange;
+  const activeEntryIdRef = useRef<string | null>(null);
 
   // --- Save logic ---
   const saveDirtySections = useCallback(async (html: string) => {
@@ -156,8 +161,9 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     } catch (e) {
       console.error('[JournalCanvas] Auto-save failed:', e);
       onSaveStatusChangeRef.current('unsaved');
+      toast.error('Auto-save failed', { description: 'Your changes are saved locally.' });
       // Fallback: save full HTML to localStorage
-      localStorage.setItem(`journal-canvas-draft-${dateStrRef.current}`, html);
+      localStorage.setItem(`notes-canvas-draft-${dateStrRef.current}`, html);
     }
   }, [updateJournalEntry]);
 
@@ -218,7 +224,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
       Highlight.configure({ multicolor: true }),
       TextStyle,
       Color,
-      TimestampDivider,
+      EntryHeaderNode,
       Placeholder.configure({
         placeholder: 'Start writing...',
         emptyEditorClass: 'is-editor-empty',
@@ -237,6 +243,28 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
         return;
       }
 
+      // Rebuild sections if entry count changed (handles deletion/split)
+      const doc = ed.state.doc;
+      const docSections: CanvasSection[] = [];
+      for (let i = 0; i < doc.childCount; i++) {
+        const child = doc.child(i);
+        if (child.type.name === 'entryHeader' && child.attrs.entryId) {
+          docSections.push({
+            entryId: child.attrs.entryId as string,
+            timestamp: new Date(child.attrs.timestamp as string),
+          });
+        }
+      }
+      if (docSections.length !== sectionsRef.current.length) {
+        sectionsRef.current = docSections;
+        onSectionsChangeRef.current(sectionsRef.current);
+        // Clean up savedContents for entries no longer in the doc
+        const activeIds = new Set(docSections.map(s => s.entryId));
+        for (const key of savedContentsRef.current.keys()) {
+          if (!activeIds.has(key)) savedContentsRef.current.delete(key);
+        }
+      }
+
       onSaveStatusChangeRef.current('unsaved');
 
       // Debounced save
@@ -246,16 +274,209 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
       }, SAVE_DEBOUNCE_MS);
 
       // localStorage draft (immediate)
-      localStorage.setItem(`journal-canvas-draft-${dateStrRef.current}`, html);
+      localStorage.setItem(`notes-canvas-draft-${dateStrRef.current}`, html);
+    },
+    onSelectionUpdate: ({ editor: ed }) => {
+      // Detect which entry the cursor is in by scanning top-level nodes
+      let foundEntryId: string | null = null;
+
+      try {
+        // Find the top-level position of the cursor
+        const { $anchor } = ed.state.selection;
+        const topIndex = $anchor.index(0);
+        const doc = ed.state.doc;
+
+        // Scan backward through top-level nodes to find nearest entryHeader
+        for (let i = Math.min(topIndex, doc.childCount - 1); i >= 0; i--) {
+          const child = doc.child(i);
+          if (child.type.name === 'entryHeader' && child.attrs.entryId) {
+            foundEntryId = child.attrs.entryId as string;
+            break;
+          }
+        }
+      } catch {
+        // ProseMirror doc may be in a transient state during content updates
+      }
+
+      if (foundEntryId !== activeEntryIdRef.current) {
+        activeEntryIdRef.current = foundEntryId;
+        onActiveEntryChangeRef.current?.(foundEntryId);
+      }
+
+      // Track text selection for split menu — disable if selection crosses entry headers
+      const sel = ed.state.selection;
+      let crossesEntries = false;
+      if (!sel.empty) {
+        ed.state.doc.nodesBetween(sel.from, sel.to, (node) => {
+          if (node.type.name === 'entryHeader') crossesEntries = true;
+        });
+      }
+      setHasSelection(!sel.empty && !crossesEntries);
     },
     editorProps: {
       attributes: {
         class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3',
         role: 'textbox',
-        'aria-label': 'Journal canvas editor',
+        'aria-label': 'Notes canvas editor',
       },
     },
   });
+
+  // --- New Entry: explicit user action ---
+  const handleNewEntry = useCallback(async () => {
+    if (pendingNewEntryRef.current || !editor) return;
+    pendingNewEntryRef.current = true;
+
+    try {
+      // Flush any pending saves first
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+        if (latestHTMLRef.current && sectionsRef.current.length > 0) {
+          await saveDirtySections(latestHTMLRef.current);
+        }
+      }
+
+      const newEntry = await addJournalEntry({
+        content: '',
+        date: dateStrRef.current,
+        tags: [],
+        topicIds: [],
+      });
+
+      if (newEntry && editor) {
+        isComposingRef.current = true;
+
+        const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
+        const dividerHTML = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>`;
+
+        // Append divider + empty paragraph to existing content
+        const currentHTML = editor.getHTML();
+        const newHTML = currentHTML + dividerHTML + '<p></p>';
+        editor.commands.setContent(newHTML);
+
+        savedContentsRef.current.set(newEntry.id, '');
+        sectionsRef.current = [
+          ...sectionsRef.current,
+          { entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) },
+        ];
+        onSectionsChangeRef.current(sectionsRef.current);
+
+        requestAnimationFrame(() => {
+          editor.commands.focus('end');
+          isComposingRef.current = false;
+        });
+      }
+    } catch (e) {
+      console.error('[JournalCanvas] Failed to create new entry:', e);
+    } finally {
+      pendingNewEntryRef.current = false;
+    }
+  }, [editor, addJournalEntry, saveDirtySections]);
+
+  // --- Split to New Entry: move selected text to a new entry ---
+  const splitToNewEntry = useCallback(async () => {
+    if (!editor || pendingNewEntryRef.current) return;
+    if (editor.state.selection.empty) return;
+
+    pendingNewEntryRef.current = true;
+    try {
+      // 1. Get selected HTML (ProseMirror slice)
+      const slice = editor.state.selection.content();
+      const tempDiv = document.createElement('div');
+      const fragment = slice.content;
+      // Serialize fragment to HTML via DOMSerializer
+      const { DOMSerializer } = await import('@tiptap/pm/model');
+      const serializer = DOMSerializer.fromSchema(editor.schema);
+      const domFragment = serializer.serializeFragment(fragment);
+      tempDiv.appendChild(domFragment);
+      const selectedHTML = tempDiv.innerHTML;
+
+      // 2. Delete selected content from editor
+      editor.chain().focus().deleteSelection().run();
+
+      // 3. Save the source entry (content was just modified)
+      const currentHTML = editor.getHTML();
+      latestHTMLRef.current = currentHTML;
+      await saveDirtySections(currentHTML);
+
+      // 4. Create new entry with the extracted content
+      const newEntry = await addJournalEntry({
+        content: selectedHTML,
+        date: dateStrRef.current,
+        tags: [],
+        topicIds: [],
+      });
+
+      if (newEntry && editor) {
+        isComposingRef.current = true;
+
+        const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
+        const dividerHTML = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>`;
+
+        // 5. Find insertion point: after the current entry's content, before next entry header
+        // Use HTML approach: rebuild with new section inserted after source entry
+        const fullHTML = editor.getHTML();
+        const sections = extractSections(fullHTML);
+
+        // Find which entry the cursor was in (use activeEntryIdRef)
+        const sourceEntryId = activeEntryIdRef.current;
+        const sourceIdx = sections.findIndex(s => s.entryId === sourceEntryId);
+
+        if (sourceIdx >= 0) {
+          // Rebuild HTML: all sections up to and including source, then new entry, then remaining
+          const allEntries = useKaivooStore.getState().journalEntries
+            .filter(e => e.date === dateStrRef.current)
+            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+          // Insert newEntry right after the source entry
+          const updatedEntries = [...allEntries];
+          const sourceEntryIdx = updatedEntries.findIndex(e => e.id === sourceEntryId);
+          if (sourceEntryIdx >= 0) {
+            updatedEntries.splice(sourceEntryIdx + 1, 0, newEntry);
+          }
+
+          const rebuiltHTML = composeHTML(updatedEntries);
+          editor.commands.setContent(rebuiltHTML);
+
+          // Update tracking refs
+          savedContentsRef.current.set(newEntry.id, selectedHTML);
+          // Update source entry's saved content from the rebuilt sections
+          const rebuiltSections = extractSections(rebuiltHTML);
+          for (const sec of rebuiltSections) {
+            if (sec.entryId !== newEntry.id) {
+              savedContentsRef.current.set(sec.entryId, sec.content);
+            }
+          }
+
+          sectionsRef.current = updatedEntries.map(e => ({
+            entryId: e.id,
+            timestamp: new Date(e.timestamp),
+          }));
+          onSectionsChangeRef.current(sectionsRef.current);
+        } else {
+          // Fallback: just append at the end
+          const appendHTML = fullHTML + dividerHTML + selectedHTML;
+          editor.commands.setContent(appendHTML);
+          savedContentsRef.current.set(newEntry.id, selectedHTML);
+          sectionsRef.current = [
+            ...sectionsRef.current,
+            { entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) },
+          ];
+          onSectionsChangeRef.current(sectionsRef.current);
+        }
+
+        requestAnimationFrame(() => {
+          editor.commands.focus('end');
+          isComposingRef.current = false;
+        });
+      }
+    } catch (e) {
+      console.error('[JournalCanvas] Split to new entry failed:', e);
+    } finally {
+      pendingNewEntryRef.current = false;
+    }
+  }, [editor, addJournalEntry, saveDirtySections]);
 
   // --- Initialize canvas on date change ---
   useEffect(() => {
@@ -291,52 +512,18 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
     }));
     onSectionsChangeRef.current(sectionsRef.current);
 
-    // Compose and set content
+    // Compose and set content — defer to avoid flushSync inside React lifecycle
     const html = composeHTML(entries);
-    editor.commands.setContent(html || '');
+    const entryCount = entries.length;
+    queueMicrotask(() => {
+      editor.commands.setContent(html || '');
+      onSaveStatusChangeRef.current(entryCount > 0 ? 'saved' : 'idle');
+      setInitialLoadDone(entryCount > 0);
 
-    onSaveStatusChangeRef.current(entries.length > 0 ? 'saved' : 'idle');
-    setInitialLoadDone(entries.length > 0);
-
-    // Auto-append: if today and latest entry is old, create new section
-    if (isToday && entries.length > 0) {
-      const latest = entries[entries.length - 1];
-      const gap = differenceInMinutes(new Date(), new Date(latest.timestamp));
-      if (gap >= GAP_THRESHOLD_MINUTES) {
-        // Create new section eagerly
-        pendingNewEntryRef.current = true;
-        addJournalEntry({
-          content: '',
-          date: dateStr,
-          tags: [],
-          topicIds: [],
-        }).then(newEntry => {
-          if (newEntry && editor) {
-            const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
-            const dividerHTML = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div><p></p>`;
-
-            // Append to existing content
-            const currentHTML = editor.getHTML();
-            editor.commands.setContent(currentHTML + dividerHTML);
-
-            savedContentsRef.current.set(newEntry.id, '');
-            sectionsRef.current = [
-              ...sectionsRef.current,
-              { entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) },
-            ];
-            onSectionsChangeRef.current(sectionsRef.current);
-          }
-          pendingNewEntryRef.current = false;
-        }).catch(e => {
-          console.error('[JournalCanvas] Auto-append failed:', e);
-          pendingNewEntryRef.current = false;
-        });
-      }
-    }
-
-    requestAnimationFrame(() => {
-      editor.commands.focus('end');
-      isComposingRef.current = false;
+      requestAnimationFrame(() => {
+        editor.commands.focus('end');
+        isComposingRef.current = false;
+      });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, dateStr]);
@@ -392,9 +579,9 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
   if (!editor) return null;
 
   return (
-    <div className="flex flex-col">
-      {/* Toolbar */}
-      <div className="border-b border-border/50 px-1 py-1.5 flex items-center gap-0.5 flex-wrap" role="toolbar" aria-label="Text formatting">
+    <div className="flex flex-col h-full">
+      {/* Toolbar — sticky so it stays visible on scroll */}
+      <div className="sticky top-0 z-10 bg-background border-b border-border/50 px-1 py-1.5 flex items-center gap-0.5 flex-wrap" role="toolbar" aria-label="Text formatting">
         <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className="h-8 w-8 p-0" aria-label="Undo">
           <Undo className="h-4 w-4" />
         </Button>
@@ -470,7 +657,30 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
         <Toggle size="sm" pressed={editor.isActive('blockquote')} onPressedChange={() => editor.chain().focus().toggleBlockquote().run()} className="h-8 w-8 p-0" aria-label="Blockquote">
           <Quote className="h-4 w-4" />
         </Toggle>
+        <div className="flex-1" />
+        <div className="w-px h-5 bg-border mx-1" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => void handleNewEntry()}
+          disabled={pendingNewEntryRef.current}
+          aria-label="New entry"
+        >
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">New Entry</span>
+        </Button>
       </div>
+
+      {/* Split to New Entry — shown when text is selected */}
+      {hasSelection && sectionsRef.current.length > 0 && (
+        <div className="sticky top-[42px] z-10 bg-background/95 backdrop-blur-sm flex justify-center py-1 border-b border-border/30">
+          <SplitToNewEntryMenu
+            onSplit={() => void splitToNewEntry()}
+            disabled={pendingNewEntryRef.current}
+          />
+        </div>
+      )}
 
       {/* Editor */}
       <div className="flex-1 overflow-auto">
@@ -487,6 +697,18 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange }: J
           user-select: none;
           pointer-events: none;
           opacity: 0.7;
+        }
+        .entry-header {
+          user-select: none;
+          border-top: 1px solid hsl(var(--border) / 0.5);
+          margin-top: 0.5rem;
+        }
+        .entry-header:first-child {
+          border-top: none;
+          margin-top: 0;
+        }
+        .collapsed-content {
+          display: none !important;
         }
         .ProseMirror {
           min-height: 400px;

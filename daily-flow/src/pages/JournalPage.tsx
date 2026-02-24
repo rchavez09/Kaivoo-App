@@ -31,11 +31,7 @@ const JournalPage = () => {
   const [sections, setSections] = useState<CanvasSection[]>([]);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'idle'>('idle');
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
-
-  // --- Metadata state ---
-  const [tags, setTags] = useState<string[]>([]);
-  const [topicPaths, setTopicPaths] = useState<string[]>([]);
-  const [moodScore, setMoodScore] = useState<number | undefined>(undefined);
+  const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
 
   // --- AI extraction state ---
   const [isExtracting, setIsExtracting] = useState(false);
@@ -47,114 +43,18 @@ const JournalPage = () => {
   const topicPages = useKaivooStore(s => s.topicPages);
   const existingTags = useKaivooStore(s => s.tags);
   const tasks = useKaivooStore(s => s.tasks);
-  const journalEntries = useKaivooStore(s => s.journalEntries);
-  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
-  const getTopicPath = useKaivooStore(s => s.getTopicPath);
-  const { updateJournalEntry, addTask, addSubtask, resolveTopicPathAsync } = useKaivooActions();
+  const { addTask, addSubtask, resolveTopicPathAsync } = useKaivooActions();
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
-  // --- Load metadata from entries when sections change ---
+  // --- Sections change handler (simplified — metadata is per-entry now) ---
   const handleSectionsChange = useCallback((newSections: CanvasSection[]) => {
     setSections(newSections);
-
-    // Load aggregated metadata from all entries for this day
-    const entries = useKaivooStore.getState().journalEntries.filter(e => e.date === dateStr);
-    const allTags = new Set<string>();
-    const allTopicIds = new Set<string>();
-    let mood: number | undefined;
-
-    entries.forEach(entry => {
-      entry.tags?.forEach(t => allTags.add(t));
-      entry.topicIds?.forEach(id => allTopicIds.add(id));
-      if (entry.moodScore !== undefined && mood === undefined) {
-        mood = entry.moodScore;
-      }
-    });
-
-    setTags(Array.from(allTags));
-    const paths = Array.from(allTopicIds)
-      .map(id => getTopicPath(id))
-      .filter((p): p is string => Boolean(p));
-    setTopicPaths(paths);
-    setMoodScore(mood);
     setExtraction(null);
     setApprovedItems(new Set());
-  }, [dateStr, getTopicPath]);
+  }, []);
 
-  // --- Get the latest entry for metadata writes ---
-  const latestEntryId = useMemo(() => {
-    const entries = journalEntries
-      .filter(e => e.date === dateStr)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    return entries[0]?.id || null;
-  }, [journalEntries, dateStr]);
-
-  // --- Save metadata to latest entry ---
-  const saveMetadata = useCallback(async (updates: { tags?: string[]; topicIds?: string[]; moodScore?: number }) => {
-    if (!latestEntryId) return;
-    try {
-      await updateJournalEntry(latestEntryId, updates);
-    } catch (e) {
-      console.error('[JournalPage] Failed to save metadata:', e);
-    }
-  }, [latestEntryId, updateJournalEntry]);
-
-  // --- Metadata handlers ---
-  const handleAddTag = useCallback((tag: string) => {
-    setTags(prev => {
-      const next = [...prev, tag];
-      void saveMetadata({ tags: next });
-      return next;
-    });
-  }, [saveMetadata]);
-
-  const handleRemoveTag = useCallback((tag: string) => {
-    setTags(prev => {
-      const next = prev.filter(t => t !== tag);
-      void saveMetadata({ tags: next });
-      return next;
-    });
-  }, [saveMetadata]);
-
-  const handleAddTopic = useCallback(async (path: string) => {
-    if (topicPaths.includes(path)) return;
-    setTopicPaths(prev => [...prev, path]);
-
-    // Resolve and save
-    const resolved = await resolveTopicPathAsync(path, true);
-    if (resolved && latestEntryId) {
-      const currentEntry = journalEntries.find(e => e.id === latestEntryId);
-      const currentIds = currentEntry?.topicIds || [];
-      const newIds = [...new Set([...currentIds, ...resolved])];
-      await updateJournalEntry(latestEntryId, { topicIds: newIds });
-    }
-  }, [topicPaths, resolveTopicPathAsync, latestEntryId, journalEntries, updateJournalEntry]);
-
-  const handleRemoveTopic = useCallback(async (path: string) => {
-    setTopicPaths(prev => prev.filter(p => p !== path));
-
-    // Resolve the path to get its IDs, then remove from entry
-    const resolved = resolveTopicPath(path, false);
-    if (resolved && latestEntryId) {
-      const currentEntry = journalEntries.find(e => e.id === latestEntryId);
-      const currentIds = currentEntry?.topicIds || [];
-      const removeSet = new Set(resolved);
-      const newIds = currentIds.filter(id => !removeSet.has(id));
-      await updateJournalEntry(latestEntryId, { topicIds: newIds });
-    }
-  }, [resolveTopicPath, latestEntryId, journalEntries, updateJournalEntry]);
-
-  const handleMoodChange = useCallback((score: number | undefined) => {
-    setMoodScore(score);
-    void saveMetadata({ moodScore: score });
-  }, [saveMetadata]);
-
-  const topicExists = useCallback((path: string) => {
-    return resolveTopicPath(path, false) !== null;
-  }, [resolveTopicPath]);
-
-  // --- AI extraction ---
+  // --- AI extraction (day-level scope) ---
   const canExtract = sections.length > 0;
 
   const handleExtract = useCallback(async () => {
@@ -234,7 +134,6 @@ const JournalPage = () => {
   // --- Section click handler ---
   const handleSectionClick = useCallback((entryId: string) => {
     setActiveSectionId(entryId);
-    // The canvas exposes scrollToSection via the editor instance
     const canvasEditor = document.querySelector('.ProseMirror');
     if (canvasEditor) {
       const divider = canvasEditor.querySelector(`[data-entry-id="${entryId}"]`);
@@ -248,6 +147,7 @@ const JournalPage = () => {
   const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
     setActiveSectionId(null);
+    setActiveEntryId(null);
   }, []);
 
   // --- Save status display ---
@@ -290,7 +190,7 @@ const JournalPage = () => {
                   <BookOpen className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold">Journal</h1>
+                  <h1 className="text-xl font-semibold">Notes</h1>
                   <p className="text-sm text-muted-foreground">
                     {format(selectedDate, 'EEEE, MMMM d, yyyy')}
                   </p>
@@ -309,6 +209,7 @@ const JournalPage = () => {
                 selectedDate={selectedDate}
                 onSectionsChange={handleSectionsChange}
                 onSaveStatusChange={setSaveStatus}
+                onActiveEntryChange={setActiveEntryId}
               />
             </div>
           </div>
@@ -323,16 +224,7 @@ const JournalPage = () => {
           activeSectionId={activeSectionId}
         >
           <JournalDetailsPanel
-            tags={tags}
-            topicPaths={topicPaths}
-            moodScore={moodScore}
-            existingTags={existingTags}
-            onAddTag={handleAddTag}
-            onRemoveTag={handleRemoveTag}
-            onAddTopic={(path) => void handleAddTopic(path)}
-            onRemoveTopic={(path) => void handleRemoveTopic(path)}
-            onMoodChange={handleMoodChange}
-            topicExists={topicExists}
+            activeEntryId={activeEntryId}
             isExtracting={isExtracting}
             extraction={extraction}
             approvedItems={approvedItems}
