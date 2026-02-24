@@ -37,11 +37,17 @@ BRANCH NAMING:
 LIFECYCLE:
   1. Sprint approved → Create branch: git checkout -b sprint/N-theme-slug
   2. All sprint work happens on the sprint branch
-  3. Sprint completes → Agent 7 audit on the branch
-  4. User signs off on functionality (UX review, not just code review)
-  5. Merge to main: git merge sprint/N-theme-slug
-  6. Tag main: git tag post-sprint-N
-  7. If sprint is rejected → branch is abandoned, main is untouched
+  3. Sprint completes → Run deterministic checks (lint, typecheck, test, build)
+  4. Agent 7 code audit + Agent 11 feature integrity check on the branch
+  5. Fix all P0 issues from gates before proceeding
+  6. SANDBOX REVIEW: Start dev server on sprint branch (npm run dev)
+     → User reviews the running app and approves UX
+     → This is a blocking gate — do NOT merge without user approval
+  7. Sprint retrospective section added to sprint file
+  8. Merge to main: git merge --no-ff sprint/N-theme-slug
+  9. Tag main: git tag post-sprint-N
+  10. Deploy to production (Netlify)
+  11. If sprint is rejected → branch is abandoned, main is untouched
 
 RULES:
   - NEVER commit sprint work directly to main
@@ -57,11 +63,12 @@ RULES:
 Before any sprint branch merges to main, ALL of the following must pass:
 
 ```
-□ Agent 7 code audit completed (no P0 issues)
+□ Deterministic checks pass: npm run lint && npm run typecheck && npm run test && npm run build
+□ Agent 7 code audit completed (no unresolved P0 issues)
 □ Agent 11 feature integrity check passed (no regressions)
-□ Build succeeds: tsc --noEmit && vite build
-□ User has reviewed the running app and approved the UX
+□ SANDBOX: Dev server started on sprint branch, user has reviewed the running app and approved UX
 □ Sprint retrospective section added to sprint file
+□ All sprint files committed to the sprint branch
 ```
 
 ### Recovery Protocol
@@ -304,6 +311,7 @@ Vision.md updated (mark phase progress)
 
 ---
 
-*Sprint Protocol v1.1 — February 22, 2026*
+*Sprint Protocol v1.2 — February 23, 2026*
 *v1.0: Initial protocol*
 *v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
+*v1.2: Explicit sandbox review step in lifecycle + pre-merge checklist. Deterministic checks before agent gates.*

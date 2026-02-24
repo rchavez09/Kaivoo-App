@@ -190,9 +190,10 @@ The platform doesn't guess what users want — it watches what they're already t
 | Security hardening + performance + code quality | DONE | Sprint 1 |
 | Error sanitization, accessibility, TrackingWidget refactor, test infrastructure | DONE | Sprint 4 |
 | CI/CD pipeline, Zustand optimization, service typing, test expansion (81 tests) | DONE | Sprint 5 |
-| Design System migration (Kaivoo palette, components) | PLANNED | — |
-| Unified Day View (Today page redesign) | PLANNED | — |
-| Core feature enhancement (task recurrence, better journal) | PLANNED | — |
+| Design System migration (Kaivoo palette, components) | DONE | Sprint 3–5 (incremental) |
+| Unified Day View (Today page redesign) | DONE | Sprint 3 |
+| Task recurrence (Daily/Weekly/Monthly), Tasks page filtering & bulk actions | DONE | Sprint 6 |
+| Core feature enhancement (better journal, search) | PLANNED | — |
 | Search & file attachments | PLANNED | — |
 | Analytics & insights dashboard rebuild | PLANNED | — |
 | Notifications & reminders | PLANNED | — |
@@ -302,9 +303,11 @@ The platform doesn't guess what users want — it watches what they're already t
 
 ## Current Position
 
-**We are in:** Phase 1 — Cloud Command Center (~90% complete)
-**Active sprint:** None (Sprint 6 planning next)
-**Last completed:** Sprint 5 (Pipeline & Polish) — CI/CD pipeline, Zustand selector optimization, service typing, test expansion to 81 tests
+**We are in:** Phase 1 — Cloud Command Center (~95% complete)
+**Active sprint:** None (Sprint 7 planning next)
+**Last completed:** Sprint 6 (Feature Depth) — Task recurrence, Tasks page topic/tag filtering, bulk actions, 23 new tests (104 total)
+
+**Sprint 6 delivered:** Topic & tag filtering in Tasks page advanced filters with quick-filter chips and badge click activation. Filtered tab counts. Multi-select mode with bulk status/priority/due date/delete actions. Task recurrence (Daily/Weekly/Monthly) with auto-generation on completion. Recurrence badges on task rows. 23 new tests (104 total). Agent 11 (56/56 PASS) + Agent 7 (all P0s fixed) gates passed. See `Sprints/Sprint-6-Feature-Depth.md`.
 
 **Sprint 5 delivered:** GitHub Actions CI pipeline (lint → format → typecheck → test → build), GitHub remote repository, Zustand selector migration (22 files, zero full-store subscriptions), TasksWidget decomposition, service layer typing (0 `any`), shared config consolidation, 4 accessibility fixes, 34 new tests (81 total, 83% coverage on src/lib/). Agent 11 + Agent 7 gates both passed (8/10 score). See `Sprints/Sprint-5-Pipeline-Polish.md`.
 

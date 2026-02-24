@@ -1,6 +1,6 @@
 # Sprint 6: Feature Depth — Sprint Contract
 
-**Status:** AWAITING APPROVAL
+**Status:** COMPLETE
 **Theme:** Feature Depth — Tasks page power features + simple task recurrence
 **Branch:** `sprint/6-feature-depth`
 **Director:** Active
@@ -334,6 +334,59 @@ Gates:
 - Update `Vision.md`: Mark "Design System migration" as DONE, mark "CI/CD pipeline" as DONE (Sprint 5)
 - Update `Feature-Bible-Tasks-Page.md`: Record user answers to Q2 (bulk actions = yes), Q3 (recurrence = simple)
 - Update `Feature-Bible-Index.md` after sprint
+
+---
+
+## Sprint Retrospective
+
+**Completed:** February 23, 2026
+**Parcels:** 8/8 complete (P1–P8)
+
+### What Was Delivered
+- **Topic & tag filtering** in Tasks page advanced filters with quick-filter chips and badge click activation
+- **Filtered tab counts** — tab counts now respect all active filters (search, topic, tag, status, priority)
+- **Multi-select mode** with bulk status, priority, due date, and delete actions (with confirmation dialog)
+- **Task recurrence** — Daily/Weekly/Monthly recurrence with auto-generation of next occurrence on completion
+- **Recurrence badges** visible on task rows in Tasks page and Today widget
+- **23 new tests** (104 total, up from 81) — recurrence date math, filtering helpers, bulk operation patterns
+
+### Verification Results
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | 0 errors |
+| `vitest run` | 104/104 pass |
+| `eslint` (Sprint 6 files) | 0 errors, warnings only (pre-existing pattern) |
+| `vite build` | Success (2.62s) |
+| Agent 11 Feature Integrity | PASS (56/56 features verified) |
+| Agent 7 Code Audit | 7/10 initial → all P0s + key P1s fixed |
+| User UX Review | Approved via sandbox (localhost dev server) |
+
+### Agent 7 Findings Resolved
+- **P0-1:** `persistPrefs` undefined → fixed with `setPrefs` pattern
+- **P0-2:** `completedAt` not clearing to `null` in DB → fixed with `'completedAt' in updates` guard
+- **P1-3:** Bulk ops `Promise.all` → `Promise.allSettled` with failure toasts
+- **P1-5+P1-6:** `parseRecurrenceRule` validates type values and rejects non-positive intervals
+- **Lint cleanup:** Removed unused imports, `let` → `const`
+
+### Deferred to Sprint 7+
+- Journal: Continuous writing mode, inline tags, search, keyboard shortcuts
+- Tasks Page: Kanban improvements (empty column drops, search in Kanban)
+- Tasks Page: "Ongoing" task label
+- Task templates, archive vs delete
+- Full-text search across all content
+- Analytics & Insights rebuild
+- Notifications & reminders
+- PWA support
+- Agent 7 remaining P1s: date format standardization, aria-labels, recurrence badge DRY extraction
+- Agent 7 P3 debt (CODE-06/07/08)
+- SEC-06 (CSP headers)
+
+### Key Learnings
+1. **Two-stage memoization pattern** works well for filter-aware tab counts — `preTabFilteredTasks` (all filters except tab) feeds into both tab count computation and final `filteredTasks`.
+2. **Timezone-aware date parsing** is critical — `new Date('2026-03-01')` parses as UTC midnight, which in PST becomes the previous day. `parseDateLocal()` utility solves this for `yyyy-MM-dd` strings.
+3. **`undefined` vs `null` in Supabase** — When clearing a column value, `undefined` is ignored by the `!== undefined` guards. Use `'key' in updates` + explicit `null` for nullable columns.
+4. **Quality gates caught real bugs** — Both P0s from Agent 7 would have caused user-visible issues (runtime crash, data integrity). Running gates before merge is worth the cost.
+5. **Dev server sandbox review** should be an explicit protocol step — added to Sprint Protocol v1.2.
 
 ---
 
