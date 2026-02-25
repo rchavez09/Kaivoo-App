@@ -4,8 +4,8 @@ import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
 // mood_score column added by migration 20260221000001_add_mood_score.sql.
 // Type-extend until Supabase types are regenerated.
-type JournalEntryRow = Tables<'journal_entries'> & { mood_score?: number | null };
-type JournalEntryUpdate = TablesUpdate<'journal_entries'> & { mood_score?: number | null };
+type JournalEntryRow = Tables<'journal_entries'> & { mood_score?: number | null; label?: string | null };
+type JournalEntryUpdate = TablesUpdate<'journal_entries'> & { mood_score?: number | null; label?: string | null };
 
 // DB row → App type converter
 export const dbToJournalEntry = (row: JournalEntryRow): JournalEntry => ({
@@ -15,6 +15,7 @@ export const dbToJournalEntry = (row: JournalEntryRow): JournalEntry => ({
   tags: row.tags || [],
   topicIds: row.topic_ids || [],
   moodScore: row.mood_score ?? undefined,
+  label: row.label ?? undefined,
   createdAt: new Date(row.created_at),
   updatedAt: new Date(row.updated_at),
   timestamp: new Date(row.timestamp),
@@ -43,6 +44,9 @@ export const createJournalEntry = async (userId: string, entry: Omit<JournalEntr
   if (entry.moodScore != null) {
     payload.mood_score = entry.moodScore;
   }
+  if (entry.label != null) {
+    payload.label = entry.label;
+  }
 
   const { data, error } = await supabase
     .from('journal_entries')
@@ -59,6 +63,7 @@ export const updateJournalEntry = async (userId: string, id: string, updates: Pa
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
   if (updates.topicIds !== undefined) dbUpdates.topic_ids = updates.topicIds;
   if ('moodScore' in updates) dbUpdates.mood_score = updates.moodScore ?? null;
+  if ('label' in updates) dbUpdates.label = updates.label ?? null;
 
   const { error } = await supabase.from('journal_entries').update(dbUpdates as TablesUpdate<'journal_entries'>).eq('id', id).eq('user_id', userId);
   if (error) throw error;

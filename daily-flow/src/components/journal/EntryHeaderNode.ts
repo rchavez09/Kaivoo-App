@@ -22,6 +22,7 @@ export const EntryHeaderNode = Node.create({
       entryId: { default: null },
       timestamp: { default: null },
       collapsed: { default: false },
+      label: { default: null },
     };
   },
 
@@ -33,6 +34,7 @@ export const EntryHeaderNode = Node.create({
           entryId: dom.getAttribute('data-entry-id'),
           timestamp: dom.getAttribute('data-timestamp'),
           collapsed: dom.getAttribute('data-collapsed') === 'true',
+          label: dom.getAttribute('data-label') || null,
         }),
       },
     ];
@@ -42,9 +44,12 @@ export const EntryHeaderNode = Node.create({
     const timestamp = node.attrs.timestamp as string;
     const entryId = node.attrs.entryId as string;
     const collapsed = node.attrs.collapsed as boolean;
-    const label = timestamp
-      ? `── ${new Date(timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} ──`
-      : '';
+    const customLabel = node.attrs.label as string | null;
+    const displayLabel = customLabel
+      ? `── ${customLabel} ──`
+      : timestamp
+        ? `── ${new Date(timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} ──`
+        : '';
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
@@ -52,10 +57,11 @@ export const EntryHeaderNode = Node.create({
         'data-timestamp': timestamp,
         'data-entry-id': entryId,
         'data-collapsed': String(collapsed),
+        ...(customLabel ? { 'data-label': customLabel } : {}),
         contenteditable: 'false',
         class: 'timestamp-divider',
       }),
-      label,
+      displayLabel,
     ];
   },
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import type { NodeViewProps } from '@tiptap/react';
 import { format } from 'date-fns';
@@ -24,12 +24,15 @@ const EntryHeader = ({ node, updateAttributes, editor, getPos: _getPos }: NodeVi
 
   const [showTagInput, setShowTagInput] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [editingLabel, setEditingLabel] = useState(false);
+  const [labelDraft, setLabelDraft] = useState('');
+  const labelInputRef = useRef<HTMLInputElement>(null);
 
   // Store reads (context-free — Zustand external store)
   // Custom equality to avoid re-renders when other entries change
   const entry = useKaivooStore(
     s => s.journalEntries.find(e => e.id === entryId),
-    (a, b) => a?.id === b?.id && a?.tags === b?.tags && a?.topicIds === b?.topicIds && a?.moodScore === b?.moodScore
+    (a, b) => a?.id === b?.id && a?.tags === b?.tags && a?.topicIds === b?.topicIds && a?.moodScore === b?.moodScore && a?.label === b?.label
   );
   const getTopicPath = useKaivooStore(s => s.getTopicPath);
   const topics = useKaivooStore(s => s.topics);
@@ -44,9 +47,42 @@ const EntryHeader = ({ node, updateAttributes, editor, getPos: _getPos }: NodeVi
   const moodScore = entry?.moodScore;
   const moodData = moodScore ? MOODS[moodScore] : undefined;
 
+  const entryLabel = entry?.label;
   const timeLabel = timestamp ? format(new Date(timestamp), 'h:mm a') : '';
+  const displayLabel = entryLabel || timeLabel;
+
+  // Focus label input when entering edit mode
+  useEffect(() => {
+    if (editingLabel) labelInputRef.current?.focus();
+  }, [editingLabel]);
 
   // --- Handlers ---
+
+  const handleStartLabelEdit = () => {
+    setLabelDraft(entryLabel || '');
+    setEditingLabel(true);
+  };
+
+  const handleSaveLabel = async () => {
+    const trimmed = labelDraft.trim();
+    // Empty string clears the label (reverts to timestamp)
+    await updateJournalEntry(entryId, { label: trimmed || undefined });
+    if (trimmed) {
+      updateAttributes({ label: trimmed });
+    } else {
+      updateAttributes({ label: null });
+    }
+    setEditingLabel(false);
+  };
+
+  const handleLabelKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      void handleSaveLabel();
+    } else if (e.key === 'Escape') {
+      setEditingLabel(false);
+    }
+  };
 
   const handleToggleCollapse = () => {
     const newCollapsed = !collapsed;
@@ -170,10 +206,26 @@ const EntryHeader = ({ node, updateAttributes, editor, getPos: _getPos }: NodeVi
           )}
         </button>
 
-        {/* Timestamp */}
-        <span className="text-xs text-muted-foreground font-medium tracking-wide">
-          {timeLabel}
-        </span>
+        {/* Timestamp / Label */}
+        {editingLabel ? (
+          <input
+            ref={labelInputRef}
+            value={labelDraft}
+            onChange={e => setLabelDraft(e.target.value)}
+            onKeyDown={handleLabelKeyDown}
+            onBlur={() => void handleSaveLabel()}
+            placeholder={timeLabel}
+            className="w-24 text-xs bg-secondary/50 rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-primary/30 font-medium"
+          />
+        ) : (
+          <button
+            onClick={handleStartLabelEdit}
+            className="text-xs text-muted-foreground font-medium tracking-wide hover:text-foreground hover:bg-secondary/50 rounded px-1 py-0.5 transition-colors"
+            title={entryLabel ? `${timeLabel} — click to rename` : 'Click to rename'}
+          >
+            {displayLabel}
+          </button>
+        )}
 
         {/* Divider line */}
         <div className="h-px flex-1 bg-border/50 min-w-[20px]" />

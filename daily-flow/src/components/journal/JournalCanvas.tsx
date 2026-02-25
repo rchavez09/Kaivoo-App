@@ -59,13 +59,16 @@ interface JournalCanvasProps {
 }
 
 // --- Helpers ---
-function composeHTML(entries: Array<{ id: string; timestamp: string; content: string | null }>, collapseState?: Map<string, boolean>): string {
+function composeHTML(entries: Array<{ id: string; timestamp: string | Date; content: string | null; label?: string | null }>, collapseState?: Map<string, boolean>): string {
   if (entries.length === 0) return '';
   return entries.map(entry => {
-    const ts = new Date(entry.timestamp);
-    const label = `── ${format(ts, 'h:mm a')} ──`;
+    const ts = entry.timestamp instanceof Date ? entry.timestamp : new Date(entry.timestamp);
+    const displayLabel = entry.label
+      ? `── ${entry.label} ──`
+      : `── ${format(ts, 'h:mm a')} ──`;
     const collapsed = collapseState?.get(entry.id) ?? false;
-    const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" data-collapsed="${collapsed}" contenteditable="false" class="timestamp-divider">${label}</div>`;
+    const labelAttr = entry.label ? ` data-label="${entry.label}"` : '';
+    const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" data-collapsed="${collapsed}"${labelAttr} contenteditable="false" class="timestamp-divider">${displayLabel}</div>`;
     return divider + (entry.content || '<p></p>');
   }).join('');
 }
@@ -125,20 +128,21 @@ function cleanOldCollapseKeys(): void {
   } catch { /* ignore */ }
 }
 
-function extractSections(html: string): Array<{ entryId: string; content: string }> {
+function extractSections(html: string): Array<{ entryId: string; content: string; label?: string | null }> {
   const parser = new DOMParser();
   const doc = parser.parseFromString(`<body>${html}</body>`, 'text/html');
   const body = doc.body;
 
-  const sections: Array<{ entryId: string; content: string }> = [];
+  const sections: Array<{ entryId: string; content: string; label?: string | null }> = [];
   let currentEntryId: string | null = null;
+  let currentLabel: string | null = null;
   let currentNodes: Node[] = [];
 
   const flush = () => {
     if (currentEntryId) {
       const div = document.createElement('div');
       currentNodes.forEach(n => div.appendChild(n.cloneNode(true)));
-      sections.push({ entryId: currentEntryId, content: div.innerHTML || '' });
+      sections.push({ entryId: currentEntryId, content: div.innerHTML || '', label: currentLabel });
     }
     currentNodes = [];
   };
@@ -147,6 +151,7 @@ function extractSections(html: string): Array<{ entryId: string; content: string
     if (child.nodeType === 1 && (child as Element).hasAttribute('data-timestamp-divider')) {
       flush();
       currentEntryId = (child as Element).getAttribute('data-entry-id');
+      currentLabel = (child as Element).getAttribute('data-label') || null;
     } else if (currentEntryId !== null) {
       currentNodes.push(child);
     }
@@ -472,20 +477,21 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
         // 5. Build entry list from current editor content (NOT from store — avoids race)
         const fullHTML = editor.getHTML();
         const currentSections = extractSections(fullHTML);
-        const sourceEntryId = activeEntryIdRef.current;
-        const sourceIdx = currentSections.findIndex(s => s.entryId === sourceEntryId);
-
         // Build entries from what's currently in the editor
-        const entryList: Array<{ id: string; timestamp: string; content: string }> =
-          sectionsRef.current.map(s => ({
-            id: s.entryId,
-            timestamp: s.timestamp.toISOString(),
-            content: currentSections.find(cs => cs.entryId === s.entryId)?.content || '',
-          }));
+        const entryList: Array<{ id: string; timestamp: string; content: string; label?: string | null }> =
+          sectionsRef.current.map(s => {
+            const sec = currentSections.find(cs => cs.entryId === s.entryId);
+            return {
+              id: s.entryId,
+              timestamp: s.timestamp.toISOString(),
+              content: sec?.content || '',
+              label: sec?.label,
+            };
+          });
 
-        // Insert new entry after source (or at end if source not found)
-        const insertIdx = sourceIdx >= 0 ? sourceIdx + 1 : entryList.length;
-        entryList.splice(insertIdx, 0, {
+        // Always append clipped entry at the end — its timestamp is now(),
+        // so it should appear after all existing entries for correct ordering.
+        entryList.push({
           id: newEntry.id,
           timestamp: new Date(newEntry.timestamp).toISOString(),
           content: selectedHTML,

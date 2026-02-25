@@ -76,6 +76,7 @@ export interface JournalEntry {
   tags: string[];
   topicIds: string[];
   moodScore?: number; // 1-5 mood rating (1=rough, 5=great)
+  label?: string; // Custom display name (e.g. "morning") — shown instead of timestamp
   createdAt: Date;
   updatedAt: Date;
   timestamp: Date; // Time of entry creation
