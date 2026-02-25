@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Topic, TopicPage, Capture, Task, Tag, Meeting, RoutineItem, RoutineGroup, JournalEntry, Subtask, RoutineCompletion } from '@/types';
+import { Topic, TopicPage, Capture, Task, Tag, Meeting, RoutineItem, RoutineGroup, JournalEntry, Subtask, RoutineCompletion, Project } from '@/types';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO, isValid, addDays } from 'date-fns';
 
 // Routine completion with timestamp for activity tracking
@@ -20,6 +20,7 @@ interface DatabaseData {
   routines: RoutineItem[];
   routineGroups: RoutineGroup[];
   routineCompletions: Record<string, RoutineCompletionRecord[]>; // date string -> array of completions with timestamps
+  projects: Project[];
 }
 
 interface KaivooStore {
@@ -110,6 +111,13 @@ interface KaivooStore {
     routineCompletionRate: number;
   };
   
+  // Projects
+  projects: Project[];
+  addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => Project;
+  updateProject: (id: string, updates: Partial<Project>) => void;
+  deleteProject: (id: string) => void;
+  getTasksByProject: (projectId: string) => Task[];
+
   // UI State
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -375,6 +383,7 @@ export const useKaivooStore = create<KaivooStore>()(
       routines: data.routines,
       routineGroups: data.routineGroups,
       routineCompletions: data.routineCompletions,
+      projects: data.projects,
       isLoaded: true,
     });
   },
@@ -978,6 +987,39 @@ export const useKaivooStore = create<KaivooStore>()(
     };
   },
   
+  // Projects
+  projects: [],
+
+  addProject: (projectData) => {
+    const now = new Date();
+    const project: Project = {
+      ...projectData,
+      id: `project-${generateId()}`,
+      createdAt: now,
+      updatedAt: now,
+    };
+    set((state) => ({ projects: [...state.projects, project] }));
+    return project;
+  },
+
+  updateProject: (id, updates) => {
+    set((state) => ({
+      projects: state.projects.map(p => p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p),
+    }));
+  },
+
+  deleteProject: (id) => {
+    set((state) => ({
+      projects: state.projects.filter(p => p.id !== id),
+      // Orphan tasks that belonged to this project
+      tasks: state.tasks.map(t => t.projectId === id ? { ...t, projectId: undefined } : t),
+    }));
+  },
+
+  getTasksByProject: (projectId) => {
+    return get().tasks.filter(t => t.projectId === projectId);
+  },
+
   // UI State
   sidebarCollapsed: false,
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
@@ -996,6 +1038,7 @@ export const useKaivooStore = create<KaivooStore>()(
         routines: state.routines,
         routineGroups: state.routineGroups,
         routineCompletions: state.routineCompletions,
+        projects: state.projects,
         sidebarCollapsed: state.sidebarCollapsed,
       }),
     }

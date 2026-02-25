@@ -75,7 +75,7 @@ Map the work to departments and agents:
 | **Product** (Agent 8) | Business model decisions, pricing, market validation, feature prioritization by commercial impact, go-to-market planning |
 | **Research** (Agent 5) | New feature domains, technology scouting, pattern research |
 | **Design** (Design Agent) | UI changes, new screens, UX flows, interaction patterns, accessibility |
-| **Engineering** (Agent 2, 3, 4) | All code changes, architecture decisions, security |
+| **Engineering** (Agent 2, 3, 4, 12) | All code changes, architecture decisions, security, database operations |
 | **DevOps** (Agent 9) | Deployment, CI/CD, Docker, packaging, infrastructure, monitoring |
 | **Quality** (Agent 7, 10) | Code review (every parcel), test strategy, test infrastructure, CI test suite |
 | **Marketing** | Launch prep, content, positioning (when agents exist) |
@@ -107,6 +107,7 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 | Agent 2 | Staff Software Engineer | React, TypeScript, Supabase, real-time features, state management, service layer |
 | Agent 3 | System Architect | Hub architecture, database design, infrastructure, build config |
 | Agent 4 | Security & Reliability | Auth, RLS, threat modeling, backup, disaster recovery |
+| Agent 12 | Data Engineer | Supabase operations, migrations, RLS optimization, query performance, type generation, data integrity |
 
 ### DevOps
 | Agent | Role | Specialty |
@@ -157,6 +158,7 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 
 ---
 
-*Director v1.3 — February 23, 2026*
+*Director v1.4 — February 24, 2026*
 *v1.2: Added Product (Agent 8), DevOps (Agent 9), and Quality (Agent 7 + Agent 10) departments*
 *v1.3: Agent 1 + Agent 6 merged into Design Agent. Updated department directory and involvement table.*
+*v1.4: Added Agent 12 (Data Engineer) to Engineering department.*

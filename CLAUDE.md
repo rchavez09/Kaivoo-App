@@ -19,7 +19,7 @@
 | Department | Folder | Agents |
 |---|---|---|
 | Product | `Agents/Product/` | Agent 8 (Product Manager) |
-| Engineering | `Agents/Engineering/` | Agent 2 (Software Engineer), Agent 3 (Architect), Agent 4 (Security) |
+| Engineering | `Agents/Engineering/` | Agent 2 (Software Engineer), Agent 3 (Architect), Agent 4 (Security), Agent 12 (Data Engineer) |
 | DevOps | `Agents/DevOps/` | Agent 9 (DevOps Engineer) |
 | Quality | `Agents/Quality/` | Agent 7 (Code Reviewer), Agent 10 (QA Architect — activates Sprint 4+), Agent 11 (Feature Integrity Guardian) |
 | Design | `Agents/Design/` | Design Agent (combined UX + Visual) |

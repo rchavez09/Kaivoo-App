@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, CheckSquare, Calendar, FolderOpen, BarChart3, Settings, PanelLeftClose, PanelLeft, LogOut, BookOpen } from 'lucide-react';
+import { Sun, CheckSquare, Calendar, FolderOpen, BarChart3, Settings, PanelLeftClose, PanelLeft, LogOut, BookOpen, Briefcase } from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,10 @@ const navItems = [{
   path: '/tasks',
   label: 'Tasks',
   icon: CheckSquare
+}, {
+  path: '/projects',
+  label: 'Projects',
+  icon: Briefcase
 }, {
   path: '/calendar',
   label: 'Calendar',
@@ -67,7 +71,7 @@ const Sidebar = ({
     label: string;
     icon: typeof Sun;
   }) => {
-    const isActive = location.pathname === path;
+    const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
     const linkContent = <Link to={path} className={cn('nav-item', isActive && 'active', collapsed && 'justify-center px-2')}>
         <Icon className="w-5 h-5 shrink-0" />
         {!collapsed && <span>{label}</span>}

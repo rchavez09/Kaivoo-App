@@ -113,6 +113,7 @@ export type Database = {
           created_at: string
           date: string
           id: string
+          mood_score: number | null
           tags: string[] | null
           timestamp: string
           topic_ids: string[] | null
@@ -124,6 +125,7 @@ export type Database = {
           created_at?: string
           date: string
           id?: string
+          mood_score?: number | null
           tags?: string[] | null
           timestamp?: string
           topic_ids?: string[] | null
@@ -135,6 +137,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          mood_score?: number | null
           tags?: string[] | null
           timestamp?: string
           topic_ids?: string[] | null
@@ -211,6 +214,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      projects: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          icon: string | null
+          id: string
+          name: string
+          start_date: string | null
+          status: string
+          topic_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          start_date?: string | null
+          status?: string
+          topic_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          start_date?: string | null
+          status?: string
+          topic_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       routine_completions: {
         Row: {
@@ -385,6 +441,7 @@ export type Database = {
           due_date: string | null
           id: string
           priority: string
+          project_id: string | null
           recurrence_rule: Json | null
           source_link: string | null
           start_date: string | null
@@ -401,6 +458,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string
+          project_id?: string | null
           recurrence_rule?: Json | null
           source_link?: string | null
           start_date?: string | null
@@ -417,6 +475,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string
+          project_id?: string | null
           recurrence_rule?: Json | null
           source_link?: string | null
           start_date?: string | null
@@ -426,7 +485,15 @@ export type Database = {
           topic_ids?: string[] | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       topic_pages: {
         Row: {

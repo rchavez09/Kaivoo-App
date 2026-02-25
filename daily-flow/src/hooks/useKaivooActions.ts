@@ -2,7 +2,7 @@ import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useDatabaseOperations } from './useDatabase';
 import { useInvalidate } from './queries';
 import { useAuth } from './useAuth';
-import { Task, Topic, TopicPage, JournalEntry, Capture, Meeting } from '@/types';
+import { Task, Topic, TopicPage, JournalEntry, Capture, Meeting, Project } from '@/types';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { computeNextDueDate } from '@/lib/recurrence';
@@ -408,6 +408,63 @@ export const useKaivooActions = () => {
     }
   };
 
+  // --- Projects ---
+
+  const addProject = async (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (user) {
+      try {
+        const project = await db.createProject(projectData);
+        useKaivooStore.setState(s => ({ projects: [...s.projects, project] }));
+        invalidate('projects');
+        return project;
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Unknown error';
+        toast.error(`Failed to create project: ${msg}`);
+        console.error('[addProject]', e);
+        return undefined;
+      }
+    }
+    return store.addProject(projectData);
+  };
+
+  const updateProject = async (id: string, updates: Partial<Project>) => {
+    const prev = store.projects.find(p => p.id === id);
+    store.updateProject(id, updates);
+    if (user) {
+      try {
+        await db.updateProject(id, updates);
+        invalidate('projects');
+      } catch (e) {
+        if (prev) store.updateProject(id, prev);
+        toast.error('Failed to save project changes.');
+        console.error('[updateProject]', e);
+      }
+    }
+  };
+
+  const deleteProject = async (id: string) => {
+    const prev = store.projects.find(p => p.id === id);
+    const affectedTaskIds = store.tasks.filter(t => t.projectId === id).map(t => t.id);
+    store.deleteProject(id);
+    if (user) {
+      try {
+        await db.deleteProject(id);
+        invalidate('projects', 'tasks');
+      } catch (e) {
+        if (prev) {
+          useKaivooStore.setState(s => ({
+            projects: [...s.projects, prev],
+            tasks: s.tasks.map(t =>
+              affectedTaskIds.includes(t.id) ? { ...t, projectId: id } : t
+            ),
+          }));
+        }
+        toast.error('Failed to delete project.');
+        console.error('[deleteProject]', e);
+      }
+    }
+  };
+
   return {
     addTask, updateTask, deleteTask,
     addSubtask, toggleSubtask, updateSubtask, deleteSubtask,
@@ -416,11 +473,13 @@ export const useKaivooActions = () => {
     updateCapture, deleteCapture, toggleRoutineCompletion,
     addTopic, addTopicPage, deleteTopic,
     addCapture, resolveTopicPathAsync,
+    addProject, updateProject, deleteProject,
 
     // Pass through store methods for reads
     tasks: store.tasks,
     meetings: store.meetings,
     routines: store.routines,
     topics: store.topics,
+    projects: store.projects,
   };
 };

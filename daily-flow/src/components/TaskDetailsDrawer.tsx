@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Calendar, Flag, Hash, Link2, Plus, Trash2,
-  Circle, CheckCircle2, X as XIcon, Check, PlayCircle, RefreshCw
+  Circle, CheckCircle2, X as XIcon, Check, PlayCircle, RefreshCw, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +44,7 @@ interface TaskDetailsDrawerProps {
 
 const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProps) => {
   const tasks = useKaivooStore(s => s.tasks);
+  const projects = useKaivooStore(s => s.projects);
   const topics = useKaivooStore(s => s.topics);
   const topicPages = useKaivooStore(s => s.topicPages);
   const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
@@ -371,6 +372,48 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
                 <SelectItem value="daily">Daily</SelectItem>
                 <SelectItem value="weekly">Weekly</SelectItem>
                 <SelectItem value="monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Project - card section */}
+          <div className="bg-panel-task-section rounded-xl p-4 space-y-2 shadow-sm">
+            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5" />
+              Project
+            </label>
+            <Select
+              value={task.projectId ?? 'none'}
+              onValueChange={(v) => {
+                updateTask(task.id, { projectId: v === 'none' ? undefined : v });
+                showSavedFeedback();
+              }}
+            >
+              <SelectTrigger className="bg-card/50 border-0 text-xs h-8">
+                <span className="flex items-center gap-1.5 truncate">
+                  {task.projectId ? (
+                    <>
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: projects.find(p => p.id === task.projectId)?.color || '#888' }}
+                      />
+                      {projects.find(p => p.id === task.projectId)?.name || 'Unknown'}
+                    </>
+                  ) : (
+                    'None'
+                  )}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {projects.map(p => (
+                  <SelectItem key={p.id} value={p.id}>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color || '#888' }} />
+                      {p.name}
+                    </span>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

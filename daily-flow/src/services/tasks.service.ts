@@ -34,6 +34,7 @@ export const dbToTask = (row: TaskRow, subtasks: Subtask[] = []): Task => ({
   startDate: row.start_date,
   tags: row.tags || [],
   topicIds: row.topic_ids || [],
+  projectId: row.project_id ?? undefined,
   subtasks,
   sourceLink: row.source_link,
   recurrence: parseRecurrenceRule(row.recurrence_rule),
@@ -75,6 +76,7 @@ export const createTask = async (userId: string, task: Omit<Task, 'id' | 'create
     tags: task.tags,
     topic_ids: task.topicIds,
     source_link: task.sourceLink,
+    project_id: task.projectId ?? null,
   };
   if (RECURRENCE_RULE_COLUMN_EXISTS && task.recurrence) {
     payload.recurrence_rule = task.recurrence;
@@ -100,6 +102,7 @@ export const updateTask = async (userId: string, id: string, updates: Partial<Ta
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
   if (updates.topicIds !== undefined) dbUpdates.topic_ids = updates.topicIds;
   if (updates.sourceLink !== undefined) dbUpdates.source_link = updates.sourceLink;
+  if (updates.projectId !== undefined) dbUpdates.project_id = updates.projectId ?? null;
   if (RECURRENCE_RULE_COLUMN_EXISTS && updates.recurrence !== undefined) dbUpdates.recurrence_rule = updates.recurrence ? updates.recurrence : null;
   if ('completedAt' in updates) dbUpdates.completed_at = updates.completedAt ? updates.completedAt.toISOString() : null;
 
