@@ -121,7 +121,7 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
               >
                 <div className="flex items-start gap-3">
                   {item.type === 'capture' ? (
-                    <Globe className="w-4 h-4 text-info mt-0.5 flex-shrink-0" />
+                    <Globe className="w-4 h-4 text-info-foreground mt-0.5 flex-shrink-0" />
                   ) : (
                     <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                   )}

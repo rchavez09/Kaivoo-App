@@ -12,7 +12,7 @@ interface TopicTasksWidgetProps {
 const priorityColors = {
   high: 'text-destructive',
   medium: 'text-primary',
-  low: 'text-info',
+  low: 'text-info-foreground',
 };
 
 const TopicTasksWidget = ({ tasks, topicName }: TopicTasksWidgetProps) => {
@@ -73,7 +73,7 @@ const TopicTasksWidget = ({ tasks, topicName }: TopicTasksWidgetProps) => {
               className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer opacity-50"
               onClick={() => toggleTask(task.id, task.status)}
             >
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-success" />
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-success-foreground" />
               <span className="text-sm flex-1 line-through text-muted-foreground">{task.title}</span>
             </div>
           ))}

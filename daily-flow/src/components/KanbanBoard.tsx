@@ -134,7 +134,7 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
               {task.topicIds.slice(0, 1).map(topicId => {
                 const name = getTopicName(topicId);
                 return name ? (
-                  <Badge key={topicId} variant="secondary" className="text-[10px] h-5 px-1.5 text-info font-normal">
+                  <Badge key={topicId} variant="secondary" className="text-[10px] h-5 px-1.5 text-info-foreground font-normal">
                     [[{name}]]
                   </Badge>
                 ) : null;

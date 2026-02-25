@@ -547,7 +547,7 @@ const Tasks = () => {
           {topicFilter !== 'all' && (
             <button
               onClick={() => handleSetTopicFilter('all')}
-              className="px-2.5 py-1 text-xs font-medium rounded-full border bg-info/10 text-info border-info/30 flex items-center gap-1"
+              className="px-2.5 py-1 text-xs font-medium rounded-full border bg-info/10 text-info-foreground border-info/30 flex items-center gap-1"
             >
               [[{availableTopics.find(t => t.id === topicFilter)?.name}]]
               <X className="w-3 h-3" />
@@ -858,7 +858,7 @@ const Tasks = () => {
                               </Badge>
                             )}
                             {task.recurrence && (
-                              <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal text-info border-info/30">
+                              <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal text-info-foreground border-info/30">
                                 <span>↻</span>
                                 {task.recurrence.type === 'daily' && 'Daily'}
                                 {task.recurrence.type === 'weekly' && 'Weekly'}
@@ -871,7 +871,7 @@ const Tasks = () => {
                                 <Badge
                                   key={topicId}
                                   variant="secondary"
-                                  className="text-[10px] h-5 px-1.5 text-info font-normal cursor-pointer hover:bg-info/20"
+                                  className="text-[10px] h-5 px-1.5 text-info-foreground font-normal cursor-pointer hover:bg-info/20"
                                   onClick={(e) => { e.stopPropagation(); handleSetTopicFilter(topicId); }}
                                 >
                                   [[{name}]]

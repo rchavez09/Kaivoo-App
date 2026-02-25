@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { ProjectStatus } from '@/types';
 import { projectStatusConfig } from '@/lib/project-config';
-import ProjectCard from '@/components/projects/ProjectCard';
+import ProjectCard, { ProjectTaskStats } from '@/components/projects/ProjectCard';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 
 type StatusTab = 'all' | ProjectStatus;
@@ -30,6 +30,7 @@ const STATUS_TABS: { key: StatusTab; label: string }[] = [
 
 const Projects = () => {
   const projects = useKaivooStore(s => s.projects);
+  const tasks = useKaivooStore(s => s.tasks);
   const topics = useKaivooStore(s => s.topics);
   const isLoaded = useKaivooStore(s => s.isLoaded);
 
@@ -80,6 +81,19 @@ const Projects = () => {
     }
     return counts;
   }, [projects]);
+
+  // Pre-compute task stats per project so ProjectCard doesn't need store access
+  const taskStatsMap = useMemo(() => {
+    const map: Record<string, ProjectTaskStats> = {};
+    for (const project of projects) {
+      const projectTasks = tasks.filter(t => t.projectId === project.id);
+      const doneTasks = projectTasks.filter(t => t.status === 'done').length;
+      const totalTasks = projectTasks.length;
+      const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+      map[project.id] = { totalTasks, doneTasks, progress };
+    }
+    return map;
+  }, [projects, tasks]);
 
   const filteredTopics = topics.filter(t => t.id !== 'topic-daily-notes');
 
@@ -173,7 +187,7 @@ const Projects = () => {
         ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((project, i) => (
-              <ProjectCard key={project.id} project={project} index={i} />
+              <ProjectCard key={project.id} project={project} index={i} taskStats={taskStatsMap[project.id] ?? { totalTasks: 0, doneTasks: 0, progress: 0 }} />
             ))}
           </div>
         ) : (

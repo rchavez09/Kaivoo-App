@@ -99,7 +99,7 @@ const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) 
                       onClick={() => handleSelectPage(topic.name, page.name)}
                       className="flex items-center gap-2 px-2 py-1.5 w-full text-sm text-left rounded hover:bg-secondary/70 transition-colors"
                     >
-                      <FileText className="w-3.5 h-3.5 text-info" />
+                      <FileText className="w-3.5 h-3.5 text-info-foreground" />
                       <span>{page.name}</span>
                     </button>
                   ))}

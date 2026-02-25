@@ -21,13 +21,6 @@ export const useKaivooActions = () => {
   const db = useDatabaseOperations();
   const { invalidate } = useInvalidate();
 
-  // Selective subscriptions for pass-through reads (avoids full-store re-renders)
-  const tasks = useKaivooStore(s => s.tasks);
-  const meetings = useKaivooStore(s => s.meetings);
-  const routines = useKaivooStore(s => s.routines);
-  const topics = useKaivooStore(s => s.topics);
-  const projects = useKaivooStore(s => s.projects);
-
   // Use getState() inside mutation functions for latest state + store methods
   const getStore = () => useKaivooStore.getState();
 
@@ -506,12 +499,5 @@ export const useKaivooActions = () => {
     addTopic, addTopicPage, deleteTopic,
     addCapture, resolveTopicPathAsync,
     addProject, updateProject, deleteProject,
-
-    // Pass through store reads (selective subscriptions — no full-store re-render)
-    tasks,
-    meetings,
-    routines,
-    topics,
-    projects,
   };
 };

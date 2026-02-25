@@ -102,7 +102,7 @@ const TaskRowContent = React.memo(function TaskRowContent({
               </Badge>
             )}
             {task.recurrence && (
-              <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal flex-shrink-0 text-info border-info/30">
+              <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal flex-shrink-0 text-info-foreground border-info/30">
                 ↻ {task.recurrence.type === 'daily' ? 'Daily' : task.recurrence.type === 'weekly' ? 'Weekly' : 'Monthly'}
               </Badge>
             )}
