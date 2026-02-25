@@ -108,6 +108,19 @@
   /* Mist — slightly more visible than global border */
   --sidebar-ring: 180 41% 39%;
 
+  /* === Task Drawer Panel — Light Mode === */
+  --panel-task-from: 36 38% 97%;
+  /* Warm Sand */
+  --panel-task-to: 0 0% 100%;
+  /* White */
+  --panel-task-accent: 180 41% 39%;
+  /* Resonance Teal */
+  --panel-task-section: 220 14% 96%;
+  /* Cloud-light */
+
+  /* === Elevated Surface (for opacity-safe backgrounds) === */
+  --surface-elevated: 220 14% 93%;
+
   /* === Widget Shadows — Light Mode === */
   --widget-shadow: 0 1px 4px rgba(26, 31, 46, 0.06), 0 1px 2px rgba(26, 31, 46, 0.04);
   --widget-shadow-hover: 0 4px 16px rgba(26, 31, 46, 0.10), 0 2px 6px rgba(26, 31, 46, 0.06);
@@ -174,6 +187,19 @@
   --sidebar-border: 246 28% 20%;
   /* Visible border within sidebar depth */
   --sidebar-ring: 180 43% 46%;
+
+  /* === Task Drawer Panel — Dark Mode === */
+  --panel-task-from: 245 35% 15%;
+  /* Card layer */
+  --panel-task-to: 249 30% 11%;
+  /* Slightly deeper */
+  --panel-task-accent: 180 43% 46%;
+  /* Teal brightened */
+  --panel-task-section: 246 34% 19%;
+  /* Elevated layer */
+
+  /* === Elevated Surface — Dark Mode === */
+  --surface-elevated: 246 34% 22%;
 
   /* === Widget Shadows — Dark Mode === */
   --widget-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.35);

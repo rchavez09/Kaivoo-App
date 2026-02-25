@@ -100,7 +100,7 @@ const Projects = () => {
         </header>
 
         {/* Status tabs */}
-        <div className="flex items-center gap-1 mb-4 p-1 bg-secondary/50 rounded-lg w-fit">
+        <div role="tablist" className="flex items-center gap-1 mb-4 p-1 bg-[hsl(var(--surface-elevated))] rounded-lg w-fit overflow-x-auto">
           {STATUS_TABS.map(tab => {
             const count = tabCounts[tab.key] || 0;
             // Hide empty tabs (except "all" and "active")
@@ -108,6 +108,8 @@ const Projects = () => {
             return (
               <button
                 key={tab.key}
+                role="tab"
+                aria-selected={activeTab === tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
                   'px-3 py-1.5 text-sm font-medium rounded-md transition-all',
@@ -120,7 +122,7 @@ const Projects = () => {
                 <span className={cn(
                   'ml-1.5 text-xs',
                   activeTab === tab.key ? 'text-muted-foreground' : 'text-muted-foreground/60'
-                )}>
+                )} aria-label={`${count} projects`}>
                   {count}
                 </span>
               </button>

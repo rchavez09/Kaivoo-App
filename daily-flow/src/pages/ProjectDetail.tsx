@@ -35,7 +35,7 @@ import { cn } from '@/lib/utils';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { ProjectStatus } from '@/types';
-import { projectStatusConfig, getProjectColor, PROJECT_COLORS } from '@/lib/project-config';
+import { projectStatusConfig, getProjectColor, PROJECT_COLORS, PROJECT_COLOR_NAMES } from '@/lib/project-config';
 import { priorityConfig } from '@/lib/task-config';
 import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
 import { toast } from 'sonner';
@@ -165,7 +165,7 @@ const ProjectDetail = () => {
       <div className="mx-auto px-6 py-8 max-w-4xl">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/projects" className="hover:text-foreground transition-colors">Projects</Link>
+          <Link to="/projects" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm">Projects</Link>
           <ChevronRight className="w-4 h-4" />
           <span className="text-foreground font-medium truncate">{project.name}</span>
         </nav>
@@ -181,7 +181,7 @@ const ProjectDetail = () => {
                 onChange={(e) => setNameInput(e.target.value)}
                 onBlur={handleNameSave}
                 onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
-                className="text-2xl font-semibold h-auto py-0 border-0 shadow-none focus-visible:ring-0 bg-transparent"
+                className="text-2xl font-semibold h-auto py-0 border-0 border-b-2 border-dashed border-primary/40 shadow-none focus-visible:ring-2 focus-visible:ring-primary/30 bg-transparent"
                 autoFocus
               />
             ) : (
@@ -334,7 +334,7 @@ const ProjectDetail = () => {
           </div>
 
           {/* Add task input */}
-          <div className="mb-4 p-3 bg-secondary/30 rounded-lg border border-border">
+          <div className="mb-4 p-3 bg-[hsl(var(--surface-elevated))] rounded-lg border border-border">
             <div className="flex items-center gap-2">
               <Circle className="w-5 h-5 text-muted-foreground shrink-0" />
               <Input
@@ -363,6 +363,7 @@ const ProjectDetail = () => {
                       className="flex items-center gap-3 py-2 px-2 -mx-2 hover:bg-secondary/30 rounded-lg transition-colors cursor-pointer group"
                     >
                       <button
+                        aria-label={task.status === 'done' ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
                         onClick={(e) => {
                           e.stopPropagation();
                           updateTask(task.id, {
@@ -449,7 +450,7 @@ const ProjectDetail = () => {
                       color === c ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
                     )}
                     style={{ backgroundColor: c }}
-                    aria-label={`Select color ${c}`}
+                    aria-label={`Select ${PROJECT_COLOR_NAMES[c] || 'color'}`}
                   />
                 ))}
               </div>
