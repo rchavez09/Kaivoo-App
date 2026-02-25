@@ -173,7 +173,13 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                   <CalendarComponent
                     mode="single"
                     selected={startDate ? new Date(startDate + 'T00:00:00') : undefined}
-                    onSelect={(date) => setStartDate(date ? format(date, 'yyyy-MM-dd') : '')}
+                    onSelect={(date) => {
+                      if (date && endDate) {
+                        const end = new Date(endDate + 'T00:00:00');
+                        if (date > end) { toast.error('Start date cannot be after end date'); return; }
+                      }
+                      setStartDate(date ? format(date, 'yyyy-MM-dd') : '');
+                    }}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />
@@ -182,7 +188,11 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                       variant="ghost"
                       size="sm"
                       className="text-xs flex-1"
-                      onClick={() => setStartDate(format(new Date(), 'yyyy-MM-dd'))}
+                      onClick={() => {
+                        const today = format(new Date(), 'yyyy-MM-dd');
+                        if (endDate && today > endDate) { toast.error('Start date cannot be after end date'); return; }
+                        setStartDate(today);
+                      }}
                     >
                       Today
                     </Button>
@@ -213,7 +223,13 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                   <CalendarComponent
                     mode="single"
                     selected={endDate ? new Date(endDate + 'T00:00:00') : undefined}
-                    onSelect={(date) => setEndDate(date ? format(date, 'yyyy-MM-dd') : '')}
+                    onSelect={(date) => {
+                      if (date && startDate) {
+                        const start = new Date(startDate + 'T00:00:00');
+                        if (date < start) { toast.error('End date cannot be before start date'); return; }
+                      }
+                      setEndDate(date ? format(date, 'yyyy-MM-dd') : '');
+                    }}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />
@@ -222,7 +238,11 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                       variant="ghost"
                       size="sm"
                       className="text-xs flex-1"
-                      onClick={() => setEndDate(format(new Date(), 'yyyy-MM-dd'))}
+                      onClick={() => {
+                        const today = format(new Date(), 'yyyy-MM-dd');
+                        if (startDate && today < startDate) { toast.error('End date cannot be before start date'); return; }
+                        setEndDate(today);
+                      }}
                     >
                       Today
                     </Button>

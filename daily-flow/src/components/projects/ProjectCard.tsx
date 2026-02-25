@@ -7,23 +7,26 @@ import { projectStatusConfig, getProjectColor } from '@/lib/project-config';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 
+export interface ProjectTaskStats {
+  totalTasks: number;
+  doneTasks: number;
+  progress: number;
+}
+
 interface ProjectCardProps {
   project: Project;
   index: number;
+  taskStats: ProjectTaskStats;
 }
 
-const ProjectCard = React.memo(({ project, index }: ProjectCardProps) => {
+const ProjectCard = React.memo(({ project, index, taskStats }: ProjectCardProps) => {
   const navigate = useNavigate();
-  const tasks = useKaivooStore(s => s.tasks);
   const topics = useKaivooStore(s => s.topics);
 
   const color = getProjectColor(project, index);
   const statusCfg = projectStatusConfig[project.status];
 
-  const projectTasks = tasks.filter(t => t.projectId === project.id);
-  const doneTasks = projectTasks.filter(t => t.status === 'done').length;
-  const totalTasks = projectTasks.length;
-  const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  const { totalTasks, doneTasks, progress } = taskStats;
 
   const topicName = project.topicId
     ? topics.find(t => t.id === project.topicId)?.name
@@ -101,7 +104,14 @@ const ProjectCard = React.memo(({ project, index }: ProjectCardProps) => {
               <span>{doneTasks}/{totalTasks} done</span>
               <span>{progress}%</span>
             </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-1.5 bg-muted rounded-full overflow-hidden"
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Project completion: ${progress}%`}
+            >
               <div
                 className="h-full rounded-full transition-all"
                 style={{ width: `${progress}%`, backgroundColor: color }}

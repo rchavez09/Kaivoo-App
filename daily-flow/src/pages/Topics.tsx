@@ -208,7 +208,7 @@ const Topics = () => {
                               onClick={() => navigate(`/topics/${topic.id}/pages/${page.id}`)}
                               className="flex items-center gap-2 py-2 px-2 w-full text-left rounded-lg hover:bg-secondary/50 transition-colors"
                             >
-                              <FileText className="w-4 h-4 text-info" />
+                              <FileText className="w-4 h-4 text-info-foreground" />
                               <span className="text-sm text-foreground">{page.name}</span>
                               <span className="text-xs text-muted-foreground">
                                 {pageCaptures} · {pageTasks}

@@ -272,7 +272,7 @@ const EntryHeader = ({ node, updateAttributes, editor, getPos: _getPos }: NodeVi
                         onClick={() => void handleTopicSelect(`${topic.name}/${page.name}`)}
                         className="flex items-center gap-2 px-2 py-1.5 pl-6 w-full text-sm text-left rounded hover:bg-secondary/70 transition-colors"
                       >
-                        <FileText className="w-3.5 h-3.5 text-info shrink-0" />
+                        <FileText className="w-3.5 h-3.5 text-info-foreground shrink-0" />
                         <span className="truncate">{page.name}</span>
                       </button>
                     ))}

@@ -201,7 +201,7 @@ export function TopicTagEditor({
                             className="w-full justify-start text-xs h-6"
                             onClick={() => handleSelectTopic(`${topic.name}/${page.name}`, false)}
                           >
-                            <FileText className="h-3 w-3 mr-1.5 text-info" />
+                            <FileText className="h-3 w-3 mr-1.5 text-info-foreground" />
                             {page.name}
                           </Button>
                         ))}

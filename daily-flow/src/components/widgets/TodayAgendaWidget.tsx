@@ -347,7 +347,7 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
               className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer opacity-50"
               onClick={(e) => handleTaskClick(task, e)}
             >
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-success" />
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-success-foreground" />
               <span className="text-sm flex-1 line-through text-muted-foreground">{task.title}</span>
             </div>
           ))}
@@ -427,8 +427,8 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
       {/* Meetings Section */}
       <div>
         <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-info/20">
-          <Video className="w-4 h-4 text-info" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-info">
+          <Video className="w-4 h-4 text-info-foreground" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-info-foreground">
             Meetings
           </span>
           <span className="text-xs text-muted-foreground">

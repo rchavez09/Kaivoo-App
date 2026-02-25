@@ -357,7 +357,7 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
                 <span className="flex items-center gap-1.5">
                   {task.recurrence ? (
                     <>
-                      <RefreshCw className="w-3 h-3 text-info" />
+                      <RefreshCw className="w-3 h-3 text-info-foreground" />
                       {task.recurrence.type === 'daily' && 'Daily'}
                       {task.recurrence.type === 'weekly' && 'Weekly'}
                       {task.recurrence.type === 'monthly' && 'Monthly'}
@@ -443,7 +443,7 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
                   <Badge 
                     key={id} 
                     variant="secondary" 
-                    className="text-xs text-info cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors bg-card/80"
+                    className="text-xs text-info-foreground cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors bg-card/80"
                     onClick={() => handleToggleTopic(id)}
                   >
                     [[{name}]] <XIcon className="w-2.5 h-2.5 ml-1" />
@@ -595,7 +595,7 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
                     className="flex-shrink-0"
                   >
                     {subtask.completed ? (
-                      <CheckCircle2 className="w-4 h-4 text-success" />
+                      <CheckCircle2 className="w-4 h-4 text-success-foreground" />
                     ) : (
                       <Circle className="w-4 h-4 text-muted-foreground" />
                     )}

@@ -264,7 +264,7 @@ export function TasksWidgetConfigDialog({
       return <Folder className="w-4 h-4 text-accent" />;
     }
     if (section.type === 'tag') {
-      return <Hash className="w-4 h-4 text-info" />;
+      return <Hash className="w-4 h-4 text-info-foreground" />;
     }
     const builtin = AVAILABLE_BUILTIN_SECTIONS.find(s => s.id === section.id);
     return builtin?.icon || <CheckSquare className="w-4 h-4" />;
@@ -400,7 +400,7 @@ export function TasksWidgetConfigDialog({
                         </span>
                       )}
                       {section.type === 'tag' && (
-                        <span className="text-[10px] uppercase tracking-wider text-info bg-info/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] uppercase tracking-wider text-info-foreground bg-info/10 px-1.5 py-0.5 rounded">
                           Tag
                         </span>
                       )}

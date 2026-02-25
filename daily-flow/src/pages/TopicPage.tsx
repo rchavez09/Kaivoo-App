@@ -85,7 +85,7 @@ const TopicPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {isPage ? (
-                <FileText className="w-6 h-6 text-info" />
+                <FileText className="w-6 h-6 text-info-foreground" />
               ) : (
                 <FolderOpen className="w-6 h-6 text-primary" />
               )}
@@ -127,7 +127,7 @@ const TopicPage = () => {
                     >
                       <div className="w-44 h-28 rounded-lg border border-border bg-card p-4 hover:border-primary/50 hover:bg-accent/50 transition-all duration-200 flex flex-col">
                         <div className="flex items-center gap-2 mb-2">
-                          <FileText className="w-4 h-4 text-info flex-shrink-0" />
+                          <FileText className="w-4 h-4 text-info-foreground flex-shrink-0" />
                           <span className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
                             {p.name}
                           </span>
