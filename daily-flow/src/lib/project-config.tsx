@@ -32,7 +32,32 @@ export const PROJECT_COLORS = [
   '#78716C', // stone
 ];
 
+// Friendly names for screen readers
+export const PROJECT_COLOR_NAMES: Record<string, string> = {
+  '#3B82F6': 'Blue',
+  '#8B5CF6': 'Purple',
+  '#EC4899': 'Pink',
+  '#EF4444': 'Red',
+  '#F97316': 'Orange',
+  '#F59E0B': 'Amber',
+  '#22C55E': 'Green',
+  '#14B8A6': 'Teal',
+  '#06B6D4': 'Cyan',
+  '#6366F1': 'Indigo',
+  '#D946EF': 'Fuchsia',
+  '#78716C': 'Stone',
+};
+
 // Auto-assign color based on index (for projects without explicit color)
 export const getProjectColor = (project: { color?: string }, index: number): string => {
   return project.color || PROJECT_COLORS[index % PROJECT_COLORS.length];
+};
+
+// Returns white or dark text depending on background luminance (WCAG contrast)
+export const getContrastTextColor = (bgHex: string): string => {
+  const r = parseInt(bgHex.slice(1, 3), 16);
+  const g = parseInt(bgHex.slice(3, 5), 16);
+  const b = parseInt(bgHex.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#0A1628' : '#FFFFFF';
 };

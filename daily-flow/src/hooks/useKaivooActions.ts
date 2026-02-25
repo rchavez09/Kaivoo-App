@@ -32,9 +32,8 @@ export const useKaivooActions = () => {
         invalidate('tasks');
         return task;
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : typeof e === 'object' && e !== null && 'message' in e ? String((e as Record<string, unknown>).message) : 'Unknown error';
-        toast.error(`Failed to add task: ${msg}`);
-        console.error('[addTask] details:', JSON.stringify(e, null, 2));
+        toast.error('Failed to add task. Please try again.');
+        console.error('[addTask]', e);
         return undefined;
       }
     }
@@ -418,8 +417,7 @@ export const useKaivooActions = () => {
         invalidate('projects');
         return project;
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'Unknown error';
-        toast.error(`Failed to create project: ${msg}`);
+        toast.error('Failed to create project. Please try again.');
         console.error('[addProject]', e);
         return undefined;
       }

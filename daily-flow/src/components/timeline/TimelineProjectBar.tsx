@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Project } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
-import { getProjectColor, projectStatusConfig } from '@/lib/project-config';
+import { getProjectColor, getContrastTextColor, projectStatusConfig } from '@/lib/project-config';
 import { differenceInDays, parseISO, addDays } from 'date-fns';
 
 interface TimelineProjectBarProps {
@@ -17,6 +17,7 @@ const TimelineProjectBar = ({ project, index, rangeStart, dayWidth }: TimelinePr
 
   const color = getProjectColor(project, index);
   const statusCfg = projectStatusConfig[project.status];
+  const textColor = getContrastTextColor(color);
 
   // Fallback: if only one date, derive the other
   const rawStart = project.startDate ? parseISO(project.startDate) : null;
@@ -39,8 +40,8 @@ const TimelineProjectBar = ({ project, index, rangeStart, dayWidth }: TimelinePr
 
   return (
     <div className="relative h-10 group" style={{ minWidth: 0 }}>
-      {/* Project label (left side, fixed) */}
-      <div className="absolute left-0 top-0 h-full flex items-center z-10 pr-2" style={{ width: 200 }}>
+      {/* Project label (left side, sticky) */}
+      <div className="sticky left-0 top-0 h-full flex items-center z-10 pr-2 bg-card" style={{ width: 200 }}>
         <span className="text-xs font-medium text-foreground truncate">{project.name}</span>
       </div>
 
@@ -58,7 +59,7 @@ const TimelineProjectBar = ({ project, index, rangeStart, dayWidth }: TimelinePr
         onClick={() => navigate(`/projects/${project.id}`)}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/projects/${project.id}`); } }}
       >
-        <span className="text-[10px] font-medium text-white truncate drop-shadow-sm">
+        <span className="text-[11px] font-medium truncate drop-shadow-sm" style={{ color: textColor }}>
           {totalTasks > 0 && `${doneTasks}/${totalTasks}`}
         </span>
       </div>

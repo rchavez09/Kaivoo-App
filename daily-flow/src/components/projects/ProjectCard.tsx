@@ -41,65 +41,76 @@ const ProjectCard = React.memo(({ project, index }: ProjectCardProps) => {
     : startLabel || endLabel || null;
 
   return (
-    <button
+    <article
       onClick={() => navigate(`/projects/${project.id}`)}
-      className="w-full text-left widget-card overflow-hidden hover:-translate-y-0.5 transition-all cursor-pointer group"
+      className="widget-card overflow-hidden p-0 hover:-translate-y-px transition-all cursor-pointer group relative"
     >
+      {/* Accessible link overlay */}
+      <a
+        href={`/projects/${project.id}`}
+        className="absolute inset-0 z-10"
+        aria-label={`Open project: ${project.name}`}
+        tabIndex={0}
+        onClick={(e) => { e.preventDefault(); navigate(`/projects/${project.id}`); }}
+      />
+
       {/* Color accent strip */}
-      <div className="h-1 -mx-5 -mt-5 mb-4 rounded-t-2xl" style={{ backgroundColor: color }} />
+      <div className="h-1" style={{ backgroundColor: color }} />
 
-      {/* Header: Name + Status */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="font-medium text-base text-foreground truncate group-hover:text-primary transition-colors">
-          {project.name}
-        </h3>
-        <span className={cn(
-          'inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0',
-          statusCfg.bg, statusCfg.color
-        )}>
-          {statusCfg.icon}
-          {statusCfg.label}
-        </span>
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {project.description}
-        </p>
-      )}
-
-      {/* Meta row: topic, dates */}
-      <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground mb-3">
-        {topicName && (
-          <span className="bg-secondary/60 px-1.5 py-0.5 rounded text-info">
-            {topicName}
+      <div className="p-5">
+        {/* Header: Name + Status */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="font-medium text-base text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+            {project.name}
+          </h3>
+          <span className={cn(
+            'inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0',
+            statusCfg.bg, statusCfg.color
+          )}>
+            {statusCfg.icon}
+            {statusCfg.label}
           </span>
-        )}
-        {dateRange && (
-          <span className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            {dateRange}
-          </span>
-        )}
-      </div>
-
-      {/* Task progress */}
-      {totalTasks > 0 && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{doneTasks}/{totalTasks} done</span>
-            <span>{progress}%</span>
-          </div>
-          <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{ width: `${progress}%`, backgroundColor: color }}
-            />
-          </div>
         </div>
-      )}
-    </button>
+
+        {/* Description */}
+        {project.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+            {project.description}
+          </p>
+        )}
+
+        {/* Meta row: topic, dates */}
+        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground mb-3">
+          {topicName && (
+            <span className="bg-secondary/60 px-1.5 py-0.5 rounded text-info">
+              {topicName}
+            </span>
+          )}
+          {dateRange && (
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              {dateRange}
+            </span>
+          )}
+        </div>
+
+        {/* Task progress */}
+        {totalTasks > 0 && (
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{doneTasks}/{totalTasks} done</span>
+              <span>{progress}%</span>
+            </div>
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${progress}%`, backgroundColor: color }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </article>
   );
 });
 
