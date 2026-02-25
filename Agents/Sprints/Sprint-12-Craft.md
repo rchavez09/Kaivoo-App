@@ -1,7 +1,8 @@
 # Sprint 12: Craft
 
 **Theme:** Design agent restructuring (3-agent split), Projects visual polish, code quality
-**Status:** VERIFICATION GATE
+**Status:** COMPLETE
+**Merged:** February 24, 2026
 **Branch:** `sprint/12-craft`
 **Created:** February 24, 2026
 **Approved by:** User
@@ -159,7 +160,7 @@ Updated Vision.md v3.3:
 
 | # | Parcel | Priority | Status |
 |---|---|---|---|
-| P11 | Sprint verification + quality gates | Gate | 🔄 In Progress |
+| P11 | Sprint verification + quality gates | Gate | ✅ Done |
 
 ### Deterministic Checks
 - [x] TypeScript: 0 errors
@@ -169,9 +170,9 @@ Updated Vision.md v3.3:
 
 ### Agent Gates
 - [x] 3-agent design review: completed (P4), all P0s fixed (P5)
-- [ ] Agent 7 code audit: pending
-- [ ] Agent 11 feature integrity: pending
-- [ ] Sandbox review: pending user approval
+- [x] Agent 7 code audit: PASS WITH NOTES (0 P0, 3 P1 pre-existing — all fixed)
+- [x] Agent 11 feature integrity: PASS (0 regressions)
+- [x] Sandbox review: user approved (with 4 additional fixes applied)
 
 ---
 
@@ -210,10 +211,10 @@ Phase C — Verification (after all parcels):
 - [x] Stale Agent 7 docs archived
 - [x] Vision.md current position up to date (v3.3)
 - [x] `npm run lint && npm run typecheck && npm run test && npm run build` all pass
-- [ ] Agent 7 code audit: no unresolved P0s
-- [ ] Agent 11 feature integrity: no regressions
+- [x] Agent 7 code audit: PASS WITH NOTES (0 P0, 3 pre-existing P1s fixed)
+- [x] Agent 11 feature integrity: PASS (0 regressions)
 - [x] 3-agent design review: all PASS (after P0 fixes)
-- [ ] Sandbox review: user approved
+- [x] Sandbox review: user approved (4 additional fixes applied)
 
 ---
 
@@ -233,4 +234,60 @@ Phase C — Verification (after all parcels):
 | Entry templates | Feature work | Sprint 14+ |
 | Calendar page redesign | Large scope | Sprint 14+ |
 | Notes rename tech debt | Low urgency | Sprint 13+ |
+| Project color palette — richer picker UI | User-flagged during sandbox | Sprint 13 (High) |
+| Unify `text-info` vs `text-info-foreground` codebase-wide | Agent 7 P1-4 | Sprint 13 |
+| Extract ProjectSettings + ProjectTaskList components | Agent 7 P2-2 (617 lines) | Sprint 13 |
+| Remove pass-through reads from useKaivooActions | Agent 7 P2-1 | Sprint 13 |
+| Lift task stats out of ProjectCard into parent | Agent 7 P2-4 | Sprint 13 |
+| Projects in DataSettings export/import | Agent 11 observation | Sprint 13 |
 | CODE-02/03 (duplicated config) | Low priority | Backlog |
+
+---
+
+## Sandbox Fixes (Applied During Review)
+
+User-identified issues caught during sandbox review that the 3-agent design audit missed:
+
+1. **Topic pill colors swapped** — `text-info` (background tint) on ProjectCard made topic badges invisible in both light and dark mode. Fixed → `text-info-foreground`
+2. **Subtask progress bar invisible** — `bg-success` (tint token) made bars near-invisible. Fixed → `bg-primary`
+3. **"Add tasks" at top** — moved to bottom of task list, consistent with daily page pattern
+4. **Native date inputs** — replaced `<input type="date">` with Popover+Calendar widget in both ProjectDetail Settings and CreateProjectDialog
+
+**Lessons for design agents:** Updated all 3 agent specs with new checks:
+- Visual Design: token consistency (base vs foreground)
+- Accessibility: native vs styled inputs, token direction audit
+- UX Completeness: input placement convention (add-new at bottom)
+
+## Agent 7 P1 Fixes (Pre-Existing)
+
+3 pre-existing issues fixed since the file was already touched:
+
+1. **deleteSubtask rollback** — was calling `addSubtask(taskId, title, id)` with wrong arity, generating new ID instead of restoring original. Fixed with `setState` direct rollback.
+2. **addSubtask missing try/catch** — DB failure caused unhandled promise rejection. Added try/catch + toast.
+3. **addMeeting + addCapture missing try/catch** — same pattern. Both wrapped with error handling.
+
+---
+
+## Retrospective
+
+### What Went Well
+- **3-agent design split** produced significantly more granular findings than the single Design Agent (4 P0, 18 P1 found vs ~5 total in Sprint 11)
+- **Executable checklists** made reviews deterministic — each agent follows a step-by-step procedure
+- **Phase B parallelization** saved time — code quality parcels (P6-P10) completed in parallel while design track ran sequentially
+- **Pre-existing assessments** (P6, P8) avoided unnecessary work — 2 of 3 code quality items were already resolved
+
+### What Needs Improvement
+- **Design agents missed 4 user-visible issues** that the user caught in sandbox review (topic pill tokens, progress bar colors, add-task placement, native date inputs)
+- Root cause: the design review was code-focused (reading tokens in source) but didn't catch the **visual runtime result** of those tokens in both themes
+- **Action taken:** Added 4 new checklist items across all 3 design agent specs to prevent recurrence
+- **Codebase-wide `text-info` inconsistency** remains — Sprint 12 files are correct but 20+ other files still use the wrong token (Agent 7 P1-4, deferred to Sprint 13)
+
+### Process Observations
+- Sandbox review remains the most effective quality gate — user eyes catch what automated agents miss
+- The 3-agent → sandbox → fix → re-verify loop took ~2 iterations this sprint
+- Agent 7's code audit found pre-existing issues in touched files — good practice to fix these opportunistically
+
+### Sprint 13 Priorities (From This Sprint)
+1. **Project color palette** — richer picker UI (user-flagged, High)
+2. **Unify semantic color tokens** codebase-wide (Agent 7 P1-4)
+3. **ProjectDetail decomposition** (617 lines → extract Settings + TaskList)
