@@ -18,7 +18,6 @@ import { EntryHeaderNode } from './EntryHeaderNode';
 import SplitToNewEntryMenu from './SplitToNewEntryMenu';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
-import { JournalEntry } from '@/types';
 import { cn } from '@/lib/utils';
 
 // --- Constants ---
@@ -60,14 +59,70 @@ interface JournalCanvasProps {
 }
 
 // --- Helpers ---
-function composeHTML(entries: JournalEntry[]): string {
+function composeHTML(entries: Array<{ id: string; timestamp: string; content: string | null }>, collapseState?: Map<string, boolean>): string {
   if (entries.length === 0) return '';
   return entries.map(entry => {
     const ts = new Date(entry.timestamp);
     const label = `── ${format(ts, 'h:mm a')} ──`;
-    const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" contenteditable="false" class="timestamp-divider">${label}</div>`;
+    const collapsed = collapseState?.get(entry.id) ?? false;
+    const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" data-collapsed="${collapsed}" contenteditable="false" class="timestamp-divider">${label}</div>`;
     return divider + (entry.content || '<p></p>');
   }).join('');
+}
+
+/** Read current collapse state from ProseMirror doc before rebuild */
+function getEditorCollapseState(editor: { state: { doc: { forEach: (cb: (node: { type: { name: string }; attrs: Record<string, unknown> }, pos: number) => void) => void } } }): Map<string, boolean> {
+  const state = new Map<string, boolean>();
+  editor.state.doc.forEach((node) => {
+    if (node.type.name === 'entryHeader' && node.attrs.entryId) {
+      state.set(node.attrs.entryId as string, node.attrs.collapsed === true);
+    }
+  });
+  return state;
+}
+
+/** Save collapse state to localStorage for session persistence */
+function saveCollapseState(dateStr: string, state: Map<string, boolean>): void {
+  const obj: Record<string, boolean> = {};
+  state.forEach((v, k) => { if (v) obj[k] = true; }); // only store collapsed=true entries
+  if (Object.keys(obj).length > 0) {
+    localStorage.setItem(`collapse-${dateStr}`, JSON.stringify(obj));
+  } else {
+    localStorage.removeItem(`collapse-${dateStr}`);
+  }
+}
+
+/** Load collapse state from localStorage */
+function loadCollapseState(dateStr: string): Map<string, boolean> {
+  const state = new Map<string, boolean>();
+  try {
+    const raw = localStorage.getItem(`collapse-${dateStr}`);
+    if (raw) {
+      const obj = JSON.parse(raw) as Record<string, boolean>;
+      for (const [k, v] of Object.entries(obj)) {
+        state.set(k, v);
+      }
+    }
+  } catch { /* ignore parse errors */ }
+  return state;
+}
+
+/** Clean up collapse localStorage keys older than 7 days */
+function cleanOldCollapseKeys(): void {
+  try {
+    const now = Date.now();
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('collapse-')) {
+        const dateStr = key.slice('collapse-'.length);
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime()) && now - date.getTime() > sevenDays) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+  } catch { /* ignore */ }
 }
 
 function extractSections(html: string): Array<{ entryId: string; content: string }> {
@@ -392,7 +447,10 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
       tempDiv.appendChild(domFragment);
       const selectedHTML = tempDiv.innerHTML;
 
-      // 2. Delete selected content from editor
+      // 2. Capture collapse state BEFORE modifying the editor
+      const collapseState = getEditorCollapseState(editor);
+
+      // 3. Delete selected content from editor
       editor.chain().focus().deleteSelection().run();
 
       // 3. Save the source entry (content was just modified)
@@ -411,60 +469,46 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
       if (newEntry && editor) {
         isComposingRef.current = true;
 
-        const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
-        const dividerHTML = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>`;
-
-        // 5. Find insertion point: after the current entry's content, before next entry header
-        // Use HTML approach: rebuild with new section inserted after source entry
+        // 5. Build entry list from current editor content (NOT from store — avoids race)
         const fullHTML = editor.getHTML();
-        const sections = extractSections(fullHTML);
-
-        // Find which entry the cursor was in (use activeEntryIdRef)
+        const currentSections = extractSections(fullHTML);
         const sourceEntryId = activeEntryIdRef.current;
-        const sourceIdx = sections.findIndex(s => s.entryId === sourceEntryId);
+        const sourceIdx = currentSections.findIndex(s => s.entryId === sourceEntryId);
 
-        if (sourceIdx >= 0) {
-          // Rebuild HTML: all sections up to and including source, then new entry, then remaining
-          const allEntries = useKaivooStore.getState().journalEntries
-            .filter(e => e.date === dateStrRef.current)
-            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-
-          // Insert newEntry right after the source entry
-          const updatedEntries = [...allEntries];
-          const sourceEntryIdx = updatedEntries.findIndex(e => e.id === sourceEntryId);
-          if (sourceEntryIdx >= 0) {
-            updatedEntries.splice(sourceEntryIdx + 1, 0, newEntry);
-          }
-
-          const rebuiltHTML = composeHTML(updatedEntries);
-          editor.commands.setContent(rebuiltHTML);
-
-          // Update tracking refs
-          savedContentsRef.current.set(newEntry.id, selectedHTML);
-          // Update source entry's saved content from the rebuilt sections
-          const rebuiltSections = extractSections(rebuiltHTML);
-          for (const sec of rebuiltSections) {
-            if (sec.entryId !== newEntry.id) {
-              savedContentsRef.current.set(sec.entryId, sec.content);
-            }
-          }
-
-          sectionsRef.current = updatedEntries.map(e => ({
-            entryId: e.id,
-            timestamp: new Date(e.timestamp),
+        // Build entries from what's currently in the editor
+        const entryList: Array<{ id: string; timestamp: string; content: string }> =
+          sectionsRef.current.map(s => ({
+            id: s.entryId,
+            timestamp: s.timestamp.toISOString(),
+            content: currentSections.find(cs => cs.entryId === s.entryId)?.content || '',
           }));
-          onSectionsChangeRef.current(sectionsRef.current);
-        } else {
-          // Fallback: just append at the end
-          const appendHTML = fullHTML + dividerHTML + selectedHTML;
-          editor.commands.setContent(appendHTML);
-          savedContentsRef.current.set(newEntry.id, selectedHTML);
-          sectionsRef.current = [
-            ...sectionsRef.current,
-            { entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) },
-          ];
-          onSectionsChangeRef.current(sectionsRef.current);
+
+        // Insert new entry after source (or at end if source not found)
+        const insertIdx = sourceIdx >= 0 ? sourceIdx + 1 : entryList.length;
+        entryList.splice(insertIdx, 0, {
+          id: newEntry.id,
+          timestamp: new Date(newEntry.timestamp).toISOString(),
+          content: selectedHTML,
+        });
+
+        // Rebuild HTML with collapse state preserved
+        const rebuiltHTML = composeHTML(entryList, collapseState);
+        editor.commands.setContent(rebuiltHTML);
+
+        // Update tracking refs
+        savedContentsRef.current.set(newEntry.id, selectedHTML);
+        for (const sec of currentSections) {
+          savedContentsRef.current.set(sec.entryId, sec.content);
         }
+
+        sectionsRef.current = entryList.map(e => ({
+          entryId: e.id,
+          timestamp: new Date(e.timestamp),
+        }));
+        onSectionsChangeRef.current(sectionsRef.current);
+
+        // Persist collapse state to localStorage
+        saveCollapseState(dateStrRef.current, collapseState);
 
         requestAnimationFrame(() => {
           editor.commands.focus('end');
@@ -513,8 +557,10 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
     onSectionsChangeRef.current(sectionsRef.current);
 
     // Compose and set content — defer to avoid flushSync inside React lifecycle
-    const html = composeHTML(entries);
+    const collapseState = loadCollapseState(dateStr);
+    const html = composeHTML(entries, collapseState);
     const entryCount = entries.length;
+    cleanOldCollapseKeys();
     queueMicrotask(() => {
       editor.commands.setContent(html || '');
       onSaveStatusChangeRef.current(entryCount > 0 ? 'saved' : 'idle');
@@ -549,7 +595,8 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
     }));
     onSectionsChangeRef.current(sectionsRef.current);
 
-    const html = composeHTML(entries);
+    const collapseState = loadCollapseState(dateStr);
+    const html = composeHTML(entries, collapseState);
     editor.commands.setContent(html);
     onSaveStatusChangeRef.current('saved');
     setInitialLoadDone(true);

@@ -66,6 +66,7 @@ Before any sprint branch merges to main, ALL of the following must pass:
 □ Deterministic checks pass: npm run lint && npm run typecheck && npm run test && npm run build
 □ Agent 7 code audit completed (no unresolved P0 issues)
 □ Agent 11 feature integrity check passed (no regressions)
+□ Design Agent review completed (for UI sprints): no unresolved P0 issues
 □ SANDBOX: Dev server started on sprint branch, user has reviewed the running app and approved UX
 □ Sprint retrospective section added to sprint file
 □ All sprint files committed to the sprint branch
@@ -191,7 +192,8 @@ Common document types:
 3. Director reads the "Deferred to Sprint N+1" section from the current sprint file
 4. Director compiles everything into `Next-Sprint-Planning.md` with attribution
 5. Director assigns parcels to agents and organizes into tracks
-6. User reviews and approves
+6. **For sprints with new pages/components:** Design Agent produces screen specs BEFORE implementation begins. These specs are reviewed by the user alongside the sprint contract.
+7. User reviews and approves
 
 ### Phase 2: Sprint Start
 
@@ -218,8 +220,9 @@ Common document types:
    `npm run lint && npm run typecheck && npm run test && npm run build`
 2. Agent 7 produces a code audit report: `Code-Audit-Sprint-{N}-Review.md`
 3. Agent 11 runs feature integrity check against Feature Bible
-4. Fix all P0 issues from gates before proceeding
-5. **SANDBOX REVIEW:** Start dev server on sprint branch (`npm run dev`)
+4. **DESIGN REVIEW (for UI sprints):** Design Agent reviews the running app on the sprint branch using its 5-step methodology (Hierarchy, Interactions, Accessibility, Responsive, Anti-patterns). Must produce a Design Review verdict (PASS / PASS WITH NOTES / FAIL). Dark mode must be reviewed as a separate pass. No unresolved P0 issues allowed before proceeding.
+5. Fix all P0 issues from gates before proceeding
+6. **SANDBOX REVIEW:** Start dev server on sprint branch (`npm run dev`)
    - User reviews the running application in their browser
    - User approves UX or requests changes
    - This is a **blocking gate** — do NOT proceed without user approval
@@ -322,6 +325,9 @@ Deterministic checks (lint, typecheck, test, build)
 Agent gates (Agent 7 code audit + Agent 11 feature integrity)
          |
          v
+Design Agent review (for UI sprints — 5-step methodology + dark mode pass)
+         |
+         v
 Fix all P0 issues
          |
          v
@@ -339,8 +345,9 @@ Vision.md updated (mark phase progress)
 
 ---
 
-*Sprint Protocol v1.3 — February 23, 2026*
+*Sprint Protocol v1.4 — February 24, 2026*
 *v1.0: Initial protocol*
 *v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
 *v1.2: Explicit sandbox review step in lifecycle + pre-merge checklist. Deterministic checks before agent gates.*
 *v1.3: Sandbox review woven into Phase 4 lifecycle + user-perspective flow. Agent 1+6 merged to Design Agent. Design references updated throughout.*
+*v1.4: Mandatory Design Agent gate in Phase 4 (5-step review + dark mode pass). Design Agent added to Phase 1 (screen specs for new UI). Pre-merge checklist updated. Sprint 10 stabilization drove this change.*
