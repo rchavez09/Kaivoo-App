@@ -11,6 +11,7 @@ import * as CapturesService from '@/services/captures.service';
 import * as TopicsService from '@/services/topics.service';
 import * as MeetingsService from '@/services/meetings.service';
 import * as RoutinesService from '@/services/routines.service';
+import * as ProjectsService from '@/services/projects.service';
 
 export const useDatabase = (options?: { autoLoad?: boolean }) => {
   const { user } = useAuth();
@@ -33,6 +34,7 @@ export const useDatabase = (options?: { autoLoad?: boolean }) => {
         routinesData,
         routineGroupsData,
         routineCompletionsData,
+        projectsData,
       ] = await Promise.all([
         TopicsService.fetchTopics(user.id),
         TopicsService.fetchTopicPages(user.id),
@@ -45,6 +47,7 @@ export const useDatabase = (options?: { autoLoad?: boolean }) => {
         RoutinesService.fetchRoutines(user.id),
         RoutinesService.fetchRoutineGroups(user.id),
         RoutinesService.fetchRoutineCompletions(user.id),
+        ProjectsService.fetchProjects(user.id),
       ]);
 
       // Group subtasks by task_id
@@ -81,6 +84,7 @@ export const useDatabase = (options?: { autoLoad?: boolean }) => {
         routines: routinesData.map(RoutinesService.dbToRoutine),
         routineGroups: routineGroupsData.map(RoutinesService.dbToRoutineGroup),
         routineCompletions: completionsMap,
+        projects: projectsData.map(ProjectsService.dbToProject),
       });
     } catch (error) {
       console.error('Error loading data from database:', error);
@@ -131,5 +135,8 @@ export const useDatabaseOperations = () => {
     updateRoutineGroup: (id: string, updates: Parameters<typeof RoutinesService.updateRoutineGroup>[2]) => RoutinesService.updateRoutineGroup(ensureAuth(), id, updates),
     deleteRoutineGroup: (id: string) => RoutinesService.deleteRoutineGroup(ensureAuth(), id),
     toggleRoutineCompletion: (routineId: string, date: string, isCompleted: boolean) => RoutinesService.toggleRoutineCompletion(ensureAuth(), routineId, date, isCompleted),
+    createProject: (project: Parameters<typeof ProjectsService.createProject>[1]) => ProjectsService.createProject(ensureAuth(), project),
+    updateProject: (id: string, updates: Parameters<typeof ProjectsService.updateProject>[2]) => ProjectsService.updateProject(ensureAuth(), id, updates),
+    deleteProject: (id: string) => ProjectsService.deleteProject(ensureAuth(), id),
   };
 };

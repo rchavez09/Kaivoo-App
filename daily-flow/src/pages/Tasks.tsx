@@ -3,7 +3,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import {
   CheckSquare, Plus, Search, SlidersHorizontal, Circle, CheckCircle2,
   Calendar, X, Flag, ChevronRight, LayoutList, Columns3,
-  ChevronDown, ArrowUpDown
+  ChevronDown, ArrowUpDown, GanttChart
 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
@@ -40,12 +40,13 @@ import { Task, TaskStatus, TaskPriority } from '@/types';
 import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
 import BulkActionBar from '@/components/BulkActionBar';
 import KanbanBoard from '@/components/KanbanBoard';
+import TimelineView from '@/components/timeline/TimelineView';
 import { isToday, isTomorrow, isThisWeek } from '@/lib/dateUtils';
 import { statusConfig, priorityConfig, statusOrder } from '@/lib/task-config';
 import { toast } from 'sonner';
 
 type ViewTab = 'open' | 'today' | 'tomorrow' | 'week' | 'completed';
-type ViewMode = 'list' | 'kanban';
+type ViewMode = 'list' | 'kanban' | 'timeline';
 type SortOption = 'created' | 'due' | 'priority' | 'title' | 'status';
 type SortDirection = 'asc' | 'desc';
 
@@ -73,6 +74,7 @@ const DEFAULT_PREFS: TasksViewPrefs = {
 
 const Tasks = () => {
   const tasks = useKaivooStore(s => s.tasks);
+  const projects = useKaivooStore(s => s.projects);
   const topics = useKaivooStore(s => s.topics);
   const topicPages = useKaivooStore(s => s.topicPages);
   const { addTask, updateTask, deleteTask, toggleSubtask } = useKaivooActions();
@@ -406,7 +408,7 @@ const Tasks = () => {
 
   return (
     <AppLayout>
-      <div className={cn("mx-auto px-6 py-8", viewMode === 'kanban' ? 'max-w-full' : 'max-w-4xl')}>
+      <div className={cn("mx-auto px-6 py-8", viewMode === 'list' ? 'max-w-4xl' : 'max-w-full')}>
         {/* Header */}
         <header className="mb-6 flex items-center justify-between">
           <div>
@@ -453,6 +455,18 @@ const Tasks = () => {
                 title="Kanban view"
               >
                 <Columns3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleSetViewMode('timeline')}
+                className={cn(
+                  'p-1.5 rounded-md transition-all',
+                  viewMode === 'timeline'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+                title="Timeline view"
+              >
+                <GanttChart className="w-4 h-4" />
               </button>
             </div>
             <Button className="gap-2" onClick={() => setShowNewTaskInput(true)}>
@@ -748,7 +762,9 @@ const Tasks = () => {
         )}
 
         {/* Task views */}
-        {viewMode === 'kanban' ? (
+        {viewMode === 'timeline' ? (
+          <TimelineView />
+        ) : viewMode === 'kanban' ? (
           <KanbanBoard tasks={filteredTasks} onTaskClick={handleOpenTask} />
         ) : (
           <div className="widget-card">
@@ -826,6 +842,15 @@ const Tasks = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            {task.projectId && (() => {
+                              const proj = projects.find(p => p.id === task.projectId);
+                              return proj ? (
+                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: proj.color || '#888' }} />
+                                  {proj.name}
+                                </Badge>
+                              ) : null;
+                            })()}
                             {task.dueDate && (
                               <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
                                 <Calendar className="w-2.5 h-2.5" />

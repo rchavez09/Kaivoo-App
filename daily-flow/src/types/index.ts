@@ -62,6 +62,7 @@ export interface Task {
   tags: string[];
   topicIds: string[];
   subtasks: Subtask[];
+  projectId?: string;
   sourceLink?: string; // Where task was created from
   recurrence?: RecurrenceRule;
   createdAt: Date;
@@ -78,6 +79,22 @@ export interface JournalEntry {
   createdAt: Date;
   updatedAt: Date;
   timestamp: Date; // Time of entry creation
+}
+
+export type ProjectStatus = 'planning' | 'active' | 'paused' | 'completed' | 'archived';
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  topicId?: string;
+  status: ProjectStatus;
+  color?: string;
+  icon?: string;
+  startDate?: string;  // yyyy-MM-dd
+  endDate?: string;     // yyyy-MM-dd
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface DailyStats {
