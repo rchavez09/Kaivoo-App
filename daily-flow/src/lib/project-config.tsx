@@ -10,9 +10,9 @@ export const projectStatusConfig: Record<ProjectStatus, {
   order: number;
 }> = {
   planning:  { label: 'Planning',  icon: <PenLine className="w-3.5 h-3.5" />,      color: 'text-muted-foreground', bg: 'bg-muted/50',       order: 0 },
-  active:    { label: 'Active',    icon: <Zap className="w-3.5 h-3.5" />,           color: 'text-info',             bg: 'bg-info/10',        order: 1 },
-  paused:    { label: 'Paused',    icon: <Pause className="w-3.5 h-3.5" />,         color: 'text-warning',          bg: 'bg-warning/10',     order: 2 },
-  completed: { label: 'Done',      icon: <CheckCircle2 className="w-3.5 h-3.5" />,  color: 'text-success',          bg: 'bg-success/10',     order: 3 },
+  active:    { label: 'Active',    icon: <Zap className="w-3.5 h-3.5" />,           color: 'text-info-foreground',    bg: 'bg-info/10',        order: 1 },
+  paused:    { label: 'Paused',    icon: <Pause className="w-3.5 h-3.5" />,         color: 'text-warning-foreground', bg: 'bg-warning/10',     order: 2 },
+  completed: { label: 'Done',      icon: <CheckCircle2 className="w-3.5 h-3.5" />,  color: 'text-success-foreground', bg: 'bg-success/10',     order: 3 },
   archived:  { label: 'Archived',  icon: <Archive className="w-3.5 h-3.5" />,       color: 'text-muted-foreground', bg: 'bg-muted/30',       order: 4 },
 };
 
@@ -53,11 +53,12 @@ export const getProjectColor = (project: { color?: string }, index: number): str
   return project.color || PROJECT_COLORS[index % PROJECT_COLORS.length];
 };
 
-// Returns white or dark text depending on background luminance (WCAG contrast)
+// Returns white or dark text depending on background luminance (WCAG 2.x relative luminance)
 export const getContrastTextColor = (bgHex: string): string => {
-  const r = parseInt(bgHex.slice(1, 3), 16);
-  const g = parseInt(bgHex.slice(3, 5), 16);
-  const b = parseInt(bgHex.slice(5, 7), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? '#0A1628' : '#FFFFFF';
+  const r = parseInt(bgHex.slice(1, 3), 16) / 255;
+  const g = parseInt(bgHex.slice(3, 5), 16) / 255;
+  const b = parseInt(bgHex.slice(5, 7), 16) / 255;
+  const toLinear = (c: number) => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  const L = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  return L > 0.179 ? '#0A1628' : '#FFFFFF';
 };

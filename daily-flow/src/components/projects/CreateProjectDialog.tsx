@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,12 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { ProjectStatus } from '@/types';
-import { projectStatusConfig, PROJECT_COLORS } from '@/lib/project-config';
+import { projectStatusConfig, PROJECT_COLORS, PROJECT_COLOR_NAMES } from '@/lib/project-config';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -59,7 +66,7 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
 
     const assignedColor = color || PROJECT_COLORS[projects.length % PROJECT_COLORS.length];
 
-    await addProject({
+    const result = await addProject({
       name: name.trim(),
       description: description.trim() || undefined,
       topicId: topicId && topicId !== 'none' ? topicId : undefined,
@@ -69,6 +76,8 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     });
+
+    if (!result) return; // Keep dialog open on failure — toast already shown by addProject
 
     toast.success('Project created');
     resetForm();
@@ -115,7 +124,7 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">Status</label>
               <Select value={status} onValueChange={(v) => setStatus(v as ProjectStatus)}>
-                <SelectTrigger>
+                <SelectTrigger aria-label="Project status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -134,7 +143,7 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">Topic</label>
               <Select value={topicId} onValueChange={setTopicId}>
-                <SelectTrigger>
+                <SelectTrigger aria-label="Project topic">
                   <SelectValue placeholder="None" />
                 </SelectTrigger>
                 <SelectContent>
@@ -150,22 +159,84 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
           {/* Dates row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label htmlFor="project-start" className="text-sm font-medium text-muted-foreground">Start Date</label>
-              <Input
-                id="project-start"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+              <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5" />
+                Start Date
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                    {startDate ? format(new Date(startDate + 'T00:00:00'), 'MMM d, yyyy') : 'Set start date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={startDate ? new Date(startDate + 'T00:00:00') : undefined}
+                    onSelect={(date) => setStartDate(date ? format(date, 'yyyy-MM-dd') : '')}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                  <div className="p-2 border-t border-border flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs flex-1"
+                      onClick={() => setStartDate(format(new Date(), 'yyyy-MM-dd'))}
+                    >
+                      Today
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs flex-1"
+                      onClick={() => setStartDate('')}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="project-end" className="text-sm font-medium text-muted-foreground">End Date</label>
-              <Input
-                id="project-end"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5" />
+                End Date
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                    {endDate ? format(new Date(endDate + 'T00:00:00'), 'MMM d, yyyy') : 'Set end date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={endDate ? new Date(endDate + 'T00:00:00') : undefined}
+                    onSelect={(date) => setEndDate(date ? format(date, 'yyyy-MM-dd') : '')}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                  <div className="p-2 border-t border-border flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs flex-1"
+                      onClick={() => setEndDate(format(new Date(), 'yyyy-MM-dd'))}
+                    >
+                      Today
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs flex-1"
+                      onClick={() => setEndDate('')}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
@@ -178,11 +249,11 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                   key={c}
                   onClick={() => setColor(c)}
                   className={cn(
-                    'w-7 h-7 rounded-full border-2 transition-all',
+                    'w-9 h-9 rounded-full border-2 transition-all',
                     color === c ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
                   )}
                   style={{ backgroundColor: c }}
-                  aria-label={`Select color ${c}`}
+                  aria-label={`Select ${PROJECT_COLOR_NAMES[c] || 'color'}`}
                 />
               ))}
             </div>

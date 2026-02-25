@@ -38,8 +38,19 @@ import { ProjectStatus } from '@/types';
 import { projectStatusConfig, getProjectColor, PROJECT_COLORS, PROJECT_COLOR_NAMES } from '@/lib/project-config';
 import { priorityConfig } from '@/lib/task-config';
 import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
+
+const formatDateLong = (d?: string) => {
+  if (!d) return null;
+  try { return format(parseISO(d), 'MMM d, yyyy'); } catch { return d; }
+};
+
+const formatDateShort = (d?: string) => {
+  if (!d) return null;
+  try { return format(parseISO(d), 'MMM d'); } catch { return d; }
+};
 
 const ProjectDetail = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -48,6 +59,7 @@ const ProjectDetail = () => {
   const projects = useKaivooStore(s => s.projects);
   const tasks = useKaivooStore(s => s.tasks);
   const topics = useKaivooStore(s => s.topics);
+  const isLoaded = useKaivooStore(s => s.isLoaded);
   const { updateProject, deleteProject, addTask, updateTask } = useKaivooActions();
 
   const project = useMemo(() => projects.find(p => p.id === projectId), [projects, projectId]);
@@ -128,6 +140,21 @@ const ProjectDetail = () => {
     setNewTaskTitle('');
   };
 
+  if (!isLoaded) {
+    return (
+      <AppLayout>
+        <div className="mx-auto px-6 py-8 max-w-4xl">
+          <div className="widget-card animate-pulse">
+            <div className="h-6 bg-muted rounded w-1/3 mb-4" />
+            <div className="h-8 bg-muted rounded w-2/3 mb-6" />
+            <div className="h-4 bg-muted rounded w-full mb-2" />
+            <div className="h-4 bg-muted rounded w-4/5" />
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   if (!project) {
     return (
       <AppLayout>
@@ -149,16 +176,6 @@ const ProjectDetail = () => {
 
   const color = getProjectColor(project, projectIndex);
   const topicName = project.topicId ? topics.find(t => t.id === project.topicId)?.name : undefined;
-
-  const formatDateLong = (d?: string) => {
-    if (!d) return null;
-    try { return format(parseISO(d), 'MMM d, yyyy'); } catch { return d; }
-  };
-
-  const formatDateShort = (d?: string) => {
-    if (!d) return null;
-    try { return format(parseISO(d), 'MMM d'); } catch { return d; }
-  };
 
   return (
     <AppLayout>
@@ -186,8 +203,11 @@ const ProjectDetail = () => {
               />
             ) : (
               <h1
+                role="button"
+                tabIndex={0}
                 className="text-2xl font-semibold text-foreground cursor-pointer hover:text-primary transition-colors"
                 onClick={() => { setNameInput(project.name); setEditingName(true); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setNameInput(project.name); setEditingName(true); } }}
               >
                 {project.name}
               </h1>
@@ -200,7 +220,7 @@ const ProjectDetail = () => {
               value={project.status}
               onValueChange={(v) => updateProject(project.id, { status: v as ProjectStatus })}
             >
-              <SelectTrigger className={cn(
+              <SelectTrigger aria-label="Change project status" className={cn(
                 'w-auto h-7 text-xs border-0 shadow-none px-2.5 rounded-full font-medium inline-flex items-center gap-1',
                 projectStatusConfig[project.status].bg,
                 projectStatusConfig[project.status].color,
@@ -221,7 +241,7 @@ const ProjectDetail = () => {
             </Select>
 
             {topicName && (
-              <Badge variant="secondary" className="text-xs text-info">{topicName}</Badge>
+              <Badge variant="secondary" className="text-xs text-info-foreground">{topicName}</Badge>
             )}
 
             {(project.startDate || project.endDate) && (
@@ -250,11 +270,14 @@ const ProjectDetail = () => {
             />
           ) : (
             <div
+              role="button"
+              tabIndex={0}
               className={cn(
                 'text-sm cursor-pointer rounded-lg p-3 hover:bg-secondary/30 transition-colors group flex items-start gap-2',
                 project.description ? 'text-muted-foreground' : 'text-muted-foreground/50 italic'
               )}
               onClick={() => { setDescInput(project.description || ''); setEditingDesc(true); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDescInput(project.description || ''); setEditingDesc(true); } }}
             >
               <span className="flex-1">
                 {project.description || 'Add a description...'}
@@ -266,7 +289,7 @@ const ProjectDetail = () => {
 
         {/* Stats bar */}
         {stats.total > 0 && (
-          <div className="widget-card mb-6">
+          <div className="widget-card mb-8">
             <div className="flex items-center gap-6 text-sm mb-3">
               <span className="text-muted-foreground">
                 <strong className="text-foreground">{stats.total}</strong> tasks
@@ -275,7 +298,7 @@ const ProjectDetail = () => {
                 <strong className="text-foreground">{stats.open}</strong> open
               </span>
               <span className="text-muted-foreground">
-                <strong className="text-success">{stats.completed}</strong> done
+                <strong className="text-success-foreground">{stats.completed}</strong> done
               </span>
               <span className="text-muted-foreground ml-auto">
                 {stats.progress}%
@@ -333,24 +356,6 @@ const ProjectDetail = () => {
             </div>
           </div>
 
-          {/* Add task input */}
-          <div className="mb-4 p-3 bg-[hsl(var(--surface-elevated))] rounded-lg border border-border">
-            <div className="flex items-center gap-2">
-              <Circle className="w-5 h-5 text-muted-foreground shrink-0" />
-              <Input
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-                placeholder="Add a task to this project..."
-                className="border-0 bg-transparent focus-visible:ring-0 shadow-none px-0"
-              />
-              <Button size="sm" onClick={handleAddTask} disabled={!newTaskTitle.trim()}>
-                <Plus className="w-4 h-4 mr-1" />
-                Add
-              </Button>
-            </div>
-          </div>
-
           {/* Task rows */}
           {projectTasks.length > 0 ? (
             <div className="divide-y divide-border">
@@ -359,7 +364,10 @@ const ProjectDetail = () => {
                 return (
                   <div key={task.id} className="py-1">
                     <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => { setSelectedTaskId(task.id); setDrawerOpen(true); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTaskId(task.id); setDrawerOpen(true); } }}
                       className="flex items-center gap-3 py-2 px-2 -mx-2 hover:bg-secondary/30 rounded-lg transition-colors cursor-pointer group"
                     >
                       <button
@@ -374,7 +382,7 @@ const ProjectDetail = () => {
                         className="shrink-0"
                       >
                         {task.status === 'done' ? (
-                          <CheckCircle2 className="w-5 h-5 text-success" />
+                          <CheckCircle2 className="w-5 h-5 text-success-foreground" />
                         ) : (
                           <Circle className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
                         )}
@@ -391,7 +399,7 @@ const ProjectDetail = () => {
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <div className="h-1.5 w-16 bg-secondary rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-success rounded-full transition-all"
+                                className="h-full bg-primary rounded-full transition-all"
                                 style={{ width: `${Math.round((task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100)}%` }}
                               />
                             </div>
@@ -424,14 +432,32 @@ const ProjectDetail = () => {
               <CheckCircle2 className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
               <h3 className="text-sm font-medium text-foreground mb-1">No tasks yet</h3>
               <p className="text-xs text-muted-foreground">
-                Add a task above or link an existing one.
+                Add a task below or link an existing one.
               </p>
             </div>
           )}
+
+          {/* Add task input */}
+          <div className="mt-4 p-3 bg-[hsl(var(--surface-elevated))] rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              <Circle className="w-5 h-5 text-muted-foreground shrink-0" />
+              <Input
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+                placeholder="Add a task to this project..."
+                className="border-0 bg-transparent focus-visible:ring-0 shadow-none px-0"
+              />
+              <Button size="sm" onClick={handleAddTask} disabled={!newTaskTitle.trim()}>
+                <Plus className="w-4 h-4 mr-1" />
+                Add
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Settings card */}
-        <div className="widget-card mt-6">
+        <div className="widget-card mt-8">
           <div className="widget-header">
             <h2 className="widget-title">Settings</h2>
           </div>
@@ -446,7 +472,7 @@ const ProjectDetail = () => {
                     key={c}
                     onClick={() => updateProject(project.id, { color: c })}
                     className={cn(
-                      'w-7 h-7 rounded-full border-2 transition-all',
+                      'w-9 h-9 rounded-full border-2 transition-all',
                       color === c ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
                     )}
                     style={{ backgroundColor: c }}
@@ -459,22 +485,88 @@ const ProjectDetail = () => {
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label htmlFor="detail-start" className="text-sm font-medium text-muted-foreground">Start Date</label>
-                <Input
-                  id="detail-start"
-                  type="date"
-                  value={project.startDate || ''}
-                  onChange={(e) => updateProject(project.id, { startDate: e.target.value || undefined })}
-                />
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Start Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                      {project.startDate ? format(parseISO(project.startDate), 'MMM d, yyyy') : 'Set start date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={project.startDate ? parseISO(project.startDate) : undefined}
+                      onSelect={(date) => {
+                        updateProject(project.id, { startDate: date ? format(date, 'yyyy-MM-dd') : undefined });
+                      }}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                    <div className="p-2 border-t border-border flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs flex-1"
+                        onClick={() => updateProject(project.id, { startDate: format(new Date(), 'yyyy-MM-dd') })}
+                      >
+                        Today
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs flex-1"
+                        onClick={() => updateProject(project.id, { startDate: undefined })}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="detail-end" className="text-sm font-medium text-muted-foreground">End Date</label>
-                <Input
-                  id="detail-end"
-                  type="date"
-                  value={project.endDate || ''}
-                  onChange={(e) => updateProject(project.id, { endDate: e.target.value || undefined })}
-                />
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  End Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                      {project.endDate ? format(parseISO(project.endDate), 'MMM d, yyyy') : 'Set end date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={project.endDate ? parseISO(project.endDate) : undefined}
+                      onSelect={(date) => {
+                        updateProject(project.id, { endDate: date ? format(date, 'yyyy-MM-dd') : undefined });
+                      }}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                    <div className="p-2 border-t border-border flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs flex-1"
+                        onClick={() => updateProject(project.id, { endDate: format(new Date(), 'yyyy-MM-dd') })}
+                      >
+                        Today
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs flex-1"
+                        onClick={() => updateProject(project.id, { endDate: undefined })}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 

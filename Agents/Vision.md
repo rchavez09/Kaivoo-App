@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 3.2
-**Last Updated:** February 23, 2026
+**Version:** 3.3
+**Last Updated:** February 24, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -115,7 +115,7 @@ The platform doesn't guess what users want — it watches what they're already t
 
 | # | Module | Role | Status |
 |---|--------|------|--------|
-| — | **Command Space** | Core Foundation — journal, projects & tasks, calendar, captures, daily view | In progress (~85%) |
+| — | **Command Space** | Core Foundation — journal, projects & tasks, calendar, captures, daily view | In progress (~97%) |
 | 2 | **Marketing Agency** | Brand guidelines → campaigns, copy, landing pages, social content, asset generation | Planned — begins after Command Space is monetizing |
 | 3 | **Trading Bot** | Multi-strategy automated trading, multi-account management, backtesting | Deferred — requires legal/compliance review before development |
 | N | **Future Modules** | Prioritized by Module Demand Intelligence — build what users are already trying to do | Long-term — platform architecture must be proven first |
@@ -198,7 +198,7 @@ The platform doesn't guess what users want — it watches what they're already t
 | Tasks Timeline view — project-first calendar with layered filters (projects, tasks, meetings) | PLANNED | — |
 | Calendar page redesign — meetings-first view with project/task dots, shared filter system | PLANNED | — |
 | AI project kickoff — chat-driven project scaffolding from templates | PLANNED | — |
-| Core feature enhancement (better journal, search) | IN PROGRESS | Sprint 7 |
+| Core feature enhancement (journal, topics, notes, captures) | DONE | Sprints 7–8 |
 | Search & file attachments | PLANNED | — |
 | Analytics & insights dashboard rebuild | PLANNED | — |
 | Notifications & reminders | PLANNED | — |
@@ -308,27 +308,29 @@ The platform doesn't guess what users want — it watches what they're already t
 
 ## Current Position
 
-**We are in:** Phase 1 — Cloud Command Center (~95% complete)
-**Active sprint:** Sprint 7 (Journal Canvas) — Transform Journal from form-based entries to continuous writing surface
-**Last completed:** Sprint 6 (Feature Depth) — Task recurrence, Tasks page topic/tag filtering, bulk actions, 23 new tests (104 total)
+**We are in:** Phase 1 — Cloud Command Center (~97% complete)
+**Active sprint:** Sprint 12 (Craft) — Design agent restructuring, Projects design re-audit, code quality
+**Last completed:** Sprint 11 (Fortify) — Security hardening, performance optimization, database indexing, Projects UX polish
 
-**Sprint 6 delivered:** Topic & tag filtering in Tasks page advanced filters with quick-filter chips and badge click activation. Filtered tab counts. Multi-select mode with bulk status/priority/due date/delete actions. Task recurrence (Daily/Weekly/Monthly) with auto-generation on completion. Recurrence badges on task rows. 23 new tests (104 total). Agent 11 (56/56 PASS) + Agent 7 (all P0s fixed) gates passed. See `Sprints/Sprint-6-Feature-Depth.md`.
+**Sprint 12 in progress:** Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Dark Mode Specification created. Sprint Protocol updated to v1.5 with 3-agent design gates. Zustand selector migration in useKaivooActions.ts. Code quality verified (zero `any` types, TasksWidget already decomposed). Projects pages 3-agent re-audit pending. See `Sprints/Sprint-12-Craft.md`.
 
-**Sprint 5 delivered:** GitHub Actions CI pipeline (lint → format → typecheck → test → build), GitHub remote repository, Zustand selector migration (22 files, zero full-store subscriptions), TasksWidget decomposition, service layer typing (0 `any`), shared config consolidation, 4 accessibility fixes, 34 new tests (81 total, 83% coverage on src/lib/). Agent 11 + Agent 7 gates both passed (8/10 score). See `Sprints/Sprint-5-Pipeline-Polish.md`.
+**Sprint 11 delivered:** Error message sanitization (2 leaks fixed). Design Agent Projects UX audit (8 P0, 11 P1, 5 P2). All 8 P0 design fixes implemented (accessible ProjectCard, ARIA tabs, sticky timeline labels, contrast-aware bar text, inline edit affordance, dark mode CSS variables). Projects Page Feature Bible (81 must-never-lose items). Verified pre-existing: service-layer user_id filtering, ownership checks, optimistic rollback, code splitting (108 KB gzip), React Query invalidation, 20+ database indexes, bounded routine queries. 104 tests passing. See `Sprints/Sprint-11-Fortify.md`.
 
-**Sprint 4 delivered:** Error message sanitization (FloatingChat, AIInbox, TrackingWidget), TrackingWidget decomposed into 4 focused modules, mood history append-only pattern, 22 aria-labels across 9 widgets, test strategy + coverage tooling + 47 tests (dateUtils, tracking-types). Agent 11 + Agent 7 gates both passed. See `Sprints/Sprint-4-Secure-Stabilize.md`.
+**Sprint 10 delivered:** Data integrity repair (orphaned records, dangling references), Notes/Journal bug fixes, process hardening. See `Sprints/Sprint-10-Stabilize.md`.
 
-**Sprint 3 delivered:** Widget-based TodayDashboard with configurable layout (drag-to-reorder, add/remove, vertical/horizontal toggle), date-aware activity trace, self-contained ScheduleWidget, FloatingChat, Feature Use Case Bible. See `Sprints/Sprint-3-Restore-Define.md`.
+**Sprint 9 delivered:** Supabase cloud migration (15 tables, RLS on all), Agent 12 (Data Engineer) created, full-stack auth flow, data sync. See `Sprints/Sprint-9-Cloud.md`.
 
 **Key decisions resolved:**
 - ~~Design System migration vs. feature work~~ → **Both in Sprint 2** (merged sprint)
 - ~~React Query adoption~~ → **Full migration** approved
 - ~~Business model validation~~ → **Agent 8 delivered** (Competitive Landscape + Customer Persona reports)
+- ~~Projects data model~~ → **Implemented in Sprint 8** (Project → Task linking, status transitions, timeline view)
+- ~~Design Agent structure~~ → **Split into 3 agents in Sprint 12** (Visual Design, Accessibility & Theming, UX Completeness)
 
 **Key decisions ahead:**
-- **Projects data model** — Topic → Project → Task → Subtask hierarchy; how Projects relate to existing Topics across journal/captures; research needed (Agent 5)
-- **Tasks Timeline view** — Project-first calendar with layered filters; relationship to Calendar page (meetings-first vs. tasks-first visual weight)
 - **Project templates + AI kickoff** — Reusable task structures; chat-driven scaffolding; prerequisite for Module 2 (Marketing Agency campaign templates)
+- **Tasks Timeline view** — Project-first calendar with layered filters; relationship to Calendar page
+- **Calendar page redesign** — meetings-first view with project/task dots
 - **Desktop framework choice** — Electron vs. Tauri (Agent 9 to evaluate)
 - **Platform architecture scoping** — When to begin module system design alongside core product work
 - **Module 2 revenue gate** — Command Space must be generating revenue before Marketing Agency development begins
@@ -387,6 +389,7 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v3.0 — February 22, 2026*
-*Updated to reflect platform pivot: modular architecture, Command Space as foundation, Marketing Agency as Module 2, long-term module ecosystem*
-*Synthesized from Agent 2 (Cloud Roadmap), Agent 3 (Hub Architecture), Agent 8 (Product Strategy), and user platform vision*
+*Vision v3.3 — February 24, 2026*
+*v3.0: Platform pivot — modular architecture, Command Space as foundation, Marketing Agency as Module 2*
+*v3.2: Sprint 7 progress, Supabase cloud migration*
+*v3.3: Updated through Sprint 12 — Design Agent split, code quality verified, Phase 1 ~97% complete*

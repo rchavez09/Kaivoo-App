@@ -74,7 +74,7 @@ Map the work to departments and agents:
 |---|---|
 | **Product** (Agent 8) | Business model decisions, pricing, market validation, feature prioritization by commercial impact, go-to-market planning |
 | **Research** (Agent 5) | New feature domains, technology scouting, pattern research |
-| **Design** (Design Agent) | UI changes, new screens, UX flows, interaction patterns, accessibility |
+| **Design** (Visual Design, Accessibility & Theming, UX Completeness) | UI changes, new screens, UX flows, interaction patterns, accessibility, dark mode, state completeness |
 | **Engineering** (Agent 2, 3, 4, 12) | All code changes, architecture decisions, security, database operations |
 | **DevOps** (Agent 9) | Deployment, CI/CD, Docker, packaging, infrastructure, monitoring |
 | **Quality** (Agent 7, 10) | Code review (every parcel), test strategy, test infrastructure, CI test suite |
@@ -117,7 +117,9 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 ### Design
 | Agent | Role | Specialty |
 |---|---|---|
-| Design Agent | Lead Designer | Kaivoo Design System, use cases, interaction patterns, visual hierarchy, accessibility, component specs |
+| Visual Design Agent | Visual Designer | Visual hierarchy, brand consistency, composition, rhythm, visual quality/polish, component specs |
+| Accessibility & Theming Agent | Accessibility & Theming Specialist | WCAG AA compliance, dark mode contrast, focus indicators, ARIA, reduced motion, theme token validation |
+| UX Completeness Agent | UX Completeness Specialist | State completeness, navigation, input patterns, edit-where-you-see-it, anti-patterns, progressive disclosure |
 
 ### Quality
 | Agent | Role | Specialty |
@@ -158,7 +160,8 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 
 ---
 
-*Director v1.4 — February 24, 2026*
+*Director v1.5 — February 24, 2026*
 *v1.2: Added Product (Agent 8), DevOps (Agent 9), and Quality (Agent 7 + Agent 10) departments*
 *v1.3: Agent 1 + Agent 6 merged into Design Agent. Updated department directory and involvement table.*
 *v1.4: Added Agent 12 (Data Engineer) to Engineering department.*
+*v1.5: Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Sprint 12.*

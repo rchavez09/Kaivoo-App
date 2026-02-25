@@ -1,49 +1,49 @@
 # Next Sprint Planning
 
-**Status:** Collecting inputs for Sprint 12
-**Last Reset:** February 24, 2026 (Sprint 11 approved)
+**Status:** Collecting inputs for Sprint 13
+**Last Reset:** February 24, 2026 (Sprint 12 approved)
 
 ---
 
 ## Input Sources
 
-### Sprint 11 Deferred Items
-Source: `Sprints/Sprint-11-Fortify.md` — Deferred to Sprint 12+
+### Sprint 12 Deferred Items
+Source: `Sprints/Sprint-12-Craft.md` — Deferred to Sprint 13+
 
 | Item | Category | Priority Estimate |
 |---|---|---|
-| **Design Agent spec rewrite** — add design craft evaluation (composition, rhythm, visual quality), not just compliance checks | Agent System | **P0 — user-flagged** |
-| **Projects UI visual polish** — re-audit with improved Design Agent, fix actual design quality | Design | **P0 — user-flagged** |
-| P1 design findings from Sprint 11 (date validation, grid layout, delete button style, timeline empty state) | Design | High |
-| Full-text search | Feature | High (deferred since Sprint 7) |
-| AI "Organize My Day" (inline annotations + sidebar summary) | Feature | High (deferred since Sprint 7) |
-| Entry templates (Morning Pages, Meeting Notes, etc.) | Feature | Medium |
+| Full-text search | Feature | **High** (deferred since Sprint 7) |
+| AI "Organize My Day" | Feature | **High** (deferred since Sprint 7) |
+| Project color palette — richer picker (more colors, custom input) | Design/UX | **High** (user-flagged Sprint 12) |
+| Topic editable after project creation | UX | Medium (deferred Sprint 12) |
+| Date input debouncing in ProjectDetail Settings | UX | Medium (deferred Sprint 12) |
+| Date range validation — end before start | UX | Medium (deferred Sprint 12) |
+| `prefers-reduced-motion` CSS | Accessibility | Medium (deferred Sprint 12) |
+| Progress bar ARIA in ProjectCard | Accessibility | Low (deferred Sprint 12) |
+| Automated design-lint CI step | DevOps | Medium |
+| Entry templates | Feature | Medium |
 | Calendar page redesign | Feature | Medium |
-| PERF-02: Zustand selector migration in hot components | Performance | Medium |
-| PERF-04: TasksWidget decomposition (1,069 lines) | Code Quality | Medium |
-| CODE-01: 17+ `any` types in service layer | Code Quality | Medium |
-| CODE-02/03: Duplicated config objects and utilities | Code Quality | Low |
-| Hub Server / Concierge / Workshop | Architecture | Phase 2-4 |
-| SaaS tier implementation | Business | Pending Agent 8 go-to-market plan |
+| Notes rename tech debt (JournalEntry → NoteEntry) | Code Quality | Low |
+| CODE-02/03 (duplicated config) | Code Quality | Low |
 
 ### Agent Docs to Scan
-The Director should scan these Docs/ folders for active concerns when planning Sprint 12:
-- `Engineering/Agent-7-Docs/` — Sprint 11 code audit findings
-- `Quality/Agent-11-Docs/` — Feature Bible updates post-Sprint 11
-- `Design/Agent-Design-Docs/` — Projects UX review findings
+The Director should scan these Docs/ folders for active concerns when planning Sprint 13:
+- `Engineering/Agent-7-Docs/` — Sprint 12 code audit findings
+- `Quality/Agent-11-Docs/` — Feature Bible updates post-Sprint 12
+- `Design/Agent-Design-Docs/` — 3-agent audit findings from Sprint 12
 
 ---
 
 ## Candidate Backlog
 
-*(Pending: Sprint 11 must complete first. Director to propose sequencing based on Sprint 11 retrospective.)*
+*(Pending: Sprint 12 must complete first. Director to propose sequencing based on Sprint 12 retrospective.)*
 
 ---
 
 ## Proposed Scope
 
-*(Pending Sprint 11 completion.)*
+*(Pending Sprint 12 completion.)*
 
 ---
 
-*Template per Sprint Protocol v1.3*
+*Template per Sprint Protocol v1.4*
