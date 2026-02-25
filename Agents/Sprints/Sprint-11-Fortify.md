@@ -1,7 +1,7 @@
 # Sprint 11: Fortify
 
 **Theme:** Security hardening, performance optimization, database indexing, Projects UX polish
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 **Branch:** `sprint/11-fortify`
 **Created:** February 24, 2026
 **Approved by:** User
@@ -180,7 +180,7 @@ Make Kaivoo production-grade — fix all P0 security and performance findings fr
 | # | Parcel | Priority | Status |
 |---|---|---|---|
 | P11 | Projects Page Feature Bible | P1 | ✅ Done (v0.1, 81 must-never-lose items) |
-| P12 | Sprint verification + Agent 7 audit | Gate | 🔄 Sandbox review pending |
+| P12 | Sprint verification + Agent 7 audit | Gate | ✅ Done |
 
 ### P11: Projects Page Feature Bible
 
@@ -235,18 +235,18 @@ Phase C (after all parcels):
 
 ## Definition of Done (Sprint-Level)
 
-- [ ] All P0 security findings (SEC-01, SEC-02, SEC-03) resolved
-- [ ] All P0 performance findings (PERF-01, PERF-03) resolved
-- [ ] Database indexes created for all primary query patterns
-- [ ] Routine completions query bounded to 90 days
-- [ ] Error messages sanitized — no raw DB errors in UI
-- [ ] Projects UX passes Design Agent review (including dark mode)
-- [ ] Projects Page Feature Bible complete
-- [ ] `npm run lint && npm run typecheck && npm run test && npm run build` all pass
-- [ ] Initial bundle ≤250 KB gzipped
-- [ ] Agent 7 code audit: no unresolved P0s
-- [ ] Agent 11 feature integrity: no regressions
-- [ ] Sandbox review: user approved
+- [x] All P0 security findings (SEC-01, SEC-02, SEC-03) resolved — pre-existing
+- [x] All P0 performance findings (PERF-01, PERF-03) resolved — pre-existing
+- [x] Database indexes created for all primary query patterns — pre-existing (20+)
+- [x] Routine completions query bounded to 90 days — pre-existing
+- [x] Error messages sanitized — no raw DB errors in UI
+- [x] Projects UX passes Design Agent review (including dark mode) — P0s fixed, P1/P2 deferred to Sprint 12
+- [x] Projects Page Feature Bible complete — v0.1, 81 items
+- [x] `npm run lint && npm run typecheck && npm run test && npm run build` all pass
+- [x] Initial bundle ≤250 KB gzipped — 108 KB
+- [x] Agent 7 code audit: no unresolved P0s — pre-existing findings verified
+- [x] Agent 11 feature integrity: no regressions
+- [x] Sandbox review: user approved
 
 ---
 
@@ -269,10 +269,29 @@ Phase C (after all parcels):
 
 ## Sprint Retrospective
 
-*(To be completed after sprint)*
+- **Completed:** February 24, 2026
+- **Parcels completed:** 12/12 (7 verified pre-existing, 5 executed)
+- **What was delivered:**
+  - Error message sanitization — no raw Supabase/Postgres errors reach the UI (P4)
+  - Design Agent Projects UX audit — 8 P0, 11 P1, 5 P2 findings documented (P9)
+  - All 8 P0 design fixes implemented — accessible ProjectCard, ARIA tabs, sticky timeline labels, contrast-aware bar text, inline edit affordance, dark mode CSS variables (P10)
+  - Projects Page Feature Bible — 81 must-never-lose items across 6 feature surfaces (P11)
+  - Verified: service-layer user_id filtering, ownership checks, optimistic rollback, code splitting, React Query invalidation, 20+ database indexes, bounded routine queries — all pre-existing from earlier sprints (P1-P3, P5-P8)
+- **Verification results:**
+  - TypeScript: 0 errors
+  - Tests: 104/104 passed
+  - Build: 108 KB gzip initial bundle (target was ≤250 KB)
+  - Lint: clean (pre-existing warnings only)
+  - Agent 7 audit: pre-existing findings verified resolved
+  - Agent 11 Feature Bible: complete (v0.1)
+  - Design Agent review: P0s fixed, P1/P2 deferred
+- **Key learnings:**
+  1. **Agent 7 audit docs were stale.** The Sprint 10 code audit flagged issues already fixed in Sprints 8-10. Saved significant time by verifying actual code before implementing. **Action:** Archive stale audit docs; re-audit from source each sprint.
+  2. **Design Agent produces compliance findings, not design craft.** The 5-step review caught accessibility and CSS issues but missed composition, rhythm, and visual quality. The Projects UI is *correct* but not *polished*. **Action:** Rewrite Design Agent spec for Sprint 12 — add design craft evaluation step.
+  3. **Slim sprints work.** When discovery reveals most work is pre-existing, pivoting to a focused scope is better than padding with unnecessary work.
 
-- **Completed:** TBD
-- **Parcels completed:** X/12
-- **What was delivered:** TBD
-- **Verification results:** TBD
-- **Key learnings:** TBD
+### Deferred to Sprint 12
+- Design Agent spec rewrite (design craft, not just compliance)
+- Projects UI visual polish (re-audit with improved Design Agent)
+- P1 design findings (date validation, grid layout, delete button style, timeline empty state)
+- PERF-02 (Zustand selectors), PERF-04 (TasksWidget decomposition), CODE-01 (any types)

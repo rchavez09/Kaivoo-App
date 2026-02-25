@@ -12,6 +12,9 @@ Source: `Sprints/Sprint-11-Fortify.md` — Deferred to Sprint 12+
 
 | Item | Category | Priority Estimate |
 |---|---|---|
+| **Design Agent spec rewrite** — add design craft evaluation (composition, rhythm, visual quality), not just compliance checks | Agent System | **P0 — user-flagged** |
+| **Projects UI visual polish** — re-audit with improved Design Agent, fix actual design quality | Design | **P0 — user-flagged** |
+| P1 design findings from Sprint 11 (date validation, grid layout, delete button style, timeline empty state) | Design | High |
 | Full-text search | Feature | High (deferred since Sprint 7) |
 | AI "Organize My Day" (inline annotations + sidebar summary) | Feature | High (deferred since Sprint 7) |
 | Entry templates (Morning Pages, Meeting Notes, etc.) | Feature | Medium |
