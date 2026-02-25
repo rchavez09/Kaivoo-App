@@ -105,15 +105,20 @@ export const useKaivooActions = () => {
 
   const addSubtask = async (taskId: string, title: string) => {
     if (user) {
-      const subtask = await db.createSubtask(taskId, title);
-      useKaivooStore.setState(s => ({
-        tasks: s.tasks.map(t =>
-          t.id === taskId
-            ? { ...t, subtasks: [...t.subtasks, { id: subtask.id, title: subtask.title, completed: subtask.completed, tags: [] }] }
-            : t
-        ),
-      }));
-      invalidate('tasks');
+      try {
+        const subtask = await db.createSubtask(taskId, title);
+        useKaivooStore.setState(s => ({
+          tasks: s.tasks.map(t =>
+            t.id === taskId
+              ? { ...t, subtasks: [...t.subtasks, { id: subtask.id, title: subtask.title, completed: subtask.completed, tags: [] }] }
+              : t
+          ),
+        }));
+        invalidate('tasks');
+      } catch (e) {
+        toast.error('Failed to add subtask.');
+        console.error('[addSubtask]', e);
+      }
       return;
     }
     getStore().addSubtask(taskId, title);
@@ -166,7 +171,15 @@ export const useKaivooActions = () => {
         await db.deleteSubtask(subtaskId);
         invalidate('tasks');
       } catch (e) {
-        if (prevSubtask) getStore().addSubtask(taskId, prevSubtask.title, prevSubtask.id);
+        if (prevSubtask) {
+          useKaivooStore.setState(s => ({
+            tasks: s.tasks.map(t =>
+              t.id === taskId
+                ? { ...t, subtasks: [...t.subtasks, prevSubtask] }
+                : t
+            ),
+          }));
+        }
         toast.error('Failed to delete subtask.');
         console.error('[deleteSubtask]', e);
       }
@@ -177,10 +190,16 @@ export const useKaivooActions = () => {
 
   const addMeeting = async (meetingData: Omit<Meeting, 'id'>) => {
     if (user) {
-      const meeting = await db.createMeeting(meetingData);
-      useKaivooStore.setState(s => ({ meetings: [...s.meetings, meeting] }));
-      invalidate('meetings');
-      return meeting;
+      try {
+        const meeting = await db.createMeeting(meetingData);
+        useKaivooStore.setState(s => ({ meetings: [...s.meetings, meeting] }));
+        invalidate('meetings');
+        return meeting;
+      } catch (e) {
+        toast.error('Failed to add meeting.');
+        console.error('[addMeeting]', e);
+        return undefined;
+      }
     }
     return getStore().addMeeting(meetingData);
   };
@@ -374,10 +393,16 @@ export const useKaivooActions = () => {
 
   const addCapture = async (captureData: Omit<Capture, 'id' | 'createdAt'>) => {
     if (user) {
-      const capture = await db.createCapture(captureData);
-      useKaivooStore.setState(s => ({ captures: [...s.captures, capture] }));
-      invalidate('captures');
-      return capture;
+      try {
+        const capture = await db.createCapture(captureData);
+        useKaivooStore.setState(s => ({ captures: [...s.captures, capture] }));
+        invalidate('captures');
+        return capture;
+      } catch (e) {
+        toast.error('Failed to add capture.');
+        console.error('[addCapture]', e);
+        return undefined;
+      }
     }
     return getStore().addCapture(captureData);
   };

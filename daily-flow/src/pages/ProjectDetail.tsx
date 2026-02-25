@@ -42,6 +42,16 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 
+const formatDateLong = (d?: string) => {
+  if (!d) return null;
+  try { return format(parseISO(d), 'MMM d, yyyy'); } catch { return d; }
+};
+
+const formatDateShort = (d?: string) => {
+  if (!d) return null;
+  try { return format(parseISO(d), 'MMM d'); } catch { return d; }
+};
+
 const ProjectDetail = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -166,16 +176,6 @@ const ProjectDetail = () => {
 
   const color = getProjectColor(project, projectIndex);
   const topicName = project.topicId ? topics.find(t => t.id === project.topicId)?.name : undefined;
-
-  const formatDateLong = (d?: string) => {
-    if (!d) return null;
-    try { return format(parseISO(d), 'MMM d, yyyy'); } catch { return d; }
-  };
-
-  const formatDateShort = (d?: string) => {
-    if (!d) return null;
-    try { return format(parseISO(d), 'MMM d'); } catch { return d; }
-  };
 
   return (
     <AppLayout>
