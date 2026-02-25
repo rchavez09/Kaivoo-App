@@ -17,7 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { MOODS } from './EntryMetadataPills';
 
-const EntryHeader = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
+const EntryHeader = ({ node, updateAttributes, editor, getPos: _getPos }: NodeViewProps) => {
   const entryId = node.attrs.entryId as string;
   const timestamp = node.attrs.timestamp as string;
   const collapsed = node.attrs.collapsed as boolean;
@@ -49,7 +49,26 @@ const EntryHeader = ({ node, updateAttributes, editor, getPos }: NodeViewProps) 
   // --- Handlers ---
 
   const handleToggleCollapse = () => {
-    updateAttributes({ collapsed: !collapsed });
+    const newCollapsed = !collapsed;
+    updateAttributes({ collapsed: newCollapsed });
+    // Persist collapse state to localStorage
+    if (entry?.date) {
+      try {
+        const key = `collapse-${entry.date}`;
+        const raw = localStorage.getItem(key);
+        const obj: Record<string, boolean> = raw ? JSON.parse(raw) as Record<string, boolean> : {};
+        if (newCollapsed) {
+          obj[entryId] = true;
+        } else {
+          delete obj[entryId];
+        }
+        if (Object.keys(obj).length > 0) {
+          localStorage.setItem(key, JSON.stringify(obj));
+        } else {
+          localStorage.removeItem(key);
+        }
+      } catch { /* ignore */ }
+    }
   };
 
   const handleTopicSelect = async (path: string) => {
@@ -94,28 +113,26 @@ const EntryHeader = ({ node, updateAttributes, editor, getPos }: NodeViewProps) 
   };
 
   const handleDeleteEntry = async () => {
-    const pos = getPos();
-    if (typeof pos !== 'number') return;
-
-    // Find the range: from this header to the next header (or end of doc)
+    // Use entryId matching (not position) — positions shift after splits
     const doc = editor.state.doc;
+    let startPos = -1;
     let endPos = doc.content.size;
-    let passedSelf = false;
-    let currentPos = 0;
+    let foundSelf = false;
 
-    for (let i = 0; i < doc.childCount; i++) {
-      const child = doc.child(i);
-      if (currentPos === pos) {
-        passedSelf = true;
-      } else if (passedSelf && child.type.name === 'entryHeader') {
-        endPos = currentPos;
-        break;
+    doc.forEach((node, pos) => {
+      if (node.type.name === 'entryHeader') {
+        if (node.attrs.entryId === entryId) {
+          startPos = pos;
+          foundSelf = true;
+        } else if (foundSelf && endPos === doc.content.size) {
+          endPos = pos;
+        }
       }
-      currentPos += child.nodeSize;
-    }
+    });
 
-    // Remove from ProseMirror document
-    editor.chain().focus().deleteRange({ from: pos, to: endPos }).run();
+    if (startPos >= 0) {
+      editor.chain().focus().deleteRange({ from: startPos, to: endPos }).run();
+    }
 
     // Remove from store + Supabase
     await deleteJournalEntry(entryId);
