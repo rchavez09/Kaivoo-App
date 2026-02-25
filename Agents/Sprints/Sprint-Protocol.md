@@ -14,7 +14,7 @@
 | Engineering | Agent 2, Agent 3, Agent 4 | Implementation, architecture, security |
 | DevOps | Agent 9 | CI/CD, Docker, packaging, deployment, monitoring |
 | Quality | Agent 7, Agent 10, Agent 11 | Code review, test strategy, feature integrity |
-| Design | Design Agent | Visual design, UX, interaction patterns, accessibility |
+| Design | Visual Design Agent, Accessibility & Theming Agent, UX Completeness Agent | Visual craft, accessibility, dark mode, UX completeness, interaction patterns |
 | Research | Agent 5 | Technology scouting, competitive analysis |
 | Marketing | TBD | Content, growth, brand |
 
@@ -66,7 +66,7 @@ Before any sprint branch merges to main, ALL of the following must pass:
 □ Deterministic checks pass: npm run lint && npm run typecheck && npm run test && npm run build
 □ Agent 7 code audit completed (no unresolved P0 issues)
 □ Agent 11 feature integrity check passed (no regressions)
-□ Design Agent review completed (for UI sprints): no unresolved P0 issues
+□ 3-agent design review completed (for UI sprints): Visual Design + Accessibility & Theming + UX Completeness — all PASS, no unresolved P0 issues
 □ SANDBOX: Dev server started on sprint branch, user has reviewed the running app and approved UX
 □ Sprint retrospective section added to sprint file
 □ All sprint files committed to the sprint branch
@@ -118,8 +118,11 @@ Agents/
     Agent-11-Docs/                         # Feature Use Case Bible, regression checks
 
   Design/
-    Agent-Design.md                   # Combined UX + Visual design spec
-    Agent-Design-Docs/                # Design system, screen specs, use cases
+    Agent-Visual-Design.md            # Visual hierarchy, composition, craft
+    Agent-Accessibility-Theming.md    # WCAG, dark mode, ARIA, focus
+    Agent-UX-Completeness.md          # States, navigation, anti-patterns
+    Agent-Design-Docs/                # Shared: design system, screen specs, dark mode spec, use cases
+    ARCHIVED-Agent-Design.md
     ARCHIVED-Agent-1-Senior-UI-Designer.md
     ARCHIVED-Agent-6-Usability-Architect.md
 
@@ -173,7 +176,8 @@ Common document types:
 | `Code-Audit` | Agent 7 | Code review reports |
 | `Research-Brief` | Agent 5 | Research findings |
 | `Security-Concern` | Agent 4 | Security gap reports |
-| `Design-Note` | Design Agent | Design decisions |
+| `Design-Note` | Design Agents | Design decisions |
+| `Design-Review` | Design Agents | Pre-merge design review verdicts |
 | `Architecture-Decision` | Agent 3 | Architecture Decision Records |
 | `Implementation-Note` | Agent 2 | Technical notes |
 | `Concern` | Any agent | Generic concern |
@@ -192,7 +196,7 @@ Common document types:
 3. Director reads the "Deferred to Sprint N+1" section from the current sprint file
 4. Director compiles everything into `Next-Sprint-Planning.md` with attribution
 5. Director assigns parcels to agents and organizes into tracks
-6. **For sprints with new pages/components:** Design Agent produces screen specs BEFORE implementation begins. These specs are reviewed by the user alongside the sprint contract.
+6. **For sprints with new pages/components:** Design agents produce pre-implementation specs (Gate 1) BEFORE coding begins. See Phase 3 for details.
 7. User reviews and approves
 
 ### Phase 2: Sprint Start
@@ -204,6 +208,15 @@ Common document types:
 2. Reset `Next-Sprint-Planning.md` to blank template
 
 ### Phase 3: Execution
+
+**Pre-Implementation Design Gate (Gate 1) — for parcels with new UI:**
+
+Before Agent 2 starts coding any parcel that creates new UI surfaces:
+1. **Visual Design Agent** produces a component-level visual spec (layout, colors, typography, component types)
+2. **UX Completeness Agent** reviews the spec for: navigation in/out, state inventory (empty/loading/error/stale), edit capabilities, input pattern appropriateness
+3. **Accessibility & Theming Agent** reviews for: color token choices in both themes, ARIA attribute plan, focus order
+
+This gate prevents specification failures (missing requirements) from becoming implementation failures.
 
 **During sprint:**
 - Agents work their assigned parcels
@@ -220,7 +233,11 @@ Common document types:
    `npm run lint && npm run typecheck && npm run test && npm run build`
 2. Agent 7 produces a code audit report: `Code-Audit-Sprint-{N}-Review.md`
 3. Agent 11 runs feature integrity check against Feature Bible
-4. **DESIGN REVIEW (for UI sprints):** Design Agent reviews the running app on the sprint branch using its 5-step methodology (Hierarchy, Interactions, Accessibility, Responsive, Anti-patterns). Must produce a Design Review verdict (PASS / PASS WITH NOTES / FAIL). Dark mode must be reviewed as a separate pass. No unresolved P0 issues allowed before proceeding.
+4. **3-AGENT DESIGN REVIEW (for UI sprints, Gate 3):** Each design agent independently reviews the running app on the sprint branch:
+   - **Visual Design Agent:** 4-step review (Hierarchy, Brand, Composition, Craft)
+   - **Accessibility & Theming Agent:** 4-step review (Contrast both themes, ARIA, Focus, Inclusive) + separate dark mode pass
+   - **UX Completeness Agent:** 5-step review (States, Navigation, Input Patterns, Edit-in-Place, Anti-Patterns)
+   Each agent produces a separate verdict document. All 3 must PASS. No unresolved P0 issues allowed before proceeding.
 5. Fix all P0 issues from gates before proceeding
 6. **SANDBOX REVIEW:** Start dev server on sprint branch (`npm run dev`)
    - User reviews the running application in their browser
@@ -325,7 +342,7 @@ Deterministic checks (lint, typecheck, test, build)
 Agent gates (Agent 7 code audit + Agent 11 feature integrity)
          |
          v
-Design Agent review (for UI sprints — 5-step methodology + dark mode pass)
+3-agent design review (Visual Design + Accessibility & Theming + UX Completeness)
          |
          v
 Fix all P0 issues
@@ -345,9 +362,10 @@ Vision.md updated (mark phase progress)
 
 ---
 
-*Sprint Protocol v1.4 — February 24, 2026*
+*Sprint Protocol v1.5 — February 24, 2026*
 *v1.0: Initial protocol*
 *v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
 *v1.2: Explicit sandbox review step in lifecycle + pre-merge checklist. Deterministic checks before agent gates.*
 *v1.3: Sandbox review woven into Phase 4 lifecycle + user-perspective flow. Agent 1+6 merged to Design Agent. Design references updated throughout.*
 *v1.4: Mandatory Design Agent gate in Phase 4 (5-step review + dark mode pass). Design Agent added to Phase 1 (screen specs for new UI). Pre-merge checklist updated. Sprint 10 stabilization drove this change.*
+*v1.5: Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Added pre-implementation design gate (Gate 1) in Phase 3. Phase 4 now requires 3 independent design verdicts. Sprint 12 restructuring per Agent 5 research.*

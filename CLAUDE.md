@@ -22,7 +22,7 @@
 | Engineering | `Agents/Engineering/` | Agent 2 (Software Engineer), Agent 3 (Architect), Agent 4 (Security), Agent 12 (Data Engineer) |
 | DevOps | `Agents/DevOps/` | Agent 9 (DevOps Engineer) |
 | Quality | `Agents/Quality/` | Agent 7 (Code Reviewer), Agent 10 (QA Architect — activates Sprint 4+), Agent 11 (Feature Integrity Guardian) |
-| Design | `Agents/Design/` | Design Agent (combined UX + Visual) |
+| Design | `Agents/Design/` | Visual Design Agent, Accessibility & Theming Agent, UX Completeness Agent |
 | Research | `Agents/Research/` | Agent 5 (Research Analyst) |
 | Marketing | `Agents/Marketing/` | TBD |
 
@@ -60,4 +60,5 @@ npm run typecheck    # TypeScript type check (tsc --noEmit)
 5. **Agent documents** are archived (`ARCHIVED-` prefix), never deleted
 6. **The Director** orchestrates all sprint planning through `Vision.md` and `Sprint-Protocol.md`
 7. **Sprint work** happens on dedicated branches (`sprint/N-theme`), never directly on `main` — see Sprint Protocol v1.1
-8. **Before merging to main**, Agent 7 (code) AND Agent 11 (feature integrity) must both pass
+8. **Before merging to main**, Agent 7 (code) AND Agent 11 (feature integrity) AND all 3 design agents must pass
+9. **For UI sprints**, design agents produce pre-implementation specs (Gate 1) BEFORE Agent 2 starts coding new UI surfaces

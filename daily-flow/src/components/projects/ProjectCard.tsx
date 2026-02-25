@@ -82,7 +82,7 @@ const ProjectCard = React.memo(({ project, index }: ProjectCardProps) => {
         {/* Meta row: topic, dates */}
         <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground mb-3">
           {topicName && (
-            <span className="bg-secondary/60 px-1.5 py-0.5 rounded text-info">
+            <span className="bg-secondary/60 px-1.5 py-0.5 rounded text-info-foreground">
               {topicName}
             </span>
           )}

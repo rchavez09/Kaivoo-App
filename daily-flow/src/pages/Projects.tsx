@@ -31,6 +31,7 @@ const STATUS_TABS: { key: StatusTab; label: string }[] = [
 const Projects = () => {
   const projects = useKaivooStore(s => s.projects);
   const topics = useKaivooStore(s => s.topics);
+  const isLoaded = useKaivooStore(s => s.isLoaded);
 
   const [activeTab, setActiveTab] = useState<StatusTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,7 +101,7 @@ const Projects = () => {
         </header>
 
         {/* Status tabs */}
-        <div role="tablist" className="flex items-center gap-1 mb-4 p-1 bg-[hsl(var(--surface-elevated))] rounded-lg w-fit overflow-x-auto">
+        <div role="tablist" aria-label="Filter projects by status" className="flex items-center gap-1 mb-6 p-1 bg-[hsl(var(--surface-elevated))] rounded-lg w-fit overflow-x-auto">
           {STATUS_TABS.map(tab => {
             const count = tabCounts[tab.key] || 0;
             // Hide empty tabs (except "all" and "active")
@@ -157,8 +158,20 @@ const Projects = () => {
         </div>
 
         {/* Card grid */}
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {!isLoaded ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="widget-card animate-pulse">
+                <div className="h-1 bg-muted rounded-full mb-4" />
+                <div className="h-5 bg-muted rounded w-2/3 mb-3" />
+                <div className="h-3 bg-muted rounded w-full mb-2" />
+                <div className="h-3 bg-muted rounded w-4/5 mb-4" />
+                <div className="h-2 bg-muted rounded-full w-full" />
+              </div>
+            ))}
+          </div>
+        ) : filtered.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((project, i) => (
               <ProjectCard key={project.id} project={project} index={i} />
             ))}

@@ -18,9 +18,18 @@ const isValidUUID = (str: string) => {
 // Cache invalidation is handled by React Query — no more manual reload().
 export const useKaivooActions = () => {
   const { user } = useAuth();
-  const store = useKaivooStore();
   const db = useDatabaseOperations();
   const { invalidate } = useInvalidate();
+
+  // Selective subscriptions for pass-through reads (avoids full-store re-renders)
+  const tasks = useKaivooStore(s => s.tasks);
+  const meetings = useKaivooStore(s => s.meetings);
+  const routines = useKaivooStore(s => s.routines);
+  const topics = useKaivooStore(s => s.topics);
+  const projects = useKaivooStore(s => s.projects);
+
+  // Use getState() inside mutation functions for latest state + store methods
+  const getStore = () => useKaivooStore.getState();
 
   // --- Tasks ---
 
@@ -37,18 +46,18 @@ export const useKaivooActions = () => {
         return undefined;
       }
     }
-    return store.addTask(taskData);
+    return getStore().addTask(taskData);
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
-    const prev = store.tasks.find(t => t.id === id);
-    store.updateTask(id, updates);
+    const prev = getStore().tasks.find(t => t.id === id);
+    getStore().updateTask(id, updates);
     if (user) {
       try {
         await db.updateTask(id, updates);
         invalidate('tasks');
       } catch (e) {
-        if (prev) store.updateTask(id, prev);
+        if (prev) getStore().updateTask(id, prev);
         toast.error('Failed to save task changes.');
         console.error('[updateTask]', e);
         return;
@@ -78,8 +87,8 @@ export const useKaivooActions = () => {
   };
 
   const deleteTask = async (id: string) => {
-    const prev = store.tasks.find(t => t.id === id);
-    store.deleteTask(id);
+    const prev = getStore().tasks.find(t => t.id === id);
+    getStore().deleteTask(id);
     if (user) {
       try {
         await db.deleteTask(id);
@@ -107,15 +116,15 @@ export const useKaivooActions = () => {
       invalidate('tasks');
       return;
     }
-    store.addSubtask(taskId, title);
+    getStore().addSubtask(taskId, title);
   };
 
   const toggleSubtask = async (taskId: string, subtaskId: string) => {
-    const task = store.tasks.find((t) => t.id === taskId);
+    const task = getStore().tasks.find((t) => t.id === taskId);
     const subtask = task?.subtasks.find((s) => s.id === subtaskId);
     const nextCompleted = !(subtask?.completed ?? false);
 
-    store.toggleSubtask(taskId, subtaskId);
+    getStore().toggleSubtask(taskId, subtaskId);
 
     if (user) {
       try {
@@ -125,7 +134,7 @@ export const useKaivooActions = () => {
         });
         invalidate('tasks');
       } catch (e) {
-        store.toggleSubtask(taskId, subtaskId);
+        getStore().toggleSubtask(taskId, subtaskId);
         toast.error('Failed to update subtask.');
         console.error('[toggleSubtask]', e);
       }
@@ -133,15 +142,15 @@ export const useKaivooActions = () => {
   };
 
   const updateSubtask = async (taskId: string, subtaskId: string, updates: { title?: string; tags?: string[] }) => {
-    const task = store.tasks.find(t => t.id === taskId);
+    const task = getStore().tasks.find(t => t.id === taskId);
     const prevSubtask = task?.subtasks.find(s => s.id === subtaskId);
-    store.updateSubtask(taskId, subtaskId, updates);
+    getStore().updateSubtask(taskId, subtaskId, updates);
     if (user) {
       try {
         await db.updateSubtask(subtaskId, updates);
         invalidate('tasks');
       } catch (e) {
-        if (prevSubtask) store.updateSubtask(taskId, subtaskId, { title: prevSubtask.title, tags: prevSubtask.tags });
+        if (prevSubtask) getStore().updateSubtask(taskId, subtaskId, { title: prevSubtask.title, tags: prevSubtask.tags });
         toast.error('Failed to update subtask.');
         console.error('[updateSubtask]', e);
       }
@@ -149,15 +158,15 @@ export const useKaivooActions = () => {
   };
 
   const deleteSubtask = async (taskId: string, subtaskId: string) => {
-    const task = store.tasks.find(t => t.id === taskId);
+    const task = getStore().tasks.find(t => t.id === taskId);
     const prevSubtask = task?.subtasks.find(s => s.id === subtaskId);
-    store.deleteSubtask(taskId, subtaskId);
+    getStore().deleteSubtask(taskId, subtaskId);
     if (user) {
       try {
         await db.deleteSubtask(subtaskId);
         invalidate('tasks');
       } catch (e) {
-        if (prevSubtask) store.addSubtask(taskId, prevSubtask.title, prevSubtask.id);
+        if (prevSubtask) getStore().addSubtask(taskId, prevSubtask.title, prevSubtask.id);
         toast.error('Failed to delete subtask.');
         console.error('[deleteSubtask]', e);
       }
@@ -173,18 +182,18 @@ export const useKaivooActions = () => {
       invalidate('meetings');
       return meeting;
     }
-    return store.addMeeting(meetingData);
+    return getStore().addMeeting(meetingData);
   };
 
   const updateMeeting = async (id: string, updates: Partial<Meeting>) => {
-    const prev = store.meetings.find(m => m.id === id);
-    store.updateMeeting(id, updates);
+    const prev = getStore().meetings.find(m => m.id === id);
+    getStore().updateMeeting(id, updates);
     if (user) {
       try {
         await db.updateMeeting(id, updates);
         invalidate('meetings');
       } catch (e) {
-        if (prev) store.updateMeeting(id, prev);
+        if (prev) getStore().updateMeeting(id, prev);
         toast.error('Failed to save meeting changes.');
         console.error('[updateMeeting]', e);
       }
@@ -192,8 +201,8 @@ export const useKaivooActions = () => {
   };
 
   const deleteMeeting = async (id: string) => {
-    const prev = store.meetings.find(m => m.id === id);
-    store.deleteMeeting(id);
+    const prev = getStore().meetings.find(m => m.id === id);
+    getStore().deleteMeeting(id);
     if (user) {
       try {
         await db.deleteMeeting(id);
@@ -225,7 +234,7 @@ export const useKaivooActions = () => {
         throw e;
       }
     }
-    return store.addJournalEntry(entryData);
+    return getStore().addJournalEntry(entryData);
   };
 
   const updateJournalEntry = async (id: string, updates: Partial<JournalEntry>) => {
@@ -233,14 +242,14 @@ export const useKaivooActions = () => {
       ? { ...updates, topicIds: updates.topicIds.filter(isValidUUID) }
       : updates;
 
-    const prev = store.journalEntries.find(e => e.id === id);
-    store.updateJournalEntry(id, sanitizedUpdates);
+    const prev = getStore().journalEntries.find(e => e.id === id);
+    getStore().updateJournalEntry(id, sanitizedUpdates);
     if (user) {
       try {
         await db.updateJournalEntry(id, sanitizedUpdates);
         invalidate('journalEntries');
       } catch (e) {
-        if (prev) store.updateJournalEntry(id, prev);
+        if (prev) getStore().updateJournalEntry(id, prev);
         toast.error('Failed to save journal entry.');
         console.error('[updateJournalEntry]', e);
       }
@@ -248,8 +257,8 @@ export const useKaivooActions = () => {
   };
 
   const deleteJournalEntry = async (id: string) => {
-    const prev = store.journalEntries.find(e => e.id === id);
-    store.deleteJournalEntry(id);
+    const prev = getStore().journalEntries.find(e => e.id === id);
+    getStore().deleteJournalEntry(id);
     if (user) {
       try {
         await db.deleteJournalEntry(id);
@@ -266,14 +275,14 @@ export const useKaivooActions = () => {
 
   const toggleRoutineCompletion = async (routineId: string, date?: string) => {
     const dateStr = date || format(new Date(), 'yyyy-MM-dd');
-    const isCompleted = store.isRoutineCompleted(routineId, dateStr);
-    store.toggleRoutineCompletion(routineId, dateStr);
+    const isCompleted = getStore().isRoutineCompleted(routineId, dateStr);
+    getStore().toggleRoutineCompletion(routineId, dateStr);
     if (user) {
       try {
         await db.toggleRoutineCompletion(routineId, dateStr, isCompleted);
         invalidate('routineCompletions');
       } catch (e) {
-        store.toggleRoutineCompletion(routineId, dateStr);
+        getStore().toggleRoutineCompletion(routineId, dateStr);
         toast.error('Failed to update routine.');
         console.error('[toggleRoutineCompletion]', e);
       }
@@ -286,7 +295,7 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const topic = await db.createTopic(topicData);
-        const alreadyInStore = store.topics.some((t) => t.id === topic.id);
+        const alreadyInStore = getStore().topics.some((t) => t.id === topic.id);
         if (!alreadyInStore) {
           useKaivooStore.setState(s => ({ topics: [...s.topics, topic] }));
         }
@@ -297,14 +306,14 @@ export const useKaivooActions = () => {
         throw e;
       }
     }
-    return store.addTopic(topicData);
+    return getStore().addTopic(topicData);
   };
 
   const addTopicPage = async (pageData: Omit<TopicPage, 'id' | 'createdAt'>) => {
     if (user) {
       try {
         const page = await db.createTopicPage(pageData);
-        const alreadyInStore = store.topicPages.some((p) => p.id === page.id);
+        const alreadyInStore = getStore().topicPages.some((p) => p.id === page.id);
         if (!alreadyInStore) {
           useKaivooStore.setState(s => ({ topicPages: [...s.topicPages, page] }));
         }
@@ -315,7 +324,7 @@ export const useKaivooActions = () => {
         throw e;
       }
     }
-    return store.addTopicPage(pageData);
+    return getStore().addTopicPage(pageData);
   };
 
   const resolveTopicPathAsync = async (path: string, autoCreate = false): Promise<string[] | null> => {
@@ -323,7 +332,7 @@ export const useKaivooActions = () => {
     if (parts.length === 0) return null;
 
     const topicName = parts[0];
-    let topic = store.topics.find(t => t.name.toLowerCase() === topicName.toLowerCase());
+    let topic = getStore().topics.find(t => t.name.toLowerCase() === topicName.toLowerCase());
 
     if (!topic) {
       if (!autoCreate) return null;
@@ -333,7 +342,7 @@ export const useKaivooActions = () => {
     if (parts.length === 1) return [topic.id];
 
     const pageName = parts.slice(1).join('/');
-    let page = store.topicPages.find(
+    let page = getStore().topicPages.find(
       p => p.topicId === topic!.id && p.name.toLowerCase() === pageName.toLowerCase()
     );
 
@@ -347,8 +356,8 @@ export const useKaivooActions = () => {
   };
 
   const deleteTopic = async (id: string) => {
-    const prev = store.topics.find(t => t.id === id);
-    store.deleteTopic(id);
+    const prev = getStore().topics.find(t => t.id === id);
+    getStore().deleteTopic(id);
     if (user) {
       try {
         await db.deleteTopic(id);
@@ -370,7 +379,7 @@ export const useKaivooActions = () => {
       invalidate('captures');
       return capture;
     }
-    return store.addCapture(captureData);
+    return getStore().addCapture(captureData);
   };
 
   const updateCapture = async (id: string, updates: Partial<Capture>) => {
@@ -378,14 +387,14 @@ export const useKaivooActions = () => {
       ? { ...updates, topicIds: updates.topicIds.filter(isValidUUID) }
       : updates;
 
-    const prev = store.captures.find(c => c.id === id);
-    store.updateCapture(id, sanitizedUpdates);
+    const prev = getStore().captures.find(c => c.id === id);
+    getStore().updateCapture(id, sanitizedUpdates);
     if (user) {
       try {
         await db.updateCapture(id, sanitizedUpdates);
         invalidate('captures');
       } catch (e) {
-        if (prev) store.updateCapture(id, prev);
+        if (prev) getStore().updateCapture(id, prev);
         toast.error('Failed to save capture changes.');
         console.error('[updateCapture]', e);
       }
@@ -393,8 +402,8 @@ export const useKaivooActions = () => {
   };
 
   const deleteCapture = async (id: string) => {
-    const prev = store.captures.find(c => c.id === id);
-    store.deleteCapture(id);
+    const prev = getStore().captures.find(c => c.id === id);
+    getStore().deleteCapture(id);
     if (user) {
       try {
         await db.deleteCapture(id);
@@ -422,18 +431,18 @@ export const useKaivooActions = () => {
         return undefined;
       }
     }
-    return store.addProject(projectData);
+    return getStore().addProject(projectData);
   };
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
-    const prev = store.projects.find(p => p.id === id);
-    store.updateProject(id, updates);
+    const prev = getStore().projects.find(p => p.id === id);
+    getStore().updateProject(id, updates);
     if (user) {
       try {
         await db.updateProject(id, updates);
         invalidate('projects');
       } catch (e) {
-        if (prev) store.updateProject(id, prev);
+        if (prev) getStore().updateProject(id, prev);
         toast.error('Failed to save project changes.');
         console.error('[updateProject]', e);
       }
@@ -441,9 +450,9 @@ export const useKaivooActions = () => {
   };
 
   const deleteProject = async (id: string) => {
-    const prev = store.projects.find(p => p.id === id);
-    const affectedTaskIds = store.tasks.filter(t => t.projectId === id).map(t => t.id);
-    store.deleteProject(id);
+    const prev = getStore().projects.find(p => p.id === id);
+    const affectedTaskIds = getStore().tasks.filter(t => t.projectId === id).map(t => t.id);
+    getStore().deleteProject(id);
     if (user) {
       try {
         await db.deleteProject(id);
@@ -473,11 +482,11 @@ export const useKaivooActions = () => {
     addCapture, resolveTopicPathAsync,
     addProject, updateProject, deleteProject,
 
-    // Pass through store methods for reads
-    tasks: store.tasks,
-    meetings: store.meetings,
-    routines: store.routines,
-    topics: store.topics,
-    projects: store.projects,
+    // Pass through store reads (selective subscriptions — no full-store re-render)
+    tasks,
+    meetings,
+    routines,
+    topics,
+    projects,
   };
 };
