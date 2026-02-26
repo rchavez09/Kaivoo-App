@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
-import { Plus, Search, Briefcase } from 'lucide-react';
+import { Plus, Search, Briefcase, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,10 +12,13 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useKaivooStore } from '@/stores/useKaivooStore';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ProjectStatus } from '@/types';
 import { projectStatusConfig } from '@/lib/project-config';
 import ProjectCard, { ProjectTaskStats } from '@/components/projects/ProjectCard';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
+
+type SortOption = 'updated' | 'name-asc' | 'name-desc' | 'created-new' | 'created-old' | 'progress';
 
 type StatusTab = 'all' | ProjectStatus;
 
@@ -37,9 +40,32 @@ const Projects = () => {
   const [activeTab, setActiveTab] = useState<StatusTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [topicFilter, setTopicFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useLocalStorage<SortOption>('kaivoo-projects-sort', 'updated');
   const [createOpen, setCreateOpen] = useState(false);
 
-  // Filter projects
+  // Pre-compute task stats per project so ProjectCard doesn't need store access
+  const taskStatsMap = useMemo(() => {
+    const map: Record<string, ProjectTaskStats> = {};
+    for (const project of projects) {
+      const projectTasks = tasks.filter(t => t.projectId === project.id);
+      const doneTasks = projectTasks.filter(t => t.status === 'done').length;
+      const totalTasks = projectTasks.length;
+      const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+      map[project.id] = { totalTasks, doneTasks, progress };
+    }
+    return map;
+  }, [projects, tasks]);
+
+  // Tab counts
+  const tabCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: projects.length };
+    for (const p of projects) {
+      counts[p.status] = (counts[p.status] || 0) + 1;
+    }
+    return counts;
+  }, [projects]);
+
+  // Filter and sort projects
   const filtered = useMemo(() => {
     let result = [...projects];
 
@@ -62,38 +88,34 @@ const Projects = () => {
       result = result.filter(p => p.topicId === topicFilter);
     }
 
-    // Sort by status order, then by updated date
+    // Sort
     result.sort((a, b) => {
-      const orderA = projectStatusConfig[a.status].order;
-      const orderB = projectStatusConfig[b.status].order;
-      if (orderA !== orderB) return orderA - orderB;
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      switch (sortBy) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'created-new':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'created-old':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'progress': {
+          const progA = taskStatsMap[a.id]?.progress ?? 0;
+          const progB = taskStatsMap[b.id]?.progress ?? 0;
+          return progB - progA;
+        }
+        case 'updated':
+        default: {
+          const orderA = projectStatusConfig[a.status].order;
+          const orderB = projectStatusConfig[b.status].order;
+          if (orderA !== orderB) return orderA - orderB;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        }
+      }
     });
 
     return result;
-  }, [projects, activeTab, searchQuery, topicFilter]);
-
-  // Tab counts
-  const tabCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: projects.length };
-    for (const p of projects) {
-      counts[p.status] = (counts[p.status] || 0) + 1;
-    }
-    return counts;
-  }, [projects]);
-
-  // Pre-compute task stats per project so ProjectCard doesn't need store access
-  const taskStatsMap = useMemo(() => {
-    const map: Record<string, ProjectTaskStats> = {};
-    for (const project of projects) {
-      const projectTasks = tasks.filter(t => t.projectId === project.id);
-      const doneTasks = projectTasks.filter(t => t.status === 'done').length;
-      const totalTasks = projectTasks.length;
-      const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-      map[project.id] = { totalTasks, doneTasks, progress };
-    }
-    return map;
-  }, [projects, tasks]);
+  }, [projects, activeTab, searchQuery, topicFilter, sortBy, taskStatsMap]);
 
   const filteredTopics = topics.filter(t => t.id !== 'topic-daily-notes');
 
@@ -145,7 +167,7 @@ const Projects = () => {
           })}
         </div>
 
-        {/* Search + topic filter */}
+        {/* Search + topic filter + sort */}
         <div className="flex items-center gap-3 mb-6">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -169,6 +191,20 @@ const Projects = () => {
               </SelectContent>
             </Select>
           )}
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+            <SelectTrigger className="w-44" aria-label="Sort projects">
+              <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 text-muted-foreground shrink-0" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="updated">Last Updated</SelectItem>
+              <SelectItem value="name-asc">Name A-Z</SelectItem>
+              <SelectItem value="name-desc">Name Z-A</SelectItem>
+              <SelectItem value="created-new">Newest First</SelectItem>
+              <SelectItem value="created-old">Oldest First</SelectItem>
+              <SelectItem value="progress">Progress %</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Card grid */}

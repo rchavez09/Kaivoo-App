@@ -1,6 +1,7 @@
 # Sprint 14: Connect — Project Notes
 
-**Status:** In Progress
+**Status:** COMPLETE
+**Merged:** February 25, 2026
 **Created:** February 25, 2026
 **Branch:** `sprint/14-connect`
 **Theme:** Connect — Add a Project Notes system so users can capture thoughts for a project mid-flow and manage them from within the project.

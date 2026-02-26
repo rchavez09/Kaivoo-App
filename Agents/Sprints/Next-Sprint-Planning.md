@@ -1,14 +1,14 @@
 # Next Sprint Planning
 
-**Status:** Collecting inputs for Sprint 15
-**Last Reset:** February 25, 2026 (Sprint 14 approved)
+**Status:** Collecting inputs for Sprint 16
+**Last Reset:** February 25, 2026 (Sprint 15 approved)
 
 ---
 
 ## Input Sources
 
-### Sprint 14 Deferred Items
-Source: `Sprints/Sprint-14-Connect.md` — Deferred to Sprint 15+
+### Sprint 15 Deferred Items
+Source: `Sprints/Sprint-15-Refine.md` — Deferred to Sprint 16+
 
 | Item | Category | Priority Estimate |
 |---|---|---|
@@ -19,24 +19,28 @@ Source: `Sprints/Sprint-14-Connect.md` — Deferred to Sprint 15+
 | Automated design-lint CI step | DevOps | Medium |
 | Notes rename tech debt (JournalEntry → NoteEntry) | Code Quality | Low |
 | CODE-02/03 (duplicated config) | Code Quality | Low |
+| Project Milestones on timeline | Feature | P2 from Agent 11 |
+| Timeline task-level view | Feature | P2 from Agent 11 |
+| Project duplication | Feature | P3 from Agent 11 |
+| Dedicated Archive action | Feature | P3 from Agent 11 |
 
 ### Agent Docs to Scan
-The Director should scan these Docs/ folders for active concerns when planning Sprint 15:
-- `Engineering/Agent-7-Docs/` — Sprint 14 code audit findings
-- `Quality/Agent-11-Docs/` — Feature Bible updates post-Sprint 14
-- `Design/Agent-Design-Docs/` — 3-agent audit findings from Sprint 14
+The Director should scan these Docs/ folders for active concerns when planning Sprint 16:
+- `Engineering/Agent-7-Docs/` — Sprint 15 code audit findings
+- `Quality/Agent-11-Docs/` — Feature Bible updates post-Sprint 15
+- `Design/Agent-Design-Docs/` — 3-agent audit findings from Sprint 15
 
 ---
 
 ## Candidate Backlog
 
-*(Pending: Sprint 14 must complete first. Director to propose sequencing based on Sprint 14 retrospective.)*
+*(Pending: Sprint 15 must complete first. Director to propose sequencing based on Sprint 15 retrospective.)*
 
 ---
 
 ## Proposed Scope
 
-*(Pending Sprint 14 completion.)*
+*(Pending Sprint 15 completion.)*
 
 ---
 

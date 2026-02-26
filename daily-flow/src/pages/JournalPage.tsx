@@ -203,7 +203,7 @@ const JournalPage = () => {
           </div>
 
           {/* Canvas — zero friction, just the editor */}
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-auto p-6 pb-[50vh]">
             <div className="max-w-4xl mx-auto">
               <JournalCanvas
                 selectedDate={selectedDate}
