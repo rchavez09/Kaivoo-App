@@ -254,3 +254,26 @@ export function formatDuration(minutes: number): string {
   const mins = minutes % 60;
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
+
+// ============================================
+// TASK DATE RESOLUTION
+// ============================================
+
+const RELATIVE_DATES = new Set(['today', 'tomorrow']);
+
+/**
+ * Resolve which calendar day a task belongs on.
+ * Relative dueDates ("Today"/"Tomorrow") always resolve to the current day,
+ * so completed tasks with relative dueDates use completedAt instead.
+ */
+export function resolveTaskDay(task: { dueDate?: string; status: string; completedAt?: Date }): Date | null {
+  if (!task.dueDate) return null;
+  const isRelative = RELATIVE_DATES.has(task.dueDate.trim().toLowerCase());
+
+  if (isRelative && task.status === 'done' && task.completedAt) {
+    return startOfDay(new Date(task.completedAt));
+  }
+
+  const parsed = parseDate(task.dueDate);
+  return parsed ? startOfDay(parsed) : null;
+}
