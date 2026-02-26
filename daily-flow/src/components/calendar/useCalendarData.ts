@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { format, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { parseDate } from '@/lib/dateUtils';
-import type { Meeting } from '@/types';
+import type { Meeting, Task } from '@/types';
 
 export interface DayData {
   meetings: Meeting[];
@@ -14,6 +14,25 @@ export interface CalendarData {
   /** Map of 'yyyy-MM-dd' -> day data (meetings + task counts) */
   byDate: Map<string, DayData>;
   totalMeetings: number;
+}
+
+const RELATIVE_DATES = new Set(['today', 'tomorrow']);
+
+/**
+ * Resolve which calendar day a task belongs on.
+ * Relative dueDates ("Today"/"Tomorrow") always resolve to the current day,
+ * so completed tasks with relative dueDates use completedAt instead.
+ */
+function resolveTaskDay(task: Task): Date | null {
+  if (!task.dueDate) return null;
+  const isRelative = RELATIVE_DATES.has(task.dueDate.trim().toLowerCase());
+
+  if (isRelative && task.status === 'done' && task.completedAt) {
+    return startOfDay(new Date(task.completedAt));
+  }
+
+  const parsed = parseDate(task.dueDate);
+  return parsed ? startOfDay(parsed) : null;
 }
 
 /**
@@ -45,14 +64,10 @@ export function useCalendarData(rangeStart: Date, rangeEnd: Date): CalendarData 
       }
     }
 
-    // Index tasks by due date — use parseDate to handle relative dates
+    // Index tasks by resolved date
     for (const task of tasks) {
-      if (!task.dueDate) continue;
-
-      const parsed = parseDate(task.dueDate);
-      if (!parsed) continue;
-
-      const taskDay = startOfDay(parsed);
+      const taskDay = resolveTaskDay(task);
+      if (!taskDay) continue;
       if (!isWithinInterval(taskDay, { start, end })) continue;
 
       const key = format(taskDay, 'yyyy-MM-dd');

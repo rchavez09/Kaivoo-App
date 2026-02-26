@@ -1,11 +1,13 @@
 import { memo, useMemo } from 'react';
-import { format, isToday, isSameDay } from 'date-fns';
+import { format, isToday, isSameDay, startOfDay } from 'date-fns';
 import { Calendar, Video, MapPin, ListTodo, CalendarCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { formatTime, getDurationMinutes, formatDuration, parseDate } from '@/lib/dateUtils';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { Meeting, Task } from '@/types';
+
+const RELATIVE_DATES = new Set(['today', 'tomorrow']);
 
 interface DaySidebarProps {
   selectedDate: Date;
@@ -30,8 +32,15 @@ export const DaySidebar = memo(({ selectedDate, onMeetingClick, onTaskClick }: D
     const completed: Task[] = [];
     for (const task of allStoreTasks) {
       if (!task.dueDate) continue;
-      const parsed = parseDate(task.dueDate);
-      if (!parsed || !isSameDay(parsed, selectedDate)) continue;
+      const isRelative = RELATIVE_DATES.has(task.dueDate.trim().toLowerCase());
+      let taskDay: Date | null;
+      if (isRelative && task.status === 'done' && task.completedAt) {
+        taskDay = startOfDay(new Date(task.completedAt));
+      } else {
+        const parsed = parseDate(task.dueDate);
+        taskDay = parsed ? startOfDay(parsed) : null;
+      }
+      if (!taskDay || !isSameDay(taskDay, selectedDate)) continue;
       if (task.status === 'done') completed.push(task);
       else pending.push(task);
     }

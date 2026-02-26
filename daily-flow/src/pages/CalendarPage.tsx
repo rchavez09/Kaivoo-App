@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar as CalendarUI } from '@/components/ui/calendar';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
-import { format, isSameDay, addDays, startOfMonth } from 'date-fns';
+import { format, isSameDay, startOfDay, startOfMonth } from 'date-fns';
+import { parseDate } from '@/lib/dateUtils';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import DayReview from '@/components/DayReview';
 import MeetingDetailsDrawer from '@/components/MeetingDetailsDrawer';
@@ -53,25 +54,28 @@ const CalendarPage = () => {
     [allMeetings, selectedDate],
   );
   const { pendingTasks, completedTasks } = useMemo(() => {
+    const relativeDates = new Set(['today', 'tomorrow']);
+    const resolveDay = (t: typeof allTasks[number]): Date | null => {
+      if (!t.dueDate) return null;
+      const isRelative = relativeDates.has(t.dueDate.trim().toLowerCase());
+      // Completed tasks with relative dueDates: use completedAt (the string
+      // "Today" always resolves to the current day, not the original due day)
+      if (isRelative && t.status === 'done' && t.completedAt) {
+        return startOfDay(new Date(t.completedAt));
+      }
+      const parsed = parseDate(t.dueDate);
+      return parsed ? startOfDay(parsed) : null;
+    };
+
     const pending = allTasks.filter(t => {
-      if (!t.dueDate) return false;
-      const d = t.dueDate.toLowerCase();
-      const today = new Date();
-      let taskDate: Date | null = null;
-      if (d === 'today') taskDate = today;
-      else if (d === 'tomorrow') taskDate = addDays(today, 1);
-      else taskDate = new Date(t.dueDate);
-      return taskDate && isSameDay(taskDate, selectedDate) && t.status !== 'done';
+      if (t.status === 'done') return false;
+      const day = resolveDay(t);
+      return day ? isSameDay(day, selectedDate) : false;
     });
     const completed = allTasks.filter(t => {
-      if (!t.dueDate) return false;
-      const d = t.dueDate.toLowerCase();
-      const today = new Date();
-      let taskDate: Date | null = null;
-      if (d === 'today') taskDate = today;
-      else if (d === 'tomorrow') taskDate = addDays(today, 1);
-      else taskDate = new Date(t.dueDate);
-      return taskDate && isSameDay(taskDate, selectedDate) && t.status === 'done';
+      if (t.status !== 'done') return false;
+      const day = resolveDay(t);
+      return day ? isSameDay(day, selectedDate) : false;
     });
     return { pendingTasks: pending, completedTasks: completed };
   }, [allTasks, selectedDate]);

@@ -11,7 +11,7 @@ interface MonthGridDayCellProps {
   onSelect: (date: Date) => void;
 }
 
-const MAX_DOTS = 3;
+const MAX_DOTS_PER_ROW = 4;
 
 export const MonthGridDayCell = memo(({
   date,
@@ -25,14 +25,11 @@ export const MonthGridDayCell = memo(({
   const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
   const meetingCount = dayData?.meetings.length ?? 0;
   const taskCount = (dayData?.pendingTasks ?? 0) + (dayData?.completedTasks ?? 0);
-  const totalEvents = meetingCount + taskCount;
 
-  // Build dot array: meetings first (primary), then tasks (accent)
-  const dots: ('meeting' | 'task')[] = [];
-  for (let i = 0; i < Math.min(meetingCount, MAX_DOTS); i++) dots.push('meeting');
-  const remaining = MAX_DOTS - dots.length;
-  for (let i = 0; i < Math.min(taskCount, remaining); i++) dots.push('task');
-  const overflow = totalEvents - dots.length;
+  const shownMeetings = Math.min(meetingCount, MAX_DOTS_PER_ROW);
+  const meetingOverflow = meetingCount - shownMeetings;
+  const shownTasks = Math.min(taskCount, MAX_DOTS_PER_ROW);
+  const taskOverflow = taskCount - shownTasks;
 
   return (
     <button
@@ -60,20 +57,26 @@ export const MonthGridDayCell = memo(({
         {date.getDate()}
       </span>
 
-      {/* Event dots */}
-      {dots.length > 0 && (
-        <div className="flex items-center gap-1 mt-1.5">
-          {dots.map((type, i) => (
-            <div
-              key={i}
-              className={cn(
-                'w-1.5 h-1.5 rounded-full',
-                type === 'meeting' ? 'bg-primary' : 'bg-accent',
-              )}
-            />
+      {/* Meeting dots — separate row */}
+      {meetingCount > 0 && (
+        <div className="flex items-center gap-0.5 mt-1">
+          {Array.from({ length: shownMeetings }, (_, i) => (
+            <div key={`m${i}`} className="w-1.5 h-1.5 rounded-full bg-primary" />
           ))}
-          {overflow > 0 && (
-            <span className="text-[9px] text-muted-foreground leading-none">+{overflow}</span>
+          {meetingOverflow > 0 && (
+            <span className="text-[8px] text-primary/70 leading-none ml-0.5">+{meetingOverflow}</span>
+          )}
+        </div>
+      )}
+
+      {/* Task dots — separate row */}
+      {taskCount > 0 && (
+        <div className="flex items-center gap-0.5 mt-0.5">
+          {Array.from({ length: shownTasks }, (_, i) => (
+            <div key={`t${i}`} className="w-1.5 h-1.5 rounded-full bg-accent" />
+          ))}
+          {taskOverflow > 0 && (
+            <span className="text-[8px] text-accent/70 leading-none ml-0.5">+{taskOverflow}</span>
           )}
         </div>
       )}
