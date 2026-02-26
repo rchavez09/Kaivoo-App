@@ -196,7 +196,7 @@ The platform doesn't guess what users want — it watches what they're already t
 | Projects system — Topic → Project → Task → Subtask hierarchy, project date ranges | PLANNED | — |
 | Project templates — reusable task structures, per-project customization | PLANNED | — |
 | Tasks Timeline view — project-first calendar with layered filters (projects, tasks, meetings) | PLANNED | — |
-| Calendar page redesign — meetings-first view with project/task dots, shared filter system | PLANNED | — |
+| Calendar page redesign — month grid + hourly day view, meetings-first hierarchy | IN PROGRESS | Sprint 16 |
 | AI project kickoff — chat-driven project scaffolding from templates | PLANNED | — |
 | Core feature enhancement (journal, topics, notes, captures) | DONE | Sprints 7–8, 14 |
 | Search & file attachments | PLANNED | — |
@@ -308,15 +308,13 @@ The platform doesn't guess what users want — it watches what they're already t
 
 ## Current Position
 
-**We are in:** Phase 1 — Cloud Command Center (~98% complete)
-**Active sprint:** Sprint 15 (Refine) — UX polish, accessibility, performance hardening
-**Last completed:** Sprint 14 (Connect) — Project Notes system, Quick Add, export/import, keyboard shortcut
+**We are in:** Phase 1 — Cloud Command Center (~99% complete)
+**Active sprint:** Sprint 16 (Calendar) — Calendar page redesign with month grid + hourly day view
+**Last completed:** Sprint 15 (Refine) — UX polish, accessibility, performance hardening
+
+**Sprint 15 delivered:** Notes page padding, touch target compliance, bundle size audit, accessibility polish. See `Sprints/Sprint-15-Refine.md`.
 
 **Sprint 14 delivered:** Project Notes CRUD (project_notes table, RLS, service layer, Zustand store). ProjectDetail Notes section with inline editing. Quick Add note-to-project from anywhere (Cmd+Shift+N). Notes included in data export/import. See `Sprints/Sprint-14-Connect.md`.
-
-**Sprint 13 delivered:** Pure UX debt and code quality sprint. Semantic color token unification, project color picker improvements, accessibility fixes, projects added to export/import flow. See `Sprints/Sprint-13-Polish.md`.
-
-**Sprint 12 delivered:** Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Dark Mode Specification created. Sprint Protocol updated to v1.5 with 3-agent design gates. Zustand selector migration. Code quality verified. See `Sprints/Sprint-12-Craft.md`.
 
 **Key decisions resolved:**
 - ~~Design System migration vs. feature work~~ → **Both in Sprint 2** (merged sprint)
@@ -328,7 +326,6 @@ The platform doesn't guess what users want — it watches what they're already t
 **Key decisions ahead:**
 - **Project templates + AI kickoff** — Reusable task structures; chat-driven scaffolding; prerequisite for Module 2 (Marketing Agency campaign templates)
 - **Tasks Timeline view** — Project-first calendar with layered filters; relationship to Calendar page
-- **Calendar page redesign** — meetings-first view with project/task dots
 - **Desktop framework choice** — Electron vs. Tauri (Agent 9 to evaluate)
 - **Platform architecture scoping** — When to begin module system design alongside core product work
 - **Module 2 revenue gate** — Command Space must be generating revenue before Marketing Agency development begins
@@ -387,8 +384,9 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v3.4 — February 25, 2026*
+*Vision v3.5 — February 25, 2026*
 *v3.0: Platform pivot — modular architecture, Command Space as foundation, Marketing Agency as Module 2*
 *v3.2: Sprint 7 progress, Supabase cloud migration*
 *v3.3: Updated through Sprint 12 — Design Agent split, code quality verified, Phase 1 ~97% complete*
 *v3.4: Updated through Sprint 14 — Project Notes, UX polish, Phase 1 ~98% complete*
+*v3.5: Updated through Sprint 16 — Calendar redesign in progress, Phase 1 ~99% complete*

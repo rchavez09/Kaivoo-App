@@ -15,9 +15,8 @@
 | **Tasks Page** | `Feature-Bible-Tasks-Page.md` | v0.1 DRAFT — Awaiting user Q&A | List/Kanban views, filtering, sorting, task detail drawer, subtasks, creation flow |
 | **Journal Page** | `Feature-Bible-Journal-Page.md` | v0.2 — Q&A resolved, Canvas design, Sprint 7 baseline | Daily Canvas (continuous writing), calendar sidebar with section anchors, AI extraction, mood, auto-save, inline tag input |
 | **Projects Page** | `Feature-Bible-Projects-Page.md` | v0.2 — Sprint 14 Project Notes | Projects list (card grid, status tabs, search, topic filter, create dialog), Project Detail (inline editing, task list, **project notes**, link existing, stats bar, settings, delete), Timeline View (Gantt bars, today line, date axis, click-to-drill), Project Selector in TaskDetailsDrawer, Project Badges on task rows, **Quick-Add Note (Cmd+Shift+N)** |
-| **Routines & Habits Page** | TBD | Not started | Full category management, goal tracking, gamification, challenges (discovered from Today Bible Q11/Q12) |
+| **Routines & Habits Page** | `Feature-Bible-Routines-Habits.md` | Planned — Sprint 17+ (research complete, design brief ready) | Full routines page, habit tracking, streaks, analytics, frequency scheduling, mood-habit correlation |
 | **Calendar Page** | TBD | Not started | Calendar integrations, event management |
-| **Captures** | TBD | Not started | Quick capture, processing, organization |
 | **Insights Page** | TBD | Not started | Analytics, correlations, trends |
 | **Topics Page** | TBD | Not started | Knowledge base, folders, topic management |
 
@@ -39,7 +38,8 @@
 
 ---
 
-*Feature Bible Index v1.5 — February 25, 2026*
+*Feature Bible Index v1.6 — February 25, 2026*
+*v1.6: Removed Captures (page deprecated — not needed, Notes covers the use case). Added Routines & Habits entry (Sprint 17+ research complete).*
 *v1.2: Journal Page Bible v0.2 (Q&A resolved, Canvas design direction, Sprint 7 baseline)*
 *v1.3: Added Projects Page entry (Sprint 9 delivered, Bible pending for Sprint 11)*
 *v1.4: Projects Page Bible v0.1 completed — full coverage of Projects list, Project Detail, Timeline View, Project Selector, Project Badges, data model*

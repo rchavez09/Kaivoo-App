@@ -85,9 +85,15 @@ const DayReview = ({
     updateCapture(updatedCapture.id, updatedCapture);
     onCaptureUpdate?.(updatedCapture);
   };
+  // Strip HTML tags for plain text display
+  const stripHtml = (html: string) => {
+    const tmp = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>\s*<p[^>]*>/gi, '\n\n');
+    return tmp.replace(/<[^>]+>/g, '').trim();
+  };
+
   // Calculate stats
   const wordCount = journalEntries.reduce(
-    (acc, entry) => acc + entry.content.split(/\s+/).filter(Boolean).length,
+    (acc, entry) => acc + stripHtml(entry.content).split(/\s+/).filter(Boolean).length,
     0
   );
   const routineRate = routines.length > 0 
@@ -140,7 +146,7 @@ const DayReview = ({
                   </span>
                 </div>
                 <p className="text-sm text-foreground font-serif leading-relaxed whitespace-pre-wrap">
-                  {entry.content}
+                  {stripHtml(entry.content)}
                 </p>
                 {(entry.tags.length > 0 || entry.topicIds.length > 0) && (
                   <div className="flex flex-wrap gap-1 mt-2">

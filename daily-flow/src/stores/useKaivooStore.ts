@@ -87,6 +87,7 @@ interface KaivooStore {
   updateMeeting: (id: string, updates: Partial<Meeting>) => void;
   deleteMeeting: (id: string) => void;
   getMeetingsForDate: (date: Date) => Meeting[];
+  getMeetingsForDateRange: (start: Date, end: Date) => Meeting[];
   getTodaysMeetings: () => Meeting[];
   
   // Routines
@@ -820,7 +821,16 @@ export const useKaivooStore = create<KaivooStore>()(
       return startTime.toDateString() === targetDate;
     }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   },
-  
+
+  getMeetingsForDateRange: (start, end) => {
+    const startMs = start.getTime();
+    const endMs = end.getTime();
+    return get().meetings.filter(m => {
+      const ms = new Date(m.startTime).getTime();
+      return ms >= startMs && ms <= endMs;
+    }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  },
+
   getTodaysMeetings: () => {
     return get().getMeetingsForDate(new Date());
   },
