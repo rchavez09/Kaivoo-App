@@ -225,6 +225,7 @@ const CalendarPage = () => {
                     size="sm"
                     onClick={() => setShowReview(!showReview)}
                     className="gap-1.5"
+                    aria-pressed={showReview}
                   >
                     <BookOpen className="w-4 h-4" />
                     <span className="hidden sm:inline">Review</span>

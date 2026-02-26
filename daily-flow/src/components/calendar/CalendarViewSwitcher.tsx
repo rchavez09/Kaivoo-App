@@ -22,6 +22,7 @@ export const CalendarViewSwitcher = memo(({ viewMode, onViewModeChange }: Calend
         onClick={() => onViewModeChange(mode)}
         className={cn(
           'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
           viewMode === mode
             ? 'bg-background text-foreground shadow-sm'
             : 'text-muted-foreground hover:text-foreground',
