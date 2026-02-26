@@ -23,6 +23,7 @@ interface ExportData {
   aiSettings: Record<string, unknown>[];
   profile: Record<string, unknown> | null;
   projects?: Record<string, unknown>[];
+  projectNotes?: Record<string, unknown>[];
 }
 
 const DataSettings = () => {
@@ -39,7 +40,7 @@ const DataSettings = () => {
       const [
         tasks, subtasks, journals, captures, topics, topicPages,
         tags, meetings, routineGroups, routines, routineCompletions,
-        widgetSettings, aiSettings, profile, projects,
+        widgetSettings, aiSettings, profile, projects, projectNotes,
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', user.id),
         supabase.from('subtasks').select('*').eq('user_id', user.id),
@@ -56,6 +57,7 @@ const DataSettings = () => {
         supabase.from('ai_settings').select('*').eq('user_id', user.id),
         supabase.from('profiles').select('*').eq('user_id', user.id).single(),
         supabase.from('projects').select('*').eq('user_id', user.id),
+        supabase.from('project_notes').select('*').eq('user_id', user.id),
       ]);
 
       const exportData: ExportData = {
@@ -76,6 +78,7 @@ const DataSettings = () => {
         aiSettings: aiSettings.data || [],
         profile: profile.data || null,
         projects: projects.data || [],
+        projectNotes: projectNotes.data || [],
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -104,7 +107,7 @@ const DataSettings = () => {
     setImporting(true);
 
     const errors: string[] = [];
-    const counts = { topics: 0, tags: 0, projects: 0, tasks: 0, subtasks: 0, journals: 0, captures: 0, meetings: 0, routineGroups: 0, routines: 0, routineCompletions: 0, widgetSettings: 0 };
+    const counts = { topics: 0, tags: 0, projects: 0, projectNotes: 0, tasks: 0, subtasks: 0, journals: 0, captures: 0, meetings: 0, routineGroups: 0, routines: 0, routineCompletions: 0, widgetSettings: 0 };
 
     try {
       const text = await file.text();
@@ -184,6 +187,19 @@ const DataSettings = () => {
           const { data: inserted, error } = await supabase.from('projects').insert({ ...rest, user_id: uid, topic_id: newTopicId } as never).select('id').single();
           if (error) errors.push(`Project "${(project.name as string) || 'unknown'}": ${error.message}`);
           else if (inserted) { projectIdMap.set(oldId, inserted.id); counts.projects++; }
+        }
+      }
+
+      // 5b. Project notes (after projects, needs projectIdMap)
+      if (data.projectNotes?.length) {
+        for (const note of data.projectNotes) {
+          const { id: _id, user_id: _uid, project_id: oldProjectId, ...rest } = note;
+          const newProjectId = oldProjectId ? projectIdMap.get(oldProjectId as string) : undefined;
+          if (newProjectId) {
+            const { error } = await supabase.from('project_notes').insert({ ...rest, user_id: uid, project_id: newProjectId } as never);
+            if (error) errors.push(`Project note: ${error.message}`);
+            else counts.projectNotes++;
+          }
         }
       }
 

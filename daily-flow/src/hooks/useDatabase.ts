@@ -12,6 +12,7 @@ import * as TopicsService from '@/services/topics.service';
 import * as MeetingsService from '@/services/meetings.service';
 import * as RoutinesService from '@/services/routines.service';
 import * as ProjectsService from '@/services/projects.service';
+import * as ProjectNotesService from '@/services/project-notes.service';
 
 export const useDatabase = (options?: { autoLoad?: boolean }) => {
   const { user } = useAuth();
@@ -35,6 +36,7 @@ export const useDatabase = (options?: { autoLoad?: boolean }) => {
         routineGroupsData,
         routineCompletionsData,
         projectsData,
+        projectNotesData,
       ] = await Promise.all([
         TopicsService.fetchTopics(user.id),
         TopicsService.fetchTopicPages(user.id),
@@ -48,6 +50,7 @@ export const useDatabase = (options?: { autoLoad?: boolean }) => {
         RoutinesService.fetchRoutineGroups(user.id),
         RoutinesService.fetchRoutineCompletions(user.id),
         ProjectsService.fetchProjects(user.id),
+        ProjectNotesService.fetchProjectNotes(user.id),
       ]);
 
       // Group subtasks by task_id
@@ -85,6 +88,7 @@ export const useDatabase = (options?: { autoLoad?: boolean }) => {
         routineGroups: routineGroupsData.map(RoutinesService.dbToRoutineGroup),
         routineCompletions: completionsMap,
         projects: projectsData.map(ProjectsService.dbToProject),
+        projectNotes: projectNotesData.map(ProjectNotesService.dbToProjectNote),
       });
     } catch (error) {
       console.error('Error loading data from database:', error);
@@ -138,5 +142,8 @@ export const useDatabaseOperations = () => {
     createProject: (project: Parameters<typeof ProjectsService.createProject>[1]) => ProjectsService.createProject(ensureAuth(), project),
     updateProject: (id: string, updates: Parameters<typeof ProjectsService.updateProject>[2]) => ProjectsService.updateProject(ensureAuth(), id, updates),
     deleteProject: (id: string) => ProjectsService.deleteProject(ensureAuth(), id),
+    createProjectNote: (note: Parameters<typeof ProjectNotesService.createProjectNote>[1]) => ProjectNotesService.createProjectNote(ensureAuth(), note),
+    updateProjectNote: (id: string, updates: Parameters<typeof ProjectNotesService.updateProjectNote>[2]) => ProjectNotesService.updateProjectNote(ensureAuth(), id, updates),
+    deleteProjectNote: (id: string) => ProjectNotesService.deleteProjectNote(ensureAuth(), id),
   };
 };

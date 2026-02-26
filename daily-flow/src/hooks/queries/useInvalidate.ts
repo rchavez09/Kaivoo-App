@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { queryKeys } from './queryKeys';
 
-type EntityType = 'tasks' | 'topics' | 'topicPages' | 'tags' | 'journalEntries' | 'captures' | 'meetings' | 'routines' | 'routineGroups' | 'routineCompletions' | 'projects';
+type EntityType = 'tasks' | 'topics' | 'topicPages' | 'tags' | 'journalEntries' | 'captures' | 'meetings' | 'routines' | 'routineGroups' | 'routineCompletions' | 'projects' | 'projectNotes';
 
 /**
  * Hook for targeted cache invalidation — replaces the old reload() pattern.

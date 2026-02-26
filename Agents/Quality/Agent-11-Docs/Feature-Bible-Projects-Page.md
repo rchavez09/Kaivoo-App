@@ -1,6 +1,6 @@
 # Feature Use Case Bible — Projects Page
 
-**Version:** 0.1 (Initial Draft)
+**Version:** 0.2 (Sprint 14 — Project Notes)
 **Status:** DRAFT — Awaiting user review and Q&A
 **Scope:** PROJECTS MODULE — Projects list (`/projects`), Project Detail (`/projects/:projectId`), Timeline View, Project Selector (in TaskDetailsDrawer), and Project Badges (on task rows)
 **Compiled by:** Agent 11 (Feature Integrity Guardian)
@@ -181,6 +181,14 @@ You click a project card. It navigates to `/projects/:projectId` — the project
 |  +--------------------------------------------------------------+  |
 |                                                                    |
 |  +--------------------------------------------------------------+  |
+|  | Notes                                          2 notes        | |
+|  +--------------------------------------------------------------+  |
+|  | Thought about the API design...        2 min ago  [ed] [del] | |
+|  | Remember to check the timeline...      1 hour ago [ed] [del] | |
+|  | [Write a note...                          ] [Add Note]       | |
+|  +--------------------------------------------------------------+  |
+|                                                                    |
+|  +--------------------------------------------------------------+  |
 |  | Settings                                                      | |
 |  | Color: [o][o][o][o][o][o][o][o][o][o][o][o]                  | |
 |  | Start Date: [____]    End Date: [____]                        | |
@@ -284,6 +292,208 @@ You click a project card. It navigates to `/projects/:projectId` — the project
 - Opens when a task row is clicked
 - Same behavior as documented in Tasks Bible
 - **Component:** `<TaskDetailsDrawer>` in `ProjectDetail.tsx`
+
+---
+
+# PROJECT NOTES (Sprint 14)
+
+## Identity
+
+**Project Notes let you capture thoughts for a project mid-flow.** From anywhere in the app, press Cmd+Shift+N (or Ctrl+Shift+N on Windows/Linux) to open a quick-add dialog, pick a project, type your thought, and get back to what you were doing. Notes are then visible and editable on the project detail page.
+
+**Core principle:** Minimal friction. You should be able to capture a project-related thought in 2-3 interactions without losing your current flow.
+
+---
+
+## Project Notes Section on ProjectDetail
+
+### Location
+- Between the **Tasks** section and the **Settings** section on the Project Detail page
+- Uses `widget-card` styling matching the Tasks and Settings sections
+
+### Layout
+
+```
++--------------------------------------------------------------+
+| Notes                                              2 notes    |
++--------------------------------------------------------------+
+|                                                                |
+|  This is a note about the project...              2 min ago   |
+|  [edit] [delete]                                               |
+|                                                                |
+|  Another thought I had earlier today...           1 hour ago  |
+|  [edit] [delete]                                               |
+|                                                                |
+|  +----------------------------------------------------------+ |
+|  | Write a note...                               [Add Note] | |
+|  +----------------------------------------------------------+ |
+|                                                                |
++--------------------------------------------------------------+
+```
+
+### What Currently Works (Sprint 14 State)
+
+#### Notes List
+- All notes for the current project, sorted newest-first by `createdAt`
+- **Progressive disclosure:** Shows first 5 notes by default, "Show N more" button to reveal rest
+- **Long notes:** Content clamped to 4 lines with "Show more" / "Show less" toggle
+- **Timestamps:** Relative time format ("2 min ago", "1 hour ago", "Feb 24") using `date-fns` `formatDistanceToNow` / `format`
+- **Component:** `src/components/projects/ProjectNotesList.tsx`
+
+#### Inline Editing
+- Click the pencil icon (or press Enter when focused) to enter edit mode
+- Textarea replaces the note content area
+- **Save:** Click "Save" button or press Enter (without Shift)
+- **Cancel:** Click "Cancel" button or press Escape
+- **Shift+Enter:** Inserts a newline (does not save)
+- Empty content reverts edit (no save)
+
+#### Delete Confirmation
+- Click the trash icon to show inline confirmation strip (not a modal)
+- Confirmation strip shows "Delete this note?" with "Delete" (destructive) and "Cancel" buttons
+- Stays inline within the note card — no dialog overlay
+- **Component:** `confirmingDeleteId` state in `ProjectNotesList`
+
+#### Add Note Input
+- Inline input at the bottom of the notes section
+- Textarea with "Write a note..." placeholder
+- "Add Note" button (disabled when input is empty)
+- **Enter** key creates the note (Shift+Enter for newlines)
+- Input clears after successful creation
+- Toast: "Note added" on success
+
+#### Empty State
+- When project has no notes: StickyNote icon + "No notes yet" + "Capture thoughts, ideas, or reminders for this project."
+- Add-note input still visible below the empty state
+
+---
+
+## Quick-Add Note Dialog
+
+### Identity
+**The Quick-Add Note dialog lets you create a project note from anywhere in the app** without navigating away from your current page.
+
+### Trigger
+- **Keyboard shortcut:** Cmd+Shift+N (Mac) / Ctrl+Shift+N (Windows/Linux)
+- Available from any page in the app (registered in `AppLayout.tsx`)
+
+### Dialog Layout
+
+```
++----------------------------------------------+
+|  [sticky-note icon] Quick Note               |
++----------------------------------------------+
+|                                                |
+|  Project                                       |
+|  [Select a project... v]                       |
+|                                                |
+|  Note                                          |
+|  [What's on your mind...                    ]  |
+|  [                                          ]  |
+|                                                |
+|  Cmd+Enter to save                             |
+|                                                |
+|              [Cancel]  [Add Note]              |
++----------------------------------------------+
+```
+
+### What Currently Works (Sprint 14 State)
+
+#### Project Picker
+- Select dropdown showing all **active** projects (filters out `status === 'archived'`)
+- Each option shows: color dot + project name
+- **Pre-selection:** When opened from a project detail page (`/projects/:projectId`), the current project is pre-selected
+- **Empty projects:** Shows "No active projects" placeholder when user has no projects
+
+#### Note Input
+- Textarea, auto-focused after dialog opens (100ms delay for animation)
+- Placeholder: "What's on your mind..."
+- **Cmd/Ctrl+Enter:** Saves the note (keyboard shortcut hint shown below)
+
+#### Save Behavior
+- "Add Note" button disabled until both project is selected AND content is non-empty
+- On save: creates note via `addProjectNote()`, shows toast "Note added to {projectName}", closes dialog
+- On cancel or dialog close: form resets
+
+#### Form Reset
+- Form resets every time dialog opens (content cleared, project re-set to default)
+
+### Component
+- `src/components/projects/QuickAddNoteDialog.tsx`
+- Mounted in `src/components/layout/AppLayout.tsx` next to `FloatingChat`
+
+---
+
+## Project Notes Data Model
+
+```typescript
+interface ProjectNote {
+  id: string;
+  projectId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Database Table (`project_notes`)
+- RLS: all policies use `(select auth.uid())` subquery form
+- `ON DELETE CASCADE` from `projects.id` — when a project is deleted, all its notes are automatically deleted
+- Indexes on `user_id` and `project_id`
+- `updated_at` auto-update trigger
+
+### Service Layer (`project-notes.service.ts`)
+- `fetchProjectNotes(userId)`: All notes for user, ordered by `created_at` desc
+- `createProjectNote(userId, note)`: Insert + return converted note
+- `updateProjectNote(userId, id, updates)`: Partial update (content only)
+- `deleteProjectNote(userId, id)`: Hard delete
+
+### Store Layer (`useKaivooStore.ts`)
+- `projectNotes: ProjectNote[]` in store
+- CRUD methods: `addProjectNote`, `updateProjectNote`, `deleteProjectNote`
+- `getNotesByProject(projectId)`: Filtered + sorted by createdAt desc
+- CASCADE cleanup: `deleteProject` also removes associated notes from local store
+
+### Actions Layer (`useKaivooActions.ts`)
+- Optimistic updates with rollback on error for all CRUD operations
+- Error toasts on failure
+
+### Export/Import (`DataSettings.tsx`)
+- Project notes included in full data export
+- Import restores notes with `project_id` remapping via `projectIdMap`
+
+---
+
+## Project Notes Interaction Spec
+
+### ProjectDetail — Notes Section
+
+```
+Note content here...                    2 min ago
+                                    [pencil] [trash]
+
+Click pencil    -> Enter edit mode (textarea replaces content)
+Enter           -> Save changes
+Escape          -> Cancel edit
+Shift+Enter     -> Newline in edit mode
+Click trash     -> Show inline delete confirmation
+"Delete"        -> Delete note + toast
+"Cancel"        -> Dismiss confirmation
+"Show more"     -> Expand clamped note
+"Show N more"   -> Show remaining notes beyond first 5
+```
+
+### Quick-Add Note Dialog
+
+```
+Cmd+Shift+N     -> Open dialog from any page
+Select project  -> Pick from active projects
+Type note       -> Content textarea
+Cmd/Ctrl+Enter  -> Save note
+Escape          -> Close dialog
+"Add Note"      -> Save + toast + close
+"Cancel"        -> Close without saving
+```
 
 ---
 
@@ -779,6 +989,41 @@ Are there things about the Projects module that frustrate you or feel missing th
 - [ ] Color dot + project name badge on task rows
 - [ ] Only shown when task has projectId and project exists
 - [ ] Appears first in meta row (before date, recurrence, topics)
+
+### Project Notes (ProjectDetail)
+- [ ] Notes section between Tasks and Settings on project detail
+- [ ] Notes sorted newest-first by createdAt
+- [ ] Progressive disclosure: first 5 notes, "Show N more" for rest
+- [ ] Long note clamping (4 lines) with "Show more" / "Show less"
+- [ ] Relative timestamps on each note
+- [ ] Inline editing: click pencil → textarea → Enter to save, Escape to cancel
+- [ ] Shift+Enter inserts newline in edit mode (does not save)
+- [ ] Empty content reverts edit without saving
+- [ ] Inline delete confirmation strip (not modal)
+- [ ] Add note input at bottom with Enter to create
+- [ ] Empty state with StickyNote icon and encouraging text
+- [ ] Add input remains visible in empty state
+- [ ] Note count in section header
+
+### Quick-Add Note Dialog
+- [ ] Cmd+Shift+N (Mac) / Ctrl+Shift+N opens from any page
+- [ ] Project picker shows active projects only (not archived)
+- [ ] Color dots in project picker
+- [ ] Pre-selects current project when on project detail page
+- [ ] Textarea auto-focuses on open
+- [ ] Cmd/Ctrl+Enter to save
+- [ ] Button disabled until project selected AND content non-empty
+- [ ] Success toast with project name
+- [ ] Form resets on each open
+- [ ] "No active projects" shown when no projects exist
+
+### Project Notes Data Integrity
+- [ ] Notes CASCADE-deleted when project is deleted (both DB and local store)
+- [ ] Notes included in data export
+- [ ] Notes import remaps project_id via projectIdMap
+- [ ] Optimistic updates with rollback on error
+- [ ] Error toasts on all failed note operations
+- [ ] RLS: all note queries filtered by user_id
 
 ### Data Integrity
 - [ ] Project deletion orphans tasks (projectId = undefined), does NOT delete tasks

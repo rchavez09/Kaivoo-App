@@ -2,7 +2,7 @@ import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useDatabaseOperations } from './useDatabase';
 import { useInvalidate } from './queries';
 import { useAuth } from './useAuth';
-import { Task, Topic, TopicPage, JournalEntry, Capture, Meeting, Project } from '@/types';
+import { Task, Topic, TopicPage, JournalEntry, Capture, Meeting, Project, ProjectNote } from '@/types';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { computeNextDueDate } from '@/lib/recurrence';
@@ -490,6 +490,54 @@ export const useKaivooActions = () => {
     }
   };
 
+  // --- Project Notes ---
+
+  const addProjectNote = async (noteData: Pick<ProjectNote, 'projectId' | 'content'>) => {
+    if (user) {
+      try {
+        const note = await db.createProjectNote(noteData);
+        useKaivooStore.setState(s => ({ projectNotes: [note, ...(s.projectNotes || [])] }));
+        invalidate('projectNotes');
+        return note;
+      } catch (e: unknown) {
+        toast.error('Failed to add note. Please try again.');
+        console.error('[addProjectNote]', e);
+        return undefined;
+      }
+    }
+    return getStore().addProjectNote(noteData);
+  };
+
+  const updateProjectNote = async (id: string, updates: Partial<Pick<ProjectNote, 'content'>>) => {
+    const prev = (getStore().projectNotes || []).find(n => n.id === id);
+    getStore().updateProjectNote(id, updates);
+    if (user) {
+      try {
+        await db.updateProjectNote(id, updates);
+        invalidate('projectNotes');
+      } catch (e) {
+        if (prev) getStore().updateProjectNote(id, { content: prev.content });
+        toast.error('Failed to save note changes.');
+        console.error('[updateProjectNote]', e);
+      }
+    }
+  };
+
+  const deleteProjectNote = async (id: string) => {
+    const prev = (getStore().projectNotes || []).find(n => n.id === id);
+    getStore().deleteProjectNote(id);
+    if (user) {
+      try {
+        await db.deleteProjectNote(id);
+        invalidate('projectNotes');
+      } catch (e) {
+        if (prev) useKaivooStore.setState(s => ({ projectNotes: [...(s.projectNotes || []), prev] }));
+        toast.error('Failed to delete note.');
+        console.error('[deleteProjectNote]', e);
+      }
+    }
+  };
+
   return {
     addTask, updateTask, deleteTask,
     addSubtask, toggleSubtask, updateSubtask, deleteSubtask,
@@ -499,5 +547,6 @@ export const useKaivooActions = () => {
     addTopic, addTopicPage, deleteTopic,
     addCapture, resolveTopicPathAsync,
     addProject, updateProject, deleteProject,
+    addProjectNote, updateProjectNote, deleteProjectNote,
   };
 };

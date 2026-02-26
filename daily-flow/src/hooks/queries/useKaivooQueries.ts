@@ -12,6 +12,7 @@ import * as CapturesService from '@/services/captures.service';
 import * as MeetingsService from '@/services/meetings.service';
 import * as RoutinesService from '@/services/routines.service';
 import * as ProjectsService from '@/services/projects.service';
+import * as ProjectNotesService from '@/services/project-notes.service';
 
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
@@ -105,6 +106,12 @@ export function useKaivooQueries() {
         enabled: !!user,
         staleTime: STALE_TIME,
       },
+      {
+        queryKey: queryKeys.projectNotes(userId),
+        queryFn: () => ProjectNotesService.fetchProjectNotes(userId),
+        enabled: !!user,
+        staleTime: STALE_TIME,
+      },
     ],
     combine: (queryResults) => {
       const allSuccess = queryResults.every(r => r.isSuccess);
@@ -129,7 +136,7 @@ export function useKaivooQueries() {
           topicsResult, topicPagesResult, tagsResult, tasksResult,
           subtasksResult, journalResult, capturesResult, meetingsResult,
           routinesResult, routineGroupsResult, routineCompletionsResult,
-          projectsResult,
+          projectsResult, projectNotesResult,
         ] = queryResults;
 
         // Group subtasks by task_id
@@ -171,6 +178,7 @@ export function useKaivooQueries() {
           routineGroups: (routineGroupsResult.data || []).map(RoutinesService.dbToRoutineGroup),
           routineCompletions: completionsMap,
           projects: (projectsResult.data || []).map(ProjectsService.dbToProject),
+          projectNotes: (projectNotesResult.data || []).map(ProjectNotesService.dbToProjectNote),
         });
       }
 

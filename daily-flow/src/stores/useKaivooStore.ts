@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Topic, TopicPage, Capture, Task, Tag, Meeting, RoutineItem, RoutineGroup, JournalEntry, Subtask, RoutineCompletion, Project } from '@/types';
+import { Topic, TopicPage, Capture, Task, Tag, Meeting, RoutineItem, RoutineGroup, JournalEntry, Subtask, RoutineCompletion, Project, ProjectNote } from '@/types';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO, isValid, addDays } from 'date-fns';
 
 // Routine completion with timestamp for activity tracking
@@ -21,6 +21,7 @@ interface DatabaseData {
   routineGroups: RoutineGroup[];
   routineCompletions: Record<string, RoutineCompletionRecord[]>; // date string -> array of completions with timestamps
   projects: Project[];
+  projectNotes: ProjectNote[];
 }
 
 interface KaivooStore {
@@ -117,6 +118,13 @@ interface KaivooStore {
   updateProject: (id: string, updates: Partial<Project>) => void;
   deleteProject: (id: string) => void;
   getTasksByProject: (projectId: string) => Task[];
+
+  // Project Notes
+  projectNotes: ProjectNote[];
+  addProjectNote: (note: Omit<ProjectNote, 'id' | 'createdAt' | 'updatedAt'>) => ProjectNote;
+  updateProjectNote: (id: string, updates: Partial<Pick<ProjectNote, 'content'>>) => void;
+  deleteProjectNote: (id: string) => void;
+  getNotesByProject: (projectId: string) => ProjectNote[];
 
   // UI State
   sidebarCollapsed: boolean;
@@ -384,6 +392,7 @@ export const useKaivooStore = create<KaivooStore>()(
       routineGroups: data.routineGroups,
       routineCompletions: data.routineCompletions,
       projects: data.projects,
+      projectNotes: data.projectNotes,
       isLoaded: true,
     });
   },
@@ -1013,11 +1022,48 @@ export const useKaivooStore = create<KaivooStore>()(
       projects: state.projects.filter(p => p.id !== id),
       // Orphan tasks that belonged to this project
       tasks: state.tasks.map(t => t.projectId === id ? { ...t, projectId: undefined } : t),
+      // Delete notes that belonged to this project (CASCADE)
+      projectNotes: (state.projectNotes || []).filter(n => n.projectId !== id),
     }));
   },
 
   getTasksByProject: (projectId) => {
     return get().tasks.filter(t => t.projectId === projectId);
+  },
+
+  // Project Notes
+  projectNotes: [],
+
+  addProjectNote: (noteData) => {
+    const now = new Date();
+    const note: ProjectNote = {
+      ...noteData,
+      id: `note-${generateId()}`,
+      createdAt: now,
+      updatedAt: now,
+    };
+    set((state) => ({ projectNotes: [note, ...(state.projectNotes || [])] }));
+    return note;
+  },
+
+  updateProjectNote: (id, updates) => {
+    set((state) => ({
+      projectNotes: (state.projectNotes || []).map(n =>
+        n.id === id ? { ...n, ...updates, updatedAt: new Date() } : n
+      ),
+    }));
+  },
+
+  deleteProjectNote: (id) => {
+    set((state) => ({
+      projectNotes: (state.projectNotes || []).filter(n => n.id !== id),
+    }));
+  },
+
+  getNotesByProject: (projectId) => {
+    return (get().projectNotes || [])
+      .filter(n => n.projectId === projectId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 
   // UI State
@@ -1039,6 +1085,7 @@ export const useKaivooStore = create<KaivooStore>()(
         routineGroups: state.routineGroups,
         routineCompletions: state.routineCompletions,
         projects: state.projects,
+        projectNotes: state.projectNotes,
         sidebarCollapsed: state.sidebarCollapsed,
       }),
     }

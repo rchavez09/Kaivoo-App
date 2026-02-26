@@ -98,6 +98,14 @@ export interface Project {
   updatedAt: Date;
 }
 
+export interface ProjectNote {
+  id: string;
+  projectId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface DailyStats {
   date: string;
   entryCount: number;

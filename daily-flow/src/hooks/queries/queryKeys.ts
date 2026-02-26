@@ -13,4 +13,5 @@ export const queryKeys = {
   routineGroups: (userId: string) => ['kaivoo', 'routineGroups', userId] as const,
   routineCompletions: (userId: string) => ['kaivoo', 'routineCompletions', userId] as const,
   projects: (userId: string) => ['kaivoo', 'projects', userId] as const,
+  projectNotes: (userId: string) => ['kaivoo', 'projectNotes', userId] as const,
 };
