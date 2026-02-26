@@ -1,7 +1,8 @@
 # Sprint 13: Polish
 
 **Theme:** Pure UX debt + code quality + accessibility cleanup
-**Status:** IN PROGRESS
+**Status:** COMPLETE
+**Merged:** February 25, 2026
 **Branch:** `sprint/13-polish`
 **Created:** February 25, 2026
 **Approved by:** User

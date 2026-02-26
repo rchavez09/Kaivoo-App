@@ -65,7 +65,7 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
                 key={c}
                 onClick={() => onUpdate({ color: c })}
                 className={cn(
-                  'w-9 h-9 rounded-full border-2 transition-all',
+                  'w-10 h-10 rounded-full border-2 transition-all',
                   color === c ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
                 )}
                 style={{ backgroundColor: c }}

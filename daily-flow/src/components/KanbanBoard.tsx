@@ -41,6 +41,7 @@ interface SortableTaskCardProps {
 const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
   const topics = useKaivooStore(s => s.topics);
   const topicPages = useKaivooStore(s => s.topicPages);
+  const projects = useKaivooStore(s => s.projects);
   
   const {
     attributes,
@@ -55,6 +56,8 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const project = task.projectId ? projects.find(p => p.id === task.projectId) : null;
 
   const getTopicName = (topicId: string) => {
     const topic = topics.find(t => t.id === topicId);
@@ -85,6 +88,12 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
       )}
       onClick={() => onTaskClick(task)}
     >
+      {project && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+          <span className="text-[10px] text-muted-foreground font-medium truncate">{project.name}</span>
+        </div>
+      )}
       <div className="flex items-start gap-2">
         <button
           {...attributes}
@@ -101,7 +110,7 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
           )}>
             {task.title}
           </p>
-          
+
           {progress !== null && (
             <div className="flex items-center gap-1.5 mt-2">
               <Progress value={progress} className="h-1.5 flex-1" />
@@ -116,7 +125,7 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
                 {task.dueDate}
               </Badge>
             )}
-            <Badge 
+            <Badge
               variant="secondary"
               className={cn(
                 'text-[10px] h-5 px-1.5 font-normal',
@@ -165,6 +174,8 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
 const TaskCard = ({ task, onTaskClick }: { task: Task; onTaskClick: (task: Task) => void }) => {
   const topics = useKaivooStore(s => s.topics);
   const topicPages = useKaivooStore(s => s.topicPages);
+  const projects = useKaivooStore(s => s.projects);
+  const project = task.projectId ? projects.find(p => p.id === task.projectId) : null;
 
   const getTopicName = (topicId: string) => {
     const topic = topics.find(t => t.id === topicId);
@@ -187,6 +198,12 @@ const TaskCard = ({ task, onTaskClick }: { task: Task; onTaskClick: (task: Task)
 
   return (
     <div className="bg-card rounded-xl p-3 shadow-lg border border-border">
+      {project && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+          <span className="text-[10px] text-muted-foreground font-medium truncate">{project.name}</span>
+        </div>
+      )}
       <p className={cn(
         "text-sm font-medium line-clamp-2",
         task.status === 'done' ? 'line-through text-muted-foreground' : 'text-foreground'

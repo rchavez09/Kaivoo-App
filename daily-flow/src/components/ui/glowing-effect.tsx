@@ -117,14 +117,15 @@ const GlowingEffect = memo(
       };
     }, [handleMove, disabled]);
 
+    if (disabled) return null;
+
     return (
       <>
         <div
           className={cn(
-            "pointer-events-none absolute -inset-px hidden rounded-[inherit] border opacity-0 transition-opacity",
+            "pointer-events-none absolute -inset-px rounded-[inherit] border opacity-0 transition-opacity",
             glow && "opacity-100",
-            variant === "white" && "border-white",
-            disabled && "!block"
+            variant === "white" && "border-white"
           )}
         />
         <div
@@ -162,8 +163,7 @@ const GlowingEffect = memo(
             "pointer-events-none absolute inset-0 rounded-[inherit] opacity-100 transition-opacity",
             glow && "opacity-100",
             blur > 0 && "blur-[var(--blur)] ",
-            className,
-            disabled && "!hidden"
+            className
           )}
         >
           <div

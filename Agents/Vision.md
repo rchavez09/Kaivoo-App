@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 3.3
-**Last Updated:** February 24, 2026
+**Version:** 3.4
+**Last Updated:** February 25, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -198,7 +198,7 @@ The platform doesn't guess what users want — it watches what they're already t
 | Tasks Timeline view — project-first calendar with layered filters (projects, tasks, meetings) | PLANNED | — |
 | Calendar page redesign — meetings-first view with project/task dots, shared filter system | PLANNED | — |
 | AI project kickoff — chat-driven project scaffolding from templates | PLANNED | — |
-| Core feature enhancement (journal, topics, notes, captures) | DONE | Sprints 7–8 |
+| Core feature enhancement (journal, topics, notes, captures) | DONE | Sprints 7–8, 14 |
 | Search & file attachments | PLANNED | — |
 | Analytics & insights dashboard rebuild | PLANNED | — |
 | Notifications & reminders | PLANNED | — |
@@ -308,17 +308,15 @@ The platform doesn't guess what users want — it watches what they're already t
 
 ## Current Position
 
-**We are in:** Phase 1 — Cloud Command Center (~97% complete)
-**Active sprint:** Sprint 12 (Craft) — Design agent restructuring, Projects design re-audit, code quality
-**Last completed:** Sprint 11 (Fortify) — Security hardening, performance optimization, database indexing, Projects UX polish
+**We are in:** Phase 1 — Cloud Command Center (~98% complete)
+**Active sprint:** Sprint 15 (Refine) — UX polish, accessibility, performance hardening
+**Last completed:** Sprint 14 (Connect) — Project Notes system, Quick Add, export/import, keyboard shortcut
 
-**Sprint 12 in progress:** Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Dark Mode Specification created. Sprint Protocol updated to v1.5 with 3-agent design gates. Zustand selector migration in useKaivooActions.ts. Code quality verified (zero `any` types, TasksWidget already decomposed). Projects pages 3-agent re-audit pending. See `Sprints/Sprint-12-Craft.md`.
+**Sprint 14 delivered:** Project Notes CRUD (project_notes table, RLS, service layer, Zustand store). ProjectDetail Notes section with inline editing. Quick Add note-to-project from anywhere (Cmd+Shift+N). Notes included in data export/import. See `Sprints/Sprint-14-Connect.md`.
 
-**Sprint 11 delivered:** Error message sanitization (2 leaks fixed). Design Agent Projects UX audit (8 P0, 11 P1, 5 P2). All 8 P0 design fixes implemented (accessible ProjectCard, ARIA tabs, sticky timeline labels, contrast-aware bar text, inline edit affordance, dark mode CSS variables). Projects Page Feature Bible (81 must-never-lose items). Verified pre-existing: service-layer user_id filtering, ownership checks, optimistic rollback, code splitting (108 KB gzip), React Query invalidation, 20+ database indexes, bounded routine queries. 104 tests passing. See `Sprints/Sprint-11-Fortify.md`.
+**Sprint 13 delivered:** Pure UX debt and code quality sprint. Semantic color token unification, project color picker improvements, accessibility fixes, projects added to export/import flow. See `Sprints/Sprint-13-Polish.md`.
 
-**Sprint 10 delivered:** Data integrity repair (orphaned records, dangling references), Notes/Journal bug fixes, process hardening. See `Sprints/Sprint-10-Stabilize.md`.
-
-**Sprint 9 delivered:** Supabase cloud migration (15 tables, RLS on all), Agent 12 (Data Engineer) created, full-stack auth flow, data sync. See `Sprints/Sprint-9-Cloud.md`.
+**Sprint 12 delivered:** Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Dark Mode Specification created. Sprint Protocol updated to v1.5 with 3-agent design gates. Zustand selector migration. Code quality verified. See `Sprints/Sprint-12-Craft.md`.
 
 **Key decisions resolved:**
 - ~~Design System migration vs. feature work~~ → **Both in Sprint 2** (merged sprint)
@@ -389,7 +387,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v3.3 — February 24, 2026*
+*Vision v3.4 — February 25, 2026*
 *v3.0: Platform pivot — modular architecture, Command Space as foundation, Marketing Agency as Module 2*
 *v3.2: Sprint 7 progress, Supabase cloud migration*
 *v3.3: Updated through Sprint 12 — Design Agent split, code quality verified, Phase 1 ~97% complete*
+*v3.4: Updated through Sprint 14 — Project Notes, UX polish, Phase 1 ~98% complete*
