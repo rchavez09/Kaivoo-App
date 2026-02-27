@@ -139,6 +139,44 @@ export interface RoutineCompletion {
   completedAt: Date;
 }
 
+// Habit system (Sprint 17 — upgrade of routines)
+export type HabitType = 'positive' | 'negative' | 'multi-count';
+export type TimeBlock = 'morning' | 'afternoon' | 'evening' | 'anytime';
+
+export interface HabitSchedule {
+  type: 'daily' | 'specific_days' | 'x_per_week';
+  days?: number[];         // 0=Sun..6=Sat (for specific_days)
+  timesPerPeriod?: number; // for x_per_week
+}
+
+export interface Habit {
+  id: string;
+  name: string;
+  icon?: string;
+  color: string;
+  type: HabitType;
+  timeBlock: TimeBlock;
+  schedule: HabitSchedule;
+  targetCount?: number;    // For multi-count habits
+  strength: number;        // 0-100, exponential smoothing
+  currentStreak: number;
+  bestStreak: number;
+  isArchived: boolean;
+  order: number;
+  groupId?: string;        // Legacy — from routine_groups
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface HabitCompletion {
+  id: string;
+  habitId: string;
+  date: string;            // YYYY-MM-DD
+  count?: number;          // For multi-count habits
+  skipped: boolean;
+  completedAt: Date;
+}
+
 export interface CalendarEvent {
   id: string;
   title: string;

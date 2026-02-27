@@ -196,7 +196,7 @@ The platform doesn't guess what users want — it watches what they're already t
 | Projects system — Topic → Project → Task → Subtask hierarchy, project date ranges | PLANNED | — |
 | Project templates — reusable task structures, per-project customization | PLANNED | — |
 | Tasks Timeline view — project-first calendar with layered filters (projects, tasks, meetings) | PLANNED | — |
-| Calendar page redesign — month grid + hourly day view, meetings-first hierarchy | IN PROGRESS | Sprint 16 |
+| Calendar page redesign — month grid + hourly day view, meetings-first hierarchy | DONE | Sprint 16 |
 | AI project kickoff — chat-driven project scaffolding from templates | PLANNED | — |
 | Core feature enhancement (journal, topics, notes, captures) | DONE | Sprints 7–8, 14 |
 | Search & file attachments | PLANNED | — |
@@ -309,10 +309,10 @@ The platform doesn't guess what users want — it watches what they're already t
 ## Current Position
 
 **We are in:** Phase 1 — Cloud Command Center (~99% complete)
-**Active sprint:** Sprint 16 (Calendar) — Calendar page redesign with month grid + hourly day view
-**Last completed:** Sprint 15 (Refine) — UX polish, accessibility, performance hardening
+**Active sprint:** Sprint 17 (Routines & Habits) — Full habit tracking system with streaks, strength scores, analytics, mood correlation
+**Last completed:** Sprint 16 (Calendar) — Month grid, day timeline, view switcher, a11y fixes
 
-**Sprint 15 delivered:** Notes page padding, touch target compliance, bundle size audit, accessibility polish. See `Sprints/Sprint-15-Refine.md`.
+**Sprint 16 delivered:** MonthGrid with event/task dots, DayTimeline (hourly), CalendarViewSwitcher, task count fixes for relative dueDates, focus ring + aria-pressed accessibility. See `Sprints/Sprint-16-Calendar.md`.
 
 **Sprint 14 delivered:** Project Notes CRUD (project_notes table, RLS, service layer, Zustand store). ProjectDetail Notes section with inline editing. Quick Add note-to-project from anywhere (Cmd+Shift+N). Notes included in data export/import. See `Sprints/Sprint-14-Connect.md`.
 

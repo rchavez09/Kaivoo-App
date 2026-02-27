@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, CheckSquare, Calendar, FolderOpen, BarChart3, Settings, PanelLeftClose, PanelLeft, LogOut, BookOpen, Briefcase } from 'lucide-react';
+import { Sun, CheckSquare, Calendar, FolderOpen, BarChart3, Settings, PanelLeftClose, PanelLeft, LogOut, BookOpen, Briefcase, Repeat } from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,10 @@ const navItems = [{
   path: '/projects',
   label: 'Projects',
   icon: Briefcase
+}, {
+  path: '/routines',
+  label: 'Routines',
+  icon: Repeat
 }, {
   path: '/calendar',
   label: 'Calendar',
