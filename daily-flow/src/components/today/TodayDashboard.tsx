@@ -4,6 +4,7 @@ import { isToday } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import DayHeader from '@/components/day-view/DayHeader';
 import DailyShutdown from '@/components/day-view/DailyShutdown';
+import SearchTrigger from '@/components/search/SearchTrigger';
 import DailyBriefWidget from '@/components/widgets/DailyBriefWidget';
 import TasksWidget from '@/components/widgets/TasksWidget';
 import TrackingWidget from '@/components/widgets/TrackingWidget';
@@ -88,6 +89,9 @@ const TodayDashboard = ({
     <div className="max-w-4xl mx-auto px-6 py-8">
       {/* Date Navigation — structural, outside widget container */}
       <DayHeader date={date} onDateChange={onDateChange} />
+
+      {/* Search bar — structural, opens command palette */}
+      <SearchTrigger />
 
       {/* Configurable widget area */}
       <WidgetContainer

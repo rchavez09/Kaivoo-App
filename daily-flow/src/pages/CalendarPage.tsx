@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar as CalendarUI } from '@/components/ui/calendar';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
-import { addDays, format, isSameDay, startOfMonth } from 'date-fns';
+import { addDays, addWeeks, format, isSameDay, startOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { resolveTaskDay } from '@/lib/dateUtils';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import DayReview from '@/components/DayReview';
@@ -15,6 +15,7 @@ import { CalendarViewSwitcher, type CalendarViewMode } from '@/components/calend
 import { MonthGrid } from '@/components/calendar/MonthGrid';
 import { DayTimeline } from '@/components/calendar/DayTimeline';
 import { DaySidebar } from '@/components/calendar/DaySidebar';
+import { WeekTimeline } from '@/components/calendar/WeekTimeline';
 
 const CALENDAR_PREFS_KEY = 'kaivoo-calendar-preferences';
 
@@ -81,6 +82,12 @@ const CalendarPage = () => {
   const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
   }, []);
+
+  const handleWeekDateSelect = useCallback((date: Date) => {
+    setSelectedDate(date);
+    setViewMode('day');
+    setPrefs(prev => ({ ...prev, viewMode: 'day' }));
+  }, [setPrefs]);
 
   const handleMonthChange = useCallback((month: Date) => {
     setCurrentMonth(month);
@@ -151,6 +158,38 @@ const CalendarPage = () => {
             />
             <DaySidebar
               selectedDate={selectedDate}
+              onMeetingClick={handleMeetingClick}
+              onTaskClick={handleTaskClick}
+            />
+          </div>
+        )}
+
+        {/* Week View */}
+        {viewMode === 'week' && (
+          <div className="space-y-4">
+            {/* Week header with navigation */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" aria-label="Previous week" onClick={() => setSelectedDate(addWeeks(selectedDate, -1))}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {format(startOfWeek(selectedDate), 'MMM d')} – {format(endOfWeek(selectedDate), 'MMM d, yyyy')}
+                </h2>
+                <Button variant="ghost" size="icon" aria-label="Next week" onClick={() => setSelectedDate(addWeeks(selectedDate, 1))}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+              {!isSameDay(selectedDate, new Date()) && (
+                <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
+                  Today
+                </Button>
+              )}
+            </div>
+
+            <WeekTimeline
+              selectedDate={selectedDate}
+              onDateSelect={handleWeekDateSelect}
               onMeetingClick={handleMeetingClick}
               onTaskClick={handleTaskClick}
             />

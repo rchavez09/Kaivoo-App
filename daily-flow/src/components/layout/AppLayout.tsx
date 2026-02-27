@@ -1,10 +1,13 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useKaivooStore } from '@/stores/useKaivooStore';
+import { useSearchStore } from '@/stores/useSearchStore';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import FloatingChat from '@/components/FloatingChat';
 import QuickAddNoteDialog from '@/components/projects/QuickAddNoteDialog';
+import SearchCommand from '@/components/search/SearchCommand';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -18,18 +21,28 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   // Detect if we're on a project detail page to pre-select the project
   const params = useParams<{ projectId?: string }>();
 
-  // Global keyboard shortcut: Option+N (Mac) or Alt+N
-  // Avoids Cmd+Shift+N which browsers reserve for private/incognito windows
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.altKey && !e.metaKey && !e.ctrlKey && e.code === 'KeyN') {
+  const toggleSearch = useSearchStore(s => s.toggle);
+  const { matchesShortcut } = useShortcuts();
+
+  // Global keyboard shortcuts (reads from customizable shortcut registry)
+  const handleGlobalShortcut = useCallback(
+    (e: KeyboardEvent) => {
+      if (matchesShortcut('quick-note', e)) {
         e.preventDefault();
         setQuickNoteOpen(true);
       }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, []);
+      if (matchesShortcut('global-search', e)) {
+        e.preventDefault();
+        toggleSearch();
+      }
+    },
+    [matchesShortcut, toggleSearch],
+  );
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleGlobalShortcut);
+    return () => document.removeEventListener('keydown', handleGlobalShortcut);
+  }, [handleGlobalShortcut]);
 
   return (
     <TooltipProvider>
@@ -46,6 +59,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </main>
         </div>
       </div>
+      <SearchCommand />
       <FloatingChat />
       <QuickAddNoteDialog
         open={quickNoteOpen}

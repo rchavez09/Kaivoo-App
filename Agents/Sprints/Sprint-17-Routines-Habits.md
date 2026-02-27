@@ -201,5 +201,33 @@ Checklist:
 
 ---
 
-*Sprint 17: Routines & Habits — Approved February 26, 2026*
+---
+
+## Sprint Retrospective
+
+**Completed:** February 26, 2026
+**Parcels Completed:** All (P0–P9)
+**Branch:** `sprint/17-routines-habits` → merged to `main` (commit `a45927d`)
+
+### What Was Delivered
+- Full habits system: three habit types (Positive, Negative, Multi-count), streaks, strength scores (exponential smoothing)
+- Routines → Habits migration (existing routines upgraded to new data model)
+- Analytics dashboard with mood-habit correlation
+- Today widget redesign with streak/strength indicators and two-way sync
+- Habit detail view with calendar dots, strength-over-time charts
+- `habits` columns added to `routines` + `routine_completions` tables (Sprint 17 migration)
+- Accessibility fixes: focus ring on view switcher, aria-pressed on Review toggle
+
+### Verification Results
+- Deterministic checks: lint, typecheck, test, build — all passed
+- Agent 7 code audit: passed (addDays import restored, resolveTaskDay extracted, unused totalMeetings removed)
+- Agent 11 feature integrity: Today page verified, no regressions
+- Design review: passed
+- Sandbox review: user approved
+
+### Key Learnings
+- Habits export/import was already covered by existing DataSettings — no extra work needed
+- Code splitting (React.lazy + vendor chunks) already in place from earlier sprints
+
+*Sprint 17: Routines & Habits — Completed February 26, 2026*
 *Sprint Protocol v1.5*

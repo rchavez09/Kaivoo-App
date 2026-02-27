@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
-import { User, Bell, Palette, Database, ChevronLeft } from 'lucide-react';
+import { User, Bell, Palette, Database, Keyboard, ChevronLeft } from 'lucide-react';
 import AISettingsCard from '@/components/AISettingsCard';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
 import DataSettings from '@/components/settings/DataSettings';
+import KeyboardShortcutsSettings from '@/components/settings/KeyboardShortcutsSettings';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-type SettingsSection = 'main' | 'profile' | 'notifications' | 'appearance' | 'data';
+type SettingsSection = 'main' | 'profile' | 'notifications' | 'appearance' | 'shortcuts' | 'data';
 
 const settingsSections = [
   { id: 'profile' as const, icon: User, label: 'Profile', description: 'Manage your account settings' },
   { id: 'notifications' as const, icon: Bell, label: 'Notifications', description: 'Configure alerts and reminders' },
   { id: 'appearance' as const, icon: Palette, label: 'Appearance', description: 'Customize your experience' },
+  { id: 'shortcuts' as const, icon: Keyboard, label: 'Keyboard Shortcuts', description: 'Customize keyboard shortcuts' },
   { id: 'data' as const, icon: Database, label: 'Data', description: 'Export and backup options' },
 ];
 
@@ -29,6 +31,8 @@ const SettingsPage = () => {
         return <NotificationSettings />;
       case 'appearance':
         return <AppearanceSettings />;
+      case 'shortcuts':
+        return <KeyboardShortcutsSettings />;
       case 'data':
         return <DataSettings />;
       default:

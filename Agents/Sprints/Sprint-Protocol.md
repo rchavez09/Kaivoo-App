@@ -1,7 +1,7 @@
 # Sprint Protocol — Kaivoo Agent Coordination System
 
-**Version:** 1.0
-**Last Updated:** February 22, 2026
+**Version:** 1.6
+**Last Updated:** February 26, 2026
 
 ---
 
@@ -66,9 +66,9 @@ Before any sprint branch merges to main, ALL of the following must pass:
 □ Deterministic checks pass: npm run lint && npm run typecheck && npm run test && npm run build
 □ Agent 7 code audit completed (no unresolved P0 issues)
 □ Agent 11 feature integrity check passed (no regressions)
-□ 3-agent design review completed (for UI sprints): Visual Design + Accessibility & Theming + UX Completeness — all PASS, no unresolved P0 issues
+□ 3-agent design review completed (for UI sprints): Visual Design + Accessibility & Theming + UX Completeness — all PASS, no unresolved P0 issues. Design review happens RIGHT BEFORE sandbox.
 □ SANDBOX: Dev server started on sprint branch, user has reviewed the running app and approved UX
-□ Sprint retrospective section added to sprint file
+□ Sprint retrospective section added to sprint file (MANDATORY — do NOT merge without it)
 □ All sprint files committed to the sprint branch
 ```
 
@@ -196,8 +196,7 @@ Common document types:
 3. Director reads the "Deferred to Sprint N+1" section from the current sprint file
 4. Director compiles everything into `Next-Sprint-Planning.md` with attribution
 5. Director assigns parcels to agents and organizes into tracks
-6. **For sprints with new pages/components:** Design agents produce pre-implementation specs (Gate 1) BEFORE coding begins. See Phase 3 for details.
-7. User reviews and approves
+6. User reviews and approves
 
 ### Phase 2: Sprint Start
 
@@ -208,15 +207,6 @@ Common document types:
 2. Reset `Next-Sprint-Planning.md` to blank template
 
 ### Phase 3: Execution
-
-**Pre-Implementation Design Gate (Gate 1) — for parcels with new UI:**
-
-Before Agent 2 starts coding any parcel that creates new UI surfaces:
-1. **Visual Design Agent** produces a component-level visual spec (layout, colors, typography, component types)
-2. **UX Completeness Agent** reviews the spec for: navigation in/out, state inventory (empty/loading/error/stale), edit capabilities, input pattern appropriateness
-3. **Accessibility & Theming Agent** reviews for: color token choices in both themes, ARIA attribute plan, focus order
-
-This gate prevents specification failures (missing requirements) from becoming implementation failures.
 
 **During sprint:**
 - Agents work their assigned parcels
@@ -233,27 +223,30 @@ This gate prevents specification failures (missing requirements) from becoming i
    `npm run lint && npm run typecheck && npm run test && npm run build`
 2. Agent 7 produces a code audit report: `Code-Audit-Sprint-{N}-Review.md`
 3. Agent 11 runs feature integrity check against Feature Bible
-4. **3-AGENT DESIGN REVIEW (for UI sprints, Gate 3):** Each design agent independently reviews the running app on the sprint branch:
+4. Fix all P0 issues from code audit and feature integrity gates
+5. **3-AGENT DESIGN REVIEW (for UI sprints) — right before sandbox:**
+   Each design agent independently reviews the running app on the sprint branch:
    - **Visual Design Agent:** 4-step review (Hierarchy, Brand, Composition, Craft)
    - **Accessibility & Theming Agent:** 4-step review (Contrast both themes, ARIA, Focus, Inclusive) + separate dark mode pass
    - **UX Completeness Agent:** 5-step review (States, Navigation, Input Patterns, Edit-in-Place, Anti-Patterns)
    Each agent produces a separate verdict document. All 3 must PASS. No unresolved P0 issues allowed before proceeding.
-5. Fix all P0 issues from gates before proceeding
-6. **SANDBOX REVIEW:** Start dev server on sprint branch (`npm run dev`)
+6. Fix all P0 issues from design review
+7. **SANDBOX REVIEW:** Start dev server on sprint branch (`npm run dev`)
    - User reviews the running application in their browser
    - User approves UX or requests changes
    - This is a **blocking gate** — do NOT proceed without user approval
-6. Add `## Sprint Retrospective` section to the sprint file:
+8. **MANDATORY: Add `## Sprint Retrospective` section to the sprint file BEFORE merging.**
+   This is a blocking requirement — no merge without a retrospective. Include:
    - Completed date
    - Parcels completed (X/Y)
    - What was delivered (brief summary)
    - Verification results (build, typecheck, tests, agent gates)
    - Deferred items
    - Key learnings
-7. Merge to main: `git merge --no-ff sprint/N-theme-slug`
-8. Tag main: `git tag post-sprint-N`
-9. Deploy to production (Netlify)
-10. Director updates `Vision.md` to reflect progress
+9. Merge to main: `git merge --no-ff sprint/N-theme-slug`
+10. Tag main: `git tag post-sprint-N`
+11. Deploy to production (Netlify)
+12. Director updates `Vision.md` to reflect progress
 
 ### Phase 5: Archival
 
@@ -339,13 +332,16 @@ Agents execute their parcels
 Deterministic checks (lint, typecheck, test, build)
          |
          v
-Agent gates (Agent 7 code audit + Agent 11 feature integrity)
+Agent 7 code audit + Agent 11 feature integrity
          |
          v
-3-agent design review (Visual Design + Accessibility & Theming + UX Completeness)
+Fix P0 issues from code/integrity gates
          |
          v
-Fix all P0 issues
+3-agent design review (right before sandbox)
+         |
+         v
+Fix P0 issues from design review
          |
          v
 SANDBOX REVIEW: User reviews running app on sprint branch
@@ -362,10 +358,11 @@ Vision.md updated (mark phase progress)
 
 ---
 
-*Sprint Protocol v1.5 — February 24, 2026*
+*Sprint Protocol v1.6 — February 26, 2026*
 *v1.0: Initial protocol*
 *v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
 *v1.2: Explicit sandbox review step in lifecycle + pre-merge checklist. Deterministic checks before agent gates.*
 *v1.3: Sandbox review woven into Phase 4 lifecycle + user-perspective flow. Agent 1+6 merged to Design Agent. Design references updated throughout.*
 *v1.4: Mandatory Design Agent gate in Phase 4 (5-step review + dark mode pass). Design Agent added to Phase 1 (screen specs for new UI). Pre-merge checklist updated. Sprint 10 stabilization drove this change.*
 *v1.5: Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Added pre-implementation design gate (Gate 1) in Phase 3. Phase 4 now requires 3 independent design verdicts. Sprint 12 restructuring per Agent 5 research.*
+*v1.6: Removed pre-implementation design gate (Gate 1). Design review now happens right before sandbox preview in Phase 4. Cleaner flow: build → code review → integrity check → design review → sandbox.*

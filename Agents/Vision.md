@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 3.4
-**Last Updated:** February 25, 2026
+**Version:** 3.7
+**Last Updated:** February 26, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -115,7 +115,7 @@ The platform doesn't guess what users want — it watches what they're already t
 
 | # | Module | Role | Status |
 |---|--------|------|--------|
-| — | **Command Space** | Core Foundation — journal, projects & tasks, calendar, captures, daily view | In progress (~97%) |
+| — | **Command Space** | Core Foundation — journal, projects & tasks, calendar, captures, daily view | In progress (~100%) |
 | 2 | **Marketing Agency** | Brand guidelines → campaigns, copy, landing pages, social content, asset generation | Planned — begins after Command Space is monetizing |
 | 3 | **Trading Bot** | Multi-strategy automated trading, multi-account management, backtesting | Deferred — requires legal/compliance review before development |
 | N | **Future Modules** | Prioritized by Module Demand Intelligence — build what users are already trying to do | Long-term — platform architecture must be proven first |
@@ -199,7 +199,11 @@ The platform doesn't guess what users want — it watches what they're already t
 | Calendar page redesign — month grid + hourly day view, meetings-first hierarchy | DONE | Sprint 16 |
 | AI project kickoff — chat-driven project scaffolding from templates | PLANNED | — |
 | Core feature enhancement (journal, topics, notes, captures) | DONE | Sprints 7–8, 14 |
-| Search & file attachments | PLANNED | — |
+| Routines & Habits — streaks, strength, analytics, mood correlation, Today widget redesign | DONE | Sprint 17 |
+| Global full-text search (FTS, GIN indexes, command palette, search trigger) | DONE | Sprint 18 |
+| Calendar week view (7-column hourly grid, 3-mode switcher) | DONE | Sprint 18 |
+| Customizable keyboard shortcuts (Settings UI, shortcut recorder, browser conflict validation) | DONE | Sprint 18 |
+| File attachments | PLANNED | — |
 | Analytics & insights dashboard rebuild | PLANNED | — |
 | Notifications & reminders | PLANNED | — |
 | PWA (installable, offline read) | PLANNED | — |
@@ -308,11 +312,13 @@ The platform doesn't guess what users want — it watches what they're already t
 
 ## Current Position
 
-**We are in:** Phase 1 — Cloud Command Center (~99% complete)
-**Active sprint:** Sprint 17 (Routines & Habits) — Full habit tracking system with streaks, strength scores, analytics, mood correlation
-**Last completed:** Sprint 16 (Calendar) — Month grid, day timeline, view switcher, a11y fixes
+**We are in:** Phase 1 — Cloud Command Center (~100% complete, entering Phase 2 transition)
+**Active sprint:** None — Sprint 19 planning pending
+**Last completed:** Sprint 18 (Search & Week View) — Global FTS, command palette, calendar week view, customizable keyboard shortcuts
 
-**Sprint 16 delivered:** MonthGrid with event/task dots, DayTimeline (hourly), CalendarViewSwitcher, task count fixes for relative dueDates, focus ring + aria-pressed accessibility. See `Sprints/Sprint-16-Calendar.md`.
+**Sprint 18 delivered:** Supabase Postgres FTS with GIN indexes across 10 tables, `search_all` RPC with `websearch_to_tsquery`, SearchCommand command palette (Cmd+K), SearchTrigger bar on Today page, Calendar week view (7-column hourly grid, 3-mode switcher), customizable keyboard shortcuts system (Settings UI, shortcut recorder, browser conflict validation). See `Sprints/Sprint-18-Search-Week-View.md`.
+
+**Sprint 17 delivered:** Three habit types (Positive, Negative, Multi-count), streaks, exponential-smoothing strength scores, analytics dashboard with mood-habit correlation, Today widget upgrade with two-way sync, habit detail view with calendar dots. See `Sprints/Sprint-17-Routines-Habits.md`.
 
 **Sprint 14 delivered:** Project Notes CRUD (project_notes table, RLS, service layer, Zustand store). ProjectDetail Notes section with inline editing. Quick Add note-to-project from anywhere (Cmd+Shift+N). Notes included in data export/import. See `Sprints/Sprint-14-Connect.md`.
 
@@ -384,9 +390,11 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v3.5 — February 25, 2026*
+*Vision v3.7 — February 26, 2026*
 *v3.0: Platform pivot — modular architecture, Command Space as foundation, Marketing Agency as Module 2*
 *v3.2: Sprint 7 progress, Supabase cloud migration*
 *v3.3: Updated through Sprint 12 — Design Agent split, code quality verified, Phase 1 ~97% complete*
 *v3.4: Updated through Sprint 14 — Project Notes, UX polish, Phase 1 ~98% complete*
-*v3.5: Updated through Sprint 16 — Calendar redesign in progress, Phase 1 ~99% complete*
+*v3.5: Updated through Sprint 16 — Calendar redesign, Phase 1 ~99% complete*
+*v3.6: Updated through Sprint 17 — Routines & Habits shipped, Phase 1 ~99% complete*
+*v3.7: Updated through Sprint 18 — Search + Calendar Week View + Keyboard Shortcuts. Phase 1 ~100% — entering Phase 2 transition*

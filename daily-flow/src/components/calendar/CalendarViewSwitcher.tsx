@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import { CalendarDays, Clock } from 'lucide-react';
+import { CalendarDays, Clock, Columns3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type CalendarViewMode = 'month' | 'day';
+export type CalendarViewMode = 'month' | 'week' | 'day';
 
 interface CalendarViewSwitcherProps {
   viewMode: CalendarViewMode;
@@ -11,6 +11,7 @@ interface CalendarViewSwitcherProps {
 
 const modes: { mode: CalendarViewMode; icon: typeof CalendarDays; label: string }[] = [
   { mode: 'month', icon: CalendarDays, label: 'Month' },
+  { mode: 'week', icon: Columns3, label: 'Week' },
   { mode: 'day', icon: Clock, label: 'Day' },
 ];
 
