@@ -18,6 +18,7 @@ const TopicPage = lazy(() => import("./pages/TopicPage"));
 const Insights = lazy(() => import("./pages/Insights"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const JournalPage = lazy(() => import("./pages/JournalPage"));
+const RoutinesPage = lazy(() => import("./pages/RoutinesPage"));
 const Projects = lazy(() => import("./pages/Projects"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -68,6 +69,7 @@ const App = () => (
                 <Route path="/tasks" element={<ProtectedPage><Tasks /></ProtectedPage>} />
                 <Route path="/projects" element={<ProtectedPage><Projects /></ProtectedPage>} />
                 <Route path="/projects/:projectId" element={<ProtectedPage><ProjectDetail /></ProtectedPage>} />
+                <Route path="/routines" element={<ProtectedPage><RoutinesPage /></ProtectedPage>} />
                 <Route path="/calendar" element={<ProtectedPage><CalendarPage /></ProtectedPage>} />
                 <Route path="/topics" element={<ProtectedPage><Topics /></ProtectedPage>} />
                 <Route path="/topics/:topicId" element={<ProtectedPage><TopicPage /></ProtectedPage>} />

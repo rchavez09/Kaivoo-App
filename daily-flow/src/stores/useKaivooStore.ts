@@ -1,11 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Topic, TopicPage, Capture, Task, Tag, Meeting, RoutineItem, RoutineGroup, JournalEntry, Subtask, RoutineCompletion, Project, ProjectNote } from '@/types';
+import { Topic, TopicPage, Capture, Task, Tag, Meeting, RoutineItem, RoutineGroup, JournalEntry, Subtask, RoutineCompletion, Project, ProjectNote, Habit, HabitCompletion, TimeBlock } from '@/types';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO, isValid, addDays } from 'date-fns';
 
 // Routine completion with timestamp for activity tracking
 export interface RoutineCompletionRecord {
   routineId: string;
+  completedAt: Date;
+}
+
+// Habit completion record for store
+export interface HabitCompletionRecord {
+  habitId: string;
+  count?: number;
+  skipped: boolean;
   completedAt: Date;
 }
 
@@ -19,7 +27,9 @@ interface DatabaseData {
   meetings: Meeting[];
   routines: RoutineItem[];
   routineGroups: RoutineGroup[];
-  routineCompletions: Record<string, RoutineCompletionRecord[]>; // date string -> array of completions with timestamps
+  routineCompletions: Record<string, RoutineCompletionRecord[]>;
+  habits: Habit[];
+  habitCompletions: Record<string, HabitCompletionRecord[]>;
   projects: Project[];
   projectNotes: ProjectNote[];
 }
@@ -113,6 +123,20 @@ interface KaivooStore {
     routineCompletionRate: number;
   };
   
+  // Habits (Sprint 17 — upgrade of routines)
+  habits: Habit[];
+  habitCompletions: Record<string, HabitCompletionRecord[]>;
+  getHabitsByTimeBlock: (timeBlock: TimeBlock) => Habit[];
+  isHabitCompleted: (habitId: string, date?: string) => boolean;
+  getHabitCompletionCount: (habitId: string, date?: string) => number;
+  getHabitCompletionsForDate: (date: string) => HabitCompletionRecord[];
+  toggleHabitCompletion: (habitId: string, date?: string) => void;
+  incrementHabitCount: (habitId: string, date?: string) => void;
+  getHabitCompletionRate: (date: string) => number;
+  addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'updatedAt' | 'strength' | 'currentStreak' | 'bestStreak'>) => Habit;
+  updateHabitInStore: (id: string, updates: Partial<Habit>) => void;
+  removeHabit: (id: string) => void;
+
   // Projects
   projects: Project[];
   addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => Project;
@@ -392,6 +416,8 @@ export const useKaivooStore = create<KaivooStore>()(
       routines: data.routines,
       routineGroups: data.routineGroups,
       routineCompletions: data.routineCompletions,
+      habits: data.habits,
+      habitCompletions: data.habitCompletions,
       projects: data.projects,
       projectNotes: data.projectNotes,
       isLoaded: true,
@@ -1076,6 +1102,104 @@ export const useKaivooStore = create<KaivooStore>()(
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 
+  // Habits (Sprint 17)
+  habits: [],
+  habitCompletions: {},
+
+  getHabitsByTimeBlock: (timeBlock) => {
+    return get().habits
+      .filter(h => h.timeBlock === timeBlock && !h.isArchived)
+      .sort((a, b) => a.order - b.order);
+  },
+
+  isHabitCompleted: (habitId, date) => {
+    const dateStr = date || getTodayString();
+    const completions = get().habitCompletions[dateStr] || [];
+    return completions.some(c => c.habitId === habitId && !c.skipped);
+  },
+
+  getHabitCompletionCount: (habitId, date) => {
+    const dateStr = date || getTodayString();
+    const completions = get().habitCompletions[dateStr] || [];
+    const completion = completions.find(c => c.habitId === habitId);
+    return completion?.count || 0;
+  },
+
+  getHabitCompletionsForDate: (date) => {
+    return get().habitCompletions[date] || [];
+  },
+
+  toggleHabitCompletion: (habitId, date) => {
+    const dateStr = date || getTodayString();
+    const isCompleted = get().isHabitCompleted(habitId, dateStr);
+    set((state) => {
+      const completions = { ...state.habitCompletions };
+      if (isCompleted) {
+        completions[dateStr] = (completions[dateStr] || []).filter(c => c.habitId !== habitId);
+      } else {
+        completions[dateStr] = [
+          ...(completions[dateStr] || []),
+          { habitId, skipped: false, completedAt: new Date() },
+        ];
+      }
+      return { habitCompletions: completions };
+    });
+  },
+
+  incrementHabitCount: (habitId, date) => {
+    const dateStr = date || getTodayString();
+    set((state) => {
+      const completions = { ...state.habitCompletions };
+      const dateCompletions = [...(completions[dateStr] || [])];
+      const idx = dateCompletions.findIndex(c => c.habitId === habitId);
+      if (idx >= 0) {
+        dateCompletions[idx] = { ...dateCompletions[idx], count: (dateCompletions[idx].count || 0) + 1 };
+      } else {
+        dateCompletions.push({ habitId, count: 1, skipped: false, completedAt: new Date() });
+      }
+      completions[dateStr] = dateCompletions;
+      return { habitCompletions: completions };
+    });
+  },
+
+  getHabitCompletionRate: (date) => {
+    const habits = get().habits.filter(h => !h.isArchived);
+    if (habits.length === 0) return 0;
+    const completions = get().habitCompletions[date] || [];
+    const completed = habits.filter(h =>
+      completions.some(c => c.habitId === h.id && !c.skipped)
+    ).length;
+    return Math.round((completed / habits.length) * 100);
+  },
+
+  addHabit: (habitData) => {
+    const habit: Habit = {
+      ...habitData,
+      id: `habit-${generateId()}`,
+      strength: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    set((state) => ({ habits: [...state.habits, habit] }));
+    return habit;
+  },
+
+  updateHabitInStore: (id, updates) => {
+    set((state) => ({
+      habits: state.habits.map(h =>
+        h.id === id ? { ...h, ...updates, updatedAt: new Date() } : h
+      ),
+    }));
+  },
+
+  removeHabit: (id) => {
+    set((state) => ({
+      habits: state.habits.filter(h => h.id !== id),
+    }));
+  },
+
   // UI State
   sidebarCollapsed: false,
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
@@ -1094,6 +1218,8 @@ export const useKaivooStore = create<KaivooStore>()(
         routines: state.routines,
         routineGroups: state.routineGroups,
         routineCompletions: state.routineCompletions,
+        habits: state.habits,
+        habitCompletions: state.habitCompletions,
         projects: state.projects,
         projectNotes: state.projectNotes,
         sidebarCollapsed: state.sidebarCollapsed,

@@ -306,23 +306,29 @@ export type Database = {
       routine_completions: {
         Row: {
           completed_at: string
+          count: number | null
           date: string
           id: string
           routine_id: string
+          skipped: boolean
           user_id: string
         }
         Insert: {
           completed_at?: string
+          count?: number | null
           date: string
           id?: string
           routine_id: string
+          skipped?: boolean
           user_id: string
         }
         Update: {
           completed_at?: string
+          count?: number | null
           date?: string
           id?: string
           routine_id?: string
+          skipped?: boolean
           user_id?: string
         }
         Relationships: [
@@ -367,30 +373,60 @@ export type Database = {
       }
       routines: {
         Row: {
+          best_streak: number
+          color: string | null
           created_at: string
+          current_streak: number
           group_id: string | null
           icon: string | null
           id: string
+          is_archived: boolean
           name: string
           order: number
+          schedule: Json
+          strength: number
+          target_count: number | null
+          time_block: string
+          type: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
+          best_streak?: number
+          color?: string | null
           created_at?: string
+          current_streak?: number
           group_id?: string | null
           icon?: string | null
           id?: string
+          is_archived?: boolean
           name: string
           order?: number
+          schedule?: Json
+          strength?: number
+          target_count?: number | null
+          time_block?: string
+          type?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
+          best_streak?: number
+          color?: string | null
           created_at?: string
+          current_streak?: number
           group_id?: string | null
           icon?: string | null
           id?: string
+          is_archived?: boolean
           name?: string
           order?: number
+          schedule?: Json
+          strength?: number
+          target_count?: number | null
+          time_block?: string
+          type?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [

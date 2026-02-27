@@ -11,6 +11,7 @@ import * as JournalService from '@/services/journal.service';
 import * as CapturesService from '@/services/captures.service';
 import * as MeetingsService from '@/services/meetings.service';
 import * as RoutinesService from '@/services/routines.service';
+import * as HabitsService from '@/services/habits.service';
 import * as ProjectsService from '@/services/projects.service';
 import * as ProjectNotesService from '@/services/project-notes.service';
 
@@ -112,6 +113,18 @@ export function useKaivooQueries() {
         enabled: !!user,
         staleTime: STALE_TIME,
       },
+      {
+        queryKey: queryKeys.habits(userId),
+        queryFn: () => HabitsService.fetchHabits(userId),
+        enabled: !!user,
+        staleTime: STALE_TIME,
+      },
+      {
+        queryKey: queryKeys.habitCompletions(userId),
+        queryFn: () => HabitsService.fetchHabitCompletions(userId),
+        enabled: !!user,
+        staleTime: STALE_TIME,
+      },
     ],
     combine: (queryResults) => {
       const allSuccess = queryResults.every(r => r.isSuccess);
@@ -137,6 +150,7 @@ export function useKaivooQueries() {
           subtasksResult, journalResult, capturesResult, meetingsResult,
           routinesResult, routineGroupsResult, routineCompletionsResult,
           projectsResult, projectNotesResult,
+          habitsResult, habitCompletionsResult,
         ] = queryResults;
 
         // Group subtasks by task_id
@@ -164,6 +178,18 @@ export function useKaivooQueries() {
 
         const journalData = (journalResult.data || []).map(JournalService.dbToJournalEntry);
 
+        // Convert habit completions to map by date
+        const habitCompletionsMap: Record<string, { habitId: string; count?: number; skipped: boolean; completedAt: Date }[]> = {};
+        (habitCompletionsResult.data as Tables<'routine_completions'>[] || []).forEach((hc) => {
+          if (!habitCompletionsMap[hc.date]) habitCompletionsMap[hc.date] = [];
+          habitCompletionsMap[hc.date].push({
+            habitId: hc.routine_id,
+            count: hc.count || undefined,
+            skipped: hc.skipped || false,
+            completedAt: new Date(hc.completed_at),
+          });
+        });
+
         setFromDatabase({
           topics: (topicsResult.data || []).map(TopicsService.dbToTopic),
           topicPages: (topicPagesResult.data || []).map(TopicsService.dbToTopicPage),
@@ -177,6 +203,8 @@ export function useKaivooQueries() {
           routines: (routinesResult.data || []).map(RoutinesService.dbToRoutine),
           routineGroups: (routineGroupsResult.data || []).map(RoutinesService.dbToRoutineGroup),
           routineCompletions: completionsMap,
+          habits: (habitsResult.data || []).map(HabitsService.dbToHabit),
+          habitCompletions: habitCompletionsMap,
           projects: (projectsResult.data || []).map(ProjectsService.dbToProject),
           projectNotes: (projectNotesResult.data || []).map(ProjectNotesService.dbToProjectNote),
         });
