@@ -290,9 +290,7 @@ describe('SupabaseDataAdapter', () => {
 
   describe('subtasks', () => {
     it('fetchAll converts rows to Subtask type', async () => {
-      const rows = [
-        { id: 's1', task_id: 't1', title: 'Sub', completed: false, completed_at: null, tags: ['a'] },
-      ];
+      const rows = [{ id: 's1', task_id: 't1', title: 'Sub', completed: false, completed_at: null, tags: ['a'] }];
       mockFetchSubtasks.mockResolvedValue(rows);
 
       const result = await adapter.subtasks.fetchAll();

@@ -1173,9 +1173,7 @@ export class LocalAuthAdapter implements AuthAdapter {
   /** Create the auth adapter, loading or generating the local user identity from SQLite. */
   static async create(db: TauriDatabase): Promise<LocalAuthAdapter> {
     // Try to load existing user from local_session table
-    const rows = await db.select<{ value: string }[]>(
-      "SELECT value FROM local_session WHERE key = 'user'",
-    );
+    const rows = await db.select<{ value: string }[]>("SELECT value FROM local_session WHERE key = 'user'");
     if (rows.length > 0) {
       const user = JSON.parse(rows[0].value) as AuthUser;
       return new LocalAuthAdapter(user);
@@ -1183,10 +1181,7 @@ export class LocalAuthAdapter implements AuthAdapter {
 
     // First launch: generate a persistent local identity
     const user: AuthUser = { id: uuid(), email: 'local@kaivoo.desktop' };
-    await db.execute(
-      "INSERT INTO local_session (key, value) VALUES ('user', $1)",
-      [JSON.stringify(user)],
-    );
+    await db.execute("INSERT INTO local_session (key, value) VALUES ('user', $1)", [JSON.stringify(user)]);
     return new LocalAuthAdapter(user);
   }
 

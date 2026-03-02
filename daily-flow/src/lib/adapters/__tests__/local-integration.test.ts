@@ -69,9 +69,7 @@ function createStatefulMockDb() {
           // Find the id parameter (usually the first or second param)
           const idParam = params[0] as string;
           // Remove matching rows (simple match on any column value)
-          tables[tableName] = table.filter((row) =>
-            !Object.values(row).includes(idParam),
-          );
+          tables[tableName] = table.filter((row) => !Object.values(row).includes(idParam));
         } else {
           // DELETE FROM table (no WHERE)
           tables[tableName] = [];
@@ -432,14 +430,12 @@ describe('Integration: Auth session persistence', () => {
 
     // Verify user was persisted to local_session
     expect(mock.db.execute).toHaveBeenCalledWith(
-      expect.stringContaining("INSERT INTO local_session"),
+      expect.stringContaining('INSERT INTO local_session'),
       expect.arrayContaining([expect.stringContaining(user1.id)]),
     );
 
     // Second launch: mock returns the persisted user
-    mock.db.select.mockResolvedValueOnce([
-      { value: JSON.stringify(user1) },
-    ]);
+    mock.db.select.mockResolvedValueOnce([{ value: JSON.stringify(user1) }]);
 
     const adapter2 = await LocalAuthAdapter.create(mock.db as never);
     const user2 = await adapter2.getUser();
@@ -450,9 +446,7 @@ describe('Integration: Auth session persistence', () => {
   });
 
   it('session includes access token', async () => {
-    mock.db.select.mockResolvedValueOnce([
-      { value: JSON.stringify({ id: 'test-id', email: 'local@kaivoo.desktop' }) },
-    ]);
+    mock.db.select.mockResolvedValueOnce([{ value: JSON.stringify({ id: 'test-id', email: 'local@kaivoo.desktop' }) }]);
 
     const adapter = await LocalAuthAdapter.create(mock.db as never);
     const session = await adapter.getSession();

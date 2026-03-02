@@ -168,32 +168,28 @@ export function useKaivooQueries() {
 
         // Group routine completions by date — adapter returns RoutineCompletion[]
         const completionsMap: Record<string, { routineId: string; completedAt: Date }[]> = {};
-        ((routineCompletionsResult.data as import('@/types').RoutineCompletion[]) || []).forEach(
-          (rc) => {
-            if (!completionsMap[rc.date]) completionsMap[rc.date] = [];
-            completionsMap[rc.date].push({
-              routineId: rc.routineId,
-              completedAt: rc.completedAt,
-            });
-          },
-        );
+        ((routineCompletionsResult.data as import('@/types').RoutineCompletion[]) || []).forEach((rc) => {
+          if (!completionsMap[rc.date]) completionsMap[rc.date] = [];
+          completionsMap[rc.date].push({
+            routineId: rc.routineId,
+            completedAt: rc.completedAt,
+          });
+        });
 
         // Group habit completions by date — adapter returns HabitCompletion[]
         const habitCompletionsMap: Record<
           string,
           { habitId: string; count?: number; skipped: boolean; completedAt: Date }[]
         > = {};
-        ((habitCompletionsResult.data as import('@/types').HabitCompletion[]) || []).forEach(
-          (hc) => {
-            if (!habitCompletionsMap[hc.date]) habitCompletionsMap[hc.date] = [];
-            habitCompletionsMap[hc.date].push({
-              habitId: hc.habitId,
-              count: hc.count || undefined,
-              skipped: hc.skipped,
-              completedAt: hc.completedAt,
-            });
-          },
-        );
+        ((habitCompletionsResult.data as import('@/types').HabitCompletion[]) || []).forEach((hc) => {
+          if (!habitCompletionsMap[hc.date]) habitCompletionsMap[hc.date] = [];
+          habitCompletionsMap[hc.date].push({
+            habitId: hc.habitId,
+            count: hc.count || undefined,
+            skipped: hc.skipped,
+            completedAt: hc.completedAt,
+          });
+        });
 
         // Adapter returns pre-converted app types — no dbToX() calls needed.
         // Only grouping/merging required for subtasks and completion maps.

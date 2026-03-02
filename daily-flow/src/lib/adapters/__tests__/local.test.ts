@@ -142,10 +142,7 @@ describe('LocalDataAdapter', () => {
       expect(task.title).toBe('New Task');
       expect(task.status).toBe('todo');
       expect(task.tags).toEqual(['dev']);
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO tasks'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tasks'), expect.any(Array));
     });
 
     it('update builds dynamic SET clause', async () => {
@@ -256,10 +253,7 @@ describe('LocalDataAdapter', () => {
 
       expect(capture.id).toBeDefined();
       expect(capture.content).toBe('Quick thought');
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO captures'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO captures'), expect.any(Array));
     });
   });
 
@@ -296,10 +290,7 @@ describe('LocalDataAdapter', () => {
       expect(subtask.title).toBe('New sub');
       expect(subtask.taskId).toBe('t1');
       expect(subtask.completed).toBe(false);
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO subtasks'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO subtasks'), expect.any(Array));
     });
 
     it('update persists changes', async () => {
@@ -348,16 +339,20 @@ describe('LocalDataAdapter', () => {
 
       expect(topic.id).toBeDefined();
       expect(topic.name).toBe('Health');
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO topics'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO topics'), expect.any(Array));
     });
 
     it('update persists changes and reads back', async () => {
       // topics.update does a SELECT after UPDATE to return the updated row
       mockDb.select.mockResolvedValueOnce([
-        { id: 'top1', name: 'Updated', description: null, icon: '💼', parent_id: null, created_at: '2026-01-01T00:00:00Z' },
+        {
+          id: 'top1',
+          name: 'Updated',
+          description: null,
+          icon: '💼',
+          parent_id: null,
+          created_at: '2026-01-01T00:00:00Z',
+        },
       ]);
 
       const adapter = await LocalDataAdapter.create();
@@ -438,10 +433,7 @@ describe('LocalDataAdapter', () => {
 
       expect(tag.id).toBeDefined();
       expect(tag.name).toBe('personal');
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO tags'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tags'), expect.any(Array));
     });
   });
 
@@ -472,10 +464,7 @@ describe('LocalDataAdapter', () => {
 
       expect(routine.id).toBeDefined();
       expect(routine.name).toBe('Evening routine');
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO routines'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO routines'), expect.any(Array));
     });
 
     it('delete removes by id', async () => {
@@ -606,10 +595,7 @@ describe('LocalDataAdapter', () => {
       const adapter = await LocalDataAdapter.create();
       await adapter.habitCompletions.incrementCount('h1', '2026-03-01', 2);
 
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.arrayContaining(['h1', '2026-03-01']),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining(['h1', '2026-03-01']));
     });
   });
 
@@ -652,10 +638,7 @@ describe('LocalDataAdapter', () => {
 
       expect(meeting.id).toBeDefined();
       expect(meeting.title).toBe('Team sync');
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO meetings'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO meetings'), expect.any(Array));
     });
 
     it('delete removes by id', async () => {
@@ -703,10 +686,7 @@ describe('LocalDataAdapter', () => {
 
       expect(project.id).toBeDefined();
       expect(project.name).toBe('New Project');
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO projects'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO projects'), expect.any(Array));
     });
 
     it('update persists changes', async () => {
@@ -866,10 +846,7 @@ describe('LocalDataAdapter', () => {
 
       expect(habit.id).toBeDefined();
       expect(habit.name).toBe('Read');
-      expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO routines'),
-        expect.any(Array),
-      );
+      expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO routines'), expect.any(Array));
     });
 
     it('update persists changes', async () => {
@@ -941,7 +918,7 @@ describe('LocalAuthAdapter', () => {
       expect(user.email).toBe('local@kaivoo.desktop');
       // Should persist to SQLite
       expect(mockDb.execute).toHaveBeenCalledWith(
-        expect.stringContaining("INSERT INTO local_session"),
+        expect.stringContaining('INSERT INTO local_session'),
         expect.arrayContaining([expect.stringContaining(user.id)]),
       );
     });
@@ -1034,9 +1011,7 @@ describe('LocalSearchAdapter', () => {
       expect(executeCalls[0][0]).toContain('DELETE FROM search_fts');
 
       // Should have multiple INSERT INTO search_fts calls (one per entity type)
-      const insertCalls = executeCalls.filter((c: unknown[]) =>
-        (c[0] as string).includes('INSERT INTO search_fts'),
-      );
+      const insertCalls = executeCalls.filter((c: unknown[]) => (c[0] as string).includes('INSERT INTO search_fts'));
       expect(insertCalls.length).toBeGreaterThanOrEqual(8);
     });
   });
@@ -1067,10 +1042,7 @@ describe('LocalSearchAdapter', () => {
 
       const results = await search.searchAll('feature');
 
-      expect(mockDb.select).toHaveBeenCalledWith(
-        expect.stringContaining('search_fts'),
-        expect.any(Array),
-      );
+      expect(mockDb.select).toHaveBeenCalledWith(expect.stringContaining('search_fts'), expect.any(Array));
       expect(results).toHaveLength(1);
       expect(results[0].entityType).toBe('task');
       expect(results[0].entityId).toBe('t1');
@@ -1082,10 +1054,7 @@ describe('LocalSearchAdapter', () => {
 
       await search.searchAll('test', 5);
 
-      expect(mockDb.select).toHaveBeenCalledWith(
-        expect.stringContaining('LIMIT'),
-        expect.any(Array),
-      );
+      expect(mockDb.select).toHaveBeenCalledWith(expect.stringContaining('LIMIT'), expect.any(Array));
     });
 
     it('maps entity types to correct paths', async () => {
