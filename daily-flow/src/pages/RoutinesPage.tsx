@@ -21,14 +21,14 @@ const TIME_BLOCKS: TimeBlock[] = ['morning', 'afternoon', 'evening', 'anytime'];
 const RoutinesPage = () => {
   const { user } = useAuth();
   const { invalidate } = useInvalidate();
-  const habits = useKaivooStore(s => s.habits);
-  const isHabitCompleted = useKaivooStore(s => s.isHabitCompleted);
-  const getHabitCompletionCount = useKaivooStore(s => s.getHabitCompletionCount);
-  const toggleHabitCompletion = useKaivooStore(s => s.toggleHabitCompletion);
-  const incrementHabitCount = useKaivooStore(s => s.incrementHabitCount);
-  const addHabit = useKaivooStore(s => s.addHabit);
-  const removeHabit = useKaivooStore(s => s.removeHabit);
-  const updateHabitInStore = useKaivooStore(s => s.updateHabitInStore);
+  const habits = useKaivooStore((s) => s.habits);
+  const isHabitCompleted = useKaivooStore((s) => s.isHabitCompleted);
+  const getHabitCompletionCount = useKaivooStore((s) => s.getHabitCompletionCount);
+  const toggleHabitCompletion = useKaivooStore((s) => s.toggleHabitCompletion);
+  const incrementHabitCount = useKaivooStore((s) => s.incrementHabitCount);
+  const addHabit = useKaivooStore((s) => s.addHabit);
+  const removeHabit = useKaivooStore((s) => s.removeHabit);
+  const updateHabitInStore = useKaivooStore((s) => s.updateHabitInStore);
 
   const [view, setView] = useState<'today' | 'analytics'>('today');
   const [formOpen, setFormOpen] = useState(false);
@@ -37,131 +37,160 @@ const RoutinesPage = () => {
   const [detailOpen, setDetailOpen] = useState(false);
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const activeHabits = useMemo(() => habits.filter(h => !h.isArchived), [habits]);
+  const activeHabits = useMemo(() => habits.filter((h) => !h.isArchived), [habits]);
 
   // Group habits by time block
   const habitsByBlock = useMemo(() => {
     const grouped: Record<TimeBlock, Habit[]> = {
-      morning: [], afternoon: [], evening: [], anytime: [],
+      morning: [],
+      afternoon: [],
+      evening: [],
+      anytime: [],
     };
-    activeHabits.forEach(h => {
+    activeHabits.forEach((h) => {
       grouped[h.timeBlock].push(h);
     });
     // Sort within each block by order
-    Object.values(grouped).forEach(arr => arr.sort((a, b) => a.order - b.order));
+    Object.values(grouped).forEach((arr) => arr.sort((a, b) => a.order - b.order));
     return grouped;
   }, [activeHabits]);
 
   // Progress
   const completedCount = useMemo(
-    () => activeHabits.filter(h => isHabitCompleted(h.id, todayStr)).length,
-    [activeHabits, todayStr, isHabitCompleted]
+    () => activeHabits.filter((h) => isHabitCompleted(h.id, todayStr)).length,
+    [activeHabits, todayStr, isHabitCompleted],
   );
-  const progressPercent = activeHabits.length > 0
-    ? Math.round((completedCount / activeHabits.length) * 100)
-    : 0;
+  const progressPercent = activeHabits.length > 0 ? Math.round((completedCount / activeHabits.length) * 100) : 0;
 
   // Handlers
-  const handleToggle = useCallback(async (habitId: string) => {
-    const wasCompleted = isHabitCompleted(habitId, todayStr);
-    toggleHabitCompletion(habitId, todayStr);
-    if (user) {
+  const handleToggle = useCallback(
+    async (habitId: string) => {
+      const wasCompleted = isHabitCompleted(habitId, todayStr);
+      toggleHabitCompletion(habitId, todayStr);
+      if (user) {
+        try {
+          await HabitsService.toggleHabitCompletion(user.id, habitId, todayStr, wasCompleted);
+          invalidate('habitCompletions', 'routineCompletions');
+        } catch {
+          toggleHabitCompletion(habitId, todayStr); // rollback
+          toast.error('Failed to update habit.');
+        }
+      }
+    },
+    [user, todayStr, isHabitCompleted, toggleHabitCompletion, invalidate],
+  );
+
+  const handleIncrement = useCallback(
+    async (habitId: string) => {
+      const currentCount = getHabitCompletionCount(habitId, todayStr);
+      incrementHabitCount(habitId, todayStr);
+      if (user) {
+        try {
+          await HabitsService.incrementHabitCount(user.id, habitId, todayStr, currentCount);
+          invalidate('habitCompletions', 'routineCompletions');
+        } catch {
+          // Simple rollback — will be re-synced on next query
+          toast.error('Failed to update habit count.');
+        }
+      }
+    },
+    [user, todayStr, getHabitCompletionCount, incrementHabitCount, invalidate],
+  );
+
+  const handleCreate = useCallback(
+    async (data: {
+      name: string;
+      icon: string;
+      color: string;
+      type: HabitType;
+      timeBlock: TimeBlock;
+      schedule: HabitSchedule;
+      targetCount?: number;
+    }) => {
+      const newHabit = addHabit({
+        ...data,
+        isArchived: false,
+        order: activeHabits.length,
+        groupId: undefined,
+      });
+      if (user) {
+        try {
+          await HabitsService.createHabit(user.id, {
+            ...data,
+            order: activeHabits.length,
+          });
+          invalidate('habits', 'routines');
+          toast.success('Habit created!');
+        } catch {
+          removeHabit(newHabit.id);
+          toast.error('Failed to create habit.');
+        }
+      }
+    },
+    [user, activeHabits.length, addHabit, removeHabit, invalidate],
+  );
+
+  const handleEdit = useCallback(
+    async (data: {
+      name: string;
+      icon: string;
+      color: string;
+      type: HabitType;
+      timeBlock: TimeBlock;
+      schedule: HabitSchedule;
+      targetCount?: number;
+    }) => {
+      if (!editingHabit || !user) return;
+      const prev = { ...editingHabit };
+      updateHabitInStore(editingHabit.id, data);
       try {
-        await HabitsService.toggleHabitCompletion(user.id, habitId, todayStr, wasCompleted);
-        invalidate('habitCompletions', 'routineCompletions');
+        await HabitsService.updateHabit(user.id, editingHabit.id, data);
+        invalidate('habits', 'routines');
+        toast.success('Habit updated!');
       } catch {
-        toggleHabitCompletion(habitId, todayStr); // rollback
+        updateHabitInStore(editingHabit.id, prev);
         toast.error('Failed to update habit.');
       }
-    }
-  }, [user, todayStr, isHabitCompleted, toggleHabitCompletion, invalidate]);
+      setEditingHabit(undefined);
+    },
+    [editingHabit, user, updateHabitInStore, invalidate],
+  );
 
-  const handleIncrement = useCallback(async (habitId: string) => {
-    const currentCount = getHabitCompletionCount(habitId, todayStr);
-    incrementHabitCount(habitId, todayStr);
-    if (user) {
+  const handleDelete = useCallback(
+    async (habitId: string) => {
+      if (!user) return;
+      const habit = habits.find((h) => h.id === habitId);
+      if (!habit) return;
+      removeHabit(habitId);
+      setDetailOpen(false);
       try {
-        await HabitsService.incrementHabitCount(user.id, habitId, todayStr, currentCount);
-        invalidate('habitCompletions', 'routineCompletions');
+        await HabitsService.deleteHabit(user.id, habitId);
+        invalidate('habits', 'habitCompletions', 'routines', 'routineCompletions');
+        toast.success('Habit deleted.');
       } catch {
-        // Simple rollback — will be re-synced on next query
-        toast.error('Failed to update habit count.');
+        // Re-add on failure — will re-sync on next query
+        toast.error('Failed to delete habit.');
       }
-    }
-  }, [user, todayStr, getHabitCompletionCount, incrementHabitCount, invalidate]);
+    },
+    [user, habits, removeHabit, invalidate],
+  );
 
-  const handleCreate = useCallback(async (data: {
-    name: string; icon: string; color: string; type: HabitType;
-    timeBlock: TimeBlock; schedule: HabitSchedule; targetCount?: number;
-  }) => {
-    const newHabit = addHabit({
-      ...data,
-      isArchived: false,
-      order: activeHabits.length,
-      groupId: undefined,
-    });
-    if (user) {
+  const handleArchive = useCallback(
+    async (habitId: string) => {
+      if (!user) return;
+      updateHabitInStore(habitId, { isArchived: true });
+      setDetailOpen(false);
       try {
-        await HabitsService.createHabit(user.id, {
-          ...data,
-          order: activeHabits.length,
-        });
+        await HabitsService.archiveHabit(user.id, habitId);
         invalidate('habits', 'routines');
-        toast.success('Habit created!');
+        toast.success('Habit archived.');
       } catch {
-        removeHabit(newHabit.id);
-        toast.error('Failed to create habit.');
+        updateHabitInStore(habitId, { isArchived: false });
+        toast.error('Failed to archive habit.');
       }
-    }
-  }, [user, activeHabits.length, addHabit, removeHabit, invalidate]);
-
-  const handleEdit = useCallback(async (data: {
-    name: string; icon: string; color: string; type: HabitType;
-    timeBlock: TimeBlock; schedule: HabitSchedule; targetCount?: number;
-  }) => {
-    if (!editingHabit || !user) return;
-    const prev = { ...editingHabit };
-    updateHabitInStore(editingHabit.id, data);
-    try {
-      await HabitsService.updateHabit(user.id, editingHabit.id, data);
-      invalidate('habits', 'routines');
-      toast.success('Habit updated!');
-    } catch {
-      updateHabitInStore(editingHabit.id, prev);
-      toast.error('Failed to update habit.');
-    }
-    setEditingHabit(undefined);
-  }, [editingHabit, user, updateHabitInStore, invalidate]);
-
-  const handleDelete = useCallback(async (habitId: string) => {
-    if (!user) return;
-    const habit = habits.find(h => h.id === habitId);
-    if (!habit) return;
-    removeHabit(habitId);
-    setDetailOpen(false);
-    try {
-      await HabitsService.deleteHabit(user.id, habitId);
-      invalidate('habits', 'habitCompletions', 'routines', 'routineCompletions');
-      toast.success('Habit deleted.');
-    } catch {
-      // Re-add on failure — will re-sync on next query
-      toast.error('Failed to delete habit.');
-    }
-  }, [user, habits, removeHabit, invalidate]);
-
-  const handleArchive = useCallback(async (habitId: string) => {
-    if (!user) return;
-    updateHabitInStore(habitId, { isArchived: true });
-    setDetailOpen(false);
-    try {
-      await HabitsService.archiveHabit(user.id, habitId);
-      invalidate('habits', 'routines');
-      toast.success('Habit archived.');
-    } catch {
-      updateHabitInStore(habitId, { isArchived: false });
-      toast.error('Failed to archive habit.');
-    }
-  }, [user, updateHabitInStore, invalidate]);
+    },
+    [user, updateHabitInStore, invalidate],
+  );
 
   const openDetail = (habitId: string) => {
     setSelectedHabitId(habitId);
@@ -177,11 +206,11 @@ const RoutinesPage = () => {
 
   return (
     <AppLayout>
-      <div className="mx-auto px-6 py-8 max-w-4xl">
+      <div className="mx-auto max-w-4xl px-6 py-8">
         {/* Header */}
         <header className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-1">Routines & Habits</h1>
+            <h1 className="mb-1 text-2xl font-semibold text-foreground">Routines & Habits</h1>
             <p className="text-sm text-muted-foreground">
               {activeHabits.length} habit{activeHabits.length !== 1 ? 's' : ''}
               {hasHabits && ` · ${completedCount}/${activeHabits.length} done today`}
@@ -193,10 +222,10 @@ const RoutinesPage = () => {
               <button
                 onClick={() => setView('today')}
                 className={cn(
-                  'px-3 py-1.5 text-sm font-medium rounded-md transition-all',
+                  'rounded-md px-3 py-1.5 text-sm font-medium transition-all',
                   view === 'today'
                     ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 role="tab"
                 aria-selected={view === 'today'}
@@ -206,10 +235,10 @@ const RoutinesPage = () => {
               <button
                 onClick={() => setView('analytics')}
                 className={cn(
-                  'px-3 py-1.5 text-sm font-medium rounded-md transition-all',
+                  'rounded-md px-3 py-1.5 text-sm font-medium transition-all',
                   view === 'analytics'
                     ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 role="tab"
                 aria-selected={view === 'analytics'}
@@ -217,8 +246,14 @@ const RoutinesPage = () => {
                 Analytics
               </button>
             </div>
-            <Button onClick={() => { setEditingHabit(undefined); setFormOpen(true); }} className="gap-2">
-              <Plus className="w-4 h-4" />
+            <Button
+              onClick={() => {
+                setEditingHabit(undefined);
+                setFormOpen(true);
+              }}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
               New Habit
             </Button>
           </div>
@@ -229,13 +264,13 @@ const RoutinesPage = () => {
             {/* Progress bar */}
             {hasHabits && (
               <div className="widget-card p-4">
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm font-medium text-foreground">{progressPercent}%</span>
                   <span className="text-xs text-muted-foreground">
                     {completedCount} of {activeHabits.length} complete
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                <div className="h-2 overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
@@ -246,19 +281,23 @@ const RoutinesPage = () => {
 
             {/* Habits by time block */}
             {hasHabits ? (
-              TIME_BLOCKS.map(block => {
+              TIME_BLOCKS.map((block) => {
                 const blockHabits = habitsByBlock[block];
                 if (blockHabits.length === 0) return null;
                 return (
                   <TimeBlockSection key={block} timeBlock={block}>
-                    {blockHabits.map(habit => (
+                    {blockHabits.map((habit) => (
                       <HabitRow
                         key={habit.id}
                         habit={habit}
                         isCompleted={isHabitCompleted(habit.id, todayStr)}
                         completionCount={getHabitCompletionCount(habit.id, todayStr)}
-                        onToggle={() => { void handleToggle(habit.id); }}
-                        onIncrement={() => { void handleIncrement(habit.id); }}
+                        onToggle={() => {
+                          void handleToggle(habit.id);
+                        }}
+                        onIncrement={() => {
+                          void handleIncrement(habit.id);
+                        }}
                         onClick={() => openDetail(habit.id)}
                       />
                     ))}
@@ -267,13 +306,19 @@ const RoutinesPage = () => {
               })
             ) : (
               <div className="widget-card p-12 text-center">
-                <Repeat className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">Start building habits</h3>
-                <p className="text-sm text-muted-foreground mb-6">
+                <Repeat className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+                <h3 className="mb-2 text-lg font-medium text-foreground">Start building habits</h3>
+                <p className="mb-6 text-sm text-muted-foreground">
                   Track daily routines, build streaks, and see how habits impact your mood.
                 </p>
-                <Button onClick={() => { setEditingHabit(undefined); setFormOpen(true); }} className="gap-2">
-                  <Plus className="w-4 h-4" />
+                <Button
+                  onClick={() => {
+                    setEditingHabit(undefined);
+                    setFormOpen(true);
+                  }}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
                   Create your first habit
                 </Button>
               </div>

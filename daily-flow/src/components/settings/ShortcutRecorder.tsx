@@ -76,17 +76,15 @@ export default function ShortcutRecorder({
   }, [captured, currentBinding, onSave]);
 
   // Pretty-print for display
-  const displayBinding = captured
-    ? (IS_MAC ? captured.replace(/\+/g, ' ') : captured)
-    : null;
+  const displayBinding = captured ? (IS_MAC ? captured.replace(/\+/g, ' ') : captured) : null;
 
   return (
     <div ref={containerRef} className="flex items-center gap-3">
-      <div className="flex-1 h-9 flex items-center px-3 rounded-md border border-primary/40 bg-primary/5 text-sm">
+      <div className="flex h-9 flex-1 items-center rounded-md border border-primary/40 bg-primary/5 px-3 text-sm">
         {displayBinding ? (
           <kbd className="font-mono text-foreground">{displayBinding}</kbd>
         ) : (
-          <span className="text-muted-foreground animate-pulse">Press keys...</span>
+          <span className="animate-pulse text-muted-foreground">Press keys...</span>
         )}
       </div>
       <Button size="sm" variant="default" onClick={handleSave} disabled={!captured}>

@@ -2,12 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Hash, FileText, X, Save, FolderOpen, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Capture } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { toast } from 'sonner';
@@ -30,7 +25,7 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
   const [content, setContent] = useState('');
   const [chips, setChips] = useState<ParsedChip[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
+  const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
 
   useEffect(() => {
     if (capture) {
@@ -41,7 +36,7 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
 
   const parseContent = useCallback((text: string) => {
     const parsed: ParsedChip[] = [];
-    
+
     // Match #tags
     const tagRegex = /#(\w+)/g;
     let match;
@@ -50,10 +45,10 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
         type: 'tag',
         value: match[1],
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + match[0].length,
       });
     }
-    
+
     // Match [[Topic]] or [[Topic/Page]] paths
     const topicRegex = /\[\[([^\]]+)\]\]/g;
     while ((match = topicRegex.exec(text)) !== null) {
@@ -61,10 +56,10 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
         type: 'topic',
         value: match[1],
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + match[0].length,
       });
     }
-    
+
     setChips(parsed);
   }, []);
 
@@ -77,12 +72,12 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
   const handleSave = () => {
     if (!capture || !content.trim()) return;
 
-    const uniqueTopicPaths = [...new Set(chips.filter(c => c.type === 'topic').map(c => c.value))];
-    const uniqueTags = [...new Set(chips.filter(c => c.type === 'tag').map(c => c.value.toLowerCase()))];
+    const uniqueTopicPaths = [...new Set(chips.filter((c) => c.type === 'topic').map((c) => c.value))];
+    const uniqueTags = [...new Set(chips.filter((c) => c.type === 'tag').map((c) => c.value.toLowerCase()))];
 
     // Resolve topic paths to IDs, auto-creating if needed. Flatten since each path returns [topicId] or [topicId, pageId]
     const topicIds = uniqueTopicPaths
-      .map(path => resolveTopicPath(path, true))
+      .map((path) => resolveTopicPath(path, true))
       .filter(Boolean)
       .flat() as string[];
 
@@ -98,8 +93,8 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
     onOpenChange(false);
   };
 
-  const uniqueTags = [...new Set(chips.filter(c => c.type === 'tag').map(c => c.value))];
-  const uniqueTopics = [...new Set(chips.filter(c => c.type === 'topic').map(c => c.value))];
+  const uniqueTags = [...new Set(chips.filter((c) => c.type === 'tag').map((c) => c.value))];
+  const uniqueTopics = [...new Set(chips.filter((c) => c.type === 'topic').map((c) => c.value))];
 
   // Check if a topic path exists
   const topicExists = (path: string) => {
@@ -108,9 +103,12 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
 
   const getSourceLabel = (source: string) => {
     switch (source) {
-      case 'video': return 'Video Capture';
-      case 'quick': return 'AI Note';
-      default: return 'AI Capture';
+      case 'video':
+        return 'Video Capture';
+      case 'quick':
+        return 'AI Note';
+      default:
+        return 'AI Capture';
     }
   };
 
@@ -120,7 +118,7 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
+              <Sparkles className="h-4 w-4 text-primary" />
               Edit Capture
             </span>
             {capture && (
@@ -136,18 +134,15 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
             ref={textareaRef}
             value={content}
             onChange={handleContentChange}
-            className="w-full min-h-[200px] resize-none border-none bg-secondary/50 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary/30 placeholder:text-muted-foreground/60 text-sm leading-relaxed"
+            className="min-h-[200px] w-full resize-none rounded-lg border-none bg-secondary/50 p-3 text-sm leading-relaxed placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/30"
             placeholder="Edit your capture... Use #tags or [[Topic/Page]]"
           />
 
           {(uniqueTags.length > 0 || uniqueTopics.length > 0) && (
             <div className="flex flex-wrap gap-1.5">
               {uniqueTags.map((tag) => (
-                <span 
-                  key={tag} 
-                  className="tag-chip text-xs py-0.5 px-2"
-                >
-                  <Hash className="w-3 h-3" />
+                <span key={tag} className="tag-chip px-2 py-0.5 text-xs">
+                  <Hash className="h-3 w-3" />
                   {tag}
                 </span>
               ))}
@@ -155,13 +150,13 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
                 const exists = topicExists(topic);
                 const isPage = topic.includes('/');
                 return (
-                  <span 
-                    key={topic} 
-                    className={`topic-chip text-xs py-0.5 px-2 ${!exists ? 'border-dashed opacity-70' : ''}`}
+                  <span
+                    key={topic}
+                    className={`topic-chip px-2 py-0.5 text-xs ${!exists ? 'border-dashed opacity-70' : ''}`}
                   >
-                    {isPage ? <FileText className="w-3 h-3" /> : <FolderOpen className="w-3 h-3" />}
+                    {isPage ? <FileText className="h-3 w-3" /> : <FolderOpen className="h-3 w-3" />}
                     {topic}
-                    {!exists && <span className="text-[10px] ml-1">(new)</span>}
+                    {!exists && <span className="ml-1 text-[10px]">(new)</span>}
                   </span>
                 );
               })}
@@ -170,11 +165,11 @@ const CaptureEditDialog = ({ capture, open, onOpenChange, onSave }: CaptureEditD
 
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
-              <X className="w-4 h-4 mr-1" />
+              <X className="mr-1 h-4 w-4" />
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={!content.trim()}>
-              <Save className="w-4 h-4 mr-1" />
+              <Save className="mr-1 h-4 w-4" />
               Save
             </Button>
           </div>

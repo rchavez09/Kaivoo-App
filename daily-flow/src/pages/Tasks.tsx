@@ -1,9 +1,21 @@
 import { useState, useMemo } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import {
-  CheckSquare, Plus, Search, SlidersHorizontal, Circle, CheckCircle2,
-  Calendar, X, Flag, ChevronRight, LayoutList, Columns3,
-  ChevronDown, ArrowUpDown, GanttChart
+  CheckSquare,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Circle,
+  CheckCircle2,
+  Calendar,
+  X,
+  Flag,
+  ChevronRight,
+  LayoutList,
+  Columns3,
+  ChevronDown,
+  ArrowUpDown,
+  GanttChart,
 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
@@ -11,20 +23,8 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,10 +73,10 @@ const DEFAULT_PREFS: TasksViewPrefs = {
 };
 
 const Tasks = () => {
-  const tasks = useKaivooStore(s => s.tasks);
-  const projects = useKaivooStore(s => s.projects);
-  const topics = useKaivooStore(s => s.topics);
-  const topicPages = useKaivooStore(s => s.topicPages);
+  const tasks = useKaivooStore((s) => s.tasks);
+  const projects = useKaivooStore((s) => s.projects);
+  const topics = useKaivooStore((s) => s.topics);
+  const topicPages = useKaivooStore((s) => s.topicPages);
   const { addTask, updateTask, deleteTask, toggleSubtask } = useKaivooActions();
 
   const [prefs, setPrefs] = useLocalStorage<TasksViewPrefs>(TASKS_VIEW_PREFS_KEY, DEFAULT_PREFS);
@@ -119,7 +119,7 @@ const Tasks = () => {
   };
 
   const toggleTaskSelection = (taskId: string) => {
-    setSelectedTaskIds(prev => {
+    setSelectedTaskIds((prev) => {
       const next = new Set(prev);
       if (next.has(taskId)) next.delete(taskId);
       else next.add(taskId);
@@ -128,7 +128,7 @@ const Tasks = () => {
   };
 
   const selectAll = () => {
-    setSelectedTaskIds(new Set(filteredTasks.map(t => t.id)));
+    setSelectedTaskIds(new Set(filteredTasks.map((t) => t.id)));
   };
 
   const deselectAll = () => {
@@ -138,9 +138,9 @@ const Tasks = () => {
   const handleBulkStatusChange = async (status: TaskStatus) => {
     const ids = [...selectedTaskIds];
     const results = await Promise.allSettled(
-      ids.map(id => updateTask(id, { status, completedAt: status === 'done' ? new Date() : undefined }))
+      ids.map((id) => updateTask(id, { status, completedAt: status === 'done' ? new Date() : undefined })),
     );
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
     if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to update.`);
     setSelectedTaskIds(new Set());
     setSelectionMode(false);
@@ -148,8 +148,8 @@ const Tasks = () => {
 
   const handleBulkPriorityChange = async (priority: TaskPriority) => {
     const ids = [...selectedTaskIds];
-    const results = await Promise.allSettled(ids.map(id => updateTask(id, { priority })));
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const results = await Promise.allSettled(ids.map((id) => updateTask(id, { priority })));
+    const failed = results.filter((r) => r.status === 'rejected').length;
     if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to update.`);
     setSelectedTaskIds(new Set());
     setSelectionMode(false);
@@ -157,8 +157,8 @@ const Tasks = () => {
 
   const handleBulkDueDateChange = async (date: string | null) => {
     const ids = [...selectedTaskIds];
-    const results = await Promise.allSettled(ids.map(id => updateTask(id, { dueDate: date ?? undefined })));
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const results = await Promise.allSettled(ids.map((id) => updateTask(id, { dueDate: date ?? undefined })));
+    const failed = results.filter((r) => r.status === 'rejected').length;
     if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to update.`);
     setSelectedTaskIds(new Set());
     setSelectionMode(false);
@@ -166,8 +166,8 @@ const Tasks = () => {
 
   const handleBulkDelete = async () => {
     const ids = [...selectedTaskIds];
-    const results = await Promise.allSettled(ids.map(id => deleteTask(id)));
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const results = await Promise.allSettled(ids.map((id) => deleteTask(id)));
+    const failed = results.filter((r) => r.status === 'rejected').length;
     if (failed > 0) toast.error(`${failed} of ${ids.length} tasks failed to delete.`);
     setSelectedTaskIds(new Set());
     setSelectionMode(false);
@@ -175,47 +175,47 @@ const Tasks = () => {
 
   const handleSetActiveTab = (tab: ViewTab) => {
     setActiveTab(tab);
-    setPrefs(prev => ({ ...prev, activeTab: tab }));
+    setPrefs((prev) => ({ ...prev, activeTab: tab }));
   };
 
   const handleSetViewMode = (mode: ViewMode) => {
     setViewMode(mode);
-    setPrefs(prev => ({ ...prev, viewMode: mode }));
+    setPrefs((prev) => ({ ...prev, viewMode: mode }));
   };
 
   const handleSetSortBy = (sort: SortOption) => {
     setSortBy(sort);
-    setPrefs(prev => ({ ...prev, sortBy: sort }));
+    setPrefs((prev) => ({ ...prev, sortBy: sort }));
   };
 
   const handleSetSortDirection = (dir: SortDirection) => {
     setSortDirection(dir);
-    setPrefs(prev => ({ ...prev, sortDirection: dir }));
+    setPrefs((prev) => ({ ...prev, sortDirection: dir }));
   };
 
   const handleSetTopicFilter = (value: string) => {
     setTopicFilter(value);
-    setPrefs(prev => ({ ...prev, topicFilter: value }));
+    setPrefs((prev) => ({ ...prev, topicFilter: value }));
   };
 
   const handleSetTagFilter = (value: string) => {
     setTagFilter(value);
-    setPrefs(prev => ({ ...prev, tagFilter: value }));
+    setPrefs((prev) => ({ ...prev, tagFilter: value }));
   };
 
   // Compute available topics and tags for filter dropdowns
   const availableTopics = useMemo(() => {
-    const topicIdSet = new Set(tasks.flatMap(t => t.topicIds));
+    const topicIdSet = new Set(tasks.flatMap((t) => t.topicIds));
     const result: { id: string; name: string }[] = [];
-    topicIdSet.forEach(id => {
-      const topic = topics.find(t => t.id === id);
+    topicIdSet.forEach((id) => {
+      const topic = topics.find((t) => t.id === id);
       if (topic) {
         result.push({ id, name: topic.name });
         return;
       }
-      const page = topicPages.find(p => p.id === id);
+      const page = topicPages.find((p) => p.id === id);
       if (page) {
-        const parent = topics.find(t => t.id === page.topicId);
+        const parent = topics.find((t) => t.id === page.topicId);
         result.push({ id, name: parent ? `${parent.name}/${page.name}` : page.name });
       }
     });
@@ -223,16 +223,16 @@ const Tasks = () => {
   }, [tasks, topics, topicPages]);
 
   const availableTags = useMemo(() => {
-    const tagSet = new Set(tasks.flatMap(t => t.tags));
+    const tagSet = new Set(tasks.flatMap((t) => t.tags));
     return [...tagSet].sort();
   }, [tasks]);
 
   const getTopicName = (topicId: string) => {
-    const topic = topics.find(t => t.id === topicId);
+    const topic = topics.find((t) => t.id === topicId);
     if (topic) return topic.name;
-    const page = topicPages.find(p => p.id === topicId);
+    const page = topicPages.find((p) => p.id === topicId);
     if (page) {
-      const parentTopic = topics.find(t => t.id === page.topicId);
+      const parentTopic = topics.find((t) => t.id === page.topicId);
       return parentTopic ? `${parentTopic.name}/${page.name}` : page.name;
     }
     return null;
@@ -240,7 +240,7 @@ const Tasks = () => {
 
   const getProgress = (task: Task) => {
     if (task.subtasks.length === 0) return null;
-    const completed = task.subtasks.filter(s => s.completed).length;
+    const completed = task.subtasks.filter((s) => s.completed).length;
     return Math.round((completed / task.subtasks.length) * 100);
   };
 
@@ -264,7 +264,7 @@ const Tasks = () => {
 
   // Pre-tab filtered tasks — all filters except tab (used for tab counts)
   const preTabFilteredTasks = useMemo(() => {
-    return tasks.filter(task => {
+    return tasks.filter((task) => {
       if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (quickStatus && task.status !== quickStatus) return false;
       if (quickDue === 'today' && !isTaskDueToday(task.dueDate)) return false;
@@ -278,17 +278,32 @@ const Tasks = () => {
   }, [tasks, searchQuery, quickStatus, quickDue, statusFilter, priorityFilter, topicFilter, tagFilter]);
 
   // Tab counts respect active filters (P2)
-  const tabs = useMemo<{ id: ViewTab; label: string; count: number }[]>(() => [
-    { id: 'open', label: 'Open', count: preTabFilteredTasks.filter(t => t.status !== 'done').length },
-    { id: 'today', label: 'Today', count: preTabFilteredTasks.filter(t => isTaskDueToday(t.dueDate) && t.status !== 'done').length },
-    { id: 'tomorrow', label: 'Tomorrow', count: preTabFilteredTasks.filter(t => isTaskDueTomorrow(t.dueDate) && t.status !== 'done').length },
-    { id: 'week', label: 'Week', count: preTabFilteredTasks.filter(t => isTaskDueThisWeek(t.dueDate) && t.status !== 'done').length },
-    { id: 'completed', label: 'Done', count: preTabFilteredTasks.filter(t => t.status === 'done').length },
-  ], [preTabFilteredTasks]);
+  const tabs = useMemo<{ id: ViewTab; label: string; count: number }[]>(
+    () => [
+      { id: 'open', label: 'Open', count: preTabFilteredTasks.filter((t) => t.status !== 'done').length },
+      {
+        id: 'today',
+        label: 'Today',
+        count: preTabFilteredTasks.filter((t) => isTaskDueToday(t.dueDate) && t.status !== 'done').length,
+      },
+      {
+        id: 'tomorrow',
+        label: 'Tomorrow',
+        count: preTabFilteredTasks.filter((t) => isTaskDueTomorrow(t.dueDate) && t.status !== 'done').length,
+      },
+      {
+        id: 'week',
+        label: 'Week',
+        count: preTabFilteredTasks.filter((t) => isTaskDueThisWeek(t.dueDate) && t.status !== 'done').length,
+      },
+      { id: 'completed', label: 'Done', count: preTabFilteredTasks.filter((t) => t.status === 'done').length },
+    ],
+    [preTabFilteredTasks],
+  );
 
   // Final filtered + sorted tasks (tab filter + sort on top of pre-tab)
   const filteredTasks = useMemo(() => {
-    const result = preTabFilteredTasks.filter(task => {
+    const result = preTabFilteredTasks.filter((task) => {
       if (viewMode === 'list' || activeTab !== 'open') {
         if (activeTab === 'open' && task.status === 'done') return false;
         if (activeTab === 'today' && !isTaskDueToday(task.dueDate)) return false;
@@ -336,7 +351,13 @@ const Tasks = () => {
     handleSetTagFilter('all');
   };
 
-  const hasActiveFilters = quickStatus || quickDue || statusFilter !== 'all' || priorityFilter !== 'all' || topicFilter !== 'all' || tagFilter !== 'all';
+  const hasActiveFilters =
+    quickStatus ||
+    quickDue ||
+    statusFilter !== 'all' ||
+    priorityFilter !== 'all' ||
+    topicFilter !== 'all' ||
+    tagFilter !== 'all';
 
   const handleOpenTask = (task: Task) => {
     setSelectedTaskId(task.id);
@@ -368,11 +389,11 @@ const Tasks = () => {
 
   const handleQuickComplete = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
-    
+
     const newStatus = task.status === 'done' ? 'todo' : 'done';
-    void updateTask(taskId, { 
+    void updateTask(taskId, {
       status: newStatus,
       completedAt: newStatus === 'done' ? new Date() : undefined,
     });
@@ -380,7 +401,7 @@ const Tasks = () => {
 
   const toggleTaskExpansion = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setExpandedTasks(prev => {
+    setExpandedTasks((prev) => {
       const next = new Set(prev);
       if (next.has(taskId)) {
         next.delete(taskId);
@@ -388,7 +409,7 @@ const Tasks = () => {
         next.add(taskId);
       }
       // Persist expanded tasks
-      setPrefs(prev => ({ ...prev, expandedTasks: Array.from(next) }));
+      setPrefs((prev) => ({ ...prev, expandedTasks: Array.from(next) }));
       return next;
     });
   };
@@ -408,11 +429,11 @@ const Tasks = () => {
 
   return (
     <AppLayout>
-      <div className={cn("mx-auto px-6 py-8", viewMode === 'list' ? 'max-w-4xl' : 'max-w-full')}>
+      <div className={cn('mx-auto px-6 py-8', viewMode === 'list' ? 'max-w-4xl' : 'max-w-full')}>
         {/* Header */}
         <header className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-1">Tasks</h1>
+            <h1 className="mb-1 text-2xl font-semibold text-foreground">Tasks</h1>
             <p className="text-sm text-muted-foreground">
               {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
             </p>
@@ -426,51 +447,51 @@ const Tasks = () => {
                 onClick={toggleSelectionMode}
                 className="gap-1.5"
               >
-                <CheckSquare className="w-4 h-4" />
+                <CheckSquare className="h-4 w-4" />
                 {selectionMode ? 'Cancel' : 'Select'}
               </Button>
             )}
             {/* View mode toggle */}
-            <div className="flex items-center p-1 bg-secondary/50 rounded-lg">
+            <div className="flex items-center rounded-lg bg-secondary/50 p-1">
               <button
                 onClick={() => handleSetViewMode('list')}
                 className={cn(
-                  'p-1.5 rounded-md transition-all',
+                  'rounded-md p-1.5 transition-all',
                   viewMode === 'list'
                     ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 title="List view"
               >
-                <LayoutList className="w-4 h-4" />
+                <LayoutList className="h-4 w-4" />
               </button>
               <button
                 onClick={() => handleSetViewMode('kanban')}
                 className={cn(
-                  'p-1.5 rounded-md transition-all',
+                  'rounded-md p-1.5 transition-all',
                   viewMode === 'kanban'
                     ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 title="Kanban view"
               >
-                <Columns3 className="w-4 h-4" />
+                <Columns3 className="h-4 w-4" />
               </button>
               <button
                 onClick={() => handleSetViewMode('timeline')}
                 className={cn(
-                  'p-1.5 rounded-md transition-all',
+                  'rounded-md p-1.5 transition-all',
                   viewMode === 'timeline'
                     ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 title="Timeline view"
               >
-                <GanttChart className="w-4 h-4" />
+                <GanttChart className="h-4 w-4" />
               </button>
             </div>
             <Button className="gap-2" onClick={() => setShowNewTaskInput(true)}>
-              <Plus className="w-4 h-4" />
+              <Plus className="h-4 w-4" />
               New Task
             </Button>
           </div>
@@ -478,23 +499,25 @@ const Tasks = () => {
 
         {/* View tabs - only show in list mode */}
         {viewMode === 'list' && (
-          <div className="flex items-center gap-1 mb-4 p-1 bg-secondary/50 rounded-lg w-fit">
+          <div className="mb-4 flex w-fit items-center gap-1 rounded-lg bg-secondary/50 p-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleSetActiveTab(tab.id)}
                 className={cn(
-                  'px-3 py-1.5 text-sm font-medium rounded-md transition-all',
+                  'rounded-md px-3 py-1.5 text-sm font-medium transition-all',
                   activeTab === tab.id
                     ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {tab.label}
-                <span className={cn(
-                  'ml-1.5 text-xs',
-                  activeTab === tab.id ? 'text-muted-foreground' : 'text-muted-foreground/60'
-                )}>
+                <span
+                  className={cn(
+                    'ml-1.5 text-xs',
+                    activeTab === tab.id ? 'text-muted-foreground' : 'text-muted-foreground/60',
+                  )}
+                >
                   {tab.count}
                 </span>
               </button>
@@ -503,11 +526,11 @@ const Tasks = () => {
         )}
 
         {/* Search + Quick filters + Sort */}
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search tasks..." 
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search tasks..."
               className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -520,10 +543,10 @@ const Tasks = () => {
               <button
                 onClick={() => setQuickStatus(quickStatus === 'doing' ? null : 'doing')}
                 className={cn(
-                  'px-2.5 py-1 text-xs font-medium rounded-full border transition-all',
+                  'rounded-full border px-2.5 py-1 text-xs font-medium transition-all',
                   quickStatus === 'doing'
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border bg-background text-muted-foreground hover:border-primary/50',
                 )}
               >
                 In Progress
@@ -531,13 +554,13 @@ const Tasks = () => {
               <button
                 onClick={() => setQuickDue(quickDue === 'today' ? null : 'today')}
                 className={cn(
-                  'px-2.5 py-1 text-xs font-medium rounded-full border transition-all flex items-center gap-1',
+                  'flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-all',
                   quickDue === 'today'
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border bg-background text-muted-foreground hover:border-primary/50',
                 )}
               >
-                <Calendar className="w-3 h-3" />
+                <Calendar className="h-3 w-3" />
                 Due Today
               </button>
             </div>
@@ -547,31 +570,26 @@ const Tasks = () => {
           {topicFilter !== 'all' && (
             <button
               onClick={() => handleSetTopicFilter('all')}
-              className="px-2.5 py-1 text-xs font-medium rounded-full border bg-info/10 text-info-foreground border-info/30 flex items-center gap-1"
+              className="flex items-center gap-1 rounded-full border border-info/30 bg-info/10 px-2.5 py-1 text-xs font-medium text-info-foreground"
             >
-              [[{availableTopics.find(t => t.id === topicFilter)?.name}]]
-              <X className="w-3 h-3" />
+              [[{availableTopics.find((t) => t.id === topicFilter)?.name}]]
+              <X className="h-3 w-3" />
             </button>
           )}
           {tagFilter !== 'all' && (
             <button
               onClick={() => handleSetTagFilter('all')}
-              className="px-2.5 py-1 text-xs font-medium rounded-full border bg-primary/10 text-primary border-primary/30 flex items-center gap-1"
+              className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
             >
               #{tagFilter}
-              <X className="w-3 h-3" />
+              <X className="h-3 w-3" />
             </button>
           )}
 
           {/* Clear filters */}
           {hasActiveFilters && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-7 text-xs text-muted-foreground"
-              onClick={clearFilters}
-            >
-              <X className="w-3 h-3 mr-1" />
+            <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={clearFilters}>
+              <X className="mr-1 h-3 w-3" />
               Clear
             </Button>
           )}
@@ -580,7 +598,7 @@ const Tasks = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5">
-                <ArrowUpDown className="w-4 h-4" />
+                <ArrowUpDown className="h-4 w-4" />
                 Sort
               </Button>
             </DropdownMenuTrigger>
@@ -598,16 +616,11 @@ const Tasks = () => {
                       handleSetSortDirection('asc');
                     }
                   }}
-                  className={cn(
-                    "flex items-center justify-between",
-                    sortBy === option.value && "bg-secondary"
-                  )}
+                  className={cn('flex items-center justify-between', sortBy === option.value && 'bg-secondary')}
                 >
                   {option.label}
                   {sortBy === option.value && (
-                    <span className="text-xs text-muted-foreground">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </DropdownMenuItem>
               ))}
@@ -618,7 +631,7 @@ const Tasks = () => {
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5">
-                <SlidersHorizontal className="w-4 h-4" />
+                <SlidersHorizontal className="h-4 w-4" />
                 Filters
               </Button>
             </SheetTrigger>
@@ -626,7 +639,7 @@ const Tasks = () => {
               <SheetHeader>
                 <SheetTitle>Advanced Filters</SheetTitle>
               </SheetHeader>
-              <div className="space-y-6 mt-6">
+              <div className="mt-6 space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status</label>
                   <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as TaskStatus | 'all')}>
@@ -656,8 +669,8 @@ const Tasks = () => {
                       <SelectItem value="all">All priorities</SelectItem>
                       {Object.entries(priorityConfig).map(([key, config]) => (
                         <SelectItem key={key} value={key}>
-                          <span className={cn("flex items-center gap-2", config.color)}>
-                            <Flag className="w-3 h-3" />
+                          <span className={cn('flex items-center gap-2', config.color)}>
+                            <Flag className="h-3 w-3" />
                             {config.label}
                           </span>
                         </SelectItem>
@@ -674,8 +687,10 @@ const Tasks = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All topics</SelectItem>
-                        {availableTopics.map(t => (
-                          <SelectItem key={t.id} value={t.id}>[[{t.name}]]</SelectItem>
+                        {availableTopics.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            [[{t.name}]]
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -690,8 +705,10 @@ const Tasks = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All tags</SelectItem>
-                        {availableTags.map(tag => (
-                          <SelectItem key={tag} value={tag}>#{tag}</SelectItem>
+                        {availableTags.map((tag) => (
+                          <SelectItem key={tag} value={tag}>
+                            #{tag}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -714,9 +731,9 @@ const Tasks = () => {
 
         {/* New task input */}
         {showNewTaskInput && (
-          <div className="mb-4 p-3 bg-secondary/30 rounded-lg border border-border">
+          <div className="mb-4 rounded-lg border border-border bg-secondary/30 p-3">
             <div className="flex items-center gap-2">
-              <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+              <Circle className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
               <Input
                 autoFocus
                 value={newTaskTitle}
@@ -729,15 +746,19 @@ const Tasks = () => {
                   }
                 }}
                 placeholder="What needs to be done?"
-                className="border-0 bg-transparent focus-visible:ring-0 shadow-none px-0"
+                className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
               />
               <Button size="sm" onClick={handleCreateTask} disabled={!newTaskTitle.trim()}>
                 Add
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => {
-                setShowNewTaskInput(false);
-                setNewTaskTitle('');
-              }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowNewTaskInput(false);
+                  setNewTaskTitle('');
+                }}
+              >
                 Cancel
               </Button>
             </div>
@@ -746,11 +767,11 @@ const Tasks = () => {
 
         {/* Selection mode bar */}
         {selectionMode && viewMode === 'list' && (
-          <div className="flex items-center gap-3 mb-3 px-3 py-2 bg-secondary/40 rounded-lg border border-border">
+          <div className="mb-3 flex items-center gap-3 rounded-lg border border-border bg-secondary/40 px-3 py-2">
             <span className="text-sm font-medium text-foreground">
               {selectedTaskIds.size} of {filteredTasks.length} selected
             </span>
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="ml-auto flex items-center gap-2">
               <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={selectAll}>
                 Select All
               </Button>
@@ -779,10 +800,10 @@ const Tasks = () => {
                     <div key={task.id} className="py-1">
                       <div
                         className={cn(
-                          "flex items-center gap-3 py-2 px-2 -mx-2 hover:bg-secondary/30 rounded-lg transition-colors cursor-pointer group",
-                          selectionMode && selectedTaskIds.has(task.id) && "bg-primary/5"
+                          'group -mx-2 flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/30',
+                          selectionMode && selectedTaskIds.has(task.id) && 'bg-primary/5',
                         )}
-                        onClick={() => selectionMode ? toggleTaskSelection(task.id) : handleOpenTask(task)}
+                        onClick={() => (selectionMode ? toggleTaskSelection(task.id) : handleOpenTask(task))}
                       >
                         {/* Selection checkbox */}
                         {selectionMode && (
@@ -796,105 +817,126 @@ const Tasks = () => {
 
                         {/* Quick complete circle */}
                         {!selectionMode && (
-                        <button
-                          onClick={(e) => handleQuickComplete(task.id, e)}
-                          className={cn(
-                            "flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all hover:scale-110",
-                            task.status === 'done'
-                              ? "bg-success border-success text-success-foreground"
-                              : "border-muted-foreground/40 hover:border-success hover:bg-success/10"
-                          )}
-                        >
-                          {task.status === 'done' && (
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                          )}
-                        </button>
+                          <button
+                            onClick={(e) => handleQuickComplete(task.id, e)}
+                            className={cn(
+                              'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all hover:scale-110',
+                              task.status === 'done'
+                                ? 'border-success bg-success text-success-foreground'
+                                : 'border-muted-foreground/40 hover:border-success hover:bg-success/10',
+                            )}
+                          >
+                            {task.status === 'done' && <CheckCircle2 className="h-3.5 w-3.5" />}
+                          </button>
                         )}
 
                         {/* Expand arrow for subtasks */}
                         {hasSubtasks ? (
                           <button
                             onClick={(e) => toggleTaskExpansion(task.id, e)}
-                            className="flex-shrink-0 p-0.5 hover:bg-secondary rounded transition-colors"
+                            className="flex-shrink-0 rounded p-0.5 transition-colors hover:bg-secondary"
                           >
-                            <ChevronDown className={cn(
-                              "w-4 h-4 text-muted-foreground transition-transform",
-                              isExpanded && "rotate-180"
-                            )} />
+                            <ChevronDown
+                              className={cn(
+                                'h-4 w-4 text-muted-foreground transition-transform',
+                                isExpanded && 'rotate-180',
+                              )}
+                            />
                           </button>
                         ) : (
                           <div className="w-5" /> // Spacer for alignment
                         )}
-                        
-                        <div className="flex-1 min-w-0">
+
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <p className={cn(
-                              'text-sm font-medium truncate',
-                              task.status === 'done' ? 'line-through text-muted-foreground' : 'text-foreground'
-                            )}>
+                            <p
+                              className={cn(
+                                'truncate text-sm font-medium',
+                                task.status === 'done' ? 'text-muted-foreground line-through' : 'text-foreground',
+                              )}
+                            >
                               {task.title}
                             </p>
                             {progress !== null && (
-                              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                                 <Progress value={progress} className="h-1 w-12" />
                                 {progress}%
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            {task.projectId && (() => {
-                              const proj = projects.find(p => p.id === task.projectId);
-                              return proj ? (
-                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
-                                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: proj.color || '#888' }} />
-                                  {proj.name}
-                                </Badge>
-                              ) : null;
-                            })()}
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
+                            {task.projectId &&
+                              (() => {
+                                const proj = projects.find((p) => p.id === task.projectId);
+                                return proj ? (
+                                  <Badge variant="secondary" className="h-5 gap-1 px-1.5 text-[10px] font-normal">
+                                    <span
+                                      className="h-2 w-2 shrink-0 rounded-full"
+                                      style={{ backgroundColor: proj.color || '#888' }}
+                                    />
+                                    {proj.name}
+                                  </Badge>
+                                ) : null;
+                              })()}
                             {task.dueDate && (
-                              <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
-                                <Calendar className="w-2.5 h-2.5" />
+                              <Badge variant="outline" className="h-5 gap-1 px-1.5 text-[10px] font-normal">
+                                <Calendar className="h-2.5 w-2.5" />
                                 {task.dueDate}
                               </Badge>
                             )}
                             {task.recurrence && (
-                              <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal text-info-foreground border-info/30">
+                              <Badge
+                                variant="outline"
+                                className="h-5 gap-1 border-info/30 px-1.5 text-[10px] font-normal text-info-foreground"
+                              >
                                 <span>↻</span>
                                 {task.recurrence.type === 'daily' && 'Daily'}
                                 {task.recurrence.type === 'weekly' && 'Weekly'}
                                 {task.recurrence.type === 'monthly' && 'Monthly'}
                               </Badge>
                             )}
-                            {task.topicIds.slice(0, 2).map(topicId => {
+                            {task.topicIds.slice(0, 2).map((topicId) => {
                               const name = getTopicName(topicId);
                               return name ? (
                                 <Badge
                                   key={topicId}
                                   variant="secondary"
-                                  className="text-[10px] h-5 px-1.5 text-info-foreground font-normal cursor-pointer hover:bg-info/20"
-                                  onClick={(e) => { e.stopPropagation(); handleSetTopicFilter(topicId); }}
+                                  className="h-5 cursor-pointer px-1.5 text-[10px] font-normal text-info-foreground hover:bg-info/20"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSetTopicFilter(topicId);
+                                  }}
                                 >
                                   [[{name}]]
                                 </Badge>
                               ) : null;
                             })}
                             {task.topicIds.length > 2 && (
-                              <Badge variant="secondary" className="text-[10px] h-5 px-1.5 text-muted-foreground font-normal">
+                              <Badge
+                                variant="secondary"
+                                className="h-5 px-1.5 text-[10px] font-normal text-muted-foreground"
+                              >
                                 +{task.topicIds.length - 2}
                               </Badge>
                             )}
-                            {task.tags.slice(0, 2).map(tag => (
+                            {task.tags.slice(0, 2).map((tag) => (
                               <Badge
                                 key={tag}
                                 variant="secondary"
-                                className="text-[10px] h-5 px-1.5 text-primary font-normal cursor-pointer hover:bg-primary/20"
-                                onClick={(e) => { e.stopPropagation(); handleSetTagFilter(tag); }}
+                                className="h-5 cursor-pointer px-1.5 text-[10px] font-normal text-primary hover:bg-primary/20"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSetTagFilter(tag);
+                                }}
                               >
                                 #{tag}
                               </Badge>
                             ))}
                             {task.tags.length > 2 && (
-                              <Badge variant="secondary" className="text-[10px] h-5 px-1.5 text-muted-foreground font-normal">
+                              <Badge
+                                variant="secondary"
+                                className="h-5 px-1.5 text-[10px] font-normal text-muted-foreground"
+                              >
                                 +{task.tags.length - 2}
                               </Badge>
                             )}
@@ -902,53 +944,57 @@ const Tasks = () => {
                         </div>
 
                         {/* Priority chip */}
-                        <Badge 
+                        <Badge
                           variant="secondary"
                           className={cn(
-                            'text-[10px] h-5 px-1.5 font-normal',
+                            'h-5 px-1.5 text-[10px] font-normal',
                             priorityConfig[task.priority].bg,
-                            priorityConfig[task.priority].color
+                            priorityConfig[task.priority].color,
                           )}
                         >
                           {priorityConfig[task.priority].label}
                         </Badge>
 
-                        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                       </div>
 
                       {/* Expanded subtasks */}
                       {hasSubtasks && isExpanded && (
-                        <div className="ml-12 pl-3 border-l-2 border-border/50 pb-2">
+                        <div className="ml-12 border-l-2 border-border/50 pb-2 pl-3">
                           {task.subtasks.map((subtask) => (
                             <div
                               key={subtask.id}
-                              className="flex items-center gap-2 py-1.5 px-2 hover:bg-secondary/20 rounded-md group/subtask"
+                              className="group/subtask flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-secondary/20"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <button
                                 onClick={(e) => handleSubtaskToggle(task.id, subtask.id, e)}
                                 className={cn(
-                                  "flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-all hover:scale-110",
+                                  'flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border transition-all hover:scale-110',
                                   subtask.completed
-                                    ? "bg-success border-success text-success-foreground"
-                                    : "border-muted-foreground/40 hover:border-success hover:bg-success/10"
+                                    ? 'border-success bg-success text-success-foreground'
+                                    : 'border-muted-foreground/40 hover:border-success hover:bg-success/10',
                                 )}
                               >
-                                {subtask.completed && (
-                                  <CheckCircle2 className="w-2.5 h-2.5" />
-                                )}
+                                {subtask.completed && <CheckCircle2 className="h-2.5 w-2.5" />}
                               </button>
-                              <span className={cn(
-                                "text-xs flex-1",
-                                subtask.completed && "line-through text-muted-foreground"
-                              )}>
+                              <span
+                                className={cn(
+                                  'flex-1 text-xs',
+                                  subtask.completed && 'text-muted-foreground line-through',
+                                )}
+                              >
                                 {subtask.title}
                               </span>
                               {/* Subtask tags */}
                               {subtask.tags && subtask.tags.length > 0 && (
                                 <div className="flex items-center gap-1">
-                                  {subtask.tags.slice(0, 2).map(tag => (
-                                    <Badge key={tag} variant="secondary" className="text-[9px] h-4 px-1 text-primary font-normal">
+                                  {subtask.tags.slice(0, 2).map((tag) => (
+                                    <Badge
+                                      key={tag}
+                                      variant="secondary"
+                                      className="h-4 px-1 text-[9px] font-normal text-primary"
+                                    >
                                       #{tag}
                                     </Badge>
                                   ))}
@@ -967,10 +1013,10 @@ const Tasks = () => {
               </div>
             ) : (
               <div className="py-12 text-center">
-                <CheckSquare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No tasks found</h3>
+                <CheckSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+                <h3 className="mb-2 text-lg font-medium text-foreground">No tasks found</h3>
                 <p className="text-sm text-muted-foreground">
-                  {searchQuery || hasActiveFilters 
+                  {searchQuery || hasActiveFilters
                     ? 'Try adjusting your filters or search query'
                     : 'Create your first task to get started'}
                 </p>
@@ -981,11 +1027,7 @@ const Tasks = () => {
       </div>
 
       {/* Task Details Drawer */}
-      <TaskDetailsDrawer
-        taskId={selectedTaskId}
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-      />
+      <TaskDetailsDrawer taskId={selectedTaskId} open={drawerOpen} onOpenChange={setDrawerOpen} />
 
       {/* Bulk Action Bar */}
       {selectionMode && selectedTaskIds.size > 0 && (

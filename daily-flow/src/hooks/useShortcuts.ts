@@ -13,15 +13,14 @@ export interface ShortcutDefinition {
 
 export interface KeyBinding {
   mac: string; // e.g. "⌘+K", "⌥+N"
-  pc: string;  // e.g. "Ctrl+K", "Alt+N"
+  pc: string; // e.g. "Ctrl+K", "Alt+N"
 }
 
 type CustomBindings = Record<string, KeyBinding>;
 
 /* ── Platform detection ────────────────────────────────────── */
 
-export const IS_MAC =
-  typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+export const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 
 /* ── Default shortcut registry ─────────────────────────────── */
 
@@ -45,19 +44,56 @@ export const DEFAULT_SHORTCUTS: ShortcutDefinition[] = [
 /* ── Reserved browser shortcuts (cannot be overridden) ────── */
 
 const RESERVED_MAC = new Set([
-  '⌘+T', '⌘+W', '⌘+N', '⌘+Q', '⌘+P', '⌘+S', '⌘+F', '⌘+L',
-  '⌘+D', '⌘+H', '⌘+R', '⌘+J', '⌘+G', '⌘+,',
-  '⌘+⇧+T', '⌘+⇧+N', '⌘+⇧+P', '⌘+⇧+J',
-  '⌘+⌥+I', '⌘+⌥+J', '⌘+⌥+C',
+  '⌘+T',
+  '⌘+W',
+  '⌘+N',
+  '⌘+Q',
+  '⌘+P',
+  '⌘+S',
+  '⌘+F',
+  '⌘+L',
+  '⌘+D',
+  '⌘+H',
+  '⌘+R',
+  '⌘+J',
+  '⌘+G',
+  '⌘+,',
+  '⌘+⇧+T',
+  '⌘+⇧+N',
+  '⌘+⇧+P',
+  '⌘+⇧+J',
+  '⌘+⌥+I',
+  '⌘+⌥+J',
+  '⌘+⌥+C',
 ]);
 
 const RESERVED_PC = new Set([
-  'Ctrl+T', 'Ctrl+W', 'Ctrl+N', 'Ctrl+Q', 'Ctrl+P', 'Ctrl+S',
-  'Ctrl+F', 'Ctrl+L', 'Ctrl+D', 'Ctrl+H', 'Ctrl+R', 'Ctrl+J',
+  'Ctrl+T',
+  'Ctrl+W',
+  'Ctrl+N',
+  'Ctrl+Q',
+  'Ctrl+P',
+  'Ctrl+S',
+  'Ctrl+F',
+  'Ctrl+L',
+  'Ctrl+D',
+  'Ctrl+H',
+  'Ctrl+R',
+  'Ctrl+J',
   'Ctrl+G',
-  'Ctrl+Shift+T', 'Ctrl+Shift+N', 'Ctrl+Shift+P', 'Ctrl+Shift+J',
-  'Ctrl+Shift+I', 'Ctrl+Shift+C',
-  'F1', 'F3', 'F5', 'F6', 'F7', 'F11', 'F12',
+  'Ctrl+Shift+T',
+  'Ctrl+Shift+N',
+  'Ctrl+Shift+P',
+  'Ctrl+Shift+J',
+  'Ctrl+Shift+I',
+  'Ctrl+Shift+C',
+  'F1',
+  'F3',
+  'F5',
+  'F6',
+  'F7',
+  'F11',
+  'F12',
 ]);
 
 export function isReservedShortcut(binding: string): boolean {
@@ -154,7 +190,7 @@ export function useShortcuts() {
   const getBinding = useCallback(
     (id: string): KeyBinding => {
       if (customBindings[id]) return customBindings[id];
-      const def = DEFAULT_SHORTCUTS.find(s => s.id === id);
+      const def = DEFAULT_SHORTCUTS.find((s) => s.id === id);
       return def?.defaultBinding ?? { mac: '', pc: '' };
     },
     [customBindings],
@@ -170,14 +206,14 @@ export function useShortcuts() {
 
   const setBinding = useCallback(
     (id: string, binding: KeyBinding) => {
-      setCustomBindings(prev => ({ ...prev, [id]: binding }));
+      setCustomBindings((prev) => ({ ...prev, [id]: binding }));
     },
     [setCustomBindings],
   );
 
   const resetBinding = useCallback(
     (id: string) => {
-      setCustomBindings(prev => {
+      setCustomBindings((prev) => {
         const next = { ...prev };
         delete next[id];
         return next;
@@ -190,10 +226,7 @@ export function useShortcuts() {
     setCustomBindings({});
   }, [setCustomBindings]);
 
-  const isCustomized = useCallback(
-    (id: string): boolean => id in customBindings,
-    [customBindings],
-  );
+  const isCustomized = useCallback((id: string): boolean => id in customBindings, [customBindings]);
 
   const matchesShortcut = useCallback(
     (id: string, e: KeyboardEvent): boolean => {
@@ -211,8 +244,12 @@ export function useShortcuts() {
       for (const def of DEFAULT_SHORTCUTS) {
         if (def.id === excludeId) continue;
         const current = customBindings[def.id]
-          ? (IS_MAC ? customBindings[def.id].mac : customBindings[def.id].pc)
-          : (IS_MAC ? def.defaultBinding.mac : def.defaultBinding.pc);
+          ? IS_MAC
+            ? customBindings[def.id].mac
+            : customBindings[def.id].pc
+          : IS_MAC
+            ? def.defaultBinding.mac
+            : def.defaultBinding.pc;
         if (current === candidateBinding) return def.label;
       }
       return null;
@@ -221,11 +258,12 @@ export function useShortcuts() {
   );
 
   const shortcuts = useMemo(
-    () => DEFAULT_SHORTCUTS.map(def => ({
-      ...def,
-      currentBinding: customBindings[def.id] ?? def.defaultBinding,
-      isCustomized: def.id in customBindings,
-    })),
+    () =>
+      DEFAULT_SHORTCUTS.map((def) => ({
+        ...def,
+        currentBinding: customBindings[def.id] ?? def.defaultBinding,
+        isCustomized: def.id in customBindings,
+      })),
     [customBindings],
   );
 

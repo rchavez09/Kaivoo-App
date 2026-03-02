@@ -11,11 +11,11 @@ const SplitToNewEntryMenu = ({ onSplit, disabled }: SplitToNewEntryMenuProps) =>
     <Button
       variant="secondary"
       size="sm"
-      className="h-7 text-xs gap-1.5 shadow-md border border-border/50"
+      className="h-7 gap-1.5 border border-border/50 text-xs shadow-md"
       onClick={onSplit}
       disabled={disabled}
     >
-      <Scissors className="w-3 h-3" />
+      <Scissors className="h-3 w-3" />
       Split to New Entry
     </Button>
   );

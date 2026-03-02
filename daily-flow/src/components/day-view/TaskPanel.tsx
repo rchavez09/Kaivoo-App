@@ -37,25 +37,28 @@ const TaskPanel = memo(({ pendingTasks, completedTasks, dateStr, onTaskClick }: 
     }
   }, [newTaskTitle, dateStr, addTask]);
 
-  const handleToggleComplete = useCallback(async (task: Task) => {
-    await updateTask(task.id, {
-      status: task.status === 'done' ? 'todo' : 'done',
-      completedAt: task.status === 'done' ? undefined : new Date(),
-    });
-  }, [updateTask]);
+  const handleToggleComplete = useCallback(
+    async (task: Task) => {
+      await updateTask(task.id, {
+        status: task.status === 'done' ? 'todo' : 'done',
+        completedAt: task.status === 'done' ? undefined : new Date(),
+      });
+    },
+    [updateTask],
+  );
 
   return (
     <div className="widget-card" aria-live="polite">
       <h3 className="widget-title mb-3">Tasks</h3>
 
       {/* Quick add */}
-      <div className="flex gap-2 mb-4">
+      <div className="mb-4 flex gap-2">
         <Input
           value={newTaskTitle}
-          onChange={e => setNewTaskTitle(e.target.value)}
+          onChange={(e) => setNewTaskTitle(e.target.value)}
           placeholder="Add a task..."
           className="h-8 text-sm"
-          onKeyDown={e => e.key === 'Enter' && handleAddTask()}
+          onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
         />
         <Button
           size="icon"
@@ -71,25 +74,25 @@ const TaskPanel = memo(({ pendingTasks, completedTasks, dateStr, onTaskClick }: 
       {/* Pending tasks */}
       <div className="space-y-1">
         {pendingTasks.length === 0 && (
-          <p className="text-xs text-muted-foreground py-4 text-center">No tasks for this day</p>
+          <p className="py-4 text-center text-xs text-muted-foreground">No tasks for this day</p>
         )}
-        {pendingTasks.map(task => (
+        {pendingTasks.map((task) => (
           <TaskRow key={task.id} task={task} onToggle={handleToggleComplete} onClick={onTaskClick} />
         ))}
       </div>
 
       {/* Completed toggle */}
       {completedTasks.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-border/30">
+        <div className="mt-4 border-t border-border/30 pt-3">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
+            className="mb-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             {showCompleted ? 'Hide' : 'Show'} completed ({completedTasks.length})
           </button>
           {showCompleted && (
             <div className="space-y-1">
-              {completedTasks.map(task => (
+              {completedTasks.map((task) => (
                 <TaskRow key={task.id} task={task} onToggle={handleToggleComplete} onClick={onTaskClick} />
               ))}
             </div>
@@ -101,47 +104,46 @@ const TaskPanel = memo(({ pendingTasks, completedTasks, dateStr, onTaskClick }: 
 });
 TaskPanel.displayName = 'TaskPanel';
 
-const TaskRow = memo(({ task, onToggle, onClick }: {
-  task: Task;
-  onToggle: (task: Task) => void;
-  onClick?: (id: string) => void;
-}) => {
-  const isDone = task.status === 'done';
-  const isOverdue = !isDone && task.dueDate && task.dueDate < new Date().toISOString().slice(0, 10);
+const TaskRow = memo(
+  ({ task, onToggle, onClick }: { task: Task; onToggle: (task: Task) => void; onClick?: (id: string) => void }) => {
+    const isDone = task.status === 'done';
+    const isOverdue = !isDone && task.dueDate && task.dueDate < new Date().toISOString().slice(0, 10);
 
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-2 px-2 py-1.5 rounded-lg group transition-colors',
-        'hover:bg-accent/10 cursor-pointer',
-      )}
-    >
-      <button
-        onClick={(e) => { e.stopPropagation(); onToggle(task); }}
+    return (
+      <div
         className={cn(
-          'w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors',
-          isDone ? 'bg-primary border-primary text-primary-foreground' : 'border-border hover:border-primary',
-        )}
-        aria-label={isDone ? 'Mark incomplete' : 'Mark complete'}
-      >
-        {isDone && <span className="text-[10px]">&#10003;</span>}
-      </button>
-      <button
-        onClick={() => onClick?.(task.id)}
-        className={cn(
-          'flex-1 text-left text-sm truncate',
-          isDone && 'line-through text-muted-foreground',
-          isOverdue && 'text-destructive',
+          'group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors',
+          'cursor-pointer hover:bg-accent/10',
         )}
       >
-        {task.title}
-      </button>
-      {task.priority === 'high' && !isDone && (
-        <span className="text-[10px] text-destructive font-medium">HIGH</span>
-      )}
-    </div>
-  );
-});
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle(task);
+          }}
+          className={cn(
+            'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+            isDone ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:border-primary',
+          )}
+          aria-label={isDone ? 'Mark incomplete' : 'Mark complete'}
+        >
+          {isDone && <span className="text-[10px]">&#10003;</span>}
+        </button>
+        <button
+          onClick={() => onClick?.(task.id)}
+          className={cn(
+            'flex-1 truncate text-left text-sm',
+            isDone && 'text-muted-foreground line-through',
+            isOverdue && 'text-destructive',
+          )}
+        >
+          {task.title}
+        </button>
+        {task.priority === 'high' && !isDone && <span className="text-[10px] font-medium text-destructive">HIGH</span>}
+      </div>
+    );
+  },
+);
 TaskRow.displayName = 'TaskRow';
 
 export default TaskPanel;

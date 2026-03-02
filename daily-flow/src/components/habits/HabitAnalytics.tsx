@@ -9,10 +9,10 @@ import { iconMap } from '@/components/widgets/tracking/tracking-types';
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 const HabitAnalytics = () => {
-  const habits = useKaivooStore(s => s.habits);
-  const habitCompletions = useKaivooStore(s => s.habitCompletions);
+  const habits = useKaivooStore((s) => s.habits);
+  const habitCompletions = useKaivooStore((s) => s.habitCompletions);
 
-  const activeHabits = useMemo(() => habits.filter(h => !h.isArchived), [habits]);
+  const activeHabits = useMemo(() => habits.filter((h) => !h.isArchived), [habits]);
 
   // This Week overview — 7 day columns
   const weekData = useMemo(() => {
@@ -21,12 +21,10 @@ const HabitAnalytics = () => {
     const weekEnd = endOfWeek(now, { weekStartsOn: 0 });
     const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
-    return days.map(day => {
+    return days.map((day) => {
       const dateStr = format(day, 'yyyy-MM-dd');
       const completions = habitCompletions[dateStr] || [];
-      const completed = activeHabits.filter(h =>
-        completions.some(c => c.habitId === h.id && !c.skipped)
-      ).length;
+      const completed = activeHabits.filter((h) => completions.some((c) => c.habitId === h.id && !c.skipped)).length;
       const total = activeHabits.length;
       const isFuture = day > now;
       const isToday = format(day, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
@@ -45,10 +43,7 @@ const HabitAnalytics = () => {
   }, [activeHabits, habitCompletions]);
 
   // Strength rankings — all habits sorted by strength descending
-  const strengthRankings = useMemo(
-    () => [...activeHabits].sort((a, b) => b.strength - a.strength),
-    [activeHabits]
-  );
+  const strengthRankings = useMemo(() => [...activeHabits].sort((a, b) => b.strength - a.strength), [activeHabits]);
 
   // Monthly calendar — dot calendar (like detail drawer but for all habits)
   const calendarData = useMemo(() => {
@@ -57,11 +52,11 @@ const HabitAnalytics = () => {
     const monthEnd = endOfMonth(now);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-    return days.map(day => {
+    return days.map((day) => {
       const dateStr = format(day, 'yyyy-MM-dd');
       const completions = habitCompletions[dateStr] || [];
-      const completedCount = activeHabits.filter(h =>
-        completions.some(c => c.habitId === h.id && !c.skipped)
+      const completedCount = activeHabits.filter((h) =>
+        completions.some((c) => c.habitId === h.id && !c.skipped),
       ).length;
       const total = activeHabits.length;
       const isFuture = day > now;
@@ -82,11 +77,9 @@ const HabitAnalytics = () => {
 
   // Best streak across all habits
   const topStreaker = useMemo(
-    () => activeHabits.reduce<Habit | null>(
-      (best, h) => (!best || h.currentStreak > best.currentStreak ? h : best),
-      null
-    ),
-    [activeHabits]
+    () =>
+      activeHabits.reduce<Habit | null>((best, h) => (!best || h.currentStreak > best.currentStreak ? h : best), null),
+    [activeHabits],
   );
 
   // 30-day overall completion rate
@@ -98,9 +91,9 @@ const HabitAnalytics = () => {
     for (let i = 0; i < 30; i++) {
       const dateStr = format(subDays(today, i), 'yyyy-MM-dd');
       const dayCompletions = habitCompletions[dateStr] || [];
-      activeHabits.forEach(h => {
+      activeHabits.forEach((h) => {
         total++;
-        if (dayCompletions.some(c => c.habitId === h.id && !c.skipped)) completed++;
+        if (dayCompletions.some((c) => c.habitId === h.id && !c.skipped)) completed++;
       });
     }
     return total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -109,9 +102,7 @@ const HabitAnalytics = () => {
   if (activeHabits.length === 0) {
     return (
       <div className="widget-card p-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          Create some habits to see analytics and trends.
-        </p>
+        <p className="text-sm text-muted-foreground">Create some habits to see analytics and trends.</p>
       </div>
     );
   }
@@ -122,27 +113,25 @@ const HabitAnalytics = () => {
       <div className="grid grid-cols-3 gap-3">
         <div className="widget-card p-4 text-center">
           <p className="text-2xl font-semibold text-foreground">{thirtyDayRate}%</p>
-          <p className="text-xs text-muted-foreground mt-1">30-day rate</p>
+          <p className="mt-1 text-xs text-muted-foreground">30-day rate</p>
         </div>
         <div className="widget-card p-4 text-center">
           <p className="text-2xl font-semibold text-foreground">{activeHabits.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">Active habits</p>
+          <p className="mt-1 text-xs text-muted-foreground">Active habits</p>
         </div>
         <div className="widget-card p-4 text-center">
           <div className="flex items-center justify-center gap-1">
-            <Flame className="w-4 h-4 text-orange-500" />
-            <p className="text-2xl font-semibold text-foreground">
-              {topStreaker?.currentStreak || 0}
-            </p>
+            <Flame className="h-4 w-4 text-orange-500" />
+            <p className="text-2xl font-semibold text-foreground">{topStreaker?.currentStreak || 0}</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Top streak</p>
+          <p className="mt-1 text-xs text-muted-foreground">Top streak</p>
         </div>
       </div>
 
       {/* This Week overview */}
       <div className="widget-card p-4" role="region" aria-label="This week overview">
-        <div className="flex items-center gap-2 mb-4">
-          <Calendar className="w-4 h-4 text-muted-foreground" />
+        <div className="mb-4 flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium text-foreground">This Week</h3>
         </div>
         <div className="grid grid-cols-7 gap-2">
@@ -152,23 +141,19 @@ const HabitAnalytics = () => {
               className={cn(
                 'flex flex-col items-center gap-1 rounded-lg p-2',
                 isToday && 'bg-primary/10 ring-1 ring-primary/30',
-                isFuture && 'opacity-30'
+                isFuture && 'opacity-30',
               )}
             >
-              <span className="text-[10px] font-medium text-muted-foreground uppercase">
-                {dayLabel}
-              </span>
+              <span className="text-[10px] font-medium uppercase text-muted-foreground">{dayLabel}</span>
               <span className="text-xs font-medium text-foreground">{dayNum}</span>
               {/* Vertical bar */}
-              <div className="w-3 h-10 bg-secondary rounded-full overflow-hidden flex flex-col-reverse">
+              <div className="flex h-10 w-3 flex-col-reverse overflow-hidden rounded-full bg-secondary">
                 <div
                   className="w-full rounded-full bg-primary transition-all duration-300"
                   style={{ height: `${percent}%` }}
                 />
               </div>
-              <span className="text-[10px] text-muted-foreground">
-                {isFuture ? '—' : `${completed}/${total}`}
-              </span>
+              <span className="text-[10px] text-muted-foreground">{isFuture ? '—' : `${completed}/${total}`}</span>
             </div>
           ))}
         </div>
@@ -176,8 +161,8 @@ const HabitAnalytics = () => {
 
       {/* Strength Rankings */}
       <div className="widget-card p-4" role="region" aria-label="Strength rankings">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-4 h-4 text-muted-foreground" />
+        <div className="mb-4 flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium text-foreground">Strength Rankings</h3>
         </div>
         <div className="space-y-3">
@@ -185,34 +170,28 @@ const HabitAnalytics = () => {
             const strengthPct = Math.round(habit.strength);
             return (
               <div key={habit.id} className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground w-4 text-right shrink-0">
-                  {index + 1}
-                </span>
+                <span className="w-4 shrink-0 text-right text-xs text-muted-foreground">{index + 1}</span>
                 {(() => {
                   const Icon = iconMap[habit.icon || 'sun'] || Sun;
                   return (
                     <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
                       style={{
                         backgroundColor: `${habit.color}26`,
                         color: habit.color,
                       }}
                     >
-                      <Icon className="w-3.5 h-3.5" />
+                      <Icon className="h-3.5 w-3.5" />
                     </div>
                   );
                 })()}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-foreground truncate">
-                      {habit.name}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground ml-2 shrink-0">
-                      {strengthPct}%
-                    </span>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="truncate text-xs font-medium text-foreground">{habit.name}</span>
+                    <span className="ml-2 shrink-0 text-[10px] text-muted-foreground">{strengthPct}%</span>
                   </div>
                   <div
-                    className="h-1.5 rounded-full bg-secondary overflow-hidden"
+                    className="h-1.5 overflow-hidden rounded-full bg-secondary"
                     role="meter"
                     aria-valuenow={strengthPct}
                     aria-valuemin={0}
@@ -236,12 +215,12 @@ const HabitAnalytics = () => {
 
       {/* Monthly Calendar */}
       <div className="widget-card p-4" role="region" aria-label="Monthly calendar">
-        <p className="text-xs font-medium text-muted-foreground mb-3">
-          {format(new Date(), 'MMMM yyyy')}
-        </p>
-        <div className="grid grid-cols-7 gap-1 text-center mb-1">
+        <p className="mb-3 text-xs font-medium text-muted-foreground">{format(new Date(), 'MMMM yyyy')}</p>
+        <div className="mb-1 grid grid-cols-7 gap-1 text-center">
           {DAY_LABELS.map((d, i) => (
-            <span key={i} className="text-[10px] text-muted-foreground font-medium">{d}</span>
+            <span key={i} className="text-[10px] font-medium text-muted-foreground">
+              {d}
+            </span>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1" role="grid" aria-label="Monthly habit completion calendar">
@@ -252,12 +231,12 @@ const HabitAnalytics = () => {
             <div
               key={dateStr}
               className={cn(
-                'w-full aspect-square rounded-lg flex items-center justify-center text-[10px] font-medium',
+                'flex aspect-square w-full items-center justify-center rounded-lg text-[10px] font-medium',
                 isFuture && 'opacity-20',
                 isToday && 'ring-1 ring-primary/50',
                 !isFuture && percent === 100 && 'bg-primary text-primary-foreground',
                 !isFuture && percent > 0 && percent < 100 && 'bg-primary/30 text-foreground',
-                !isFuture && percent === 0 && 'bg-muted text-muted-foreground'
+                !isFuture && percent === 0 && 'bg-muted text-muted-foreground',
               )}
               role="gridcell"
               aria-label={`${dateStr}: ${isFuture ? 'future' : `${completedCount} of ${total} completed`}`}
@@ -266,17 +245,17 @@ const HabitAnalytics = () => {
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-4 mt-3 justify-center">
+        <div className="mt-3 flex items-center justify-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-primary" />
+            <div className="h-3 w-3 rounded bg-primary" />
             <span className="text-[10px] text-muted-foreground">All done</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-primary/30" />
+            <div className="h-3 w-3 rounded bg-primary/30" />
             <span className="text-[10px] text-muted-foreground">Partial</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-muted" />
+            <div className="h-3 w-3 rounded bg-muted" />
             <span className="text-[10px] text-muted-foreground">Missed</span>
           </div>
         </div>

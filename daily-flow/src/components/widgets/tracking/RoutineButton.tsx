@@ -14,47 +14,51 @@ interface RoutineItemButtonProps {
   isDragging?: boolean;
 }
 
-export const RoutineItemButtonContent = ({ routine, completed, isEditing, onToggle, onDelete, isDragging }: RoutineItemButtonProps) => {
+export const RoutineItemButtonContent = ({
+  routine,
+  completed,
+  isEditing,
+  onToggle,
+  onDelete,
+  isDragging,
+}: RoutineItemButtonProps) => {
   const Icon = iconMap[routine.icon || 'sun'] || Sun;
 
   return (
-    <div className={cn("relative", isDragging && "opacity-50")}>
+    <div className={cn('relative', isDragging && 'opacity-50')}>
       <button
         onClick={() => !isEditing && onToggle()}
         disabled={isEditing}
         aria-label={`${completed ? 'Unmark' : 'Mark'} ${routine.name} as ${completed ? 'incomplete' : 'complete'}`}
         className={cn(
-          'w-full flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200',
+          'flex w-full flex-col items-center gap-1.5 rounded-xl p-3 transition-all duration-200',
           completed
             ? 'bg-primary/10 text-primary'
             : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground',
-          isEditing && 'opacity-75 cursor-grab'
+          isEditing && 'cursor-grab opacity-75',
         )}
       >
-        <div className={cn(
-          'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200',
-          completed
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-background'
-        )}>
-          {completed ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Icon className="w-4 h-4" />
+        <div
+          className={cn(
+            'flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200',
+            completed ? 'bg-primary text-primary-foreground' : 'bg-background',
           )}
+        >
+          {completed ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
         </div>
-        <span className="text-[10px] font-medium text-center leading-tight line-clamp-2">
-          {routine.name}
-        </span>
+        <span className="line-clamp-2 text-center text-[10px] font-medium leading-tight">{routine.name}</span>
       </button>
 
       {isEditing && (
         <button
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-sm hover:bg-destructive/90 transition-colors z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="absolute -right-1 -top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm transition-colors hover:bg-destructive/90"
           aria-label={`Delete ${routine.name}`}
         >
-          <X className="w-3 h-3" />
+          <X className="h-3 w-3" />
         </button>
       )}
     </div>
@@ -70,14 +74,7 @@ interface DraggableRoutineProps {
 }
 
 export const DraggableRoutine = ({ routine, completed, isEditing, onToggle, onDelete }: DraggableRoutineProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: routine.id,
     disabled: !isEditing,
   });

@@ -1,5 +1,23 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Settings, GripVertical, Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2, Clock, Pause, Archive, Flag, AlertTriangle, Calendar, CheckSquare, Folder, Hash } from 'lucide-react';
+import {
+  Settings,
+  GripVertical,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Trash2,
+  Clock,
+  Pause,
+  Archive,
+  Flag,
+  AlertTriangle,
+  Calendar,
+  CheckSquare,
+  Folder,
+  Hash,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -11,19 +29,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Topic, Tag } from '@/types';
 import { useWidgetSettings } from '@/hooks/useWidgetSettings';
 
 // Built-in section types
-export type BuiltInSectionId = 'overdue' | 'highPriority' | 'mediumPriority' | 'lowPriority' | 'dueToday' | 'dueThisWeek' | 'doing' | 'blocked' | 'backlog';
+export type BuiltInSectionId =
+  | 'overdue'
+  | 'highPriority'
+  | 'mediumPriority'
+  | 'lowPriority'
+  | 'dueToday'
+  | 'dueThisWeek'
+  | 'doing'
+  | 'blocked'
+  | 'backlog';
 
 // Section can be built-in, topic-based, or tag-based
 export type SectionId = BuiltInSectionId | `topic:${string}` | `tag:${string}`;
@@ -49,16 +70,36 @@ export interface TasksWidgetSettings {
 }
 
 // All available built-in sections
-export const AVAILABLE_BUILTIN_SECTIONS: { id: BuiltInSectionId; label: string; icon: React.ReactNode; description: string }[] = [
-  { id: 'dueToday', label: 'Due Today', icon: <CheckSquare className="w-4 h-4" />, description: 'Tasks due today' },
-  { id: 'overdue', label: 'Overdue', icon: <AlertTriangle className="w-4 h-4" />, description: 'Past due tasks' },
-  { id: 'highPriority', label: 'High Priority', icon: <Flag className="w-4 h-4" />, description: 'High priority tasks' },
-  { id: 'mediumPriority', label: 'Medium Priority', icon: <Flag className="w-4 h-4" />, description: 'Medium priority tasks' },
-  { id: 'lowPriority', label: 'Low Priority', icon: <Flag className="w-4 h-4" />, description: 'Low priority tasks' },
-  { id: 'dueThisWeek', label: 'Due This Week', icon: <Calendar className="w-4 h-4" />, description: 'Tasks due within 7 days' },
-  { id: 'doing', label: 'Doing', icon: <Clock className="w-4 h-4" />, description: 'Tasks in progress' },
-  { id: 'blocked', label: 'Blocked', icon: <Pause className="w-4 h-4" />, description: 'Blocked tasks' },
-  { id: 'backlog', label: 'Backlog', icon: <Archive className="w-4 h-4" />, description: 'Backlog tasks' },
+export const AVAILABLE_BUILTIN_SECTIONS: {
+  id: BuiltInSectionId;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+}[] = [
+  { id: 'dueToday', label: 'Due Today', icon: <CheckSquare className="h-4 w-4" />, description: 'Tasks due today' },
+  { id: 'overdue', label: 'Overdue', icon: <AlertTriangle className="h-4 w-4" />, description: 'Past due tasks' },
+  {
+    id: 'highPriority',
+    label: 'High Priority',
+    icon: <Flag className="h-4 w-4" />,
+    description: 'High priority tasks',
+  },
+  {
+    id: 'mediumPriority',
+    label: 'Medium Priority',
+    icon: <Flag className="h-4 w-4" />,
+    description: 'Medium priority tasks',
+  },
+  { id: 'lowPriority', label: 'Low Priority', icon: <Flag className="h-4 w-4" />, description: 'Low priority tasks' },
+  {
+    id: 'dueThisWeek',
+    label: 'Due This Week',
+    icon: <Calendar className="h-4 w-4" />,
+    description: 'Tasks due within 7 days',
+  },
+  { id: 'doing', label: 'Doing', icon: <Clock className="h-4 w-4" />, description: 'Tasks in progress' },
+  { id: 'blocked', label: 'Blocked', icon: <Pause className="h-4 w-4" />, description: 'Blocked tasks' },
+  { id: 'backlog', label: 'Backlog', icon: <Archive className="h-4 w-4" />, description: 'Backlog tasks' },
 ];
 
 const DEFAULT_SECTIONS: TasksWidgetSection[] = [
@@ -93,24 +134,22 @@ export function useTasksWidgetSettings() {
       ...raw,
       sections: raw.sections?.length ? raw.sections : DEFAULT_SECTIONS,
     }),
-    [raw]
+    [raw],
   );
 
   const updateSettings = useCallback(
     (partial: Partial<TasksWidgetSettings>) => {
       patchSettings(partial);
     },
-    [patchSettings]
+    [patchSettings],
   );
 
   const updateSection = useCallback(
     (id: SectionId, updates: Partial<TasksWidgetSection>) => {
-      const newSections = settings.sections.map((s) =>
-        s.id === id ? { ...s, ...updates } : s
-      );
+      const newSections = settings.sections.map((s) => (s.id === id ? { ...s, ...updates } : s));
       patchSettings({ sections: newSections });
     },
-    [settings.sections, patchSettings]
+    [settings.sections, patchSettings],
   );
 
   const addSection = useCallback(
@@ -121,18 +160,16 @@ export function useTasksWidgetSettings() {
         sections: [...settings.sections, { ...section, order: maxOrder + 1 }],
       });
     },
-    [settings.sections, patchSettings]
+    [settings.sections, patchSettings],
   );
 
   const removeSection = useCallback(
     (id: SectionId) => {
       patchSettings({
-        sections: settings.sections
-          .filter((s) => s.id !== id)
-          .map((s, i) => ({ ...s, order: i })),
+        sections: settings.sections.filter((s) => s.id !== id).map((s, i) => ({ ...s, order: i })),
       });
     },
-    [settings.sections, patchSettings]
+    [settings.sections, patchSettings],
   );
 
   const reorderSections = useCallback(
@@ -144,7 +181,7 @@ export function useTasksWidgetSettings() {
         sections: sorted.map((s, i) => ({ ...s, order: i })),
       });
     },
-    [settings.sections, patchSettings]
+    [settings.sections, patchSettings],
   );
 
   const setTaskOrderForSection = useCallback(
@@ -156,7 +193,7 @@ export function useTasksWidgetSettings() {
         },
       });
     },
-    [settings.taskOrder, patchSettings]
+    [settings.taskOrder, patchSettings],
   );
 
   return {
@@ -201,14 +238,14 @@ export function TasksWidgetConfigDialog({
   const sortedSections = [...settings.sections].sort((a, b) => a.order - b.order);
 
   // Get available built-in sections (not already added)
-  const existingSectionIds = new Set(settings.sections.map(s => s.id));
-  const availableBuiltins = AVAILABLE_BUILTIN_SECTIONS.filter(s => !existingSectionIds.has(s.id));
+  const existingSectionIds = new Set(settings.sections.map((s) => s.id));
+  const availableBuiltins = AVAILABLE_BUILTIN_SECTIONS.filter((s) => !existingSectionIds.has(s.id));
 
   // Get available topics (not already added)
-  const availableTopics = topics.filter(t => !existingSectionIds.has(`topic:${t.id}`));
+  const availableTopics = topics.filter((t) => !existingSectionIds.has(`topic:${t.id}`));
 
   // Get available tags (not already added)
-  const availableTags = tags.filter(t => !existingSectionIds.has(`tag:${t.name}`));
+  const availableTags = tags.filter((t) => !existingSectionIds.has(`tag:${t.name}`));
 
   const moveSection = (index: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
@@ -219,7 +256,7 @@ export function TasksWidgetConfigDialog({
 
   const handleAddSection = () => {
     if (addType === 'builtin' && selectedBuiltin) {
-      const builtinInfo = AVAILABLE_BUILTIN_SECTIONS.find(s => s.id === selectedBuiltin);
+      const builtinInfo = AVAILABLE_BUILTIN_SECTIONS.find((s) => s.id === selectedBuiltin);
       if (builtinInfo) {
         onAddSection({
           id: selectedBuiltin,
@@ -231,7 +268,7 @@ export function TasksWidgetConfigDialog({
         setSelectedBuiltin('');
       }
     } else if (addType === 'topic' && selectedTopic) {
-      const topic = topics.find(t => t.id === selectedTopic);
+      const topic = topics.find((t) => t.id === selectedTopic);
       if (topic) {
         onAddSection({
           id: `topic:${topic.id}`,
@@ -244,7 +281,7 @@ export function TasksWidgetConfigDialog({
         setSelectedTopic('');
       }
     } else if (addType === 'tag' && selectedTag) {
-      const tag = tags.find(t => t.name === selectedTag);
+      const tag = tags.find((t) => t.name === selectedTag);
       if (tag) {
         onAddSection({
           id: `tag:${tag.name}`,
@@ -261,13 +298,13 @@ export function TasksWidgetConfigDialog({
 
   const getSectionIcon = (section: TasksWidgetSection) => {
     if (section.type === 'topic') {
-      return <Folder className="w-4 h-4 text-accent" />;
+      return <Folder className="h-4 w-4 text-accent" />;
     }
     if (section.type === 'tag') {
-      return <Hash className="w-4 h-4 text-info-foreground" />;
+      return <Hash className="h-4 w-4 text-info-foreground" />;
     }
-    const builtin = AVAILABLE_BUILTIN_SECTIONS.find(s => s.id === section.id);
-    return builtin?.icon || <CheckSquare className="w-4 h-4" />;
+    const builtin = AVAILABLE_BUILTIN_SECTIONS.find((s) => s.id === section.id);
+    return builtin?.icon || <CheckSquare className="h-4 w-4" />;
   };
 
   return (
@@ -276,14 +313,14 @@ export function TasksWidgetConfigDialog({
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground hover:text-foreground h-8 px-2"
+          className="h-8 px-2 text-muted-foreground hover:text-foreground"
           title="Customize Tasks Widget"
           aria-label="Customize Tasks Widget"
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col">
+      <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-lg">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Customize Tasks Widget</DialogTitle>
           <DialogDescription>
@@ -291,13 +328,13 @@ export function TasksWidgetConfigDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4 overflow-y-auto flex-1 min-h-0 pr-2">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto py-4 pr-2">
           {/* Add new section */}
-          <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border">
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
             <Label className="text-sm font-medium">Add Section</Label>
             <div className="flex gap-2">
               <Select value={addType} onValueChange={(v) => setAddType(v as 'builtin' | 'topic' | 'tag')}>
-                <SelectTrigger className="w-28 h-9">
+                <SelectTrigger className="h-9 w-28">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -309,11 +346,13 @@ export function TasksWidgetConfigDialog({
 
               {addType === 'builtin' ? (
                 <Select value={selectedBuiltin} onValueChange={(v) => setSelectedBuiltin(v as BuiltInSectionId)}>
-                  <SelectTrigger className="flex-1 h-9">
-                    <SelectValue placeholder={availableBuiltins.length === 0 ? "All filters added" : "Select a filter..."} />
+                  <SelectTrigger className="h-9 flex-1">
+                    <SelectValue
+                      placeholder={availableBuiltins.length === 0 ? 'All filters added' : 'Select a filter...'}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableBuiltins.map(s => (
+                    {availableBuiltins.map((s) => (
                       <SelectItem key={s.id} value={s.id}>
                         <span className="flex items-center gap-2">
                           {s.icon}
@@ -325,14 +364,16 @@ export function TasksWidgetConfigDialog({
                 </Select>
               ) : addType === 'topic' ? (
                 <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-                  <SelectTrigger className="flex-1 h-9">
-                    <SelectValue placeholder={availableTopics.length === 0 ? "No topics available" : "Select a topic..."} />
+                  <SelectTrigger className="h-9 flex-1">
+                    <SelectValue
+                      placeholder={availableTopics.length === 0 ? 'No topics available' : 'Select a topic...'}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableTopics.map(t => (
+                    {availableTopics.map((t) => (
                       <SelectItem key={t.id} value={t.id}>
                         <span className="flex items-center gap-2">
-                          <Folder className="w-4 h-4" />
+                          <Folder className="h-4 w-4" />
                           {t.name}
                         </span>
                       </SelectItem>
@@ -341,15 +382,14 @@ export function TasksWidgetConfigDialog({
                 </Select>
               ) : (
                 <Select value={selectedTag} onValueChange={setSelectedTag}>
-                  <SelectTrigger className="flex-1 h-9">
-                    <SelectValue placeholder={availableTags.length === 0 ? "No tags available" : "Select a tag..."} />
+                  <SelectTrigger className="h-9 flex-1">
+                    <SelectValue placeholder={availableTags.length === 0 ? 'No tags available' : 'Select a tag...'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableTags.map(t => (
+                    {availableTags.map((t) => (
                       <SelectItem key={t.name} value={t.name}>
                         <span className="flex items-center gap-2">
-                          <Hash className="w-4 h-4" />
-                          #{t.name}
+                          <Hash className="h-4 w-4" />#{t.name}
                         </span>
                       </SelectItem>
                     ))}
@@ -361,10 +401,14 @@ export function TasksWidgetConfigDialog({
                 size="sm"
                 className="h-9 px-3"
                 onClick={handleAddSection}
-                disabled={(addType === 'builtin' && !selectedBuiltin) || (addType === 'topic' && !selectedTopic) || (addType === 'tag' && !selectedTag)}
+                disabled={
+                  (addType === 'builtin' && !selectedBuiltin) ||
+                  (addType === 'topic' && !selectedTopic) ||
+                  (addType === 'tag' && !selectedTag)
+                }
                 aria-label="Add section"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -374,33 +418,30 @@ export function TasksWidgetConfigDialog({
             <Label className="text-sm font-medium">Active Sections</Label>
             <div className="space-y-2">
               {sortedSections.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No sections configured</p>
+                <p className="py-4 text-center text-sm text-muted-foreground">No sections configured</p>
               ) : (
                 sortedSections.map((section, index) => (
                   <div
                     key={section.id}
                     className={cn(
-                      "flex items-center gap-3 p-2 rounded-lg border transition-colors",
-                      section.visible ? "bg-secondary/30 border-border" : "bg-muted/30 border-transparent"
+                      'flex items-center gap-3 rounded-lg border p-2 transition-colors',
+                      section.visible ? 'border-border bg-secondary/30' : 'border-transparent bg-muted/30',
                     )}
                   >
-                    <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <GripVertical className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
 
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
                       {getSectionIcon(section)}
-                      <span className={cn(
-                        "text-sm truncate",
-                        !section.visible && "text-muted-foreground"
-                      )}>
+                      <span className={cn('truncate text-sm', !section.visible && 'text-muted-foreground')}>
                         {section.label}
                       </span>
                       {section.type === 'topic' && (
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                        <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                           Topic
                         </span>
                       )}
                       {section.type === 'tag' && (
-                        <span className="text-[10px] uppercase tracking-wider text-info-foreground bg-info/10 px-1.5 py-0.5 rounded">
+                        <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-info-foreground">
                           Tag
                         </span>
                       )}
@@ -415,7 +456,7 @@ export function TasksWidgetConfigDialog({
                         disabled={index === 0}
                         aria-label={`Move ${section.label} up`}
                       >
-                        <ChevronUp className="w-4 h-4" />
+                        <ChevronUp className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -425,7 +466,7 @@ export function TasksWidgetConfigDialog({
                         disabled={index === sortedSections.length - 1}
                         aria-label={`Move ${section.label} down`}
                       >
-                        <ChevronDown className="w-4 h-4" />
+                        <ChevronDown className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -435,9 +476,9 @@ export function TasksWidgetConfigDialog({
                         aria-label={section.visible ? `Hide ${section.label}` : `Show ${section.label}`}
                       >
                         {section.visible ? (
-                          <Eye className="w-4 h-4 text-primary" />
+                          <Eye className="h-4 w-4 text-primary" />
                         ) : (
-                          <EyeOff className="w-4 h-4 text-muted-foreground" />
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
                         )}
                       </Button>
                       <Button
@@ -447,7 +488,7 @@ export function TasksWidgetConfigDialog({
                         onClick={() => onRemoveSection(section.id)}
                         aria-label={`Remove ${section.label} section`}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -461,9 +502,7 @@ export function TasksWidgetConfigDialog({
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-sm">Hide empty sections</Label>
-                <p className="text-xs text-muted-foreground">
-                  Hide sections when they have no tasks
-                </p>
+                <p className="text-xs text-muted-foreground">Hide sections when they have no tasks</p>
               </div>
               <Switch
                 checked={settings.hideEmptySections}
@@ -474,9 +513,7 @@ export function TasksWidgetConfigDialog({
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-sm">Show completed tasks</Label>
-                <p className="text-xs text-muted-foreground">
-                  Keep completed tasks visible in their sections
-                </p>
+                <p className="text-xs text-muted-foreground">Keep completed tasks visible in their sections</p>
               </div>
               <Switch
                 checked={settings.showCompletedTasks}
@@ -485,12 +522,10 @@ export function TasksWidgetConfigDialog({
             </div>
 
             {settings.showCompletedTasks && (
-              <div className="flex items-center justify-between pl-4 border-l-2 border-border">
+              <div className="flex items-center justify-between border-l-2 border-border pl-4">
                 <div className="space-y-0.5">
                   <Label className="text-sm">Collapse completed by default</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Hide completed tasks until you expand
-                  </p>
+                  <p className="text-xs text-muted-foreground">Hide completed tasks until you expand</p>
                 </div>
                 <Switch
                   checked={settings.collapseCompletedByDefault}
@@ -502,9 +537,7 @@ export function TasksWidgetConfigDialog({
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-sm">Collapse sections by default</Label>
-                <p className="text-xs text-muted-foreground">
-                  Start with all sections collapsed
-                </p>
+                <p className="text-xs text-muted-foreground">Start with all sections collapsed</p>
               </div>
               <Switch
                 checked={settings.collapseSectionsByDefault}

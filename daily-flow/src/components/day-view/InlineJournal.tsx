@@ -33,10 +33,10 @@ const InlineJournal = memo(({ dateStr, entries, onEditEntry }: InlineJournalProp
 
   return (
     <div className="widget-card" aria-live="polite">
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <h3 className="widget-title">Notes</h3>
         {!composing && (
-          <Button variant="ghost" size="sm" onClick={() => setComposing(true)} className="h-7 text-xs gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setComposing(true)} className="h-7 gap-1 text-xs">
             <Plus className="h-3 w-3" /> Write
           </Button>
         )}
@@ -47,13 +47,20 @@ const InlineJournal = memo(({ dateStr, entries, onEditEntry }: InlineJournalProp
         <div className="mb-4">
           <Textarea
             value={content}
-            onChange={e => setContent(e.target.value)}
+            onChange={(e) => setContent(e.target.value)}
             placeholder="What's on your mind..."
-            className="min-h-[80px] text-sm mb-2"
+            className="mb-2 min-h-[80px] text-sm"
             autoFocus
           />
-          <div className="flex gap-2 justify-end">
-            <Button variant="ghost" size="sm" onClick={() => { setComposing(false); setContent(''); }}>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setComposing(false);
+                setContent('');
+              }}
+            >
               Cancel
             </Button>
             <Button size="sm" onClick={handleSave} disabled={!content.trim()}>
@@ -65,28 +72,27 @@ const InlineJournal = memo(({ dateStr, entries, onEditEntry }: InlineJournalProp
 
       {/* Entry list */}
       {entries.length === 0 && !composing && (
-        <p className="text-xs text-muted-foreground text-center py-4">No notes yet</p>
+        <p className="py-4 text-center text-xs text-muted-foreground">No notes yet</p>
       )}
       <div className="space-y-2">
-        {entries.map(entry => (
+        {entries.map((entry) => (
           <button
             key={entry.id}
             onClick={() => onEditEntry?.(entry)}
-            className="w-full text-left p-2 rounded-lg hover:bg-accent/10 transition-colors group"
+            className="group w-full rounded-lg p-2 text-left transition-colors hover:bg-accent/10"
           >
-            <div className="flex items-center gap-2 mb-1">
+            <div className="mb-1 flex items-center gap-2">
               <BookOpen className="h-3 w-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(entry.createdAt), 'h:mm a')}
-              </span>
+              <span className="text-xs text-muted-foreground">{format(new Date(entry.createdAt), 'h:mm a')}</span>
               {entry.moodScore && (
-                <span className="text-xs">
-                  {['', '😔', '😐', '🙂', '😊', '🤩'][entry.moodScore]}
-                </span>
+                <span className="text-xs">{['', '😔', '😐', '🙂', '😊', '🤩'][entry.moodScore]}</span>
               )}
             </div>
-            <p className="text-sm text-foreground line-clamp-2">
-              {entry.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
+            <p className="line-clamp-2 text-sm text-foreground">
+              {entry.content
+                .replace(/<[^>]*>/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()}
             </p>
           </button>
         ))}

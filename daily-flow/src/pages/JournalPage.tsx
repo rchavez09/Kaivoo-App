@@ -39,10 +39,10 @@ const JournalPage = () => {
   const [approvedItems, setApprovedItems] = useState<Set<number>>(new Set());
 
   // --- Store selectors ---
-  const topics = useKaivooStore(s => s.topics);
-  const topicPages = useKaivooStore(s => s.topicPages);
-  const existingTags = useKaivooStore(s => s.tags);
-  const tasks = useKaivooStore(s => s.tasks);
+  const topics = useKaivooStore((s) => s.topics);
+  const topicPages = useKaivooStore((s) => s.topicPages);
+  const existingTags = useKaivooStore((s) => s.tags);
+  const tasks = useKaivooStore((s) => s.tasks);
   const { addTask, addSubtask, resolveTopicPathAsync } = useKaivooActions();
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
@@ -58,8 +58,8 @@ const JournalPage = () => {
   const canExtract = sections.length > 0;
 
   const handleExtract = useCallback(async () => {
-    const entries = useKaivooStore.getState().journalEntries.filter(e => e.date === dateStr);
-    const allContent = entries.map(e => e.content).join(' ');
+    const entries = useKaivooStore.getState().journalEntries.filter((e) => e.date === dateStr);
+    const allContent = entries.map((e) => e.content).join(' ');
     if (!allContent.trim()) {
       toast.error('Please write something first');
       return;
@@ -67,20 +67,27 @@ const JournalPage = () => {
 
     setIsExtracting(true);
     try {
-      const plainText = allContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      const plainText = allContent
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { data, error } = await supabase.functions.invoke<AIExtraction>('ai-journal-extract', {
         body: {
           input: plainText,
-          topics: topics.map(t => {
-            const pages = topicPages.filter(p => p.topicId === t.id).map(p => ({ id: p.id, name: p.name }));
+          topics: topics.map((t) => {
+            const pages = topicPages.filter((p) => p.topicId === t.id).map((p) => ({ id: p.id, name: p.name }));
             return { id: t.id, name: t.name, pages };
           }),
-          tags: existingTags.map(t => ({ id: t.id, name: t.name })),
-          tasks: tasks.filter(t => t.status !== 'done').map(t => ({
-            id: t.id, title: t.title, subtaskCount: t.subtasks?.length || 0,
-          })),
+          tags: existingTags.map((t) => ({ id: t.id, name: t.name })),
+          tasks: tasks
+            .filter((t) => t.status !== 'done')
+            .map((t) => ({
+              id: t.id,
+              title: t.title,
+              subtaskCount: t.subtasks?.length || 0,
+            })),
           currentDate: format(new Date(), 'yyyy-MM-dd'),
         },
       });
@@ -101,35 +108,38 @@ const JournalPage = () => {
     }
   }, [dateStr, topics, topicPages, existingTags, tasks]);
 
-  const handleApproveItem = useCallback(async (index: number) => {
-    if (!extraction) return;
-    const item = extraction.suggestions[index];
+  const handleApproveItem = useCallback(
+    async (index: number) => {
+      if (!extraction) return;
+      const item = extraction.suggestions[index];
 
-    try {
-      if (item.type === 'task') {
-        const resolved = item.topicPath
-          ? await resolveTopicPathAsync(item.topicPath.replace(/^\[\[|\]\]$/g, ''), true)
-          : [];
-        await addTask({
-          title: item.title || '',
-          status: 'todo',
-          priority: item.priority || 'medium',
-          dueDate: item.dueDate || undefined,
-          tags: item.tags?.map(t => t.replace(/^#/, '')) || [],
-          topicIds: resolved || [],
-          subtasks: [],
-        });
-        toast.success('Task created', { description: item.title });
-      } else if (item.type === 'subtask' && item.parentTaskId) {
-        await addSubtask(item.parentTaskId, item.title || '');
-        toast.success('Subtask added', { description: item.title });
+      try {
+        if (item.type === 'task') {
+          const resolved = item.topicPath
+            ? await resolveTopicPathAsync(item.topicPath.replace(/^\[\[|\]\]$/g, ''), true)
+            : [];
+          await addTask({
+            title: item.title || '',
+            status: 'todo',
+            priority: item.priority || 'medium',
+            dueDate: item.dueDate || undefined,
+            tags: item.tags?.map((t) => t.replace(/^#/, '')) || [],
+            topicIds: resolved || [],
+            subtasks: [],
+          });
+          toast.success('Task created', { description: item.title });
+        } else if (item.type === 'subtask' && item.parentTaskId) {
+          await addSubtask(item.parentTaskId, item.title || '');
+          toast.success('Subtask added', { description: item.title });
+        }
+        setApprovedItems((prev) => new Set(prev).add(index));
+      } catch (e) {
+        console.error('Failed to approve item:', e);
+        toast.error('Failed to create item');
       }
-      setApprovedItems(prev => new Set(prev).add(index));
-    } catch (e) {
-      console.error('Failed to approve item:', e);
-      toast.error('Failed to create item');
-    }
-  }, [extraction, resolveTopicPathAsync, addTask, addSubtask]);
+    },
+    [extraction, resolveTopicPathAsync, addTask, addSubtask],
+  );
 
   // --- Section click handler ---
   const handleSectionClick = useCallback((entryId: string) => {
@@ -155,22 +165,20 @@ const JournalPage = () => {
     switch (saveStatus) {
       case 'saved':
         return (
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Check className="w-3 h-3" />
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Check className="h-3 w-3" />
             Saved
           </span>
         );
       case 'saving':
         return (
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Loader2 className="w-3 h-3 animate-spin" />
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" />
             Saving...
           </span>
         );
       case 'unsaved':
-        return (
-          <span className="text-xs text-amber-500">Unsaved changes</span>
-        );
+        return <span className="text-xs text-amber-500">Unsaved changes</span>;
       case 'idle':
       default:
         return null;
@@ -181,19 +189,17 @@ const JournalPage = () => {
     <AppLayout>
       <div className="flex h-full">
         {/* Main editor area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col">
           {/* Header — date + save status only */}
           <div className="border-b border-border px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
-                  <BookOpen className="w-5 h-5 text-primary" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10" aria-hidden="true">
+                  <BookOpen className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h1 className="text-xl font-semibold">Notes</h1>
-                  <p className="text-sm text-muted-foreground">
-                    {format(selectedDate, 'EEEE, MMMM d, yyyy')}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{format(selectedDate, 'EEEE, MMMM d, yyyy')}</p>
                 </div>
               </div>
               <div role="status" aria-live="polite">
@@ -204,7 +210,7 @@ const JournalPage = () => {
 
           {/* Canvas — zero friction, just the editor */}
           <div className="flex-1 overflow-auto p-6 pb-[50vh]">
-            <div className="max-w-4xl mx-auto">
+            <div className="mx-auto max-w-4xl">
               <JournalCanvas
                 selectedDate={selectedDate}
                 onSectionsChange={handleSectionsChange}

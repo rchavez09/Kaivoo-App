@@ -3,12 +3,12 @@
  * across the entire application.
  */
 
-import { 
-  format, 
-  parseISO, 
-  isValid, 
-  isSameDay, 
-  isToday as fnsIsToday, 
+import {
+  format,
+  parseISO,
+  isValid,
+  isSameDay,
+  isToday as fnsIsToday,
   isTomorrow as fnsIsTomorrow,
   isPast,
   isFuture,
@@ -18,7 +18,7 @@ import {
   differenceInDays,
   isWithinInterval,
   startOfWeek,
-  endOfWeek
+  endOfWeek,
 } from 'date-fns';
 
 // ============================================
@@ -35,24 +35,24 @@ import {
 export function parseDate(input: string | Date | undefined | null): Date | null {
   if (!input) return null;
   if (input instanceof Date) return isValid(input) ? input : null;
-  
+
   const str = input.trim();
-  
+
   // Handle relative dates
   const today = startOfDay(new Date());
   if (str.toLowerCase() === 'today') return today;
   if (str.toLowerCase() === 'tomorrow') return addDays(today, 1);
-  
+
   // Try ISO format first (most reliable)
   if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
     const parsed = parseISO(str);
     if (isValid(parsed)) return parsed;
   }
-  
+
   // Try general Date parsing (handles "Jan 25, 2026" etc.)
   const generalParsed = new Date(str);
   if (isValid(generalParsed)) return generalParsed;
-  
+
   return null;
 }
 
@@ -126,17 +126,17 @@ export function formatFullDate(date: Date | string | undefined | null): string {
 export function getRelativeDateLabel(date: Date | string | undefined | null): string {
   const parsed = parseDate(date);
   if (!parsed) return '';
-  
+
   const today = startOfDay(new Date());
   const targetDay = startOfDay(parsed);
   const diffDays = differenceInDays(targetDay, today);
-  
+
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Tomorrow';
   if (diffDays === -1) return 'Yesterday';
   if (diffDays < -1) return `${Math.abs(diffDays)} days ago`;
   if (diffDays <= 7) return format(parsed, 'EEEE'); // "Monday", "Tuesday", etc.
-  
+
   return formatShortDate(parsed);
 }
 
@@ -166,7 +166,7 @@ export function isTomorrow(date: Date | string | undefined | null): boolean {
 export function isOverdue(date: Date | string | undefined | null): boolean {
   const parsed = parseDate(date);
   if (!parsed) return false;
-  
+
   // Compare start of days to ignore time component
   return startOfDay(parsed) < startOfDay(new Date());
 }
@@ -177,11 +177,11 @@ export function isOverdue(date: Date | string | undefined | null): boolean {
 export function isThisWeek(date: Date | string | undefined | null): boolean {
   const parsed = parseDate(date);
   if (!parsed) return false;
-  
+
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 0 }); // Sunday
   const weekEnd = endOfWeek(today, { weekStartsOn: 0 });
-  
+
   return isWithinInterval(startOfDay(parsed), { start: weekStart, end: weekEnd });
 }
 
@@ -208,10 +208,10 @@ export function isSameDayAs(date1: Date | string | undefined | null, date2: Date
  */
 export function isDueDateMatch(dueDate: string | undefined, targetDate: Date): boolean {
   if (!dueDate) return false;
-  
+
   const parsed = parseDate(dueDate);
   if (!parsed) return false;
-  
+
   return isSameDay(startOfDay(parsed), startOfDay(targetDate));
 }
 
@@ -240,7 +240,7 @@ export function getDurationMinutes(start: Date | string, end: Date | string): nu
   const startParsed = parseDate(start);
   const endParsed = parseDate(end);
   if (!startParsed || !endParsed) return 0;
-  
+
   return Math.round((endParsed.getTime() - startParsed.getTime()) / (1000 * 60));
 }
 

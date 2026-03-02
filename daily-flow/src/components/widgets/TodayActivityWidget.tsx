@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
-import { 
-  Activity, 
-  ChevronDown, 
-  ChevronUp, 
-  Hash, 
-  FileText, 
+import {
+  Activity,
+  ChevronDown,
+  ChevronUp,
+  Hash,
+  FileText,
   FolderOpen,
   CheckSquare,
   BookOpen,
@@ -14,7 +14,7 @@ import {
   Trash2,
   ListChecks,
   CheckCircle2,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,7 +65,13 @@ interface ActivityItem {
   status?: string;
   source?: string;
   parentTaskTitle?: string;
-  originalItem: JournalEntry | Task | Capture | SubtaskWithParent | RoutineCompletionWithDetails | TaskCompletionDetails;
+  originalItem:
+    | JournalEntry
+    | Task
+    | Capture
+    | SubtaskWithParent
+    | RoutineCompletionWithDetails
+    | TaskCompletionDetails;
 }
 
 interface TodayActivityWidgetProps {
@@ -77,15 +83,22 @@ interface TodayActivityWidgetProps {
   onDeleteCapture?: (captureId: string) => void;
 }
 
-const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick, onEditCapture, onDeleteCapture }: TodayActivityWidgetProps) => {
+const TodayActivityWidget = ({
+  date,
+  onEditJournal,
+  onDeleteJournal,
+  onTaskClick,
+  onEditCapture,
+  onDeleteCapture,
+}: TodayActivityWidgetProps) => {
   const [expanded, setExpanded] = useState(true);
-  const tasks = useKaivooStore(s => s.tasks);
-  const journalEntries = useKaivooStore(s => s.journalEntries);
-  const captures = useKaivooStore(s => s.captures);
-  const getTopicPath = useKaivooStore(s => s.getTopicPath);
-  const routines = useKaivooStore(s => s.routines);
-  const routineCompletions = useKaivooStore(s => s.routineCompletions);
-  const getCompletionsForDate = useKaivooStore(s => s.getCompletionsForDate);
+  const tasks = useKaivooStore((s) => s.tasks);
+  const journalEntries = useKaivooStore((s) => s.journalEntries);
+  const captures = useKaivooStore((s) => s.captures);
+  const getTopicPath = useKaivooStore((s) => s.getTopicPath);
+  const routines = useKaivooStore((s) => s.routines);
+  const routineCompletions = useKaivooStore((s) => s.routineCompletions);
+  const getCompletionsForDate = useKaivooStore((s) => s.getCompletionsForDate);
   const { logs } = useAIActionLog();
 
   const todayStr = useMemo(() => formatStorageDate(date || new Date()), [date]);
@@ -118,10 +131,13 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
 
     // Journal entries created today
     journalEntries
-      .filter(entry => entry.date === todayStr)
-      .forEach(entry => {
+      .filter((entry) => entry.date === todayStr)
+      .forEach((entry) => {
         // Strip HTML tags for display preview
-        const plainContent = entry.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        const plainContent = entry.content
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
         items.push({
           id: `journal-${entry.id}`,
           type: 'journal',
@@ -135,12 +151,12 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
 
     // Tasks created today
     tasks
-      .filter(task => {
+      .filter((task) => {
         if (undoneIds.undoneTaskIds.has(task.id)) return false;
         const createdAt = task.createdAt instanceof Date ? task.createdAt : new Date(task.createdAt);
         return createdAt >= todayStart && createdAt <= todayEnd;
       })
-      .forEach(task => {
+      .forEach((task) => {
         items.push({
           id: `task-${task.id}`,
           type: 'task',
@@ -155,14 +171,13 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
       });
 
     // Subtasks created today (we need to check createdAt on subtasks - added via store)
-    tasks.forEach(task => {
-      task.subtasks.forEach(subtask => {
+    tasks.forEach((task) => {
+      task.subtasks.forEach((subtask) => {
         // Check if subtask has a createdAt timestamp and was created today
         const subtaskWithMeta = subtask as Subtask & { createdAt?: Date };
         if (subtaskWithMeta.createdAt) {
-          const createdAt = subtaskWithMeta.createdAt instanceof Date 
-            ? subtaskWithMeta.createdAt 
-            : new Date(subtaskWithMeta.createdAt);
+          const createdAt =
+            subtaskWithMeta.createdAt instanceof Date ? subtaskWithMeta.createdAt : new Date(subtaskWithMeta.createdAt);
           if (createdAt >= todayStart && createdAt <= todayEnd) {
             const subtaskItem: SubtaskWithParent = {
               ...subtask,
@@ -187,12 +202,12 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
 
     // Captures (AI entries) created today - use the stored date field for consistent filtering
     captures
-      .filter(capture => {
+      .filter((capture) => {
         if (undoneIds.undoneCaptureIds.has(capture.id)) return false;
         // Use the date field (YYYY-MM-DD) for accurate day-based filtering
         return capture.date === todayStr;
       })
-      .forEach(capture => {
+      .forEach((capture) => {
         items.push({
           id: `capture-${capture.id}`,
           type: 'capture',
@@ -207,12 +222,11 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
 
     // Routine completions for today
     const todayRoutineCompletions = getCompletionsForDate(todayStr);
-    todayRoutineCompletions.forEach(completion => {
-      const routine = routines.find(r => r.id === completion.routineId);
+    todayRoutineCompletions.forEach((completion) => {
+      const routine = routines.find((r) => r.id === completion.routineId);
       if (routine) {
-        const completedAt = completion.completedAt instanceof Date 
-          ? completion.completedAt 
-          : new Date(completion.completedAt);
+        const completedAt =
+          completion.completedAt instanceof Date ? completion.completedAt : new Date(completion.completedAt);
         items.push({
           id: `routine-${completion.routineId}-${todayStr}`,
           type: 'routine-completed',
@@ -227,12 +241,12 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
 
     // Tasks completed today
     tasks
-      .filter(task => {
+      .filter((task) => {
         if (task.status !== 'done' || !task.completedAt) return false;
         const completedAt = task.completedAt instanceof Date ? task.completedAt : new Date(task.completedAt);
         return completedAt >= todayStart && completedAt <= todayEnd;
       })
-      .forEach(task => {
+      .forEach((task) => {
         const completedAt = task.completedAt instanceof Date ? task.completedAt : new Date(task.completedAt);
         items.push({
           id: `task-completed-${task.id}`,
@@ -257,17 +271,17 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
   const getTypeIcon = (type: ActivityType, source?: string) => {
     switch (type) {
       case 'journal':
-        return <BookOpen className="w-3 h-3" />;
+        return <BookOpen className="h-3 w-3" />;
       case 'task':
-        return <CheckSquare className="w-3 h-3" />;
+        return <CheckSquare className="h-3 w-3" />;
       case 'subtask':
-        return <ListChecks className="w-3 h-3" />;
+        return <ListChecks className="h-3 w-3" />;
       case 'capture':
-        return source === 'quick' ? <Sparkles className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />;
+        return source === 'quick' ? <Sparkles className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />;
       case 'routine-completed':
-        return <RotateCcw className="w-3 h-3" />;
+        return <RotateCcw className="h-3 w-3" />;
       case 'task-completed':
-        return <CheckCircle2 className="w-3 h-3" />;
+        return <CheckCircle2 className="h-3 w-3" />;
     }
   };
 
@@ -329,7 +343,7 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
     <div className="widget-card animate-fade-in">
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-primary" />
+          <Activity className="h-4 w-4 text-primary" />
           <span className="widget-title">Today's Activity</span>
           <span className="text-xs text-muted-foreground">({activityItems.length})</span>
         </div>
@@ -338,58 +352,51 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
           size="sm"
           className="h-8 px-2"
           onClick={() => setExpanded(!expanded)}
-          aria-label={expanded ? "Collapse activity feed" : "Expand activity feed"}
+          aria-label={expanded ? 'Collapse activity feed' : 'Expand activity feed'}
         >
-          {expanded ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )}
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </div>
 
       {expanded && (
-        <div className="space-y-3 relative">
+        <div className="relative space-y-3">
           {/* Timeline line */}
-          <div className="absolute left-[11px] top-3 bottom-3 w-px bg-border" />
+          <div className="absolute bottom-3 left-[11px] top-3 w-px bg-border" />
 
           {activityItems.map((item) => (
-            <div key={item.id} className="flex gap-3 relative group">
+            <div key={item.id} className="group relative flex gap-3">
               {/* Timeline dot with type indicator */}
-              <div className={cn(
-                "w-6 h-6 rounded-full flex items-center justify-center shrink-0 z-10 border-2",
-                item.type === 'journal' && "bg-primary/20 border-primary/50",
-                item.type === 'task' && "bg-accent/20 border-accent/50",
-                item.type === 'subtask' && "bg-muted border-muted-foreground/30",
-                item.type === 'capture' && "bg-secondary border-secondary-foreground/30",
-                item.type === 'routine-completed' && "bg-green-500/20 border-green-500/50",
-                item.type === 'task-completed' && "bg-green-500/20 border-green-500/50"
-              )}>
+              <div
+                className={cn(
+                  'z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2',
+                  item.type === 'journal' && 'border-primary/50 bg-primary/20',
+                  item.type === 'task' && 'border-accent/50 bg-accent/20',
+                  item.type === 'subtask' && 'border-muted-foreground/30 bg-muted',
+                  item.type === 'capture' && 'border-secondary-foreground/30 bg-secondary',
+                  item.type === 'routine-completed' && 'border-green-500/50 bg-green-500/20',
+                  item.type === 'task-completed' && 'border-green-500/50 bg-green-500/20',
+                )}
+              >
                 {getTypeIcon(item.type, item.source)}
               </div>
 
               {/* Activity card */}
-              <div 
+              <div
                 className={cn(
-                  "flex-1 bg-secondary/30 rounded-lg p-3 transition-colors",
-                  "hover:bg-secondary/50 cursor-pointer"
+                  'flex-1 rounded-lg bg-secondary/30 p-3 transition-colors',
+                  'cursor-pointer hover:bg-secondary/50',
                 )}
                 onClick={() => handleItemClick(item)}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className={cn(
-                      "text-[10px] font-medium px-1.5 py-0.5 rounded",
-                      getTypeColor(item.type)
-                    )}>
+                    <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium', getTypeColor(item.type))}>
                       {getTypeLabel(item.type, item.source)}
                     </span>
-                    <span className="text-xs text-muted-foreground">
-                      {format(item.timestamp, 'h:mm a')}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{format(item.timestamp, 'h:mm a')}</span>
                   </div>
                   {(item.type === 'journal' || item.type === 'capture') && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -404,7 +411,7 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
                           }
                         }}
                       >
-                        <Edit3 className="w-3 h-3" />
+                        <Edit3 className="h-3 w-3" />
                       </Button>
 
                       <AlertDialog>
@@ -416,15 +423,13 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
                             aria-label={`Delete ${item.type === 'journal' ? 'journal entry' : 'capture'}`}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete it.
-                            </AlertDialogDescription>
+                            <AlertDialogDescription>This will permanently delete it.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -446,34 +451,34 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
                     </div>
                   )}
                 </div>
-                
+
                 {/* Parent task reference for subtasks */}
                 {item.type === 'subtask' && item.parentTaskTitle && (
-                  <p className="text-xs text-muted-foreground mb-1">
-                    in: {item.parentTaskTitle}
-                  </p>
+                  <p className="mb-1 text-xs text-muted-foreground">in: {item.parentTaskTitle}</p>
                 )}
 
-                <p className={cn(
-                  "text-sm text-foreground line-clamp-3",
-                  item.type === 'journal' && "font-serif leading-relaxed"
-                )}>
+                <p
+                  className={cn(
+                    'line-clamp-3 text-sm text-foreground',
+                    item.type === 'journal' && 'font-serif leading-relaxed',
+                  )}
+                >
                   {item.content}
                 </p>
 
                 {/* Priority badge for tasks */}
                 {item.type === 'task' && item.priority === 'high' && (
-                  <span className="inline-block mt-2 text-[10px] font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
+                  <span className="mt-2 inline-block rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
                     High Priority
                   </span>
                 )}
 
                 {/* Tags and topics */}
                 {(item.tags.length > 0 || item.topicIds.length > 0) && (
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="mt-2 flex flex-wrap gap-1">
                     {item.tags.map((tag) => (
-                      <span key={tag} className="tag-chip text-[10px] py-0.5 px-1.5">
-                        <Hash className="w-2.5 h-2.5" />
+                      <span key={tag} className="tag-chip px-1.5 py-0.5 text-[10px]">
+                        <Hash className="h-2.5 w-2.5" />
                         {tag}
                       </span>
                     ))}
@@ -482,8 +487,8 @@ const TodayActivityWidget = ({ date, onEditJournal, onDeleteJournal, onTaskClick
                       if (!path) return null;
                       const isPage = path.includes('/');
                       return (
-                        <span key={topicId} className="topic-chip text-[10px] py-0.5 px-1.5">
-                          {isPage ? <FileText className="w-2.5 h-2.5" /> : <FolderOpen className="w-2.5 h-2.5" />}
+                        <span key={topicId} className="topic-chip px-1.5 py-0.5 text-[10px]">
+                          {isPage ? <FileText className="h-2.5 w-2.5" /> : <FolderOpen className="h-2.5 w-2.5" />}
                           {path}
                         </span>
                       );

@@ -51,21 +51,21 @@ export default function SearchCommand() {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   // P1-1 fix: individual selectors instead of full-store destructure
-  const query = useSearchStore(s => s.query);
-  const results = useSearchStore(s => s.results);
-  const isLoading = useSearchStore(s => s.isLoading);
-  const isOpen = useSearchStore(s => s.isOpen);
-  const selectedCategory = useSearchStore(s => s.selectedCategory);
-  const recentSearches = useSearchStore(s => s.recentSearches);
-  const setQuery = useSearchStore(s => s.setQuery);
-  const search = useSearchStore(s => s.search);
-  const close = useSearchStore(s => s.close);
-  const setCategory = useSearchStore(s => s.setCategory);
-  const addRecentSearch = useSearchStore(s => s.addRecentSearch);
+  const query = useSearchStore((s) => s.query);
+  const results = useSearchStore((s) => s.results);
+  const isLoading = useSearchStore((s) => s.isLoading);
+  const isOpen = useSearchStore((s) => s.isOpen);
+  const selectedCategory = useSearchStore((s) => s.selectedCategory);
+  const recentSearches = useSearchStore((s) => s.recentSearches);
+  const setQuery = useSearchStore((s) => s.setQuery);
+  const search = useSearchStore((s) => s.search);
+  const close = useSearchStore((s) => s.close);
+  const setCategory = useSearchStore((s) => s.setCategory);
+  const addRecentSearch = useSearchStore((s) => s.addRecentSearch);
 
   // P1-3 fix: memoize filtered results
   const filteredResults = useMemo(
-    () => selectedCategory === 'all' ? results : results.filter(r => r.entityType === selectedCategory),
+    () => (selectedCategory === 'all' ? results : results.filter((r) => r.entityType === selectedCategory)),
     [results, selectedCategory],
   );
 
@@ -101,9 +101,7 @@ export default function SearchCommand() {
 
     const handleTab = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
-      const focusable = dialog.querySelectorAll<HTMLElement>(
-        'input, button, [tabindex]:not([tabindex="-1"])',
-      );
+      const focusable = dialog.querySelectorAll<HTMLElement>('input, button, [tabindex]:not([tabindex="-1"])');
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -126,44 +124,53 @@ export default function SearchCommand() {
   }, [isOpen]);
 
   // Debounced search
-  const handleQueryChange = useCallback((value: string) => {
-    setQuery(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      void search(value);
-    }, 300);
-  }, [setQuery, search]);
+  const handleQueryChange = useCallback(
+    (value: string) => {
+      setQuery(value);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        void search(value);
+      }, 300);
+    },
+    [setQuery, search],
+  );
 
   // Navigate to result
-  const handleSelect = useCallback((result: { path: string; entityType: string; entityId: string }) => {
-    addRecentSearch(query);
-    close();
-    navigate(result.path);
-  }, [navigate, close, addRecentSearch, query]);
+  const handleSelect = useCallback(
+    (result: { path: string; entityType: string; entityId: string }) => {
+      addRecentSearch(query);
+      close();
+      navigate(result.path);
+    },
+    [navigate, close, addRecentSearch, query],
+  );
 
   // Keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setActiveIndex(i => Math.min(i + 1, filteredResults.length - 1));
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setActiveIndex(i => Math.max(i - 1, 0));
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (filteredResults[activeIndex]) {
-          handleSelect(filteredResults[activeIndex]);
-        }
-        break;
-      case 'Escape':
-        e.preventDefault();
-        close();
-        break;
-    }
-  }, [filteredResults, activeIndex, handleSelect, close]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setActiveIndex((i) => Math.min(i + 1, filteredResults.length - 1));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setActiveIndex((i) => Math.max(i - 1, 0));
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (filteredResults[activeIndex]) {
+            handleSelect(filteredResults[activeIndex]);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          close();
+          break;
+      }
+    },
+    [filteredResults, activeIndex, handleSelect, close],
+  );
 
   // Scroll active item into view
   useEffect(() => {
@@ -183,7 +190,9 @@ export default function SearchCommand() {
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]"
-      onClick={(e) => { if (e.target === e.currentTarget) close(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) close();
+      }}
       role="presentation"
     >
       {/* Backdrop */}
@@ -192,46 +201,49 @@ export default function SearchCommand() {
       {/* Command palette */}
       <div
         ref={dialogRef}
-        className="relative w-full max-w-xl bg-background border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200"
+        className="relative w-full max-w-xl overflow-hidden rounded-xl border border-border bg-background shadow-2xl duration-200 animate-in fade-in slide-in-from-top-4"
         role="dialog"
         aria-label="Search"
         aria-modal="true"
         onKeyDown={handleKeyDown}
       >
         {/* Input */}
-        <div className="flex items-center px-4 border-b border-border">
-          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+        <div className="flex items-center border-b border-border px-4">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => handleQueryChange(e.target.value)}
             placeholder="Search tasks, notes, projects, meetings..."
-            className="flex-1 h-12 px-3 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="h-12 flex-1 bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             aria-label="Search query"
           />
           {query && (
             <button
               onClick={() => handleQueryChange('')}
-              className="p-1 text-muted-foreground hover:text-foreground rounded-md"
+              className="rounded-md p-1 text-muted-foreground hover:text-foreground"
               aria-label="Clear search"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           )}
-          {isLoading && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin ml-2" />}
+          {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin text-muted-foreground" />}
           <button
             onClick={close}
-            className="ml-2 p-1 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors"
+            className="ml-2 rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             aria-label="Close search"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Category tabs */}
         {results.length > 0 && (
-          <div className="flex items-center gap-1 px-4 py-2 border-b border-border/50 overflow-x-auto scrollbar-none" role="tablist">
+          <div
+            className="scrollbar-none flex items-center gap-1 overflow-x-auto border-b border-border/50 px-4 py-2"
+            role="tablist"
+          >
             {CATEGORIES.map(({ key, label }) => {
               const count = categoryCounts[key] ?? 0;
               if (key !== 'all' && count === 0) return null;
@@ -242,14 +254,14 @@ export default function SearchCommand() {
                   aria-selected={selectedCategory === key}
                   onClick={() => setCategory(key)}
                   className={cn(
-                    'text-xs px-2.5 py-1 rounded-md whitespace-nowrap transition-colors',
+                    'whitespace-nowrap rounded-md px-2.5 py-1 text-xs transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     selectedCategory === key
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50',
+                      ? 'bg-primary/10 font-medium text-primary'
+                      : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground',
                   )}
                 >
-                  {label} <span className="text-muted-foreground ml-0.5">{count}</span>
+                  {label} <span className="ml-0.5 text-muted-foreground">{count}</span>
                 </button>
               );
             })}
@@ -257,18 +269,18 @@ export default function SearchCommand() {
         )}
 
         {/* Results */}
-        <div ref={listRef} className="max-h-[360px] overflow-y-auto scrollbar-thin" role="listbox">
+        <div ref={listRef} className="scrollbar-thin max-h-[360px] overflow-y-auto" role="listbox">
           {/* Empty / no query state */}
           {!query && recentSearches.length > 0 && (
             <div className="p-4">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Recent searches</p>
+              <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Recent searches</p>
               {recentSearches.map((term) => (
                 <button
                   key={term}
                   onClick={() => handleQueryChange(term)}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-secondary/50 rounded-md text-left"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-secondary/50"
                 >
-                  <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                   {term}
                 </button>
               ))}
@@ -284,16 +296,14 @@ export default function SearchCommand() {
           {/* Loading */}
           {query && isLoading && filteredResults.length === 0 && (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-primary" />
+              <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin text-primary" />
               Searching...
             </div>
           )}
 
           {/* No results */}
           {query && !isLoading && filteredResults.length === 0 && (
-            <div className="p-8 text-center text-sm text-muted-foreground">
-              No results for &quot;{query}&quot;
-            </div>
+            <div className="p-8 text-center text-sm text-muted-foreground">No results for &quot;{query}&quot;</div>
           )}
 
           {/* Result items */}
@@ -308,27 +318,28 @@ export default function SearchCommand() {
                 onClick={() => handleSelect(result)}
                 onMouseEnter={() => setActiveIndex(i)}
                 className={cn(
-                  'flex items-start gap-3 w-full px-4 py-3 text-left transition-colors',
+                  'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
                   'focus-visible:outline-none',
                   i === activeIndex ? 'bg-secondary/70' : 'hover:bg-secondary/40',
                 )}
               >
-                <Icon className={cn('w-4 h-4 mt-0.5 shrink-0', config.color)} />
-                <div className="flex-1 min-w-0">
+                <Icon className={cn('mt-0.5 h-4 w-4 shrink-0', config.color)} />
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground truncate">{result.title}</span>
-                    <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded shrink-0">
+                    <span className="truncate text-sm font-medium text-foreground">{result.title}</span>
+                    <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
                       {config.label}
                     </span>
                   </div>
                   {result.preview && result.preview !== result.title && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1"
+                    <p
+                      className="mt-0.5 line-clamp-1 text-xs text-muted-foreground"
                       dangerouslySetInnerHTML={{
                         __html: result.preview
                           .replace(/&/g, '&amp;')
                           .replace(/</g, '&lt;')
                           .replace(/>/g, '&gt;')
-                          .replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
+                          .replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>'),
                       }}
                     />
                   )}
@@ -339,13 +350,21 @@ export default function SearchCommand() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-2 border-t border-border/50 text-[10px] text-muted-foreground">
+        <div className="flex items-center justify-between border-t border-border/50 px-4 py-2 text-[10px] text-muted-foreground">
           <div className="flex items-center gap-3">
-            <span><kbd className="bg-secondary px-1 py-0.5 rounded font-mono">↑↓</kbd> navigate</span>
-            <span><kbd className="bg-secondary px-1 py-0.5 rounded font-mono">↵</kbd> open</span>
-            <span><kbd className="bg-secondary px-1 py-0.5 rounded font-mono">esc</kbd> close</span>
+            <span>
+              <kbd className="rounded bg-secondary px-1 py-0.5 font-mono">↑↓</kbd> navigate
+            </span>
+            <span>
+              <kbd className="rounded bg-secondary px-1 py-0.5 font-mono">↵</kbd> open
+            </span>
+            <span>
+              <kbd className="rounded bg-secondary px-1 py-0.5 font-mono">esc</kbd> close
+            </span>
           </div>
-          <span>{filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''}</span>
+          <span>
+            {filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
     </div>

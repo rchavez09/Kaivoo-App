@@ -37,33 +37,35 @@ export const useJournalStore = create<JournalStore>()(
 
       updateJournalEntry: (id, updates) => {
         set((state) => ({
-          journalEntries: state.journalEntries.map(e =>
-            e.id === id ? { ...e, ...updates, updatedAt: new Date() } : e
+          journalEntries: state.journalEntries.map((e) =>
+            e.id === id ? { ...e, ...updates, updatedAt: new Date() } : e,
           ),
         }));
       },
 
       deleteJournalEntry: (id) => {
-        set((state) => ({ journalEntries: state.journalEntries.filter(e => e.id !== id) }));
+        set((state) => ({ journalEntries: state.journalEntries.filter((e) => e.id !== id) }));
       },
 
       getJournalEntriesForDate: (date) => {
-        return get().journalEntries
-          .filter(e => e.date === date)
+        return get()
+          .journalEntries.filter((e) => e.date === date)
           .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
       },
 
       getJournalEntriesByTopic: (topicId, childPageIds) => {
-        return get().journalEntries
-          .filter(e => e.topicIds.includes(topicId) || e.topicIds.some(id => childPageIds.includes(id)))
+        return get()
+          .journalEntries.filter(
+            (e) => e.topicIds.includes(topicId) || e.topicIds.some((id) => childPageIds.includes(id)),
+          )
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       },
 
       getAllJournalDates: () => {
-        const dates = get().journalEntries.map(e => e.date);
+        const dates = get().journalEntries.map((e) => e.date);
         return [...new Set(dates)].sort((a, b) => b.localeCompare(a));
       },
     }),
-    { name: 'kaivoo-journal', partialize: (state) => ({ journalEntries: state.journalEntries }) }
-  )
+    { name: 'kaivoo-journal', partialize: (state) => ({ journalEntries: state.journalEntries }) },
+  ),
 );

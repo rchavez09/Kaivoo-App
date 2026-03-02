@@ -26,14 +26,7 @@ interface SortableWidgetProps {
 }
 
 const SortableWidget = ({ widget, children, onRemove, isEditing }: SortableWidgetProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: widget.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: widget.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -41,16 +34,9 @@ const SortableWidget = ({ widget, children, onRemove, isEditing }: SortableWidge
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        'relative group',
-        isDragging && 'z-50 opacity-80'
-      )}
-    >
+    <div ref={setNodeRef} style={style} className={cn('group relative', isDragging && 'z-50 opacity-80')}>
       {isEditing && (
-        <div className="absolute -top-2 -right-2 z-10 flex gap-1">
+        <div className="absolute -right-2 -top-2 z-10 flex gap-1">
           <Button
             variant="destructive"
             size="icon"
@@ -66,20 +52,13 @@ const SortableWidget = ({ widget, children, onRemove, isEditing }: SortableWidge
         <div
           {...attributes}
           {...listeners}
-          className="absolute left-1/2 -translate-x-1/2 -top-3 z-10 cursor-grab active:cursor-grabbing bg-muted rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 cursor-grab rounded-full bg-muted p-1 opacity-0 shadow-md transition-opacity active:cursor-grabbing group-hover:opacity-100"
         >
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </div>
       )}
       <div className={cn('relative rounded-2xl', isEditing && 'ring-2 ring-primary/20')}>
-        <GlowingEffect
-          spread={40}
-          glow={false}
-          disabled={false}
-          proximity={64}
-          inactiveZone={0.1}
-          borderWidth={2}
-        />
+        <GlowingEffect spread={40} glow={false} disabled={false} proximity={64} inactiveZone={0.1} borderWidth={2} />
         {children}
       </div>
     </div>
@@ -93,28 +72,24 @@ interface WidgetPickerProps {
 }
 
 const WidgetPicker = ({ availableWidgets, activeWidgets, onAdd }: WidgetPickerProps) => {
-  const activeTypes = activeWidgets.filter(w => w.visible).map(w => w.type);
-  const inactiveWidgets = availableWidgets.filter(w => !activeTypes.includes(w.type));
+  const activeTypes = activeWidgets.filter((w) => w.visible).map((w) => w.type);
+  const inactiveWidgets = availableWidgets.filter((w) => !activeTypes.includes(w.type));
 
   if (inactiveWidgets.length === 0) {
-    return (
-      <div className="text-sm text-muted-foreground p-4 text-center">
-        All widgets are active
-      </div>
-    );
+    return <div className="p-4 text-center text-sm text-muted-foreground">All widgets are active</div>;
   }
 
   return (
     <div className="space-y-1 p-2">
-      <p className="text-xs text-muted-foreground px-2 pb-2">Add widget</p>
-      {inactiveWidgets.map(widget => (
+      <p className="px-2 pb-2 text-xs text-muted-foreground">Add widget</p>
+      {inactiveWidgets.map((widget) => (
         <Button
           key={widget.type}
           variant="ghost"
           className="w-full justify-start text-sm"
           onClick={() => onAdd(widget.type)}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           {widget.title}
         </Button>
       ))}
@@ -149,48 +124,44 @@ const WidgetContainer = ({
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
-  const visibleWidgets = widgets
-    .filter(w => w.visible)
-    .sort((a, b) => a.order - b.order);
+  const visibleWidgets = widgets.filter((w) => w.visible).sort((a, b) => a.order - b.order);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     if (over && active.id !== over.id) {
-      const oldIndex = visibleWidgets.findIndex(w => w.id === active.id);
-      const newIndex = visibleWidgets.findIndex(w => w.id === over.id);
-      
+      const oldIndex = visibleWidgets.findIndex((w) => w.id === active.id);
+      const newIndex = visibleWidgets.findIndex((w) => w.id === over.id);
+
       const reordered = arrayMove(visibleWidgets, oldIndex, newIndex);
-      
+
       // Update order values
-      const updatedWidgets = widgets.map(w => {
-        const newPos = reordered.findIndex(r => r.id === w.id);
+      const updatedWidgets = widgets.map((w) => {
+        const newPos = reordered.findIndex((r) => r.id === w.id);
         if (newPos !== -1) {
           return { ...w, order: newPos };
         }
         return w;
       });
-      
+
       onWidgetsChange(updatedWidgets);
     }
   };
 
   const handleAddWidget = (type: string) => {
-    const widgetDef = availableWidgets.find(w => w.type === type);
+    const widgetDef = availableWidgets.find((w) => w.type === type);
     if (!widgetDef) return;
 
-    const existingWidget = widgets.find(w => w.type === type);
+    const existingWidget = widgets.find((w) => w.type === type);
     if (existingWidget) {
       // Just make it visible
-      onWidgetsChange(
-        widgets.map(w => w.id === existingWidget.id ? { ...w, visible: true } : w)
-      );
+      onWidgetsChange(widgets.map((w) => (w.id === existingWidget.id ? { ...w, visible: true } : w)));
     } else {
       // Add new widget
-      const maxOrder = Math.max(...widgets.map(w => w.order), -1);
+      const maxOrder = Math.max(...widgets.map((w) => w.order), -1);
       const newWidget: WidgetConfig = {
         id: `widget-${type}-${Date.now()}`,
         type,
@@ -205,9 +176,7 @@ const WidgetContainer = ({
   };
 
   const handleRemoveWidget = (id: string) => {
-    onWidgetsChange(
-      widgets.map(w => w.id === id ? { ...w, visible: false } : w)
-    );
+    onWidgetsChange(widgets.map((w) => (w.id === id ? { ...w, visible: false } : w)));
   };
 
   // Split widgets into columns for horizontal layout
@@ -218,7 +187,7 @@ const WidgetContainer = ({
     <div className="space-y-4">
       {/* Controls */}
       <div className="flex items-center justify-end gap-2">
-        <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+        <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
           <Button
             variant={layout === 'vertical' ? 'secondary' : 'ghost'}
             size="icon"
@@ -240,7 +209,7 @@ const WidgetContainer = ({
             <LayoutGrid className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
@@ -250,82 +219,46 @@ const WidgetContainer = ({
           </PopoverTrigger>
           <PopoverContent className="w-56 p-0" align="end">
             <WidgetPicker
-              availableWidgets={availableWidgets.filter(w => w.type !== 'new-routine-group')}
+              availableWidgets={availableWidgets.filter((w) => w.type !== 'new-routine-group')}
               activeWidgets={widgets}
               onAdd={handleAddWidget}
             />
-            {customAddAction && (
-              <div className="border-t p-2">
-                {customAddAction}
-              </div>
-            )}
+            {customAddAction && <div className="border-t p-2">{customAddAction}</div>}
           </PopoverContent>
         </Popover>
 
-        <Button
-          variant={isEditing ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setIsEditing(!isEditing)}
-        >
+        <Button variant={isEditing ? 'default' : 'outline'} size="sm" onClick={() => setIsEditing(!isEditing)}>
           {isEditing ? 'Done' : 'Edit'}
         </Button>
       </div>
 
       {/* Widget Grid */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         {layout === 'vertical' ? (
-          <SortableContext
-            items={visibleWidgets.map(w => w.id)}
-            strategy={verticalListSortingStrategy}
-          >
+          <SortableContext items={visibleWidgets.map((w) => w.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-4">
-              {visibleWidgets.map(widget => (
-                <SortableWidget
-                  key={widget.id}
-                  widget={widget}
-                  onRemove={handleRemoveWidget}
-                  isEditing={isEditing}
-                >
+              {visibleWidgets.map((widget) => (
+                <SortableWidget key={widget.id} widget={widget} onRemove={handleRemoveWidget} isEditing={isEditing}>
                   {renderWidget(widget)}
                 </SortableWidget>
               ))}
             </div>
           </SortableContext>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SortableContext
-              items={leftWidgets.map(w => w.id)}
-              strategy={verticalListSortingStrategy}
-            >
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <SortableContext items={leftWidgets.map((w) => w.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-4">
-                {leftWidgets.map(widget => (
-                  <SortableWidget
-                    key={widget.id}
-                    widget={widget}
-                    onRemove={handleRemoveWidget}
-                    isEditing={isEditing}
-                  >
+                {leftWidgets.map((widget) => (
+                  <SortableWidget key={widget.id} widget={widget} onRemove={handleRemoveWidget} isEditing={isEditing}>
                     {renderWidget(widget)}
                   </SortableWidget>
                 ))}
               </div>
             </SortableContext>
-            <SortableContext
-              items={rightWidgets.map(w => w.id)}
-              strategy={verticalListSortingStrategy}
-            >
+            <SortableContext items={rightWidgets.map((w) => w.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-4">
-                {rightWidgets.map(widget => (
-                  <SortableWidget
-                    key={widget.id}
-                    widget={widget}
-                    onRemove={handleRemoveWidget}
-                    isEditing={isEditing}
-                  >
+                {rightWidgets.map((widget) => (
+                  <SortableWidget key={widget.id} widget={widget} onRemove={handleRemoveWidget} isEditing={isEditing}>
                     {renderWidget(widget)}
                   </SortableWidget>
                 ))}

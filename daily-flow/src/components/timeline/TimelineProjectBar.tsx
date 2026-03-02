@@ -13,7 +13,7 @@ interface TimelineProjectBarProps {
 
 const TimelineProjectBar = ({ project, index, rangeStart, dayWidth }: TimelineProjectBarProps) => {
   const navigate = useNavigate();
-  const tasks = useKaivooStore(s => s.tasks);
+  const tasks = useKaivooStore((s) => s.tasks);
 
   const color = getProjectColor(project, index);
   const statusCfg = projectStatusConfig[project.status];
@@ -26,7 +26,7 @@ const TimelineProjectBar = ({ project, index, rangeStart, dayWidth }: TimelinePr
   if (!rawStart && !rawEnd) return null;
 
   const start = rawStart ?? addDays(rawEnd ?? new Date(), -30); // no start → 30 days before end
-  const end = rawEnd ?? addDays(rawStart ?? new Date(), 30);     // no end → 30 days after start
+  const end = rawEnd ?? addDays(rawStart ?? new Date(), 30); // no end → 30 days after start
 
   const offsetDays = differenceInDays(start, rangeStart);
   const spanDays = Math.max(differenceInDays(end, start) + 1, 1);
@@ -34,15 +34,15 @@ const TimelineProjectBar = ({ project, index, rangeStart, dayWidth }: TimelinePr
   const left = offsetDays * dayWidth;
   const width = spanDays * dayWidth;
 
-  const projectTasks = tasks.filter(t => t.projectId === project.id);
-  const doneTasks = projectTasks.filter(t => t.status === 'done').length;
+  const projectTasks = tasks.filter((t) => t.projectId === project.id);
+  const doneTasks = projectTasks.filter((t) => t.status === 'done').length;
   const totalTasks = projectTasks.length;
 
   return (
-    <div className="relative h-10 group" style={{ minWidth: 0 }}>
+    <div className="group relative h-10" style={{ minWidth: 0 }}>
       {/* Project label (left side, sticky) */}
-      <div className="sticky left-0 top-0 h-full flex items-center z-10 pr-2 bg-card" style={{ width: 200 }}>
-        <span className="text-xs font-medium text-foreground truncate">{project.name}</span>
+      <div className="sticky left-0 top-0 z-10 flex h-full items-center bg-card pr-2" style={{ width: 200 }}>
+        <span className="truncate text-xs font-medium text-foreground">{project.name}</span>
       </div>
 
       {/* Bar */}
@@ -50,16 +50,21 @@ const TimelineProjectBar = ({ project, index, rangeStart, dayWidth }: TimelinePr
         role="button"
         tabIndex={0}
         aria-label={`${project.name} — ${statusCfg.label}${totalTasks > 0 ? `, ${doneTasks} of ${totalTasks} done` : ''}`}
-        className="absolute top-1 h-8 rounded-md cursor-pointer hover:brightness-110 transition-all flex items-center px-2 overflow-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="absolute top-1 flex h-8 cursor-pointer items-center overflow-hidden rounded-md px-2 transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         style={{
           left: 200 + left,
           width: Math.max(width, 24),
           backgroundColor: color,
         }}
         onClick={() => navigate(`/projects/${project.id}`)}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/projects/${project.id}`); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            navigate(`/projects/${project.id}`);
+          }
+        }}
       >
-        <span className="text-[11px] font-medium truncate drop-shadow-sm" style={{ color: textColor }}>
+        <span className="truncate text-[11px] font-medium drop-shadow-sm" style={{ color: textColor }}>
           {totalTasks > 0 && `${doneTasks}/${totalTasks}`}
         </span>
       </div>

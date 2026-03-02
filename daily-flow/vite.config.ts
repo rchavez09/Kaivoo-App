@@ -5,13 +5,19 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  clearScreen: false,
   server: {
     host: "::",
     port: 8080,
+    strictPort: true,
     hmr: {
       overlay: false,
     },
+    watch: {
+      ignored: ["**/src-tauri/**"],
+    },
   },
+  envPrefix: ["VITE_", "TAURI_ENV_*"],
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {

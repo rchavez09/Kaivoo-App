@@ -4,19 +4,19 @@ import Highlight from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Placeholder from '@tiptap/extension-placeholder';
-import { 
-  Bold, 
-  Italic, 
-  Strikethrough, 
-  Highlighter, 
-  List, 
+import {
+  Bold,
+  Italic,
+  Strikethrough,
+  Highlighter,
+  List,
   ListOrdered,
   Heading1,
   Heading2,
   Quote,
   Undo,
   Redo,
-  Palette
+  Palette,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -54,12 +54,12 @@ interface RichTextEditorProps {
   editable?: boolean;
 }
 
-const RichTextEditor = ({ 
-  content, 
-  onChange, 
-  placeholder = "Start writing...",
+const RichTextEditor = ({
+  content,
+  onChange,
+  placeholder = 'Start writing...',
   className,
-  editable = true
+  editable = true,
 }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
@@ -102,9 +102,9 @@ const RichTextEditor = ({
   }
 
   return (
-    <div className={cn("border border-border rounded-lg overflow-hidden bg-background", className)}>
+    <div className={cn('overflow-hidden rounded-lg border border-border bg-background', className)}>
       {/* Toolbar */}
-      <div className="border-b border-border bg-muted/30 px-2 py-1.5 flex items-center gap-0.5 flex-wrap">
+      <div className="flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/30 px-2 py-1.5">
         {/* Undo/Redo */}
         <Button
           variant="ghost"
@@ -125,7 +125,7 @@ const RichTextEditor = ({
           <Redo className="h-4 w-4" />
         </Button>
 
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
 
         {/* Headings */}
         <Toggle
@@ -145,7 +145,7 @@ const RichTextEditor = ({
           <Heading2 className="h-4 w-4" />
         </Toggle>
 
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
 
         {/* Text formatting */}
         <Toggle
@@ -173,7 +173,7 @@ const RichTextEditor = ({
           <Strikethrough className="h-4 w-4" />
         </Toggle>
 
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
 
         {/* Text Color */}
         <Popover>
@@ -195,8 +195,8 @@ const RichTextEditor = ({
                     }
                   }}
                   className={cn(
-                    "h-6 w-6 rounded border border-border hover:scale-110 transition-transform",
-                    !c.color && "bg-foreground"
+                    'h-6 w-6 rounded border border-border transition-transform hover:scale-110',
+                    !c.color && 'bg-foreground',
                   )}
                   style={{ backgroundColor: c.color || undefined }}
                   title={c.name}
@@ -226,8 +226,8 @@ const RichTextEditor = ({
                     }
                   }}
                   className={cn(
-                    "h-6 w-6 rounded border border-border hover:scale-110 transition-transform",
-                    !c.color && "bg-background line-through"
+                    'h-6 w-6 rounded border border-border transition-transform hover:scale-110',
+                    !c.color && 'bg-background line-through',
                   )}
                   style={{ backgroundColor: c.color || undefined }}
                   title={c.name}
@@ -237,7 +237,7 @@ const RichTextEditor = ({
           </PopoverContent>
         </Popover>
 
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
 
         {/* Lists */}
         <Toggle
@@ -257,7 +257,7 @@ const RichTextEditor = ({
           <ListOrdered className="h-4 w-4" />
         </Toggle>
 
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
 
         {/* Blockquote */}
         <Toggle

@@ -36,6 +36,7 @@ export interface Capture {
 
 export interface Subtask {
   id: string;
+  taskId: string;
   title: string;
   completed: boolean;
   completedAt?: Date;
@@ -92,8 +93,8 @@ export interface Project {
   status: ProjectStatus;
   color?: string;
   icon?: string;
-  startDate?: string;  // yyyy-MM-dd
-  endDate?: string;     // yyyy-MM-dd
+  startDate?: string; // yyyy-MM-dd
+  endDate?: string; // yyyy-MM-dd
   createdAt: Date;
   updatedAt: Date;
 }
@@ -145,7 +146,7 @@ export type TimeBlock = 'morning' | 'afternoon' | 'evening' | 'anytime';
 
 export interface HabitSchedule {
   type: 'daily' | 'specific_days' | 'x_per_week';
-  days?: number[];         // 0=Sun..6=Sat (for specific_days)
+  days?: number[]; // 0=Sun..6=Sat (for specific_days)
   timesPerPeriod?: number; // for x_per_week
 }
 
@@ -157,13 +158,13 @@ export interface Habit {
   type: HabitType;
   timeBlock: TimeBlock;
   schedule: HabitSchedule;
-  targetCount?: number;    // For multi-count habits
-  strength: number;        // 0-100, exponential smoothing
+  targetCount?: number; // For multi-count habits
+  strength: number; // 0-100, exponential smoothing
   currentStreak: number;
   bestStreak: number;
   isArchived: boolean;
   order: number;
-  groupId?: string;        // Legacy — from routine_groups
+  groupId?: string; // Legacy — from routine_groups
   createdAt: Date;
   updatedAt: Date;
 }
@@ -171,8 +172,8 @@ export interface Habit {
 export interface HabitCompletion {
   id: string;
   habitId: string;
-  date: string;            // YYYY-MM-DD
-  count?: number;          // For multi-count habits
+  date: string; // YYYY-MM-DD
+  count?: number; // For multi-count habits
   skipped: boolean;
   completedAt: Date;
 }

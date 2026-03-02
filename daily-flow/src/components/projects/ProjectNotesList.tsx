@@ -15,14 +15,15 @@ interface ProjectNotesListProps {
 const INITIAL_VISIBLE = 5;
 
 const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
-  const projectNotes = useKaivooStore(s => s.projectNotes) ?? [];
+  const projectNotes = useKaivooStore((s) => s.projectNotes) ?? [];
   const { addProjectNote, updateProjectNote, deleteProjectNote } = useKaivooActions();
 
   const notes = useMemo(
-    () => (projectNotes || [])
-      .filter(n => n.projectId === projectId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [projectNotes, projectId]
+    () =>
+      (projectNotes || [])
+        .filter((n) => n.projectId === projectId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [projectNotes, projectId],
   );
 
   const [newContent, setNewContent] = useState('');
@@ -99,14 +100,17 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
     }
   }, [editingId]);
 
-  const handleDelete = useCallback(async (noteId: string) => {
-    try {
-      await deleteProjectNote(noteId);
-    } catch {
-      toast.error('Failed to delete note. Please try again.');
-    }
-    setDeletingId(null);
-  }, [deleteProjectNote]);
+  const handleDelete = useCallback(
+    async (noteId: string) => {
+      try {
+        await deleteProjectNote(noteId);
+      } catch {
+        toast.error('Failed to delete note. Please try again.');
+      }
+      setDeletingId(null);
+    },
+    [deleteProjectNote],
+  );
 
   const handleDeleteCancel = useCallback((noteId: string) => {
     setDeletingId(null);
@@ -117,7 +121,7 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
   }, []);
 
   const toggleExpand = useCallback((noteId: string) => {
-    setExpandedIds(prev => {
+    setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(noteId)) next.delete(noteId);
       else next.add(noteId);
@@ -140,7 +144,7 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
       {/* Notes list */}
       {notes.length > 0 ? (
         <div role="list" aria-label="Project notes" className="divide-y divide-border">
-          {visibleNotes.map(note => {
+          {visibleNotes.map((note) => {
             const isEditing = editingId === note.id;
             const isDeleting = deletingId === note.id;
             const isExpanded = expandedIds.has(note.id);
@@ -149,8 +153,8 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
             return (
               <div key={note.id} role="listitem" className="py-3 first:pt-0">
                 {isDeleting ? (
-                  <div role="alert" className="flex items-center gap-3 px-3 py-2 bg-destructive/10 rounded-lg">
-                    <span className="text-sm text-foreground flex-1">Delete this note?</span>
+                  <div role="alert" className="flex items-center gap-3 rounded-lg bg-destructive/10 px-3 py-2">
+                    <span className="flex-1 text-sm text-foreground">Delete this note?</span>
                     <Button
                       size="sm"
                       variant="destructive"
@@ -175,29 +179,27 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
                       ref={editRef}
                       aria-label="Edit note content"
                       value={editContent}
-                      onChange={e => setEditContent(e.target.value)}
-                      onKeyDown={e => {
+                      onChange={(e) => setEditContent(e.target.value)}
+                      onKeyDown={(e) => {
                         if (e.key === 'Escape') handleEditCancel();
-                        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleEditSave(); }
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleEditSave();
+                        }
                       }}
-                      className="min-h-[80px] text-sm mb-2 resize-none"
+                      className="mb-2 min-h-[80px] resize-none text-sm"
                     />
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 text-xs gap-1"
-                        onClick={handleEditCancel}
-                      >
-                        <X className="w-3 h-3" /> Cancel
+                    <div className="flex justify-end gap-2">
+                      <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={handleEditCancel}>
+                        <X className="h-3 w-3" /> Cancel
                       </Button>
                       <Button
                         size="sm"
-                        className="h-7 text-xs gap-1"
+                        className="h-7 gap-1 text-xs"
                         onClick={handleEditSave}
                         disabled={!editContent.trim()}
                       >
-                        <Check className="w-3 h-3" /> Save
+                        <Check className="h-3 w-3" /> Save
                       </Button>
                     </div>
                   </div>
@@ -207,16 +209,21 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
                       role="button"
                       tabIndex={0}
                       aria-label={`Edit note: ${note.content.slice(0, 50)}${note.content.length > 50 ? '...' : ''}`}
-                      className="cursor-pointer hover:bg-secondary/30 rounded-lg px-2 py-1 -mx-2 transition-colors"
+                      className="-mx-2 cursor-pointer rounded-lg px-2 py-1 transition-colors hover:bg-secondary/30"
                       onClick={() => handleEditStart(note.id, note.content)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') { e.preventDefault(); handleEditStart(note.id, note.content); }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleEditStart(note.id, note.content);
+                        }
                       }}
                     >
-                      <p className={cn(
-                        'text-sm text-foreground whitespace-pre-wrap break-words',
-                        !isExpanded && 'line-clamp-4'
-                      )}>
+                      <p
+                        className={cn(
+                          'whitespace-pre-wrap break-words text-sm text-foreground',
+                          !isExpanded && 'line-clamp-4',
+                        )}
+                      >
                         {note.content}
                       </p>
                     </div>
@@ -224,33 +231,37 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
                     {/* Check if content is long enough to need expand */}
                     {note.content.length > 200 && (
                       <button
-                        className="text-xs text-primary hover:text-primary/80 mt-1 ml-2"
+                        className="ml-2 mt-1 text-xs text-primary hover:text-primary/80"
                         onClick={() => toggleExpand(note.id)}
                       >
                         {isExpanded ? 'Show less' : 'Show more'}
                       </button>
                     )}
 
-                    <div className="flex items-center gap-2 mt-2 px-2">
-                      <span className="text-xs text-muted-foreground flex-1">
+                    <div className="mt-2 flex items-center gap-2 px-2">
+                      <span className="flex-1 text-xs text-muted-foreground">
                         {timestamp}
                         {new Date(note.updatedAt).getTime() - new Date(note.createdAt).getTime() > 1000 && ' (edited)'}
                       </span>
                       <button
-                        ref={el => { if (el) editButtonRefs.current.set(note.id, el); }}
+                        ref={(el) => {
+                          if (el) editButtonRefs.current.set(note.id, el);
+                        }}
                         aria-label={`Edit note from ${timestamp}`}
-                        className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/50 opacity-60 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                        className="rounded-md p-2 text-muted-foreground opacity-60 transition-opacity hover:bg-secondary/50 hover:text-foreground focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         onClick={() => handleEditStart(note.id, note.content)}
                       >
-                        <Pencil className="w-3.5 h-3.5" />
+                        <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        ref={el => { if (el) deleteButtonRefs.current.set(note.id, el); }}
+                        ref={(el) => {
+                          if (el) deleteButtonRefs.current.set(note.id, el);
+                        }}
                         aria-label={`Delete note from ${timestamp}`}
-                        className="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-60 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                        className="rounded-md p-2 text-muted-foreground opacity-60 transition-opacity hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         onClick={() => setDeletingId(note.id)}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
@@ -261,18 +272,16 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
         </div>
       ) : (
         <div className="py-12 text-center" role="status" aria-label="No notes yet">
-          <StickyNote className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-          <h3 className="text-sm font-medium text-foreground mb-1">No notes yet</h3>
-          <p className="text-xs text-muted-foreground">
-            Capture thoughts, ideas, or references for this project.
-          </p>
+          <StickyNote className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
+          <h3 className="mb-1 text-sm font-medium text-foreground">No notes yet</h3>
+          <p className="text-xs text-muted-foreground">Capture thoughts, ideas, or references for this project.</p>
         </div>
       )}
 
       {/* Show more / less toggle */}
       {hiddenCount > 0 && !showAll && (
         <button
-          className="text-xs text-primary hover:text-primary/80 mt-2 w-full text-center py-1"
+          className="mt-2 w-full py-1 text-center text-xs text-primary hover:text-primary/80"
           onClick={() => setShowAll(true)}
         >
           Show {hiddenCount} more note{hiddenCount === 1 ? '' : 's'}
@@ -280,7 +289,7 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
       )}
       {showAll && notes.length > INITIAL_VISIBLE && (
         <button
-          className="text-xs text-primary hover:text-primary/80 mt-2 w-full text-center py-1"
+          className="mt-2 w-full py-1 text-center text-xs text-primary hover:text-primary/80"
           onClick={() => setShowAll(false)}
         >
           Show less
@@ -288,26 +297,29 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
       )}
 
       {/* Add note input */}
-      <div className="mt-4 p-3 bg-[hsl(var(--surface-elevated))] rounded-lg border border-border">
+      <div className="mt-4 rounded-lg border border-border bg-[hsl(var(--surface-elevated))] p-3">
         <div className="flex items-start gap-2">
-          <StickyNote className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+          <StickyNote className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
           <Textarea
             ref={newNoteRef}
             aria-label="New note for this project"
             value={newContent}
-            onChange={e => setNewContent(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAdd(); }
+            onChange={(e) => setNewContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleAdd();
+              }
             }}
             placeholder="Add a note to this project..."
-            className="border-0 bg-transparent focus-visible:ring-0 shadow-none px-0 min-h-[40px] resize-none text-sm"
+            className="min-h-[40px] resize-none border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
             rows={1}
           />
         </div>
         {newContent.trim() && (
-          <div className="flex justify-end mt-2">
+          <div className="mt-2 flex justify-end">
             <Button size="sm" onClick={handleAdd}>
-              <Plus className="w-4 h-4 mr-1" />
+              <Plus className="mr-1 h-4 w-4" />
               Add Note
             </Button>
           </div>

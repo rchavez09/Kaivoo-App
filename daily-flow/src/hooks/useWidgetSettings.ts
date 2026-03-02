@@ -10,10 +10,7 @@ import { useAuth } from './useAuth';
 type Json = Record<string, unknown>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useWidgetSettings<T extends Record<string, any>>(
-  widgetKey: string,
-  defaultSettings: T
-) {
+export function useWidgetSettings<T extends Record<string, any>>(widgetKey: string, defaultSettings: T) {
   const { user } = useAuth();
   const [settings, setSettings] = useState<T>(defaultSettings);
   const [loading, setLoading] = useState(true);
@@ -50,7 +47,9 @@ export function useWidgetSettings<T extends Record<string, any>>(
                 const parsed = JSON.parse(local) as T;
                 setSettings({ ...defaultSettings, ...parsed });
               }
-            } catch {}
+            } catch {
+              /* localStorage unavailable */
+            }
           }
           setLoading(false);
         }
@@ -62,7 +61,9 @@ export function useWidgetSettings<T extends Record<string, any>>(
             const parsed = JSON.parse(local) as T;
             setSettings({ ...defaultSettings, ...parsed });
           }
-        } catch {}
+        } catch {
+          /* localStorage unavailable */
+        }
         if (!cancelled) setLoading(false);
       }
     };
@@ -95,16 +96,14 @@ export function useWidgetSettings<T extends Record<string, any>>(
       if (user) {
         saveTimeoutRef.current = setTimeout(async () => {
           // Cast to any because types.ts hasn't been regenerated yet
-          const { error: upsertError } = await (supabase as any)
-            .from('widget_settings')
-            .upsert(
-              {
-                user_id: user.id,
-                widget_key: widgetKey,
-                settings: newSettings,
-              },
-              { onConflict: 'user_id,widget_key' }
-            );
+          const { error: upsertError } = await (supabase as any).from('widget_settings').upsert(
+            {
+              user_id: user.id,
+              widget_key: widgetKey,
+              settings: newSettings,
+            },
+            { onConflict: 'user_id,widget_key' },
+          );
           if (upsertError) {
             console.error('Failed to persist widget settings:', upsertError);
             toast.error('Could not save widget settings. Your changes are saved locally.');
@@ -112,7 +111,7 @@ export function useWidgetSettings<T extends Record<string, any>>(
         }, 400);
       }
     },
-    [user, widgetKey, localStorageKey]
+    [user, widgetKey, localStorageKey],
   );
 
   const updateSettings = useCallback(
@@ -123,7 +122,7 @@ export function useWidgetSettings<T extends Record<string, any>>(
         return updated;
       });
     },
-    [persistSettings]
+    [persistSettings],
   );
 
   const replaceSettings = useCallback(
@@ -131,7 +130,7 @@ export function useWidgetSettings<T extends Record<string, any>>(
       setSettings(full);
       persistSettings(full);
     },
-    [persistSettings]
+    [persistSettings],
   );
 
   return { settings, loading, updateSettings, replaceSettings };

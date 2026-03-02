@@ -1,17 +1,7 @@
 import { Calendar, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { Project, Topic } from '@/types';
@@ -28,7 +18,7 @@ interface ProjectSettingsProps {
 }
 
 const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: ProjectSettingsProps) => {
-  const filteredTopics = topics.filter(t => t.id !== 'topic-daily-notes');
+  const filteredTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
 
   return (
     <div className="widget-card mt-8">
@@ -49,8 +39,10 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">None</SelectItem>
-              {filteredTopics.map(t => (
-                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+              {filteredTopics.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -65,8 +57,8 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
                 key={c}
                 onClick={() => onUpdate({ color: c })}
                 className={cn(
-                  'w-10 h-10 rounded-full border-2 transition-all',
-                  color === c ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
+                  'h-10 w-10 rounded-full border-2 transition-all',
+                  color === c ? 'scale-110 border-foreground' : 'border-transparent hover:scale-105',
                 )}
                 style={{ backgroundColor: c }}
                 aria-label={`Select ${PROJECT_COLOR_NAMES[c] || 'color'}`}
@@ -78,13 +70,13 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
         {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
+            <label className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5" />
               Start Date
             </label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                <Button variant="outline" size="sm" className="w-full justify-start text-left text-sm font-normal">
                   {project.startDate ? format(parseISO(project.startDate), 'MMM d, yyyy') : 'Set start date'}
                 </Button>
               </PopoverTrigger>
@@ -94,21 +86,27 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
                   selected={project.startDate ? parseISO(project.startDate) : undefined}
                   onSelect={(date) => {
                     if (date && project.endDate) {
-                      if (date > parseISO(project.endDate)) { toast.error('Start date cannot be after end date'); return; }
+                      if (date > parseISO(project.endDate)) {
+                        toast.error('Start date cannot be after end date');
+                        return;
+                      }
                     }
                     onUpdate({ startDate: date ? format(date, 'yyyy-MM-dd') : undefined });
                   }}
                   initialFocus
-                  className="p-3 pointer-events-auto"
+                  className="pointer-events-auto p-3"
                 />
-                <div className="p-2 border-t border-border flex gap-1">
+                <div className="flex gap-1 border-t border-border p-2">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs flex-1"
+                    className="flex-1 text-xs"
                     onClick={() => {
                       const today = format(new Date(), 'yyyy-MM-dd');
-                      if (project.endDate && today > project.endDate) { toast.error('Start date cannot be after end date'); return; }
+                      if (project.endDate && today > project.endDate) {
+                        toast.error('Start date cannot be after end date');
+                        return;
+                      }
                       onUpdate({ startDate: today });
                     }}
                   >
@@ -117,7 +115,7 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs flex-1"
+                    className="flex-1 text-xs"
                     onClick={() => onUpdate({ startDate: undefined })}
                   >
                     Clear
@@ -127,13 +125,13 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
             </Popover>
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
+            <label className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5" />
               End Date
             </label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                <Button variant="outline" size="sm" className="w-full justify-start text-left text-sm font-normal">
                   {project.endDate ? format(parseISO(project.endDate), 'MMM d, yyyy') : 'Set end date'}
                 </Button>
               </PopoverTrigger>
@@ -143,21 +141,27 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
                   selected={project.endDate ? parseISO(project.endDate) : undefined}
                   onSelect={(date) => {
                     if (date && project.startDate) {
-                      if (date < parseISO(project.startDate)) { toast.error('End date cannot be before start date'); return; }
+                      if (date < parseISO(project.startDate)) {
+                        toast.error('End date cannot be before start date');
+                        return;
+                      }
                     }
                     onUpdate({ endDate: date ? format(date, 'yyyy-MM-dd') : undefined });
                   }}
                   initialFocus
-                  className="p-3 pointer-events-auto"
+                  className="pointer-events-auto p-3"
                 />
-                <div className="p-2 border-t border-border flex gap-1">
+                <div className="flex gap-1 border-t border-border p-2">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs flex-1"
+                    className="flex-1 text-xs"
                     onClick={() => {
                       const today = format(new Date(), 'yyyy-MM-dd');
-                      if (project.startDate && today < project.startDate) { toast.error('End date cannot be before start date'); return; }
+                      if (project.startDate && today < project.startDate) {
+                        toast.error('End date cannot be before start date');
+                        return;
+                      }
                       onUpdate({ endDate: today });
                     }}
                   >
@@ -166,7 +170,7 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs flex-1"
+                    className="flex-1 text-xs"
                     onClick={() => onUpdate({ endDate: undefined })}
                   >
                     Clear
@@ -178,14 +182,14 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
         </div>
 
         {/* Delete */}
-        <div className="pt-3 border-t border-border/50">
+        <div className="border-t border-border/50 pt-3">
           <Button
             variant="ghost"
             size="sm"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={onDeleteClick}
           >
-            <Trash2 className="w-4 h-4 mr-1.5" />
+            <Trash2 className="mr-1.5 h-4 w-4" />
             Delete Project
           </Button>
         </div>

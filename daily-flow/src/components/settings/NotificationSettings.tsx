@@ -16,14 +16,16 @@ const NotificationSettings = () => {
   });
 
   const updatePref = (key: keyof NotificationPrefs, value: boolean) => {
-    setPrefs(prev => ({ ...prev, [key]: value }));
+    setPrefs((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <div>
-          <Label htmlFor="taskReminders" className="font-medium">Task Reminders</Label>
+          <Label htmlFor="taskReminders" className="font-medium">
+            Task Reminders
+          </Label>
           <p className="text-xs text-muted-foreground">Get notified about upcoming due dates</p>
         </div>
         <Switch
@@ -33,9 +35,11 @@ const NotificationSettings = () => {
         />
       </div>
 
-      <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <div>
-          <Label htmlFor="dailyBrief" className="font-medium">Daily Brief</Label>
+          <Label htmlFor="dailyBrief" className="font-medium">
+            Daily Brief
+          </Label>
           <p className="text-xs text-muted-foreground">Morning summary of your day</p>
         </div>
         <Switch
@@ -45,9 +49,11 @@ const NotificationSettings = () => {
         />
       </div>
 
-      <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <div>
-          <Label htmlFor="meetingAlerts" className="font-medium">Meeting Alerts</Label>
+          <Label htmlFor="meetingAlerts" className="font-medium">
+            Meeting Alerts
+          </Label>
           <p className="text-xs text-muted-foreground">Reminders before meetings start</p>
         </div>
         <Switch
@@ -57,7 +63,7 @@ const NotificationSettings = () => {
         />
       </div>
 
-      <p className="text-xs text-muted-foreground pt-2">
+      <p className="pt-2 text-xs text-muted-foreground">
         Note: Browser notifications require permission. These settings control in-app notifications.
       </p>
     </div>

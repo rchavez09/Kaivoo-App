@@ -11,10 +11,7 @@ export default function KeyboardShortcutsSettings() {
   const { shortcuts, setBinding, resetBinding, resetAll, findConflict } = useShortcuts();
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const hasAnyCustom = useMemo(
-    () => shortcuts.some(s => s.isCustomized),
-    [shortcuts],
-  );
+  const hasAnyCustom = useMemo(() => shortcuts.some((s) => s.isCustomized), [shortcuts]);
 
   // Group shortcuts by category
   const grouped = useMemo(() => {
@@ -36,15 +33,13 @@ export default function KeyboardShortcutsSettings() {
     <div className="space-y-6">
       {/* Platform indicator */}
       <p className="text-xs text-muted-foreground">
-        Detected platform: <span className="font-medium text-foreground">{IS_MAC ? 'Mac' : 'Windows / Linux'}</span>.
-        {' '}Shortcuts are shown for both platforms.
+        Detected platform: <span className="font-medium text-foreground">{IS_MAC ? 'Mac' : 'Windows / Linux'}</span>.{' '}
+        Shortcuts are shown for both platforms.
       </p>
 
       {Array.from(grouped.entries()).map(([category, items]) => (
         <div key={category}>
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
-            {category}
-          </h3>
+          <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">{category}</h3>
           <div className="space-y-1">
             {items.map((shortcut) => {
               const isEditing = editingId === shortcut.id;
@@ -53,12 +48,12 @@ export default function KeyboardShortcutsSettings() {
                 <div
                   key={shortcut.id}
                   className={cn(
-                    'flex items-center gap-4 p-3 rounded-lg transition-colors',
+                    'flex items-center gap-4 rounded-lg p-3 transition-colors',
                     isEditing ? 'bg-secondary/40' : 'hover:bg-secondary/20',
                   )}
                 >
                   {/* Label */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground">{shortcut.label}</p>
                     <p className="text-xs text-muted-foreground">{shortcut.description}</p>
                   </div>
@@ -76,13 +71,13 @@ export default function KeyboardShortcutsSettings() {
                   ) : (
                     <>
                       {/* Mac binding */}
-                      <div className="text-center w-24">
-                        <span className="text-[9px] text-muted-foreground uppercase block mb-0.5">Mac</span>
+                      <div className="w-24 text-center">
+                        <span className="mb-0.5 block text-[9px] uppercase text-muted-foreground">Mac</span>
                         <kbd
                           className={cn(
-                            'inline-block text-xs font-mono px-2 py-1 rounded',
+                            'inline-block rounded px-2 py-1 font-mono text-xs',
                             IS_MAC
-                              ? 'bg-primary/10 text-primary border border-primary/20'
+                              ? 'border border-primary/20 bg-primary/10 text-primary'
                               : 'bg-secondary text-muted-foreground',
                           )}
                         >
@@ -91,13 +86,13 @@ export default function KeyboardShortcutsSettings() {
                       </div>
 
                       {/* PC binding */}
-                      <div className="text-center w-24">
-                        <span className="text-[9px] text-muted-foreground uppercase block mb-0.5">PC</span>
+                      <div className="w-24 text-center">
+                        <span className="mb-0.5 block text-[9px] uppercase text-muted-foreground">PC</span>
                         <kbd
                           className={cn(
-                            'inline-block text-xs font-mono px-2 py-1 rounded',
+                            'inline-block rounded px-2 py-1 font-mono text-xs',
                             !IS_MAC
-                              ? 'bg-primary/10 text-primary border border-primary/20'
+                              ? 'border border-primary/20 bg-primary/10 text-primary'
                               : 'bg-secondary text-muted-foreground',
                           )}
                         >
@@ -106,7 +101,7 @@ export default function KeyboardShortcutsSettings() {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1 w-20 justify-end">
+                      <div className="flex w-20 items-center justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -114,7 +109,7 @@ export default function KeyboardShortcutsSettings() {
                           onClick={() => setEditingId(shortcut.id)}
                           aria-label={`Edit ${shortcut.label} shortcut`}
                         >
-                          <Pencil className="w-3.5 h-3.5" />
+                          <Pencil className="h-3.5 w-3.5" />
                         </Button>
                         {shortcut.isCustomized && (
                           <Button
@@ -124,7 +119,7 @@ export default function KeyboardShortcutsSettings() {
                             onClick={() => resetBinding(shortcut.id)}
                             aria-label={`Reset ${shortcut.label} to default`}
                           >
-                            <RotateCcw className="w-3.5 h-3.5" />
+                            <RotateCcw className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
@@ -143,7 +138,7 @@ export default function KeyboardShortcutsSettings() {
           <Separator />
           <div className="flex justify-end">
             <Button variant="outline" size="sm" onClick={resetAll} className="gap-1.5">
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="h-3.5 w-3.5" />
               Reset All to Defaults
             </Button>
           </div>

@@ -33,9 +33,12 @@ const UnifiedDayView = ({
   const { toggleRoutineCompletion } = useKaivooActions();
   const [shutdownOpen, setShutdownOpen] = useState(false);
 
-  const handleRoutineToggle = useCallback((routineId: string) => {
-    toggleRoutineCompletion(routineId, dayData.dateStr);
-  }, [toggleRoutineCompletion, dayData.dateStr]);
+  const handleRoutineToggle = useCallback(
+    (routineId: string) => {
+      toggleRoutineCompletion(routineId, dayData.dateStr);
+    },
+    [toggleRoutineCompletion, dayData.dateStr],
+  );
 
   const handleMetricClick = useCallback((section: string) => {
     const el = document.getElementById(`day-section-${section}`);
@@ -43,12 +46,12 @@ const UnifiedDayView = ({
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="mx-auto max-w-4xl px-6 py-8">
       <DayHeader date={date} onDateChange={onDateChange} />
       <DaySummaryBar stats={dayData.stats} onMetricClick={handleMetricClick} />
 
       {/* Main body: Timeline + Tasks side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" id="day-section-tasks">
+      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2" id="day-section-tasks">
         <div id="day-section-routines">
           <TimelineColumn
             date={date}
@@ -70,20 +73,12 @@ const UnifiedDayView = ({
       </div>
 
       {/* Footer: Journal + Captures side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4" id="day-section-journal">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2" id="day-section-journal">
         <div>
-          <InlineJournal
-            dateStr={dayData.dateStr}
-            entries={dayData.journalEntries}
-            onEditEntry={onEditJournal}
-          />
+          <InlineJournal dateStr={dayData.dateStr} entries={dayData.journalEntries} onEditEntry={onEditJournal} />
         </div>
         <div id="day-section-captures">
-          <CapturesList
-            dateStr={dayData.dateStr}
-            captures={dayData.captures}
-            onEditCapture={onEditCapture}
-          />
+          <CapturesList dateStr={dayData.dateStr} captures={dayData.captures} onEditCapture={onEditCapture} />
         </div>
       </div>
 

@@ -50,18 +50,18 @@ const DaySummaryBar = memo(({ stats, onMetricClick }: DaySummaryBarProps) => {
     },
   ];
 
-  const visibleMetrics = metrics.filter(m => m.show);
+  const visibleMetrics = metrics.filter((m) => m.show);
 
   return (
     <div className="widget-card mb-6 !p-3" aria-live="polite" aria-label="Day summary">
-      <div className="flex items-center gap-4 flex-wrap">
+      <div className="flex flex-wrap items-center gap-4">
         {visibleMetrics.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => onMetricClick?.(id)}
             className={cn(
               'flex items-center gap-1.5 text-xs text-muted-foreground',
-              'hover:text-foreground transition-colors cursor-pointer',
+              'cursor-pointer transition-colors hover:text-foreground',
             )}
           >
             <Icon className="h-3.5 w-3.5" />

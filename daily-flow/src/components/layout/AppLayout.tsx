@@ -14,14 +14,14 @@ interface AppLayoutProps {
 }
 
 const AppLayout = ({ children }: AppLayoutProps) => {
-  const sidebarCollapsed = useKaivooStore(s => s.sidebarCollapsed);
-  const toggleSidebar = useKaivooStore(s => s.toggleSidebar);
+  const sidebarCollapsed = useKaivooStore((s) => s.sidebarCollapsed);
+  const toggleSidebar = useKaivooStore((s) => s.toggleSidebar);
   const [quickNoteOpen, setQuickNoteOpen] = useState(false);
 
   // Detect if we're on a project detail page to pre-select the project
   const params = useParams<{ projectId?: string }>();
 
-  const toggleSearch = useSearchStore(s => s.toggle);
+  const toggleSearch = useSearchStore((s) => s.toggle);
   const { matchesShortcut } = useShortcuts();
 
   // Global keyboard shortcuts (reads from customizable shortcut registry)
@@ -46,28 +46,19 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen bg-background w-full">
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          onToggle={toggleSidebar}
-        />
-        <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex h-screen w-full bg-background">
+        <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+        <div className="flex flex-1 flex-col overflow-hidden">
           {/* Depth Bar — Kaivoo signature gradient stripe (Design System v2.0) */}
           <div className="depth-bar" aria-hidden="true" />
-          <main className="flex-1 overflow-auto scrollbar-thin">
-            {children}
-          </main>
+          <main className="scrollbar-thin flex-1 overflow-auto">{children}</main>
         </div>
       </div>
       <Suspense fallback={null}>
         <SearchCommand />
       </Suspense>
       <FloatingChat />
-      <QuickAddNoteDialog
-        open={quickNoteOpen}
-        onOpenChange={setQuickNoteOpen}
-        defaultProjectId={params.projectId}
-      />
+      <QuickAddNoteDialog open={quickNoteOpen} onOpenChange={setQuickNoteOpen} defaultProjectId={params.projectId} />
     </TooltipProvider>
   );
 };

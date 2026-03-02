@@ -12,33 +12,29 @@ interface TopicTagsWidgetProps {
   onTagSelect: (tag: string | null) => void;
 }
 
-const TopicTagsWidget = ({ 
-  tags, 
-  topicName, 
-  entries, 
-  captures, 
-  tasks, 
-  selectedTag, 
-  onTagSelect 
+const TopicTagsWidget = ({
+  tags,
+  topicName,
+  entries,
+  captures,
+  tasks,
+  selectedTag,
+  onTagSelect,
 }: TopicTagsWidgetProps) => {
   // Count items within this topic/page that have each tag
-  const tagStats = tags.map(tag => {
-    const tagLower = tag.toLowerCase();
-    const entryCount = entries.filter(e => 
-      e.tags.some(t => t.toLowerCase() === tagLower)
-    ).length;
-    const captureCount = captures.filter(c => 
-      c.tags.some(t => t.toLowerCase() === tagLower)
-    ).length;
-    const taskCount = tasks.filter(t => 
-      t.tags.some(tg => tg.toLowerCase() === tagLower)
-    ).length;
-    
-    return {
-      name: tag,
-      count: entryCount + captureCount + taskCount,
-    };
-  }).sort((a, b) => b.count - a.count);
+  const tagStats = tags
+    .map((tag) => {
+      const tagLower = tag.toLowerCase();
+      const entryCount = entries.filter((e) => e.tags.some((t) => t.toLowerCase() === tagLower)).length;
+      const captureCount = captures.filter((c) => c.tags.some((t) => t.toLowerCase() === tagLower)).length;
+      const taskCount = tasks.filter((t) => t.tags.some((tg) => tg.toLowerCase() === tagLower)).length;
+
+      return {
+        name: tag,
+        count: entryCount + captureCount + taskCount,
+      };
+    })
+    .sort((a, b) => b.count - a.count);
 
   const handleTagClick = (tagName: string) => {
     if (selectedTag === tagName) {
@@ -52,17 +48,14 @@ const TopicTagsWidget = ({
     <div className="widget-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <Tag className="w-4 h-4 text-primary" />
+          <Tag className="h-4 w-4 text-primary" />
           <span className="widget-title">Tags</span>
-          <span className="text-xs text-muted-foreground font-normal ml-1">
+          <span className="ml-1 text-xs font-normal text-muted-foreground">
             {tags.length} tag{tags.length !== 1 ? 's' : ''}
           </span>
         </div>
         {selectedTag && (
-          <button 
-            onClick={() => onTagSelect(null)}
-            className="text-xs text-primary hover:underline"
-          >
+          <button onClick={() => onTagSelect(null)} className="text-xs text-primary hover:underline">
             Clear filter
           </button>
         )}
@@ -74,15 +67,13 @@ const TopicTagsWidget = ({
             key={name}
             onClick={() => handleTagClick(name)}
             className={cn(
-              "tag-chip group cursor-pointer transition-all",
-              selectedTag === name && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+              'tag-chip group cursor-pointer transition-all',
+              selectedTag === name && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
             )}
           >
-            <Hash className="w-3 h-3" />
+            <Hash className="h-3 w-3" />
             <span>{name}</span>
-            <span className="text-[10px] opacity-60 ml-1">
-              {count}
-            </span>
+            <span className="ml-1 text-[10px] opacity-60">{count}</span>
           </button>
         ))}
       </div>

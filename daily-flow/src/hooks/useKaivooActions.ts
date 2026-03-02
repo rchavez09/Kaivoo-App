@@ -30,7 +30,7 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const task = await db.createTask(taskData);
-        useKaivooStore.setState(s => ({ tasks: [...s.tasks, task] }));
+        useKaivooStore.setState((s) => ({ tasks: [...s.tasks, task] }));
         invalidate('tasks');
         return task;
       } catch (e: unknown) {
@@ -43,7 +43,7 @@ export const useKaivooActions = () => {
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
-    const prev = getStore().tasks.find(t => t.id === id);
+    const prev = getStore().tasks.find((t) => t.id === id);
     getStore().updateTask(id, updates);
     if (user) {
       try {
@@ -80,14 +80,14 @@ export const useKaivooActions = () => {
   };
 
   const deleteTask = async (id: string) => {
-    const prev = getStore().tasks.find(t => t.id === id);
+    const prev = getStore().tasks.find((t) => t.id === id);
     getStore().deleteTask(id);
     if (user) {
       try {
         await db.deleteTask(id);
         invalidate('tasks');
       } catch (e) {
-        if (prev) useKaivooStore.setState(s => ({ tasks: [...s.tasks, prev] }));
+        if (prev) useKaivooStore.setState((s) => ({ tasks: [...s.tasks, prev] }));
         toast.error('Failed to delete task.');
         console.error('[deleteTask]', e);
       }
@@ -100,11 +100,17 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const subtask = await db.createSubtask(taskId, title);
-        useKaivooStore.setState(s => ({
-          tasks: s.tasks.map(t =>
+        useKaivooStore.setState((s) => ({
+          tasks: s.tasks.map((t) =>
             t.id === taskId
-              ? { ...t, subtasks: [...t.subtasks, { id: subtask.id, title: subtask.title, completed: subtask.completed, tags: [] }] }
-              : t
+              ? {
+                  ...t,
+                  subtasks: [
+                    ...t.subtasks,
+                    { id: subtask.id, title: subtask.title, completed: subtask.completed, tags: [] },
+                  ],
+                }
+              : t,
           ),
         }));
         invalidate('tasks');
@@ -140,15 +146,16 @@ export const useKaivooActions = () => {
   };
 
   const updateSubtask = async (taskId: string, subtaskId: string, updates: { title?: string; tags?: string[] }) => {
-    const task = getStore().tasks.find(t => t.id === taskId);
-    const prevSubtask = task?.subtasks.find(s => s.id === subtaskId);
+    const task = getStore().tasks.find((t) => t.id === taskId);
+    const prevSubtask = task?.subtasks.find((s) => s.id === subtaskId);
     getStore().updateSubtask(taskId, subtaskId, updates);
     if (user) {
       try {
         await db.updateSubtask(subtaskId, updates);
         invalidate('tasks');
       } catch (e) {
-        if (prevSubtask) getStore().updateSubtask(taskId, subtaskId, { title: prevSubtask.title, tags: prevSubtask.tags });
+        if (prevSubtask)
+          getStore().updateSubtask(taskId, subtaskId, { title: prevSubtask.title, tags: prevSubtask.tags });
         toast.error('Failed to update subtask.');
         console.error('[updateSubtask]', e);
       }
@@ -156,8 +163,8 @@ export const useKaivooActions = () => {
   };
 
   const deleteSubtask = async (taskId: string, subtaskId: string) => {
-    const task = getStore().tasks.find(t => t.id === taskId);
-    const prevSubtask = task?.subtasks.find(s => s.id === subtaskId);
+    const task = getStore().tasks.find((t) => t.id === taskId);
+    const prevSubtask = task?.subtasks.find((s) => s.id === subtaskId);
     getStore().deleteSubtask(taskId, subtaskId);
     if (user) {
       try {
@@ -165,12 +172,8 @@ export const useKaivooActions = () => {
         invalidate('tasks');
       } catch (e) {
         if (prevSubtask) {
-          useKaivooStore.setState(s => ({
-            tasks: s.tasks.map(t =>
-              t.id === taskId
-                ? { ...t, subtasks: [...t.subtasks, prevSubtask] }
-                : t
-            ),
+          useKaivooStore.setState((s) => ({
+            tasks: s.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, prevSubtask] } : t)),
           }));
         }
         toast.error('Failed to delete subtask.');
@@ -185,7 +188,7 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const meeting = await db.createMeeting(meetingData);
-        useKaivooStore.setState(s => ({ meetings: [...s.meetings, meeting] }));
+        useKaivooStore.setState((s) => ({ meetings: [...s.meetings, meeting] }));
         invalidate('meetings');
         return meeting;
       } catch (e) {
@@ -198,7 +201,7 @@ export const useKaivooActions = () => {
   };
 
   const updateMeeting = async (id: string, updates: Partial<Meeting>) => {
-    const prev = getStore().meetings.find(m => m.id === id);
+    const prev = getStore().meetings.find((m) => m.id === id);
     getStore().updateMeeting(id, updates);
     if (user) {
       try {
@@ -213,14 +216,14 @@ export const useKaivooActions = () => {
   };
 
   const deleteMeeting = async (id: string) => {
-    const prev = getStore().meetings.find(m => m.id === id);
+    const prev = getStore().meetings.find((m) => m.id === id);
     getStore().deleteMeeting(id);
     if (user) {
       try {
         await db.deleteMeeting(id);
         invalidate('meetings');
       } catch (e) {
-        if (prev) useKaivooStore.setState(s => ({ meetings: [...s.meetings, prev] }));
+        if (prev) useKaivooStore.setState((s) => ({ meetings: [...s.meetings, prev] }));
         toast.error('Failed to delete meeting.');
         console.error('[deleteMeeting]', e);
       }
@@ -238,7 +241,7 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const entry = await db.createJournalEntry(sanitizedData);
-        useKaivooStore.setState(s => ({ journalEntries: [...s.journalEntries, entry] }));
+        useKaivooStore.setState((s) => ({ journalEntries: [...s.journalEntries, entry] }));
         invalidate('journalEntries');
         return entry;
       } catch (e) {
@@ -254,7 +257,7 @@ export const useKaivooActions = () => {
       ? { ...updates, topicIds: updates.topicIds.filter(isValidUUID) }
       : updates;
 
-    const prev = getStore().journalEntries.find(e => e.id === id);
+    const prev = getStore().journalEntries.find((e) => e.id === id);
     getStore().updateJournalEntry(id, sanitizedUpdates);
     if (user) {
       try {
@@ -269,14 +272,14 @@ export const useKaivooActions = () => {
   };
 
   const deleteJournalEntry = async (id: string) => {
-    const prev = getStore().journalEntries.find(e => e.id === id);
+    const prev = getStore().journalEntries.find((e) => e.id === id);
     getStore().deleteJournalEntry(id);
     if (user) {
       try {
         await db.deleteJournalEntry(id);
         invalidate('journalEntries');
       } catch (e) {
-        if (prev) useKaivooStore.setState(s => ({ journalEntries: [...s.journalEntries, prev] }));
+        if (prev) useKaivooStore.setState((s) => ({ journalEntries: [...s.journalEntries, prev] }));
         toast.error('Failed to delete journal entry.');
         console.error('[deleteJournalEntry]', e);
       }
@@ -309,7 +312,7 @@ export const useKaivooActions = () => {
         const topic = await db.createTopic(topicData);
         const alreadyInStore = getStore().topics.some((t) => t.id === topic.id);
         if (!alreadyInStore) {
-          useKaivooStore.setState(s => ({ topics: [...s.topics, topic] }));
+          useKaivooStore.setState((s) => ({ topics: [...s.topics, topic] }));
         }
         invalidate('topics');
         return topic;
@@ -327,7 +330,7 @@ export const useKaivooActions = () => {
         const page = await db.createTopicPage(pageData);
         const alreadyInStore = getStore().topicPages.some((p) => p.id === page.id);
         if (!alreadyInStore) {
-          useKaivooStore.setState(s => ({ topicPages: [...s.topicPages, page] }));
+          useKaivooStore.setState((s) => ({ topicPages: [...s.topicPages, page] }));
         }
         invalidate('topicPages');
         return page;
@@ -340,11 +343,14 @@ export const useKaivooActions = () => {
   };
 
   const resolveTopicPathAsync = async (path: string, autoCreate = false): Promise<string[] | null> => {
-    const parts = path.split('/').map(p => p.trim()).filter(Boolean);
+    const parts = path
+      .split('/')
+      .map((p) => p.trim())
+      .filter(Boolean);
     if (parts.length === 0) return null;
 
     const topicName = parts[0];
-    let topic = getStore().topics.find(t => t.name.toLowerCase() === topicName.toLowerCase());
+    let topic = getStore().topics.find((t) => t.name.toLowerCase() === topicName.toLowerCase());
 
     if (!topic) {
       if (!autoCreate) return null;
@@ -355,7 +361,7 @@ export const useKaivooActions = () => {
 
     const pageName = parts.slice(1).join('/');
     let page = getStore().topicPages.find(
-      p => p.topicId === topic!.id && p.name.toLowerCase() === pageName.toLowerCase()
+      (p) => p.topicId === topic!.id && p.name.toLowerCase() === pageName.toLowerCase(),
     );
 
     if (!page) {
@@ -368,7 +374,7 @@ export const useKaivooActions = () => {
   };
 
   const updateTopic = async (id: string, updates: { name?: string; description?: string; icon?: string }) => {
-    const prev = getStore().topics.find(t => t.id === id);
+    const prev = getStore().topics.find((t) => t.id === id);
     getStore().updateTopic(id, updates);
     if (user) {
       try {
@@ -383,14 +389,14 @@ export const useKaivooActions = () => {
   };
 
   const deleteTopic = async (id: string) => {
-    const prev = getStore().topics.find(t => t.id === id);
+    const prev = getStore().topics.find((t) => t.id === id);
     getStore().deleteTopic(id);
     if (user) {
       try {
         await db.deleteTopic(id);
         invalidate('topics');
       } catch (e) {
-        if (prev) useKaivooStore.setState(s => ({ topics: [...s.topics, prev] }));
+        if (prev) useKaivooStore.setState((s) => ({ topics: [...s.topics, prev] }));
         toast.error('Failed to delete topic.');
         console.error('[deleteTopic]', e);
       }
@@ -398,7 +404,7 @@ export const useKaivooActions = () => {
   };
 
   const updateTopicPage = async (id: string, updates: { name?: string; description?: string }) => {
-    const prev = getStore().topicPages.find(p => p.id === id);
+    const prev = getStore().topicPages.find((p) => p.id === id);
     getStore().updateTopicPage(id, updates);
     if (user) {
       try {
@@ -413,14 +419,14 @@ export const useKaivooActions = () => {
   };
 
   const deleteTopicPage = async (id: string) => {
-    const prev = getStore().topicPages.find(p => p.id === id);
+    const prev = getStore().topicPages.find((p) => p.id === id);
     getStore().deleteTopicPage(id);
     if (user) {
       try {
         await db.deleteTopicPage(id);
         invalidate('topicPages');
       } catch (e) {
-        if (prev) useKaivooStore.setState(s => ({ topicPages: [...s.topicPages, prev] }));
+        if (prev) useKaivooStore.setState((s) => ({ topicPages: [...s.topicPages, prev] }));
         toast.error('Failed to delete page.');
         console.error('[deleteTopicPage]', e);
       }
@@ -433,7 +439,7 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const capture = await db.createCapture(captureData);
-        useKaivooStore.setState(s => ({ captures: [...s.captures, capture] }));
+        useKaivooStore.setState((s) => ({ captures: [...s.captures, capture] }));
         invalidate('captures');
         return capture;
       } catch (e) {
@@ -450,7 +456,7 @@ export const useKaivooActions = () => {
       ? { ...updates, topicIds: updates.topicIds.filter(isValidUUID) }
       : updates;
 
-    const prev = getStore().captures.find(c => c.id === id);
+    const prev = getStore().captures.find((c) => c.id === id);
     getStore().updateCapture(id, sanitizedUpdates);
     if (user) {
       try {
@@ -465,14 +471,14 @@ export const useKaivooActions = () => {
   };
 
   const deleteCapture = async (id: string) => {
-    const prev = getStore().captures.find(c => c.id === id);
+    const prev = getStore().captures.find((c) => c.id === id);
     getStore().deleteCapture(id);
     if (user) {
       try {
         await db.deleteCapture(id);
         invalidate('captures');
       } catch (e) {
-        if (prev) useKaivooStore.setState(s => ({ captures: [...s.captures, prev] }));
+        if (prev) useKaivooStore.setState((s) => ({ captures: [...s.captures, prev] }));
         toast.error('Failed to delete capture.');
         console.error('[deleteCapture]', e);
       }
@@ -485,7 +491,7 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const project = await db.createProject(projectData);
-        useKaivooStore.setState(s => ({ projects: [...s.projects, project] }));
+        useKaivooStore.setState((s) => ({ projects: [...s.projects, project] }));
         invalidate('projects');
         return project;
       } catch (e: unknown) {
@@ -498,7 +504,7 @@ export const useKaivooActions = () => {
   };
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
-    const prev = getStore().projects.find(p => p.id === id);
+    const prev = getStore().projects.find((p) => p.id === id);
     getStore().updateProject(id, updates);
     if (user) {
       try {
@@ -513,8 +519,10 @@ export const useKaivooActions = () => {
   };
 
   const deleteProject = async (id: string) => {
-    const prev = getStore().projects.find(p => p.id === id);
-    const affectedTaskIds = getStore().tasks.filter(t => t.projectId === id).map(t => t.id);
+    const prev = getStore().projects.find((p) => p.id === id);
+    const affectedTaskIds = getStore()
+      .tasks.filter((t) => t.projectId === id)
+      .map((t) => t.id);
     getStore().deleteProject(id);
     if (user) {
       try {
@@ -522,11 +530,9 @@ export const useKaivooActions = () => {
         invalidate('projects', 'tasks');
       } catch (e) {
         if (prev) {
-          useKaivooStore.setState(s => ({
+          useKaivooStore.setState((s) => ({
             projects: [...s.projects, prev],
-            tasks: s.tasks.map(t =>
-              affectedTaskIds.includes(t.id) ? { ...t, projectId: id } : t
-            ),
+            tasks: s.tasks.map((t) => (affectedTaskIds.includes(t.id) ? { ...t, projectId: id } : t)),
           }));
         }
         toast.error('Failed to delete project.');
@@ -541,7 +547,7 @@ export const useKaivooActions = () => {
     if (user) {
       try {
         const note = await db.createProjectNote(noteData);
-        useKaivooStore.setState(s => ({ projectNotes: [note, ...(s.projectNotes || [])] }));
+        useKaivooStore.setState((s) => ({ projectNotes: [note, ...(s.projectNotes || [])] }));
         invalidate('projectNotes');
         return note;
       } catch (e: unknown) {
@@ -554,7 +560,7 @@ export const useKaivooActions = () => {
   };
 
   const updateProjectNote = async (id: string, updates: Partial<Pick<ProjectNote, 'content'>>) => {
-    const prev = (getStore().projectNotes || []).find(n => n.id === id);
+    const prev = (getStore().projectNotes || []).find((n) => n.id === id);
     getStore().updateProjectNote(id, updates);
     if (user) {
       try {
@@ -569,14 +575,14 @@ export const useKaivooActions = () => {
   };
 
   const deleteProjectNote = async (id: string) => {
-    const prev = (getStore().projectNotes || []).find(n => n.id === id);
+    const prev = (getStore().projectNotes || []).find((n) => n.id === id);
     getStore().deleteProjectNote(id);
     if (user) {
       try {
         await db.deleteProjectNote(id);
         invalidate('projectNotes');
       } catch (e) {
-        if (prev) useKaivooStore.setState(s => ({ projectNotes: [...(s.projectNotes || []), prev] }));
+        if (prev) useKaivooStore.setState((s) => ({ projectNotes: [...(s.projectNotes || []), prev] }));
         toast.error('Failed to delete note.');
         console.error('[deleteProjectNote]', e);
       }
@@ -584,14 +590,35 @@ export const useKaivooActions = () => {
   };
 
   return {
-    addTask, updateTask, deleteTask,
-    addSubtask, toggleSubtask, updateSubtask, deleteSubtask,
-    addMeeting, updateMeeting, deleteMeeting,
-    addJournalEntry, updateJournalEntry, deleteJournalEntry,
-    updateCapture, deleteCapture, toggleRoutineCompletion,
-    addTopic, updateTopic, addTopicPage, updateTopicPage, deleteTopic, deleteTopicPage,
-    addCapture, resolveTopicPathAsync,
-    addProject, updateProject, deleteProject,
-    addProjectNote, updateProjectNote, deleteProjectNote,
+    addTask,
+    updateTask,
+    deleteTask,
+    addSubtask,
+    toggleSubtask,
+    updateSubtask,
+    deleteSubtask,
+    addMeeting,
+    updateMeeting,
+    deleteMeeting,
+    addJournalEntry,
+    updateJournalEntry,
+    deleteJournalEntry,
+    updateCapture,
+    deleteCapture,
+    toggleRoutineCompletion,
+    addTopic,
+    updateTopic,
+    addTopicPage,
+    updateTopicPage,
+    deleteTopic,
+    deleteTopicPage,
+    addCapture,
+    resolveTopicPathAsync,
+    addProject,
+    updateProject,
+    deleteProject,
+    addProjectNote,
+    updateProjectNote,
+    deleteProjectNote,
   };
 };

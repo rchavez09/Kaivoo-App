@@ -13,7 +13,7 @@ interface CalendarWidgetProps {
 }
 
 const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
-  const getTodaysMeetings = useKaivooStore(s => s.getTodaysMeetings);
+  const getTodaysMeetings = useKaivooStore((s) => s.getTodaysMeetings);
   const { addMeeting } = useKaivooActions();
   const meetings = getTodaysMeetings();
   const [showInput, setShowInput] = useState(false);
@@ -62,9 +62,9 @@ const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
     <div className="widget-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-primary" />
+          <Calendar className="h-4 w-4 text-primary" />
           <span className="widget-title">Today's Schedule</span>
-          <span className="text-xs text-muted-foreground font-normal ml-1">
+          <span className="ml-1 text-xs font-normal text-muted-foreground">
             {meetings.length} {meetings.length === 1 ? 'meeting' : 'meetings'}
           </span>
         </div>
@@ -72,21 +72,17 @@ const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground h-8 px-2"
+            className="h-8 px-2 text-muted-foreground hover:text-foreground"
             onClick={() => setShowInput(true)}
             title="Add meeting"
             aria-label="Add meeting"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="h-4 w-4" />
           </Button>
           <Link to="/calendar">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-muted-foreground hover:text-foreground h-8 px-2"
-            >
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground">
               <span className="text-xs">View all</span>
-              <ChevronRight className="w-3 h-3 ml-1" />
+              <ChevronRight className="ml-1 h-3 w-3" />
             </Button>
           </Link>
         </div>
@@ -98,21 +94,23 @@ const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
           {meetings.slice(0, 4).map((meeting) => (
             <div
               key={meeting.id}
-              className="flex items-start gap-3 py-2.5 px-3 -mx-1 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer"
+              className="-mx-1 flex cursor-pointer items-start gap-3 rounded-lg bg-secondary/30 px-3 py-2.5 transition-colors hover:bg-secondary/50"
               onClick={() => handleMeetingClick(meeting.id)}
             >
-              <div className="flex flex-col items-center min-w-[50px]">
+              <div className="flex min-w-[50px] flex-col items-center">
                 <span className="text-xs font-medium text-foreground">{getFormattedTime(meeting.startTime)}</span>
-                <span className="text-[10px] text-muted-foreground">{getFormattedDuration(meeting.startTime, meeting.endTime)}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {getFormattedDuration(meeting.startTime, meeting.endTime)}
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{meeting.title}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-foreground">{meeting.title}</p>
                 {meeting.location && (
-                  <div className="flex items-center gap-1 mt-0.5">
+                  <div className="mt-0.5 flex items-center gap-1">
                     {meeting.location.toLowerCase().includes('zoom') ? (
-                      <Video className="w-3 h-3 text-muted-foreground" />
+                      <Video className="h-3 w-3 text-muted-foreground" />
                     ) : (
-                      <MapPin className="w-3 h-3 text-muted-foreground" />
+                      <MapPin className="h-3 w-3 text-muted-foreground" />
                     )}
                     <span className="text-xs text-muted-foreground">{meeting.location}</span>
                   </div>
@@ -121,7 +119,7 @@ const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
             </div>
           ))}
           {meetings.length > 4 && (
-            <p className="text-xs text-muted-foreground text-center">+{meetings.length - 4} more meetings</p>
+            <p className="text-center text-xs text-muted-foreground">+{meetings.length - 4} more meetings</p>
           )}
         </div>
       )}
@@ -136,7 +134,7 @@ const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
       )}
 
       {/* Add meeting input */}
-      <div className="mt-3 pt-3 border-t border-border">
+      <div className="mt-3 border-t border-border pt-3">
         {showInput ? (
           <div className="flex items-center gap-2">
             <Input
@@ -158,13 +156,13 @@ const CalendarWidget = ({ onMeetingClick }: CalendarWidgetProps) => {
             </Button>
           </div>
         ) : (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="w-full justify-start text-muted-foreground hover:text-foreground h-8 -mx-2"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-mx-2 h-8 w-full justify-start text-muted-foreground hover:text-foreground"
             onClick={() => setShowInput(true)}
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             <span className="text-sm">Add meeting</span>
           </Button>
         )}

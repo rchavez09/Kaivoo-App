@@ -16,7 +16,7 @@ export default function AIInboxWidget() {
   return (
     <Card className="border-primary/20" aria-live="polite">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-medium flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-base font-medium">
           <Sparkles className="h-4 w-4 text-primary" />
           AI Inbox
         </CardTitle>
@@ -35,7 +35,7 @@ export default function AIInboxWidget() {
           </TabsList>
 
           {/* Quick Thought Tab */}
-          <TabsContent value="thought" className="space-y-4 mt-4">
+          <TabsContent value="thought" className="mt-4 space-y-4">
             {/* Input area */}
             <div className="space-y-2">
               <div className="relative">
@@ -46,22 +46,18 @@ export default function AIInboxWidget() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) state.handleSubmit();
                   }}
-                  className="min-h-[80px] pr-12 resize-none bg-background"
+                  className="min-h-[80px] resize-none bg-background pr-12"
                   disabled={state.isProcessing}
                 />
                 <Button
                   size="icon"
                   variant="ghost"
                   aria-label="Send message"
-                  className="absolute right-2 bottom-2"
+                  className="absolute bottom-2 right-2"
                   onClick={state.handleSubmit}
                   disabled={!state.input.trim() || state.isProcessing}
                 >
-                  {state.isProcessing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
+                  {state.isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -71,7 +67,7 @@ export default function AIInboxWidget() {
 
             {/* Clarification question */}
             {state.clarification && (
-              <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
+              <div className="space-y-3 rounded-xl border border-border bg-muted/50 p-4">
                 <p className="text-sm font-medium">{state.clarification.question}</p>
                 <div className="flex flex-wrap gap-2">
                   {state.clarification.choices.map((choice) => (
@@ -96,12 +92,12 @@ export default function AIInboxWidget() {
             {state.suggestions.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium flex items-center gap-2">
+                  <h4 className="flex items-center gap-2 text-sm font-medium">
                     <Sparkles className="h-4 w-4 text-primary" />
                     AI Suggestions
                   </h4>
                   <span className="text-xs text-muted-foreground">
-                    {state.suggestions.filter(s => s.selected).length} of {state.suggestions.length} selected
+                    {state.suggestions.filter((s) => s.selected).length} of {state.suggestions.length} selected
                   </span>
                 </div>
 
@@ -119,11 +115,11 @@ export default function AIInboxWidget() {
 
                 <div className="flex gap-2">
                   <Button onClick={state.handleApprove} disabled={state.isProcessing} className="flex-1">
-                    <Check className="h-4 w-4 mr-2" />
+                    <Check className="mr-2 h-4 w-4" />
                     Approve Selected
                   </Button>
                   <Button variant="outline" onClick={state.handleCancel} disabled={state.isProcessing}>
-                    <X className="h-4 w-4 mr-2" />
+                    <X className="mr-2 h-4 w-4" />
                     Cancel
                   </Button>
                 </div>
@@ -132,7 +128,7 @@ export default function AIInboxWidget() {
           </TabsContent>
 
           {/* Link Capture Tab */}
-          <TabsContent value="link" className="space-y-4 mt-4">
+          <TabsContent value="link" className="mt-4 space-y-4">
             {!state.linkResult && !state.needsManualInput && (
               <div className="space-y-3">
                 <div className="space-y-2">
@@ -158,17 +154,17 @@ export default function AIInboxWidget() {
                 >
                   {state.isProcessing ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Extracting content...
                     </>
                   ) : (
                     <>
-                      <Globe className="h-4 w-4 mr-2" />
+                      <Globe className="mr-2 h-4 w-4" />
                       Capture Link
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-center text-xs text-muted-foreground">
                   AI will scrape the page and create a structured note with topics &amp; tags
                 </p>
               </div>
@@ -197,9 +193,9 @@ export default function AIInboxWidget() {
                     className="flex-1"
                   >
                     {state.isProcessing ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                      <Sparkles className="h-4 w-4 mr-2" />
+                      <Sparkles className="mr-2 h-4 w-4" />
                     )}
                     Process Content
                   </Button>

@@ -16,7 +16,12 @@ const settingsSections = [
   { id: 'profile' as const, icon: User, label: 'Profile', description: 'Manage your account settings' },
   { id: 'notifications' as const, icon: Bell, label: 'Notifications', description: 'Configure alerts and reminders' },
   { id: 'appearance' as const, icon: Palette, label: 'Appearance', description: 'Customize your experience' },
-  { id: 'shortcuts' as const, icon: Keyboard, label: 'Keyboard Shortcuts', description: 'Customize keyboard shortcuts' },
+  {
+    id: 'shortcuts' as const,
+    icon: Keyboard,
+    label: 'Keyboard Shortcuts',
+    description: 'Customize keyboard shortcuts',
+  },
   { id: 'data' as const, icon: Database, label: 'Data', description: 'Export and backup options' },
 ];
 
@@ -40,28 +45,28 @@ const SettingsPage = () => {
     }
   };
 
-  const activeSectionData = settingsSections.find(s => s.id === activeSection);
+  const activeSectionData = settingsSections.find((s) => s.id === activeSection);
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="mx-auto max-w-2xl px-6 py-8">
         {activeSection === 'main' ? (
           <>
             <header className="mb-8">
-              <h1 className="text-2xl font-semibold text-foreground mb-1">Settings</h1>
+              <h1 className="mb-1 text-2xl font-semibold text-foreground">Settings</h1>
               <p className="text-sm text-muted-foreground">Customize your Kaivoo experience</p>
             </header>
 
             <div className="space-y-6">
               {/* AI Settings */}
               <section>
-                <h2 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">AI Features</h2>
+                <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">AI Features</h2>
                 <AISettingsCard />
               </section>
 
               {/* General Settings */}
               <section>
-                <h2 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">General</h2>
+                <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">General</h2>
                 <div className="space-y-2">
                   {settingsSections.map((section) => {
                     const Icon = section.icon;
@@ -69,16 +74,16 @@ const SettingsPage = () => {
                       <button
                         key={section.id}
                         onClick={() => setActiveSection(section.id)}
-                        className="widget-card flex items-center gap-4 cursor-pointer hover:bg-secondary/30 transition-colors p-4 w-full text-left"
+                        className="widget-card flex w-full cursor-pointer items-center gap-4 p-4 text-left transition-colors hover:bg-secondary/30"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                          <Icon className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                          <Icon className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1">
                           <h3 className="text-sm font-medium text-foreground">{section.label}</h3>
                           <p className="text-xs text-muted-foreground">{section.description}</p>
                         </div>
-                        <ChevronLeft className="w-4 h-4 text-muted-foreground rotate-180" />
+                        <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
                       </button>
                     );
                   })}
@@ -93,15 +98,15 @@ const SettingsPage = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setActiveSection('main')}
-                className="mb-2 -ml-2 text-muted-foreground hover:text-foreground"
+                className="-ml-2 mb-2 text-muted-foreground hover:text-foreground"
               >
-                <ChevronLeft className="w-4 h-4 mr-1" />
+                <ChevronLeft className="mr-1 h-4 w-4" />
                 Back
               </Button>
               <div className="flex items-center gap-3">
                 {activeSectionData && (
-                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                    <activeSectionData.icon className="w-5 h-5 text-muted-foreground" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                    <activeSectionData.icon className="h-5 w-5 text-muted-foreground" />
                   </div>
                 )}
                 <div>
@@ -111,9 +116,7 @@ const SettingsPage = () => {
               </div>
             </header>
 
-            <div className="widget-card p-6">
-              {renderContent()}
-            </div>
+            <div className="widget-card p-6">{renderContent()}</div>
           </>
         )}
       </div>

@@ -27,11 +27,11 @@ const TopicTasksWidget = ({ tasks, topicName, selectedTag, topicId }: TopicTasks
   let filteredTasks = tasks;
   if (selectedTag) {
     const tagLower = selectedTag.toLowerCase();
-    filteredTasks = tasks.filter(t => t.tags.some(tag => tag.toLowerCase() === tagLower));
+    filteredTasks = tasks.filter((t) => t.tags.some((tag) => tag.toLowerCase() === tagLower));
   }
 
-  const pendingTasks = filteredTasks.filter(t => t.status !== 'done');
-  const completedTasks = filteredTasks.filter(t => t.status === 'done');
+  const pendingTasks = filteredTasks.filter((t) => t.status !== 'done');
+  const completedTasks = filteredTasks.filter((t) => t.status === 'done');
 
   const toggleTask = (taskId: string, currentStatus: string) => {
     void updateTask(taskId, {
@@ -44,28 +44,21 @@ const TopicTasksWidget = ({ tasks, topicName, selectedTag, topicId }: TopicTasks
     <div className="widget-card animate-fade-in" style={{ animationDelay: '0.05s' }}>
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <CheckSquare className="w-4 h-4 text-primary" />
+          <CheckSquare className="h-4 w-4 text-primary" />
           <span className="widget-title">Tasks</span>
-          <span className="text-xs text-muted-foreground font-normal ml-1">
+          <span className="ml-1 text-xs font-normal text-muted-foreground">
             {pendingTasks.length} open
-            {selectedTag && (
-              <span className="ml-1 text-primary">(#{selectedTag})</span>
-            )}
+            {selectedTag && <span className="ml-1 text-primary">(#{selectedTag})</span>}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 text-xs gap-1.5"
-          onClick={() => setShowAddInput(true)}
-        >
-          <Plus className="w-3 h-3" />
+        <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => setShowAddInput(true)}>
+          <Plus className="h-3 w-3" />
           Add Task
         </Button>
       </div>
 
       {showAddInput && (
-        <div className="flex items-center gap-2 mb-2">
+        <div className="mb-2 flex items-center gap-2">
           <input
             type="text"
             aria-label="New task title"
@@ -91,7 +84,7 @@ const TopicTasksWidget = ({ tasks, topicName, selectedTag, topicId }: TopicTasks
               }
             }}
             autoFocus
-            className="flex-1 h-8 px-3 text-sm bg-secondary/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="h-8 flex-1 rounded-md border border-border bg-secondary/50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </div>
       )}
@@ -102,18 +95,18 @@ const TopicTasksWidget = ({ tasks, topicName, selectedTag, topicId }: TopicTasks
           {pendingTasks.map((task) => (
             <button
               key={task.id}
-              className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer group w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="group -mx-2 flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               onClick={() => toggleTask(task.id, task.status)}
               role="checkbox"
               aria-checked={false}
               aria-label={`${task.priority} priority: ${task.title}`}
             >
-              <Circle className={cn('w-4 h-4 flex-shrink-0', priorityColors[task.priority])} />
-              <div className="flex-1 min-w-0">
+              <Circle className={cn('h-4 w-4 flex-shrink-0', priorityColors[task.priority])} />
+              <div className="min-w-0 flex-1">
                 <span className="text-sm text-foreground">{task.title}</span>
                 {task.dueDate && (
-                  <span className="ml-2 text-xs text-muted-foreground flex-inline items-center gap-0.5">
-                    <Calendar className="w-3 h-3 inline mr-0.5" aria-hidden="true" />
+                  <span className="flex-inline ml-2 items-center gap-0.5 text-xs text-muted-foreground">
+                    <Calendar className="mr-0.5 inline h-3 w-3" aria-hidden="true" />
                     {task.dueDate}
                   </span>
                 )}
@@ -125,30 +118,28 @@ const TopicTasksWidget = ({ tasks, topicName, selectedTag, topicId }: TopicTasks
           {completedTasks.slice(0, 2).map((task) => (
             <button
               key={task.id}
-              className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer opacity-50 w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="-mx-2 flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left opacity-50 transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               onClick={() => toggleTask(task.id, task.status)}
               role="checkbox"
               aria-checked={true}
               aria-label={`Completed: ${task.title}`}
             >
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-success-foreground" />
-              <span className="text-sm flex-1 line-through text-muted-foreground">{task.title}</span>
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-success-foreground" />
+              <span className="flex-1 text-sm text-muted-foreground line-through">{task.title}</span>
             </button>
           ))}
 
           {completedTasks.length > 2 && (
-            <p className="text-xs text-muted-foreground text-center py-2">
+            <p className="py-2 text-center text-xs text-muted-foreground">
               +{completedTasks.length - 2} more completed
             </p>
           )}
         </div>
       ) : (
         <div className="py-8 text-center">
-          <CheckSquare className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+          <CheckSquare className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">
-            {selectedTag
-              ? `No tasks with #${selectedTag} tag.`
-              : `No tasks linked to ${topicName} yet.`}
+            {selectedTag ? `No tasks with #${selectedTag} tag.` : `No tasks linked to ${topicName} yet.`}
           </p>
         </div>
       )}

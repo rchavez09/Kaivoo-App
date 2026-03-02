@@ -1,26 +1,11 @@
 import { useState } from 'react';
 import { Plus, Calendar } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
@@ -36,8 +21,8 @@ interface CreateProjectDialogProps {
 }
 
 const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) => {
-  const topics = useKaivooStore(s => s.topics);
-  const projects = useKaivooStore(s => s.projects);
+  const topics = useKaivooStore((s) => s.topics);
+  const projects = useKaivooStore((s) => s.projects);
   const { addProject } = useKaivooActions();
 
   const [name, setName] = useState('');
@@ -84,7 +69,7 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
     onOpenChange(false);
   };
 
-  const filteredTopics = topics.filter(t => t.id !== 'topic-daily-notes');
+  const filteredTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,7 +81,9 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
         <div className="space-y-4 pt-2">
           {/* Name */}
           <div className="space-y-1.5">
-            <label htmlFor="project-name" className="text-sm font-medium text-muted-foreground">Name *</label>
+            <label htmlFor="project-name" className="text-sm font-medium text-muted-foreground">
+              Name *
+            </label>
             <Input
               id="project-name"
               value={name}
@@ -109,7 +96,9 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
 
           {/* Description */}
           <div className="space-y-1.5">
-            <label htmlFor="project-desc" className="text-sm font-medium text-muted-foreground">Description</label>
+            <label htmlFor="project-desc" className="text-sm font-medium text-muted-foreground">
+              Description
+            </label>
             <Textarea
               id="project-desc"
               value={description}
@@ -148,8 +137,10 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {filteredTopics.map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  {filteredTopics.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -159,13 +150,13 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
           {/* Dates row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" />
+              <label className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
                 Start Date
               </label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                  <Button variant="outline" size="sm" className="w-full justify-start text-left text-sm font-normal">
                     {startDate ? format(new Date(startDate + 'T00:00:00'), 'MMM d, yyyy') : 'Set start date'}
                   </Button>
                 </PopoverTrigger>
@@ -176,32 +167,33 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                     onSelect={(date) => {
                       if (date && endDate) {
                         const end = new Date(endDate + 'T00:00:00');
-                        if (date > end) { toast.error('Start date cannot be after end date'); return; }
+                        if (date > end) {
+                          toast.error('Start date cannot be after end date');
+                          return;
+                        }
                       }
                       setStartDate(date ? format(date, 'yyyy-MM-dd') : '');
                     }}
                     initialFocus
-                    className="p-3 pointer-events-auto"
+                    className="pointer-events-auto p-3"
                   />
-                  <div className="p-2 border-t border-border flex gap-1">
+                  <div className="flex gap-1 border-t border-border p-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs flex-1"
+                      className="flex-1 text-xs"
                       onClick={() => {
                         const today = format(new Date(), 'yyyy-MM-dd');
-                        if (endDate && today > endDate) { toast.error('Start date cannot be after end date'); return; }
+                        if (endDate && today > endDate) {
+                          toast.error('Start date cannot be after end date');
+                          return;
+                        }
                         setStartDate(today);
                       }}
                     >
                       Today
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs flex-1"
-                      onClick={() => setStartDate('')}
-                    >
+                    <Button variant="ghost" size="sm" className="flex-1 text-xs" onClick={() => setStartDate('')}>
                       Clear
                     </Button>
                   </div>
@@ -209,13 +201,13 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
               </Popover>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" />
+              <label className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
                 End Date
               </label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal text-sm">
+                  <Button variant="outline" size="sm" className="w-full justify-start text-left text-sm font-normal">
                     {endDate ? format(new Date(endDate + 'T00:00:00'), 'MMM d, yyyy') : 'Set end date'}
                   </Button>
                 </PopoverTrigger>
@@ -226,32 +218,33 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                     onSelect={(date) => {
                       if (date && startDate) {
                         const start = new Date(startDate + 'T00:00:00');
-                        if (date < start) { toast.error('End date cannot be before start date'); return; }
+                        if (date < start) {
+                          toast.error('End date cannot be before start date');
+                          return;
+                        }
                       }
                       setEndDate(date ? format(date, 'yyyy-MM-dd') : '');
                     }}
                     initialFocus
-                    className="p-3 pointer-events-auto"
+                    className="pointer-events-auto p-3"
                   />
-                  <div className="p-2 border-t border-border flex gap-1">
+                  <div className="flex gap-1 border-t border-border p-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs flex-1"
+                      className="flex-1 text-xs"
                       onClick={() => {
                         const today = format(new Date(), 'yyyy-MM-dd');
-                        if (startDate && today < startDate) { toast.error('End date cannot be before start date'); return; }
+                        if (startDate && today < startDate) {
+                          toast.error('End date cannot be before start date');
+                          return;
+                        }
                         setEndDate(today);
                       }}
                     >
                       Today
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs flex-1"
-                      onClick={() => setEndDate('')}
-                    >
+                    <Button variant="ghost" size="sm" className="flex-1 text-xs" onClick={() => setEndDate('')}>
                       Clear
                     </Button>
                   </div>
@@ -269,8 +262,8 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                   key={c}
                   onClick={() => setColor(c)}
                   className={cn(
-                    'w-10 h-10 rounded-full border-2 transition-all',
-                    color === c ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
+                    'h-10 w-10 rounded-full border-2 transition-all',
+                    color === c ? 'scale-110 border-foreground' : 'border-transparent hover:scale-105',
                   )}
                   style={{ backgroundColor: c }}
                   aria-label={`Select ${PROJECT_COLOR_NAMES[c] || 'color'}`}
@@ -281,9 +274,11 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleCreate} disabled={!name.trim()} className="gap-1.5">
-              <Plus className="w-4 h-4" />
+              <Plus className="h-4 w-4" />
               Create
             </Button>
           </div>

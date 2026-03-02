@@ -120,21 +120,16 @@ const DailyShutdown = ({ open, onOpenChange, date }: DailyShutdownProps) => {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
         {/* Progress bar */}
-        <div className="flex gap-1 mb-2">
+        <div className="mb-2 flex gap-1">
           {STEPS.map((s, i) => (
             <div
               key={s}
-              className={cn(
-                'flex-1 h-1 rounded-full transition-colors',
-                i <= stepIndex ? 'bg-primary' : 'bg-muted',
-              )}
+              className={cn('h-1 flex-1 rounded-full transition-colors', i <= stepIndex ? 'bg-primary' : 'bg-muted')}
             />
           ))}
         </div>
 
-        {step === 'review' && (
-          <StepReview stats={dayData.stats} onNext={goNext} />
-        )}
+        {step === 'review' && <StepReview stats={dayData.stats} onNext={goNext} />}
 
         {step === 'unfinished' && (
           <StepUnfinished
@@ -169,9 +164,7 @@ const DailyShutdown = ({ open, onOpenChange, date }: DailyShutdownProps) => {
           />
         )}
 
-        {step === 'done' && (
-          <StepDone onClose={handleClose} />
-        )}
+        {step === 'done' && <StepDone onClose={handleClose} />}
       </DialogContent>
     </Dialog>
   );
@@ -188,9 +181,16 @@ const StepReview = ({ stats, onNext }: { stats: DayStats; onNext: () => void }) 
       <p className="text-sm text-muted-foreground">
         You completed <strong className="text-foreground">{stats.tasksCompleted}</strong> tasks
         {stats.routinesTotal > 0 && (
-          <> and <strong className="text-foreground">{stats.routinesDone}/{stats.routinesTotal}</strong> routines</>
-        )}
-        {' '}today.
+          <>
+            {' '}
+            and{' '}
+            <strong className="text-foreground">
+              {stats.routinesDone}/{stats.routinesTotal}
+            </strong>{' '}
+            routines
+          </>
+        )}{' '}
+        today.
       </p>
       {stats.journalWordCount > 0 && (
         <p className="text-sm text-muted-foreground">
@@ -199,20 +199,25 @@ const StepReview = ({ stats, onNext }: { stats: DayStats; onNext: () => void }) 
       )}
       {stats.captureCount > 0 && (
         <p className="text-sm text-muted-foreground">
-          Captured <strong className="text-foreground">{stats.captureCount}</strong> idea{stats.captureCount !== 1 ? 's' : ''}.
+          Captured <strong className="text-foreground">{stats.captureCount}</strong> idea
+          {stats.captureCount !== 1 ? 's' : ''}.
         </p>
       )}
     </div>
-    <div className="flex justify-end mt-6">
+    <div className="mt-6 flex justify-end">
       <Button onClick={onNext}>
-        Continue <ArrowRight className="h-4 w-4 ml-1" />
+        Continue <ArrowRight className="ml-1 h-4 w-4" />
       </Button>
     </div>
   </div>
 );
 
 const StepUnfinished = ({
-  tasks, decisions, onChange, onBack, onNext,
+  tasks,
+  decisions,
+  onChange,
+  onBack,
+  onNext,
 }: {
   tasks: Task[];
   decisions: Record<string, string>;
@@ -225,25 +230,31 @@ const StepUnfinished = ({
       <DialogTitle>Handle Unfinished Tasks</DialogTitle>
     </DialogHeader>
     {tasks.length === 0 ? (
-      <p className="text-sm text-muted-foreground mt-4 text-center py-4">All tasks done — nice work!</p>
+      <p className="mt-4 py-4 text-center text-sm text-muted-foreground">All tasks done — nice work!</p>
     ) : (
-      <div className="mt-4 space-y-3 max-h-64 overflow-y-auto">
-        {tasks.map(task => (
-          <div key={task.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted/30">
-            <span className="text-sm truncate flex-1">{task.title}</span>
-            <div className="flex gap-1 shrink-0">
-              {(['tomorrow', 'week', 'done', 'drop'] as const).map(action => (
+      <div className="mt-4 max-h-64 space-y-3 overflow-y-auto">
+        {tasks.map((task) => (
+          <div key={task.id} className="flex items-center justify-between gap-2 rounded-lg bg-muted/30 p-2">
+            <span className="flex-1 truncate text-sm">{task.title}</span>
+            <div className="flex shrink-0 gap-1">
+              {(['tomorrow', 'week', 'done', 'drop'] as const).map((action) => (
                 <button
                   key={action}
                   onClick={() => onChange({ ...decisions, [task.id]: action })}
                   className={cn(
-                    'text-[10px] px-2 py-1 rounded-lg transition-colors',
+                    'rounded-lg px-2 py-1 text-[10px] transition-colors',
                     decisions[task.id] === action
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-muted-foreground hover:bg-accent/30',
                   )}
                 >
-                  {action === 'tomorrow' ? '→ Tmrw' : action === 'week' ? '→ Week' : action === 'done' ? '✓ Done' : '✕ Drop'}
+                  {action === 'tomorrow'
+                    ? '→ Tmrw'
+                    : action === 'week'
+                      ? '→ Week'
+                      : action === 'done'
+                        ? '✓ Done'
+                        : '✕ Drop'}
                 </button>
               ))}
             </div>
@@ -251,17 +262,25 @@ const StepUnfinished = ({
         ))}
       </div>
     )}
-    <div className="flex justify-between mt-6">
-      <Button variant="ghost" onClick={onBack}>Back</Button>
+    <div className="mt-6 flex justify-between">
+      <Button variant="ghost" onClick={onBack}>
+        Back
+      </Button>
       <Button onClick={onNext}>
-        {tasks.length === 0 ? 'Continue' : 'Apply & Continue'} <ArrowRight className="h-4 w-4 ml-1" />
+        {tasks.length === 0 ? 'Continue' : 'Apply & Continue'} <ArrowRight className="ml-1 h-4 w-4" />
       </Button>
     </div>
   </div>
 );
 
 const StepTomorrow = ({
-  tomorrowTasks, tomorrowMeetings, newTask, onNewTaskChange, onAddTask, onBack, onNext,
+  tomorrowTasks,
+  tomorrowMeetings,
+  newTask,
+  onNewTaskChange,
+  onAddTask,
+  onBack,
+  onNext,
 }: {
   tomorrowTasks: Task[];
   tomorrowMeetings: number;
@@ -277,44 +296,54 @@ const StepTomorrow = ({
     </DialogHeader>
     <div className="mt-4 space-y-3">
       <p className="text-sm text-muted-foreground">
-        You have <strong className="text-foreground">{tomorrowMeetings}</strong> meeting{tomorrowMeetings !== 1 ? 's' : ''} and{' '}
-        <strong className="text-foreground">{tomorrowTasks.length}</strong> task{tomorrowTasks.length !== 1 ? 's' : ''} lined up.
+        You have <strong className="text-foreground">{tomorrowMeetings}</strong> meeting
+        {tomorrowMeetings !== 1 ? 's' : ''} and <strong className="text-foreground">{tomorrowTasks.length}</strong> task
+        {tomorrowTasks.length !== 1 ? 's' : ''} lined up.
       </p>
       {tomorrowTasks.length > 0 && (
         <div className="space-y-1">
-          {tomorrowTasks.slice(0, 5).map(t => (
-            <div key={t.id} className="text-sm text-muted-foreground flex items-center gap-2 px-2 py-1">
-              <div className="w-3 h-3 rounded border border-border shrink-0" />
+          {tomorrowTasks.slice(0, 5).map((t) => (
+            <div key={t.id} className="flex items-center gap-2 px-2 py-1 text-sm text-muted-foreground">
+              <div className="h-3 w-3 shrink-0 rounded border border-border" />
               <span className="truncate">{t.title}</span>
             </div>
           ))}
           {tomorrowTasks.length > 5 && (
-            <p className="text-xs text-muted-foreground px-2">+{tomorrowTasks.length - 5} more</p>
+            <p className="px-2 text-xs text-muted-foreground">+{tomorrowTasks.length - 5} more</p>
           )}
         </div>
       )}
       <div className="flex gap-2">
         <Input
           value={newTask}
-          onChange={e => onNewTaskChange(e.target.value)}
+          onChange={(e) => onNewTaskChange(e.target.value)}
           placeholder="Add a task for tomorrow..."
           className="h-8 text-sm"
-          onKeyDown={e => e.key === 'Enter' && onAddTask()}
+          onKeyDown={(e) => e.key === 'Enter' && onAddTask()}
         />
         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onAddTask} disabled={!newTask.trim()}>
           <CalendarPlus className="h-4 w-4" />
         </Button>
       </div>
     </div>
-    <div className="flex justify-between mt-6">
-      <Button variant="ghost" onClick={onBack}>Back</Button>
-      <Button onClick={onNext}>Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
+    <div className="mt-6 flex justify-between">
+      <Button variant="ghost" onClick={onBack}>
+        Back
+      </Button>
+      <Button onClick={onNext}>
+        Continue <ArrowRight className="ml-1 h-4 w-4" />
+      </Button>
     </div>
   </div>
 );
 
 const StepRate = ({
-  moodScore, daySummary, onMoodChange, onSummaryChange, onBack, onNext,
+  moodScore,
+  daySummary,
+  onMoodChange,
+  onSummaryChange,
+  onBack,
+  onNext,
 }: {
   moodScore: number | null;
   daySummary: string;
@@ -329,13 +358,13 @@ const StepRate = ({
     </DialogHeader>
     <div className="mt-4 space-y-4">
       <div className="flex items-center justify-center gap-3">
-        {MOOD_OPTIONS.map(m => (
+        {MOOD_OPTIONS.map((m) => (
           <button
             key={m.score}
             onClick={() => onMoodChange(moodScore === m.score ? null : m.score)}
             className={cn(
-              'flex flex-col items-center gap-1 p-2 rounded-xl transition-all',
-              moodScore === m.score ? 'bg-primary/10 scale-110' : 'hover:bg-muted',
+              'flex flex-col items-center gap-1 rounded-xl p-2 transition-all',
+              moodScore === m.score ? 'scale-110 bg-primary/10' : 'hover:bg-muted',
             )}
           >
             <span className="text-2xl">{m.emoji}</span>
@@ -345,16 +374,18 @@ const StepRate = ({
       </div>
       <Input
         value={daySummary}
-        onChange={e => onSummaryChange(e.target.value)}
+        onChange={(e) => onSummaryChange(e.target.value)}
         placeholder="Today in a sentence... (optional)"
         className="text-sm"
       />
     </div>
-    <div className="flex justify-between mt-6">
-      <Button variant="ghost" onClick={onBack}>Back</Button>
+    <div className="mt-6 flex justify-between">
+      <Button variant="ghost" onClick={onBack}>
+        Back
+      </Button>
       <Button onClick={onNext}>
         {moodScore || daySummary.trim() ? 'Save & Finish' : 'Skip & Finish'}
-        <ArrowRight className="h-4 w-4 ml-1" />
+        <ArrowRight className="ml-1 h-4 w-4" />
       </Button>
     </div>
   </div>
@@ -362,11 +393,11 @@ const StepRate = ({
 
 const StepDone = ({ onClose }: { onClose: () => void }) => (
   <div className="py-8 text-center">
-    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 animate-in zoom-in-50 duration-500">
+    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 duration-500 animate-in zoom-in-50">
       <Sparkles className="h-8 w-8 text-primary" />
     </div>
-    <h2 className="text-xl font-semibold text-foreground mb-2">Shutdown Complete</h2>
-    <p className="text-sm text-muted-foreground mb-6">You're done for the day. See you tomorrow.</p>
+    <h2 className="mb-2 text-xl font-semibold text-foreground">Shutdown Complete</h2>
+    <p className="mb-6 text-sm text-muted-foreground">You're done for the day. See you tomorrow.</p>
     <Button onClick={onClose}>Close</Button>
   </div>
 );

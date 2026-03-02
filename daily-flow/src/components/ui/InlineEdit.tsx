@@ -60,10 +60,7 @@ const InlineEdit = ({ value, onSave, placeholder, className, as = 'p' }: InlineE
           if (e.key === 'Escape') cancel();
         }}
         onBlur={save}
-        className={cn(
-          'bg-transparent border-b border-primary/50 outline-none w-full',
-          className,
-        )}
+        className={cn('w-full border-b border-primary/50 bg-transparent outline-none', className)}
       />
     );
   }
@@ -85,7 +82,7 @@ const InlineEdit = ({ value, onSave, placeholder, className, as = 'p' }: InlineE
       role="button"
       aria-label={`Edit ${as === 'h1' ? 'name' : 'description'}: ${value || placeholder || ''}`}
       className={cn(
-        'cursor-pointer hover:bg-secondary/50 rounded px-1 -mx-1 transition-colors',
+        '-mx-1 cursor-pointer rounded px-1 transition-colors hover:bg-secondary/50',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         isEmpty && 'italic text-muted-foreground',
         className,

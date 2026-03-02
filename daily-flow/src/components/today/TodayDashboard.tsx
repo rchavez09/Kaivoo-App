@@ -46,23 +46,15 @@ interface TodayDashboardProps {
   onMeetingClick?: (id: string) => void;
 }
 
-const TodayDashboard = ({
-  date,
-  onDateChange,
-  onTaskClick,
-  onMeetingClick,
-}: TodayDashboardProps) => {
+const TodayDashboard = ({ date, onDateChange, onTaskClick, onMeetingClick }: TodayDashboardProps) => {
   const [shutdownOpen, setShutdownOpen] = useState(false);
   const { settings, updateSettings } = useWidgetSettings('today-dashboard', DEFAULT_SETTINGS);
 
-  const handleWidgetsChange = useCallback(
-    (widgets: WidgetConfig[]) => updateSettings({ widgets }),
-    [updateSettings]
-  );
+  const handleWidgetsChange = useCallback((widgets: WidgetConfig[]) => updateSettings({ widgets }), [updateSettings]);
 
   const handleLayoutChange = useCallback(
     (layout: 'vertical' | 'horizontal') => updateSettings({ layout }),
-    [updateSettings]
+    [updateSettings],
   );
 
   const renderWidget = useCallback(
@@ -82,11 +74,11 @@ const TodayDashboard = ({
           return null;
       }
     },
-    [date, onTaskClick, onMeetingClick]
+    [date, onTaskClick, onMeetingClick],
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="mx-auto max-w-4xl px-6 py-8">
       {/* Date Navigation — structural, outside widget container */}
       <DayHeader date={date} onDateChange={onDateChange} />
 

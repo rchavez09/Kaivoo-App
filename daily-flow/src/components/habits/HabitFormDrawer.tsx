@@ -7,10 +7,7 @@ import { Habit, HabitType, TimeBlock, HabitSchedule } from '@/types';
 import { cn } from '@/lib/utils';
 import { iconMap, availableIcons } from '@/components/widgets/tracking/tracking-types';
 
-const HABIT_COLORS = [
-  '#3B8C8C', '#E06040', '#6B7FD7', '#D4A843',
-  '#7CB56B', '#C77DBA', '#5BA0C9', '#8B8B8B',
-];
+const HABIT_COLORS = ['#3B8C8C', '#E06040', '#6B7FD7', '#D4A843', '#7CB56B', '#C77DBA', '#5BA0C9', '#8B8B8B'];
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -84,25 +81,23 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
   };
 
   const toggleDay = (day: number) => {
-    setSelectedDays(prev =>
-      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
-    );
+    setSelectedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]));
   };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-card">
-        <SheetHeader className="pb-4 mb-4 border-b border-border/50">
+      <SheetContent className="w-full overflow-y-auto bg-card sm:max-w-lg">
+        <SheetHeader className="mb-4 border-b border-border/50 pb-4">
           <SheetTitle>{habit ? 'Edit Habit' : 'New Habit'}</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-6">
           {/* Name */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Name</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Name</label>
             <Input
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Drink water, Exercise, Meditate..."
               className="text-lg font-semibold"
               autoFocus
@@ -111,17 +106,17 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
 
           {/* Type */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Type</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Type</label>
             <div className="flex gap-2">
-              {(['positive', 'negative', 'multi-count'] as HabitType[]).map(t => (
+              {(['positive', 'negative', 'multi-count'] as HabitType[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setType(t)}
                   className={cn(
-                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
                     type === t
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-muted-foreground hover:text-foreground'
+                      : 'bg-secondary text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {t === 'positive' ? 'Positive' : t === 'negative' ? 'Negative' : 'Multi-count'}
@@ -132,17 +127,17 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
 
           {/* Time block */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Time of day</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Time of day</label>
             <div className="flex gap-2">
-              {(['morning', 'afternoon', 'evening', 'anytime'] as TimeBlock[]).map(tb => (
+              {(['morning', 'afternoon', 'evening', 'anytime'] as TimeBlock[]).map((tb) => (
                 <button
                   key={tb}
                   onClick={() => setTimeBlock(tb)}
                   className={cn(
-                    'px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all',
+                    'rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition-all',
                     timeBlock === tb
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-muted-foreground hover:text-foreground'
+                      : 'bg-secondary text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {tb}
@@ -153,27 +148,29 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
 
           {/* Icon */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Icon</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Icon</label>
             <div className="flex flex-wrap gap-2">
-              {availableIcons.map(iconKey => {
+              {availableIcons.map((iconKey) => {
                 const IconComponent = iconMap[iconKey] || Sun;
                 return (
                   <button
                     key={iconKey}
                     onClick={() => setIcon(iconKey)}
                     className={cn(
-                      'w-10 h-10 rounded-lg flex items-center justify-center transition-all',
-                      icon === iconKey
-                        ? 'ring-2 ring-primary'
-                        : 'bg-secondary hover:bg-secondary/80'
+                      'flex h-10 w-10 items-center justify-center rounded-lg transition-all',
+                      icon === iconKey ? 'ring-2 ring-primary' : 'bg-secondary hover:bg-secondary/80',
                     )}
-                    style={icon === iconKey ? {
-                      backgroundColor: `${color}1A`,
-                      color: color,
-                    } : undefined}
+                    style={
+                      icon === iconKey
+                        ? {
+                            backgroundColor: `${color}1A`,
+                            color: color,
+                          }
+                        : undefined
+                    }
                     aria-label={iconKey}
                   >
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent className="h-5 w-5" />
                   </button>
                 );
               })}
@@ -182,15 +179,15 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
 
           {/* Color */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Color</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Color</label>
             <div className="flex gap-2">
-              {HABIT_COLORS.map(c => (
+              {HABIT_COLORS.map((c) => (
                 <button
                   key={c}
                   onClick={() => setColor(c)}
                   className={cn(
-                    'w-8 h-8 rounded-full transition-all',
-                    color === c ? 'ring-2 ring-offset-2 ring-primary' : ''
+                    'h-8 w-8 rounded-full transition-all',
+                    color === c ? 'ring-2 ring-primary ring-offset-2' : '',
                   )}
                   style={{ backgroundColor: c }}
                   aria-label={`Color ${c}`}
@@ -201,17 +198,17 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
 
           {/* Schedule */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Schedule</label>
-            <div className="flex gap-2 mb-3">
-              {(['daily', 'specific_days', 'x_per_week'] as HabitSchedule['type'][]).map(st => (
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Schedule</label>
+            <div className="mb-3 flex gap-2">
+              {(['daily', 'specific_days', 'x_per_week'] as HabitSchedule['type'][]).map((st) => (
                 <button
                   key={st}
                   onClick={() => setScheduleType(st)}
                   className={cn(
-                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
                     scheduleType === st
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-muted-foreground hover:text-foreground'
+                      : 'bg-secondary text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {st === 'daily' ? 'Daily' : st === 'specific_days' ? 'Specific Days' : 'X per Week'}
@@ -226,10 +223,10 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
                     key={idx}
                     onClick={() => toggleDay(idx)}
                     className={cn(
-                      'w-9 h-9 rounded-lg text-sm font-medium transition-all',
+                      'h-9 w-9 rounded-lg text-sm font-medium transition-all',
                       selectedDays.includes(idx)
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-muted-foreground hover:text-foreground'
+                        : 'bg-secondary text-muted-foreground hover:text-foreground',
                     )}
                   >
                     {day}
@@ -245,7 +242,7 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
                   min={1}
                   max={7}
                   value={timesPerWeek}
-                  onChange={e => setTimesPerWeek(Number(e.target.value))}
+                  onChange={(e) => setTimesPerWeek(Number(e.target.value))}
                   className="w-20"
                 />
                 <span className="text-sm text-muted-foreground">times per week</span>
@@ -256,15 +253,13 @@ const HabitFormDrawer = ({ open, onOpenChange, habit, onSave }: HabitFormDrawerP
           {/* Target count (multi-count only) */}
           {type === 'multi-count' && (
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Times per day
-              </label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Times per day</label>
               <Input
                 type="number"
                 min={1}
                 max={99}
                 value={targetCount}
-                onChange={e => setTargetCount(Number(e.target.value))}
+                onChange={(e) => setTargetCount(Number(e.target.value))}
                 className="w-24"
               />
             </div>
