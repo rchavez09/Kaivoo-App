@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 4.2
+**Version:** 4.3
 **Last Updated:** March 1, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -366,23 +366,24 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 | Milestone | Status | Priority |
 |---|---|---|
-| Topics page restructure — intuitive organization, cleaner UX | PLANNED | Must-have |
+| Topics as Knowledge OS — local-first file browser, smart folder hierarchy, single source of truth for all content and files | PLANNED | Must-have |
+| Desktop packaging (Electron or Tauri) — macOS, Windows, Linux. Required for local file system access. One codebase, three platform builds. | PLANNED | Must-have |
+| Data layer abstraction — LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B. Swappable backend, one codebase. | PLANNED | Must-have |
+| Local-first storage — SQLite database + real files on disk. Vault folder chosen during setup. No cloud dependency for core functionality. | PLANNED | Must-have |
+| File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | PLANNED | Must-have |
 | AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | PLANNED | Must-have |
 | Google Calendar integration — OAuth, two-way sync | PLANNED | Must-have |
 | Gmail integration — read, send, organize email within the app | PLANNED | Must-have |
-| Local save / data export — own your data on disk, full export | PLANNED | Must-have |
-| Setup wizard + Concierge Hatching — first-run: hosting, AI config, profile, name your concierge, set tone/style | PLANNED | Must-have |
+| Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | PLANNED | Must-have |
 | License key system — activation, tier validation, commercial distribution | PLANNED | Must-have |
-| White-label config layer — logo, colors, app name as settings (not hardcoded) | PLANNED | Should-have |
-| Outlook integration — email + calendar (fast-follow after Google) | PLANNED | Should-have |
 | Landing page & marketing site | PLANNED | Must-have |
 | Stripe integration — one-time payment flow | PLANNED | Must-have |
 | EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED | Must-have |
 | Product Hunt launch | PLANNED | Must-have |
+| White-label config layer — logo, colors, app name as settings (not hardcoded) | PLANNED | Should-have |
+| Outlook integration — email + calendar (fast-follow after Google) | PLANNED | Should-have |
 | PWA (installable, offline read) | PLANNED | Should-have |
-| File attachments | PLANNED | Should-have |
-| Desktop packaging (Electron or Tauri) — macOS, Windows, Linux | PLANNED | Should-have |
 | Notifications & reminders | PLANNED | Should-have |
 
 ### Phase B: One Workflow Cloud Platform + Orchestrator
@@ -442,7 +443,7 @@ Every 1st-party module passes through the same packaging checks that marketplace
 | Full white-label Workshop — deep customization, branding, layout composition | PLANNED |
 | Business Hub (multi-user, roles, team vaults) | PLANNED |
 | The Theater — media previews (PDF, video, audio, slides) | PLANNED |
-| The Vault — file system + file browser | PLANNED |
+| The Vault — full file system + file browser (Phase A local-first storage is the architectural foundation) | PLANNED |
 | Self-hosted hub (Node.js + SQLite, Dockerized, multi-device sync) | PLANNED |
 | Trading Bot module (requires legal/compliance review before development) | PLANNED |
 | YouTube / Content Factory module | PLANNED |
@@ -470,6 +471,10 @@ These run in parallel with sprint work, not blocking it.
 | Orchestrator pricing model | Agent 8 | Subscription vs. usage-based vs. hybrid pricing for Product 2 | PLANNED |
 | Productization template design | Agent 3 + Agent 8 | What does a blank agent system look like for a new user? Guided not empty. First-run wizard design | PLANNED |
 | Multi-model orchestration overhead | Agent 5 | Users pay API costs — what's the platform orchestration overhead on top? | PLANNED |
+| Electron vs. Tauri evaluation | Agent 9 | Desktop framework for Phase A — performance, bundle size, file system API, cross-platform maturity, Rust vs. Node | **URGENT** |
+| SQLite schema + adapter interface | Agent 3 | Local-first schema design. Mirror Supabase or redesign? Adapter pattern for swappable backend. | PLANNED |
+| File watching mechanism | Agent 3 | How to detect manual file changes on disk for "permissive by nature" design | PLANNED |
+| Desktop auto-update + code signing | Agent 9 | Update distribution mechanism, Apple notarization, Windows signing | PLANNED |
 
 ---
 
@@ -517,9 +522,26 @@ These run in parallel with sprint work, not blocking it.
 - ~~Phase A concierge BYO keys~~ → **Scoped to productivity use** — users connect Claude, ChatGPT, Llama, any provider. Multi-model routing architecture ships in Phase A but only productivity capabilities exposed.
 - ~~Phase A vs. Phase B priority~~ → **Ship productivity app first** — revenue now funds Orchestrator development. Research runs in parallel.
 
+**Key decisions resolved (CEO Session #4 — March 1, 2026):**
+- ~~Local-first storage phasing~~ → **Phase A must-have** — $249 one-time model requires local storage. Supabase cloud dependency creates inverted unit economics. Local-first solves business model and aligns with Core Principle #1.
+- ~~Desktop packaging priority~~ → **Promoted to Phase A must-have** — required for file system access. One codebase, three platform builds (macOS, Windows, Linux).
+- ~~Topics page role~~ → **Knowledge OS** — Topics is the top-level hierarchy (Topics > Projects > Tasks/Files). Smart file browser, single source of truth for all content and files. Convention with flexibility: opinionated default, permissive by nature.
+- ~~Data architecture for local~~ → **Swappable backend** — Data layer abstraction with LocalAdapter (SQLite + file system) for Phase A and CloudAdapter (Supabase) for Phase B. One codebase, no split.
+- ~~File attachments priority~~ → **Promoted to Phase A must-have** — files in project/topic folders, images embedded inline in notes.
+- ~~Hashtags as folders vs. filters~~ → **Virtual groupings (filters)** — hashtags are metadata filters, not physical subfolders. Files can have multiple tags but live in one folder.
+- ~~Folder structure ownership~~ → **SQLite is source of truth** — folder structure on disk is the default representation, but metadata/relationships tracked in SQLite. If user rearranges files manually, app detects and updates index.
+- ~~Obsidian import scope~~ → **File copy, feature not headline** — copy .md files into Topics, index #hashtags and [[wiki-links]], no plugins/frontmatter/graph. Default copy, optional adopt-in-place.
+- ~~Supabase during development~~ → **Keep for dev/test** — Supabase stays for development. Shipped product uses local SQLite. Data layer abstraction enables the swap.
+- ~~Codebase split~~ → **No split until Phase A ships** — same React frontend, same repo, adapter pattern handles local vs. cloud.
+- ~~Entry export~~ → **Export to file** — journal entries/captures can be exported as .md files to chosen Topics folder location.
+
 **Key decisions ahead:**
+- **Electron vs. Tauri** — Agent 9 to evaluate urgently. Blocks desktop packaging and all local-first features.
+- **SQLite schema design** — Agent 3 to design local schema and adapter interface. Mirror Supabase or redesign for local-first?
+- **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
+- **Desktop auto-update** — How do users get updates for the desktop app? Agent 9.
+- **Code signing** — Apple notarization + Windows signing. Agent 9.
 - **Phase A sprint sequencing** — Which pre-ship features to group into Sprint 19, 20, etc. (Director to plan)
-- **Desktop framework choice** — Electron vs. Tauri (Agent 9 to evaluate)
 - **Phase B subscription pricing** — Pending research on token costs, competitive pricing, addon model
 - **Skills store architecture** — MCP-based vs. custom plugin API (Agent 3 to evaluate during Phase B)
 - **Sandboxed module runtime** — How user-built modules run safely (iframe, Web Components, controlled runtime) (Agent 3)
@@ -603,7 +625,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v4.2 — March 1, 2026*
+*Vision v4.3 — March 1, 2026*
+*v4.3: CEO Session #4 — Local-First Knowledge OS. Topics elevated to single source of truth for all content and files (Topics > Projects > Tasks/Files hierarchy). Desktop packaging (Electron/Tauri) promoted to Phase A must-have — $249 model requires local storage, Supabase cloud creates inverted unit economics. Data layer abstraction: LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B, swappable backend, no codebase split. File attachments + image embedding promoted to must-have. Hashtags as virtual filters not folders. Convention-with-flexibility folder structure (opinionated default, permissive by nature). Obsidian import (file copy, not headline). Entry-to-file export. Setup wizard includes vault folder selection. Four new research parcels: Electron vs. Tauri (urgent), SQLite schema design, file watching, desktop auto-update + code signing. See CEO-Sessions/CEO-Session-4-Local-First-Knowledge-OS.md.*
 *v4.2: CEO Session #3 — Two-product architecture (Kaivoo Productivity + Kaivoo Orchestrator). Concierge scope boundary (productivity helper vs. builder). Modular toggle architecture (settings-driven module activation). Productization requirement (clean templates, no Kaivoo-specific content in shipped specs). Orchestrator as addon/integration for SMBs. Solo Builder target customer added. Phase B split into Orchestrator + One Workflow Cloud sections. Seven new research parcels assigned (messaging channel, agent productization, Solo Builder market, remote execution security, Orchestrator pricing, template design, multi-model overhead).*
 *v4.1: CEO Session #2 — Concierge Identity & Soul (naming, hatching, soul file). Concierge-as-Builder (personal customization Phase B, marketplace creation Phase C). 1st-party modules as marketplace templates (Page + Today Widget format). Phase B concierge-led onboarding wizard. New research parcels: marketplace model analysis (Agent 8), sandboxed module runtime (Agent 3).*
 *v4.0: CEO Session strategic pivot — Two-phase revenue strategy (Phase A: $249 productivity app, Phase B: One Workflow cloud subscription). New core principles: "Guided, not open-ended" and "Progressive autonomy." Autonomy Ladder (manual → concierge → autonomous). SMB focus, enterprise language dropped. White-label architecture. Skills/integration architecture elevated. Research parcels assigned. Competitive edge articulated.*

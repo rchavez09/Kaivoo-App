@@ -322,7 +322,15 @@ export default function SearchCommand() {
                     </span>
                   </div>
                   {result.preview && result.preview !== result.title && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{result.preview}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1"
+                      dangerouslySetInnerHTML={{
+                        __html: result.preview
+                          .replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
+                      }}
+                    />
                   )}
                 </div>
               </button>

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { 
-  FolderOpen, Plus, ChevronRight, ChevronDown, FileText, 
-  MoreHorizontal, Search, Trash2 
+  FolderOpen, Plus, ChevronRight, ChevronDown, FileText,
+  MoreHorizontal, Search, Trash2, Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,10 +75,29 @@ const Topics = () => {
     setCreatePageOpen(true);
   };
 
-  // Filter topics based on search
-  const filteredTopics = topics.filter(topic => 
-    topic.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter topics based on search (includes page name matching)
+  const searchLower = searchQuery.toLowerCase();
+  const filteredTopics = searchQuery
+    ? topics.filter(topic => {
+        if (topic.name.toLowerCase().includes(searchLower)) return true;
+        // Also match if any child page name matches
+        return topicPages.some(p => p.topicId === topic.id && p.name.toLowerCase().includes(searchLower));
+      })
+    : topics;
+
+  // Auto-expand topics that have matching pages
+  useEffect(() => {
+    if (!searchQuery) return;
+    const toExpand = new Set(expandedTopics);
+    topics.forEach(topic => {
+      const hasMatchingPage = topicPages.some(
+        p => p.topicId === topic.id && p.name.toLowerCase().includes(searchLower)
+      );
+      if (hasMatchingPage) toExpand.add(topic.id);
+    });
+    setExpandedTopics(toExpand);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
 
   return (
     <AppLayout>
@@ -122,7 +141,7 @@ const Topics = () => {
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Search topics..." 
+            placeholder="Search topics and pages..."
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -154,13 +173,22 @@ const Topics = () => {
                         )}
                       </button>
                       
-                      <FolderOpen className="w-4 h-4 text-primary" />
-                      
+                      {topic.icon ? (
+                        <span className="text-base leading-none">{topic.icon}</span>
+                      ) : (
+                        <FolderOpen className="w-4 h-4 text-primary" />
+                      )}
+
                       <button
                         onClick={() => navigate(`/topics/${topic.id}`)}
                         className="flex-1 text-left"
                       >
                         <span className="font-medium text-foreground">{topic.name}</span>
+                        {topic.description && (
+                          <span className="ml-2 text-xs text-muted-foreground truncate max-w-[200px] inline-block align-bottom">
+                            {topic.description.length > 50 ? topic.description.slice(0, 50) + '...' : topic.description}
+                          </span>
+                        )}
                         <span className="ml-2 text-xs text-muted-foreground">
                           {captureCount} capture{captureCount !== 1 ? 's' : ''} · {taskCount} task{taskCount !== 1 ? 's' : ''}
                         </span>
@@ -181,9 +209,15 @@ const Topics = () => {
                             <Plus className="w-4 h-4 mr-2" />
                             Add Page
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem onClick={() => {
+                            navigate(`/topics/${topic.id}`);
+                          }}>
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             onClick={() => {
-                              deleteTopic(topic.id);
+                              void deleteTopic(topic.id);
                               toast.success(`Deleted topic "${topic.name}"`);
                             }}
                             className="text-destructive focus:text-destructive"

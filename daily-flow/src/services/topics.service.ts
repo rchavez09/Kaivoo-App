@@ -92,6 +92,27 @@ export const createTopic = async (userId: string, topic: Omit<Topic, 'id' | 'cre
   return dbToTopic(data);
 };
 
+export const updateTopic = async (
+  userId: string,
+  id: string,
+  updates: { name?: string; description?: string; icon?: string },
+) => {
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
+
+  const { data, error } = await supabase
+    .from('topics')
+    .update(dbUpdates)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToTopic(data);
+};
+
 export const deleteTopic = async (userId: string, id: string) => {
   const { error } = await supabase.from('topics').delete().eq('id', id).eq('user_id', userId);
   if (error) throw error;
@@ -125,6 +146,31 @@ export const createTopicPage = async (userId: string, page: Omit<TopicPage, 'id'
     .single();
   if (error) throw error;
   return dbToTopicPage(data);
+};
+
+export const updateTopicPage = async (
+  userId: string,
+  id: string,
+  updates: { name?: string; description?: string },
+) => {
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+
+  const { data, error } = await supabase
+    .from('topic_pages')
+    .update(dbUpdates)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToTopicPage(data);
+};
+
+export const deleteTopicPage = async (userId: string, id: string) => {
+  const { error } = await supabase.from('topic_pages').delete().eq('id', id).eq('user_id', userId);
+  if (error) throw error;
 };
 
 // Tag CRUD

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CheckSquare, Circle, CheckCircle2, Plus, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '@/types';
@@ -7,6 +8,8 @@ import { useKaivooActions } from '@/hooks/useKaivooActions';
 interface TopicTasksWidgetProps {
   tasks: Task[];
   topicName: string;
+  selectedTag?: string | null;
+  topicId?: string;
 }
 
 const priorityColors = {
@@ -15,14 +18,23 @@ const priorityColors = {
   low: 'text-info-foreground',
 };
 
-const TopicTasksWidget = ({ tasks, topicName }: TopicTasksWidgetProps) => {
-  const { updateTask } = useKaivooActions();
+const TopicTasksWidget = ({ tasks, topicName, selectedTag, topicId }: TopicTasksWidgetProps) => {
+  const { updateTask, addTask } = useKaivooActions();
+  const [showAddInput, setShowAddInput] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
 
-  const pendingTasks = tasks.filter(t => t.status !== 'done');
-  const completedTasks = tasks.filter(t => t.status === 'done');
+  // Filter by selected tag
+  let filteredTasks = tasks;
+  if (selectedTag) {
+    const tagLower = selectedTag.toLowerCase();
+    filteredTasks = tasks.filter(t => t.tags.some(tag => tag.toLowerCase() === tagLower));
+  }
+
+  const pendingTasks = filteredTasks.filter(t => t.status !== 'done');
+  const completedTasks = filteredTasks.filter(t => t.status === 'done');
 
   const toggleTask = (taskId: string, currentStatus: string) => {
-    void updateTask(taskId, { 
+    void updateTask(taskId, {
       status: currentStatus === 'done' ? 'todo' : 'done',
       completedAt: currentStatus === 'done' ? undefined : new Date(),
     });
@@ -36,15 +48,54 @@ const TopicTasksWidget = ({ tasks, topicName }: TopicTasksWidgetProps) => {
           <span className="widget-title">Tasks</span>
           <span className="text-xs text-muted-foreground font-normal ml-1">
             {pendingTasks.length} open
+            {selectedTag && (
+              <span className="ml-1 text-primary">(#{selectedTag})</span>
+            )}
           </span>
         </div>
-        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs gap-1.5"
+          onClick={() => setShowAddInput(true)}
+        >
           <Plus className="w-3 h-3" />
           Add Task
         </Button>
       </div>
 
-      {tasks.length > 0 ? (
+      {showAddInput && (
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            type="text"
+            placeholder="Task title..."
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newTaskTitle.trim()) {
+                void addTask({
+                  title: newTaskTitle.trim(),
+                  status: 'todo',
+                  priority: 'medium',
+                  tags: [],
+                  topicIds: topicId ? [topicId] : [],
+                  subtasks: [],
+                });
+                setNewTaskTitle('');
+                setShowAddInput(false);
+              }
+              if (e.key === 'Escape') {
+                setNewTaskTitle('');
+                setShowAddInput(false);
+              }
+            }}
+            autoFocus
+            className="flex-1 h-8 px-3 text-sm bg-secondary/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+        </div>
+      )}
+
+      {filteredTasks.length > 0 ? (
         <div className="space-y-1">
           {/* Pending tasks */}
           {pendingTasks.map((task) => (

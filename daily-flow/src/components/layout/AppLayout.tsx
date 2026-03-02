@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect, useCallback } from 'react';
+import { ReactNode, useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -7,7 +7,7 @@ import { useSearchStore } from '@/stores/useSearchStore';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import FloatingChat from '@/components/FloatingChat';
 import QuickAddNoteDialog from '@/components/projects/QuickAddNoteDialog';
-import SearchCommand from '@/components/search/SearchCommand';
+const SearchCommand = lazy(() => import('@/components/search/SearchCommand'));
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -59,7 +59,9 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </main>
         </div>
       </div>
-      <SearchCommand />
+      <Suspense fallback={null}>
+        <SearchCommand />
+      </Suspense>
       <FloatingChat />
       <QuickAddNoteDialog
         open={quickNoteOpen}
