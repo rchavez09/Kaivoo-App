@@ -43,11 +43,15 @@ interface KaivooStore {
   topics: Topic[];
   topicPages: TopicPage[];
   addTopic: (topic: Omit<Topic, 'id' | 'createdAt'>) => Topic;
+  updateTopic: (id: string, updates: Partial<Topic>) => void;
   deleteTopic: (id: string) => void;
   addTopicPage: (page: Omit<TopicPage, 'id' | 'createdAt'>) => TopicPage;
+  updateTopicPage: (id: string, updates: Partial<TopicPage>) => void;
+  deleteTopicPage: (id: string) => void;
   getTopicById: (id: string) => Topic | undefined;
   getTopicByName: (name: string) => Topic | undefined;
   getTopicPages: (topicId: string) => TopicPage[];
+  getChildPageIds: (topicId: string) => string[];
   // Resolve [[Topic]] or [[Topic/Page]] path to array of IDs [topicId] or [topicId, pageId]
   resolveTopicPath: (path: string, autoCreate?: boolean) => string[] | null;
   // Get display path for a topic/page ID
@@ -439,13 +443,19 @@ export const useKaivooStore = create<KaivooStore>()(
     return topic;
   },
 
+  updateTopic: (id, updates) => {
+    set((state) => ({
+      topics: state.topics.map(t => t.id === id ? { ...t, ...updates } : t),
+    }));
+  },
+
   deleteTopic: (id) => {
     set((state) => ({
       topics: state.topics.filter(t => t.id !== id),
       topicPages: state.topicPages.filter(p => p.topicId !== id),
     }));
   },
-  
+
   addTopicPage: (pageData) => {
     const page: TopicPage = {
       ...pageData,
@@ -455,7 +465,19 @@ export const useKaivooStore = create<KaivooStore>()(
     set((state) => ({ topicPages: [...state.topicPages, page] }));
     return page;
   },
-  
+
+  updateTopicPage: (id, updates) => {
+    set((state) => ({
+      topicPages: state.topicPages.map(p => p.id === id ? { ...p, ...updates } : p),
+    }));
+  },
+
+  deleteTopicPage: (id) => {
+    set((state) => ({
+      topicPages: state.topicPages.filter(p => p.id !== id),
+    }));
+  },
+
   getTopicById: (id) => {
     const { topics, topicPages } = get();
     return topics.find(t => t.id === id) || topicPages.find(p => p.id === id) as Topic | undefined;
@@ -471,7 +493,11 @@ export const useKaivooStore = create<KaivooStore>()(
   getTopicPages: (topicId) => {
     return get().topicPages.filter(p => p.topicId === topicId);
   },
-  
+
+  getChildPageIds: (topicId) => {
+    return get().topicPages.filter(p => p.topicId === topicId).map(p => p.id);
+  },
+
   // Resolve [[Topic]] or [[Topic/Page]] or [[Topic/Page/SubPage]] path
   // Returns array of IDs: [topicId] for [[Topic]], or [topicId, pageId] for [[Topic/Page]]
   resolveTopicPath: (path, autoCreate = false) => {

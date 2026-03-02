@@ -367,6 +367,21 @@ export const useKaivooActions = () => {
     return [topic.id, page.id];
   };
 
+  const updateTopic = async (id: string, updates: { name?: string; description?: string; icon?: string }) => {
+    const prev = getStore().topics.find(t => t.id === id);
+    getStore().updateTopic(id, updates);
+    if (user) {
+      try {
+        await db.updateTopic(id, updates);
+        invalidate('topics');
+      } catch (e) {
+        if (prev) getStore().updateTopic(id, prev);
+        toast.error('Failed to save topic changes.');
+        console.error('[updateTopic]', e);
+      }
+    }
+  };
+
   const deleteTopic = async (id: string) => {
     const prev = getStore().topics.find(t => t.id === id);
     getStore().deleteTopic(id);
@@ -378,6 +393,36 @@ export const useKaivooActions = () => {
         if (prev) useKaivooStore.setState(s => ({ topics: [...s.topics, prev] }));
         toast.error('Failed to delete topic.');
         console.error('[deleteTopic]', e);
+      }
+    }
+  };
+
+  const updateTopicPage = async (id: string, updates: { name?: string; description?: string }) => {
+    const prev = getStore().topicPages.find(p => p.id === id);
+    getStore().updateTopicPage(id, updates);
+    if (user) {
+      try {
+        await db.updateTopicPage(id, updates);
+        invalidate('topicPages');
+      } catch (e) {
+        if (prev) getStore().updateTopicPage(id, prev);
+        toast.error('Failed to save page changes.');
+        console.error('[updateTopicPage]', e);
+      }
+    }
+  };
+
+  const deleteTopicPage = async (id: string) => {
+    const prev = getStore().topicPages.find(p => p.id === id);
+    getStore().deleteTopicPage(id);
+    if (user) {
+      try {
+        await db.deleteTopicPage(id);
+        invalidate('topicPages');
+      } catch (e) {
+        if (prev) useKaivooStore.setState(s => ({ topicPages: [...s.topicPages, prev] }));
+        toast.error('Failed to delete page.');
+        console.error('[deleteTopicPage]', e);
       }
     }
   };
@@ -544,7 +589,7 @@ export const useKaivooActions = () => {
     addMeeting, updateMeeting, deleteMeeting,
     addJournalEntry, updateJournalEntry, deleteJournalEntry,
     updateCapture, deleteCapture, toggleRoutineCompletion,
-    addTopic, addTopicPage, deleteTopic,
+    addTopic, updateTopic, addTopicPage, updateTopicPage, deleteTopic, deleteTopicPage,
     addCapture, resolveTopicPathAsync,
     addProject, updateProject, deleteProject,
     addProjectNote, updateProjectNote, deleteProjectNote,

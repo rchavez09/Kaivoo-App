@@ -22,7 +22,7 @@ export const WeekTimeline = memo(({
   selectedDate,
   onDateSelect,
   onMeetingClick,
-  onTaskClick: _onTaskClick,
+  onTaskClick,
 }: WeekTimelineProps) => {
   const nowRef = useRef<HTMLDivElement>(null);
   const allMeetings = useKaivooStore(s => s.meetings);
@@ -163,7 +163,7 @@ export const WeekTimeline = memo(({
           {weekDays.map(day => {
             const dayKey = format(day, 'yyyy-MM-dd');
             const dayMeetings = meetingsByDay.get(dayKey) ?? [];
-            const _dayTasks = tasksByDay.get(dayKey) ?? [];
+            const dayTasks = tasksByDay.get(dayKey) ?? [];
             const isTodayCol = dayKey === todayStr;
             const isSelected = isSameDay(day, selectedDate);
 
@@ -205,6 +205,38 @@ export const WeekTimeline = memo(({
                     )}
                   </button>
                 ))}
+
+                {/* Task blocks — rendered as compact bars at the top of each day */}
+                {dayTasks.length > 0 && (
+                  <div className="absolute left-0.5 right-0.5 top-0 flex flex-col gap-0.5 p-0.5">
+                    {dayTasks.slice(0, 3).map(task => (
+                      <button
+                        key={task.id}
+                        onClick={() => onTaskClick?.(task.id)}
+                        className={cn(
+                          'w-full text-left px-1.5 py-0.5 rounded text-[10px] truncate',
+                          'transition-colors cursor-pointer',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                          task.status === 'done'
+                            ? 'bg-success-foreground/10 text-success-foreground/60 line-through'
+                            : task.priority === 'high'
+                              ? 'bg-destructive/10 text-destructive border border-destructive/20'
+                              : task.priority === 'medium'
+                                ? 'bg-primary/10 text-primary border border-primary/20'
+                                : 'bg-secondary text-foreground border border-border',
+                        )}
+                        aria-label={`Task: ${task.title}`}
+                      >
+                        {task.title}
+                      </button>
+                    ))}
+                    {dayTasks.length > 3 && (
+                      <span className="text-[9px] text-muted-foreground text-center">
+                        +{dayTasks.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Current time indicator */}
                 {isTodayCol && nowOffset >= 0 && nowOffset <= totalHeight && (

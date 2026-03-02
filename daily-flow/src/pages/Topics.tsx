@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { 
-  FolderOpen, Plus, ChevronRight, ChevronDown, FileText, 
-  MoreHorizontal, Search, Trash2 
+  FolderOpen, Plus, ChevronRight, ChevronDown, FileText,
+  MoreHorizontal, Search, Trash2, Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,12 +29,10 @@ const Topics = () => {
   const navigate = useNavigate();
   const topics = useKaivooStore(s => s.topics);
   const topicPages = useKaivooStore(s => s.topicPages);
-  const addTopic = useKaivooStore(s => s.addTopic);
-  const addTopicPage = useKaivooStore(s => s.addTopicPage);
   const getJournalEntriesByTopic = useKaivooStore(s => s.getJournalEntriesByTopic);
   const getCapturesByTopic = useKaivooStore(s => s.getCapturesByTopic);
   const getTasksByTopic = useKaivooStore(s => s.getTasksByTopic);
-  const { deleteTopic } = useKaivooActions();
+  const { addTopic, addTopicPage, deleteTopic } = useKaivooActions();
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(['topic-1']));
   const [searchQuery, setSearchQuery] = useState('');
   const [newTopicName, setNewTopicName] = useState('');
@@ -55,7 +53,7 @@ const Topics = () => {
 
   const handleCreateTopic = () => {
     if (newTopicName.trim()) {
-      addTopic({ name: newTopicName.trim() });
+      void addTopic({ name: newTopicName.trim() });
       setNewTopicName('');
       setCreateTopicOpen(false);
     }
@@ -63,7 +61,7 @@ const Topics = () => {
 
   const handleCreatePage = () => {
     if (newPageName.trim() && selectedTopicForPage) {
-      addTopicPage({ topicId: selectedTopicForPage, name: newPageName.trim() });
+      void addTopicPage({ topicId: selectedTopicForPage, name: newPageName.trim() });
       setNewPageName('');
       setSelectedTopicForPage(null);
       setCreatePageOpen(false);
@@ -75,10 +73,29 @@ const Topics = () => {
     setCreatePageOpen(true);
   };
 
-  // Filter topics based on search
-  const filteredTopics = topics.filter(topic => 
-    topic.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter topics based on search (includes page name matching)
+  const searchLower = searchQuery.toLowerCase();
+  const filteredTopics = searchQuery
+    ? topics.filter(topic => {
+        if (topic.name.toLowerCase().includes(searchLower)) return true;
+        // Also match if any child page name matches
+        return topicPages.some(p => p.topicId === topic.id && p.name.toLowerCase().includes(searchLower));
+      })
+    : topics;
+
+  // Auto-expand topics that have matching pages
+  useEffect(() => {
+    if (!searchQuery) return;
+    const toExpand = new Set(expandedTopics);
+    topics.forEach(topic => {
+      const hasMatchingPage = topicPages.some(
+        p => p.topicId === topic.id && p.name.toLowerCase().includes(searchLower)
+      );
+      if (hasMatchingPage) toExpand.add(topic.id);
+    });
+    setExpandedTopics(toExpand);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
 
   return (
     <AppLayout>
@@ -109,6 +126,7 @@ const Topics = () => {
                   value={newTopicName}
                   onChange={(e) => setNewTopicName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleCreateTopic()}
+                  autoFocus
                 />
                 <Button onClick={handleCreateTopic} className="w-full">
                   Create Topic
@@ -122,7 +140,7 @@ const Topics = () => {
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Search topics..." 
+            placeholder="Search topics and pages..."
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -145,7 +163,9 @@ const Topics = () => {
                     <div className="flex items-center gap-2 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors group">
                       <button
                         onClick={() => toggleTopic(topic.id)}
-                        className="p-0.5 hover:bg-secondary rounded"
+                        className="p-1 hover:bg-secondary rounded"
+                        aria-expanded={isExpanded}
+                        aria-label={`Toggle ${topic.name}`}
                       >
                         {isExpanded ? (
                           <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -154,13 +174,22 @@ const Topics = () => {
                         )}
                       </button>
                       
-                      <FolderOpen className="w-4 h-4 text-primary" />
-                      
+                      {topic.icon ? (
+                        <span className="text-base leading-none">{topic.icon}</span>
+                      ) : (
+                        <FolderOpen className="w-4 h-4 text-primary" />
+                      )}
+
                       <button
                         onClick={() => navigate(`/topics/${topic.id}`)}
                         className="flex-1 text-left"
                       >
                         <span className="font-medium text-foreground">{topic.name}</span>
+                        {topic.description && (
+                          <span className="ml-2 text-xs text-muted-foreground truncate max-w-[200px] inline-block align-bottom">
+                            {topic.description.length > 50 ? topic.description.slice(0, 50) + '...' : topic.description}
+                          </span>
+                        )}
                         <span className="ml-2 text-xs text-muted-foreground">
                           {captureCount} capture{captureCount !== 1 ? 's' : ''} · {taskCount} task{taskCount !== 1 ? 's' : ''}
                         </span>
@@ -171,7 +200,8 @@ const Topics = () => {
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100"
+                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                            aria-label={`Actions for ${topic.name}`}
                           >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
@@ -181,10 +211,17 @@ const Topics = () => {
                             <Plus className="w-4 h-4 mr-2" />
                             Add Page
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem onClick={() => {
+                            navigate(`/topics/${topic.id}`);
+                          }}>
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             onClick={() => {
-                              deleteTopic(topic.id);
-                              toast.success(`Deleted topic "${topic.name}"`);
+                              if (window.confirm(`Delete "${topic.name}" and all its pages? This cannot be undone.`)) {
+                                void deleteTopic(topic.id);
+                              }
                             }}
                             className="text-destructive focus:text-destructive"
                           >
