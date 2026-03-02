@@ -212,3 +212,30 @@ test.describe("Calendar", () => {
     await expect(calendarContent).toBeVisible({ timeout: 10000 });
   });
 });
+
+// ─── Vault (Sprint 22) ────────────────────────────────────
+
+test.describe("Vault", () => {
+  test("vault page loads with header and tree", async ({ page }) => {
+    await page.goto("/vault");
+    await waitForAppReady(page);
+
+    await expect(page.locator('h1:has-text("Vault")')).toBeVisible({ timeout: 10000 });
+
+    // Should show the search input
+    await expect(page.getByLabel("Search vault")).toBeVisible();
+
+    // Should show the file tree container (widget-card)
+    await expect(page.locator(".widget-card")).toBeVisible();
+  });
+
+  test("vault search input accepts text", async ({ page }) => {
+    await page.goto("/vault");
+    await waitForAppReady(page);
+    await expect(page.locator('h1:has-text("Vault")')).toBeVisible({ timeout: 10000 });
+
+    const search = page.getByLabel("Search vault");
+    await search.fill("journal");
+    await expect(search).toHaveValue("journal");
+  });
+});

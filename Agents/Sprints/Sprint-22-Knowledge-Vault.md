@@ -108,8 +108,9 @@ The core deliverable. Builds on Agent 3's Vault-System-Design.md.
 - [x] All Sprint 21 P1 carry-overs resolved (P1-P5 + P5b + P5c)
 - [x] Agent 7 code audit — all 6 P0s fixed
 - [x] Agent 11 feature integrity — DoD verified
-- [ ] 3-agent design review — pending
-- [ ] Sprint retrospective added before merge
+- [x] 3-agent design review — all PASS WITH NOTES, P1 quick fixes applied
+- [x] E2E test — 16/16 authenticated pass, 3/4 smoke pass (1 pre-existing)
+- [x] Sprint retrospective added before merge
 
 ---
 
@@ -170,7 +171,7 @@ Track 1 (P1-P5) ──→ Track 2 (P6-P9) ──→ Track 3 (P10-P12)
     - Accessibility & Theming: PASS WITH NOTES (0 P0, 3 P1, 7 P2)
     - UX Completeness: PASS WITH NOTES (0 P0, 1 P1, 5 P2)
     P1 fixes applied: aria-labels on tree buttons/search, delete confirmation, focus-visible rings, 24px tree indent
-[ ] E2E test against deploy preview
+[x] E2E test against deploy preview: 16/16 authenticated pass (incl. 2 new Vault tests), 3/4 smoke pass (1 pre-existing timing issue)
 [ ] Sandbox review by user
 [x] Sprint retrospective (below)
 ```
