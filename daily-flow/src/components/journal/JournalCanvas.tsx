@@ -6,8 +6,19 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Placeholder from '@tiptap/extension-placeholder';
 import {
-  Bold, Italic, Strikethrough, Highlighter, List, ListOrdered,
-  Heading1, Heading2, Quote, Undo, Redo, Palette, Plus,
+  Bold,
+  Italic,
+  Strikethrough,
+  Highlighter,
+  List,
+  ListOrdered,
+  Heading1,
+  Heading2,
+  Quote,
+  Undo,
+  Redo,
+  Palette,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -59,22 +70,31 @@ interface JournalCanvasProps {
 }
 
 // --- Helpers ---
-function composeHTML(entries: Array<{ id: string; timestamp: string | Date; content: string | null; label?: string | null }>, collapseState?: Map<string, boolean>): string {
+function composeHTML(
+  entries: Array<{ id: string; timestamp: string | Date; content: string | null; label?: string | null }>,
+  collapseState?: Map<string, boolean>,
+): string {
   if (entries.length === 0) return '';
-  return entries.map(entry => {
-    const ts = entry.timestamp instanceof Date ? entry.timestamp : new Date(entry.timestamp);
-    const displayLabel = entry.label
-      ? `── ${entry.label} ──`
-      : `── ${format(ts, 'h:mm a')} ──`;
-    const collapsed = collapseState?.get(entry.id) ?? false;
-    const labelAttr = entry.label ? ` data-label="${entry.label}"` : '';
-    const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" data-collapsed="${collapsed}"${labelAttr} contenteditable="false" class="timestamp-divider">${displayLabel}</div>`;
-    return divider + (entry.content || '<p></p>');
-  }).join('');
+  return entries
+    .map((entry) => {
+      const ts = entry.timestamp instanceof Date ? entry.timestamp : new Date(entry.timestamp);
+      const displayLabel = entry.label ? `── ${entry.label} ──` : `── ${format(ts, 'h:mm a')} ──`;
+      const collapsed = collapseState?.get(entry.id) ?? false;
+      const labelAttr = entry.label ? ` data-label="${entry.label}"` : '';
+      const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" data-collapsed="${collapsed}"${labelAttr} contenteditable="false" class="timestamp-divider">${displayLabel}</div>`;
+      return divider + (entry.content || '<p></p>');
+    })
+    .join('');
 }
 
 /** Read current collapse state from ProseMirror doc before rebuild */
-function getEditorCollapseState(editor: { state: { doc: { forEach: (cb: (node: { type: { name: string }; attrs: Record<string, unknown> }, pos: number) => void) => void } } }): Map<string, boolean> {
+function getEditorCollapseState(editor: {
+  state: {
+    doc: {
+      forEach: (cb: (node: { type: { name: string }; attrs: Record<string, unknown> }, pos: number) => void) => void;
+    };
+  };
+}): Map<string, boolean> {
   const state = new Map<string, boolean>();
   editor.state.doc.forEach((node) => {
     if (node.type.name === 'entryHeader' && node.attrs.entryId) {
@@ -87,7 +107,9 @@ function getEditorCollapseState(editor: { state: { doc: { forEach: (cb: (node: {
 /** Save collapse state to localStorage for session persistence */
 function saveCollapseState(dateStr: string, state: Map<string, boolean>): void {
   const obj: Record<string, boolean> = {};
-  state.forEach((v, k) => { if (v) obj[k] = true; }); // only store collapsed=true entries
+  state.forEach((v, k) => {
+    if (v) obj[k] = true;
+  }); // only store collapsed=true entries
   if (Object.keys(obj).length > 0) {
     localStorage.setItem(`collapse-${dateStr}`, JSON.stringify(obj));
   } else {
@@ -106,7 +128,9 @@ function loadCollapseState(dateStr: string): Map<string, boolean> {
         state.set(k, v);
       }
     }
-  } catch { /* ignore parse errors */ }
+  } catch {
+    /* ignore parse errors */
+  }
   return state;
 }
 
@@ -125,7 +149,9 @@ function cleanOldCollapseKeys(): void {
         }
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 function extractSections(html: string): Array<{ entryId: string; content: string; label?: string | null }> {
@@ -141,7 +167,7 @@ function extractSections(html: string): Array<{ entryId: string; content: string
   const flush = () => {
     if (currentEntryId) {
       const div = document.createElement('div');
-      currentNodes.forEach(n => div.appendChild(n.cloneNode(true)));
+      currentNodes.forEach((n) => div.appendChild(n.cloneNode(true)));
       sections.push({ entryId: currentEntryId, content: div.innerHTML || '', label: currentLabel });
     }
     currentNodes = [];
@@ -161,13 +187,18 @@ function extractSections(html: string): Array<{ entryId: string; content: string
 }
 
 // --- Component ---
-const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onActiveEntryChange }: JournalCanvasProps) => {
+const JournalCanvas = ({
+  selectedDate,
+  onSectionsChange,
+  onSaveStatusChange,
+  onActiveEntryChange,
+}: JournalCanvasProps) => {
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
   const { addJournalEntry, updateJournalEntry } = useKaivooActions();
 
   // Subscribe to journalEntries for re-initialization when data arrives
-  const journalEntries = useKaivooStore(s => s.journalEntries);
+  const journalEntries = useKaivooStore((s) => s.journalEntries);
 
   // Track whether initial load populated the canvas
   const [initialLoadDone, setInitialLoadDone] = useState(false);
@@ -192,90 +223,94 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
   const activeEntryIdRef = useRef<string | null>(null);
 
   // --- Save logic ---
-  const saveDirtySections = useCallback(async (html: string) => {
-    const sections = extractSections(html);
-    const toSave: Array<{ entryId: string; content: string }> = [];
+  const saveDirtySections = useCallback(
+    async (html: string) => {
+      const sections = extractSections(html);
+      const toSave: Array<{ entryId: string; content: string }> = [];
 
-    for (const section of sections) {
-      const saved = savedContentsRef.current.get(section.entryId);
-      if (saved !== section.content) {
-        toSave.push(section);
+      for (const section of sections) {
+        const saved = savedContentsRef.current.get(section.entryId);
+        if (saved !== section.content) {
+          toSave.push(section);
+        }
       }
-    }
 
-    if (toSave.length === 0) {
-      onSaveStatusChangeRef.current('saved');
-      return;
-    }
-
-    onSaveStatusChangeRef.current('saving');
-
-    try {
-      await Promise.all(
-        toSave.map(({ entryId, content }) => updateJournalEntry(entryId, { content }))
-      );
-      for (const { entryId, content } of toSave) {
-        savedContentsRef.current.set(entryId, content);
+      if (toSave.length === 0) {
+        onSaveStatusChangeRef.current('saved');
+        return;
       }
-      onSaveStatusChangeRef.current('saved');
-    } catch (e) {
-      console.error('[JournalCanvas] Auto-save failed:', e);
-      onSaveStatusChangeRef.current('unsaved');
-      toast.error('Auto-save failed', { description: 'Your changes are saved locally.' });
-      // Fallback: save full HTML to localStorage
-      localStorage.setItem(`notes-canvas-draft-${dateStrRef.current}`, html);
-    }
-  }, [updateJournalEntry]);
+
+      onSaveStatusChangeRef.current('saving');
+
+      try {
+        await Promise.all(toSave.map(({ entryId, content }) => updateJournalEntry(entryId, { content })));
+        for (const { entryId, content } of toSave) {
+          savedContentsRef.current.set(entryId, content);
+        }
+        onSaveStatusChangeRef.current('saved');
+      } catch (e) {
+        console.error('[JournalCanvas] Auto-save failed:', e);
+        onSaveStatusChangeRef.current('unsaved');
+        toast.error('Auto-save failed', { description: 'Your changes are saved locally.' });
+        // Fallback: save full HTML to localStorage
+        localStorage.setItem(`notes-canvas-draft-${dateStrRef.current}`, html);
+      }
+    },
+    [updateJournalEntry],
+  );
 
   // --- First-write: create entry when user types in empty canvas ---
-  const handleFirstWrite = useCallback(async (editorHTML: string, editorInstance: ReturnType<typeof useEditor>) => {
-    if (pendingNewEntryRef.current || sectionsRef.current.length > 0) return;
-    pendingNewEntryRef.current = true;
+  const handleFirstWrite = useCallback(
+    async (editorHTML: string, editorInstance: ReturnType<typeof useEditor>) => {
+      if (pendingNewEntryRef.current || sectionsRef.current.length > 0) return;
+      pendingNewEntryRef.current = true;
 
-    try {
-      // Get the current content BEFORE the async call (user may still be typing)
-      const typedContent = editorInstance ? editorInstance.getHTML() : editorHTML;
+      try {
+        // Get the current content BEFORE the async call (user may still be typing)
+        const typedContent = editorInstance ? editorInstance.getHTML() : editorHTML;
 
-      const newEntry = await addJournalEntry({
-        content: typedContent, // Save content immediately, not empty
-        date: dateStrRef.current,
-        tags: [],
-        topicIds: [],
-      });
-
-      if (newEntry && editorInstance) {
-        isComposingRef.current = true;
-
-        const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
-        // Get the LATEST content (user may have typed more during the await)
-        const latestContent = editorInstance.getHTML();
-        // Rebuild: divider + latest content
-        const html = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>${latestContent}`;
-        editorInstance.commands.setContent(html);
-
-        savedContentsRef.current.set(newEntry.id, typedContent);
-        sectionsRef.current = [{ entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) }];
-        onSectionsChangeRef.current(sectionsRef.current);
-        setInitialLoadDone(true);
-
-        // If the user typed more during the await, save immediately
-        if (latestContent !== typedContent) {
-          void updateJournalEntry(newEntry.id, { content: latestContent });
-          savedContentsRef.current.set(newEntry.id, latestContent);
-        }
-
-        // Restore cursor at end
-        requestAnimationFrame(() => {
-          editorInstance.commands.focus('end');
-          isComposingRef.current = false;
+        const newEntry = await addJournalEntry({
+          content: typedContent, // Save content immediately, not empty
+          date: dateStrRef.current,
+          tags: [],
+          topicIds: [],
         });
+
+        if (newEntry && editorInstance) {
+          isComposingRef.current = true;
+
+          const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
+          // Get the LATEST content (user may have typed more during the await)
+          const latestContent = editorInstance.getHTML();
+          // Rebuild: divider + latest content
+          const html = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>${latestContent}`;
+          editorInstance.commands.setContent(html);
+
+          savedContentsRef.current.set(newEntry.id, typedContent);
+          sectionsRef.current = [{ entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) }];
+          onSectionsChangeRef.current(sectionsRef.current);
+          setInitialLoadDone(true);
+
+          // If the user typed more during the await, save immediately
+          if (latestContent !== typedContent) {
+            void updateJournalEntry(newEntry.id, { content: latestContent });
+            savedContentsRef.current.set(newEntry.id, latestContent);
+          }
+
+          // Restore cursor at end
+          requestAnimationFrame(() => {
+            editorInstance.commands.focus('end');
+            isComposingRef.current = false;
+          });
+        }
+      } catch (e) {
+        console.error('[JournalCanvas] Failed to create first entry:', e);
+      } finally {
+        pendingNewEntryRef.current = false;
       }
-    } catch (e) {
-      console.error('[JournalCanvas] Failed to create first entry:', e);
-    } finally {
-      pendingNewEntryRef.current = false;
-    }
-  }, [addJournalEntry, updateJournalEntry]);
+    },
+    [addJournalEntry, updateJournalEntry],
+  );
 
   // --- TipTap editor ---
   const editor = useEditor({
@@ -319,7 +354,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
         sectionsRef.current = docSections;
         onSectionsChangeRef.current(sectionsRef.current);
         // Clean up savedContents for entries no longer in the doc
-        const activeIds = new Set(docSections.map(s => s.entryId));
+        const activeIds = new Set(docSections.map((s) => s.entryId));
         for (const key of savedContentsRef.current.keys()) {
           if (!activeIds.has(key)) savedContentsRef.current.delete(key);
         }
@@ -479,8 +514,8 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
         const currentSections = extractSections(fullHTML);
         // Build entries from what's currently in the editor
         const entryList: Array<{ id: string; timestamp: string; content: string; label?: string | null }> =
-          sectionsRef.current.map(s => {
-            const sec = currentSections.find(cs => cs.entryId === s.entryId);
+          sectionsRef.current.map((s) => {
+            const sec = currentSections.find((cs) => cs.entryId === s.entryId);
             return {
               id: s.entryId,
               timestamp: s.timestamp.toISOString(),
@@ -507,7 +542,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
           savedContentsRef.current.set(sec.entryId, sec.content);
         }
 
-        sectionsRef.current = entryList.map(e => ({
+        sectionsRef.current = entryList.map((e) => ({
           entryId: e.id,
           timestamp: new Date(e.timestamp),
         }));
@@ -549,14 +584,14 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
     // Read entries directly from store (not reactive to future store changes)
     const allEntries = useKaivooStore.getState().journalEntries;
     const entries = allEntries
-      .filter(e => e.date === dateStr)
+      .filter((e) => e.date === dateStr)
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     // Store saved contents
     savedContentsRef.current.clear();
-    entries.forEach(e => savedContentsRef.current.set(e.id, e.content || ''));
+    entries.forEach((e) => savedContentsRef.current.set(e.id, e.content || ''));
 
     // Track sections
-    sectionsRef.current = entries.map(e => ({
+    sectionsRef.current = entries.map((e) => ({
       entryId: e.id,
       timestamp: new Date(e.timestamp),
     }));
@@ -586,7 +621,7 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
     if (!editor || initialLoadDone || pendingNewEntryRef.current) return;
 
     const entries = journalEntries
-      .filter(e => e.date === dateStr)
+      .filter((e) => e.date === dateStr)
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
     if (entries.length === 0) return;
@@ -594,8 +629,8 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
     // Entries arrived — initialize canvas
     isComposingRef.current = true;
     savedContentsRef.current.clear();
-    entries.forEach(e => savedContentsRef.current.set(e.id, e.content || ''));
-    sectionsRef.current = entries.map(e => ({
+    entries.forEach((e) => savedContentsRef.current.set(e.id, e.content || ''));
+    sectionsRef.current = entries.map((e) => ({
       entryId: e.id,
       timestamp: new Date(e.timestamp),
     }));
@@ -632,33 +667,81 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
   if (!editor) return null;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Toolbar — sticky so it stays visible on scroll */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border/50 px-1 py-1.5 flex items-center gap-0.5 flex-wrap" role="toolbar" aria-label="Text formatting">
-        <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className="h-8 w-8 p-0" aria-label="Undo">
+      <div
+        className="sticky top-0 z-10 flex flex-wrap items-center gap-0.5 border-b border-border/50 bg-background px-1 py-1.5"
+        role="toolbar"
+        aria-label="Text formatting"
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          className="h-8 w-8 p-0"
+          aria-label="Undo"
+        >
           <Undo className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} className="h-8 w-8 p-0" aria-label="Redo">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          className="h-8 w-8 p-0"
+          aria-label="Redo"
+        >
           <Redo className="h-4 w-4" />
         </Button>
-        <div className="w-px h-5 bg-border mx-1" />
-        <Toggle size="sm" pressed={editor.isActive('heading', { level: 1 })} onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className="h-8 w-8 p-0" aria-label="Heading 1">
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('heading', { level: 1 })}
+          onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className="h-8 w-8 p-0"
+          aria-label="Heading 1"
+        >
           <Heading1 className="h-4 w-4" />
         </Toggle>
-        <Toggle size="sm" pressed={editor.isActive('heading', { level: 2 })} onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className="h-8 w-8 p-0" aria-label="Heading 2">
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('heading', { level: 2 })}
+          onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className="h-8 w-8 p-0"
+          aria-label="Heading 2"
+        >
           <Heading2 className="h-4 w-4" />
         </Toggle>
-        <div className="w-px h-5 bg-border mx-1" />
-        <Toggle size="sm" pressed={editor.isActive('bold')} onPressedChange={() => editor.chain().focus().toggleBold().run()} className="h-8 w-8 p-0" aria-label="Bold">
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('bold')}
+          onPressedChange={() => editor.chain().focus().toggleBold().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Bold"
+        >
           <Bold className="h-4 w-4" />
         </Toggle>
-        <Toggle size="sm" pressed={editor.isActive('italic')} onPressedChange={() => editor.chain().focus().toggleItalic().run()} className="h-8 w-8 p-0" aria-label="Italic">
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('italic')}
+          onPressedChange={() => editor.chain().focus().toggleItalic().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Italic"
+        >
           <Italic className="h-4 w-4" />
         </Toggle>
-        <Toggle size="sm" pressed={editor.isActive('strike')} onPressedChange={() => editor.chain().focus().toggleStrike().run()} className="h-8 w-8 p-0" aria-label="Strikethrough">
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('strike')}
+          onPressedChange={() => editor.chain().focus().toggleStrike().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Strikethrough"
+        >
           <Strikethrough className="h-4 w-4" />
         </Toggle>
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="Text color">
@@ -670,8 +753,13 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
               {TEXT_COLORS.map((c) => (
                 <button
                   key={c.name}
-                  onClick={() => c.color ? editor.chain().focus().setColor(c.color).run() : editor.chain().focus().unsetColor().run()}
-                  className={cn("h-6 w-6 rounded border border-border hover:scale-110 transition-transform", !c.color && "bg-foreground")}
+                  onClick={() =>
+                    c.color ? editor.chain().focus().setColor(c.color).run() : editor.chain().focus().unsetColor().run()
+                  }
+                  className={cn(
+                    'h-6 w-6 rounded border border-border transition-transform hover:scale-110',
+                    !c.color && 'bg-foreground',
+                  )}
                   style={{ backgroundColor: c.color || undefined }}
                   aria-label={`${c.name} text color`}
                 />
@@ -690,8 +778,15 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
               {HIGHLIGHT_COLORS.map((c) => (
                 <button
                   key={c.name}
-                  onClick={() => c.color ? editor.chain().focus().toggleHighlight({ color: c.color }).run() : editor.chain().focus().unsetHighlight().run()}
-                  className={cn("h-6 w-6 rounded border border-border hover:scale-110 transition-transform", !c.color && "bg-background line-through")}
+                  onClick={() =>
+                    c.color
+                      ? editor.chain().focus().toggleHighlight({ color: c.color }).run()
+                      : editor.chain().focus().unsetHighlight().run()
+                  }
+                  className={cn(
+                    'h-6 w-6 rounded border border-border transition-transform hover:scale-110',
+                    !c.color && 'bg-background line-through',
+                  )}
                   style={{ backgroundColor: c.color || undefined }}
                   aria-label={`${c.name} highlight`}
                 />
@@ -699,23 +794,41 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
             </div>
           </PopoverContent>
         </Popover>
-        <div className="w-px h-5 bg-border mx-1" />
-        <Toggle size="sm" pressed={editor.isActive('bulletList')} onPressedChange={() => editor.chain().focus().toggleBulletList().run()} className="h-8 w-8 p-0" aria-label="Bullet list">
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('bulletList')}
+          onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Bullet list"
+        >
           <List className="h-4 w-4" />
         </Toggle>
-        <Toggle size="sm" pressed={editor.isActive('orderedList')} onPressedChange={() => editor.chain().focus().toggleOrderedList().run()} className="h-8 w-8 p-0" aria-label="Ordered list">
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('orderedList')}
+          onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Ordered list"
+        >
           <ListOrdered className="h-4 w-4" />
         </Toggle>
-        <div className="w-px h-5 bg-border mx-1" />
-        <Toggle size="sm" pressed={editor.isActive('blockquote')} onPressedChange={() => editor.chain().focus().toggleBlockquote().run()} className="h-8 w-8 p-0" aria-label="Blockquote">
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('blockquote')}
+          onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Blockquote"
+        >
           <Quote className="h-4 w-4" />
         </Toggle>
         <div className="flex-1" />
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 px-2 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground"
           onClick={() => void handleNewEntry()}
           disabled={pendingNewEntryRef.current}
           aria-label="New entry"
@@ -727,11 +840,8 @@ const JournalCanvas = ({ selectedDate, onSectionsChange, onSaveStatusChange, onA
 
       {/* Split to New Entry — shown when text is selected */}
       {hasSelection && sectionsRef.current.length > 0 && (
-        <div className="sticky top-[42px] z-10 bg-background/95 backdrop-blur-sm flex justify-center py-1 border-b border-border/30">
-          <SplitToNewEntryMenu
-            onSplit={() => void splitToNewEntry()}
-            disabled={pendingNewEntryRef.current}
-          />
+        <div className="sticky top-[42px] z-10 flex justify-center border-b border-border/30 bg-background/95 py-1 backdrop-blur-sm">
+          <SplitToNewEntryMenu onSplit={() => void splitToNewEntry()} disabled={pendingNewEntryRef.current} />
         </div>
       )}
 

@@ -19,15 +19,18 @@ const Today = () => {
     return new Date();
   }, [searchParams]);
 
-  const handleDateChange = useCallback((date: Date) => {
-    const iso = date.toISOString().slice(0, 10);
-    const today = new Date().toISOString().slice(0, 10);
-    if (iso === today) {
-      setSearchParams({});
-    } else {
-      setSearchParams({ date: iso });
-    }
-  }, [setSearchParams]);
+  const handleDateChange = useCallback(
+    (date: Date) => {
+      const iso = date.toISOString().slice(0, 10);
+      const today = new Date().toISOString().slice(0, 10);
+      if (iso === today) {
+        setSearchParams({});
+      } else {
+        setSearchParams({ date: iso });
+      }
+    },
+    [setSearchParams],
+  );
 
   // Task drawer
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -56,11 +59,7 @@ const Today = () => {
         onMeetingClick={handleMeetingClick}
       />
 
-      <TaskDetailsDrawer
-        taskId={selectedTaskId}
-        open={taskDrawerOpen}
-        onOpenChange={setTaskDrawerOpen}
-      />
+      <TaskDetailsDrawer taskId={selectedTaskId} open={taskDrawerOpen} onOpenChange={setTaskDrawerOpen} />
 
       <MeetingDetailsDrawer
         meetingId={selectedMeetingId}

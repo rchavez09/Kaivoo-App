@@ -15,11 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DraggableRoutine } from './RoutineButton';
 import { iconMap } from './tracking-types';
 
@@ -45,11 +41,11 @@ const RoutineGroupSection = ({
   droppableId,
 }: GroupSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
-  const completedCount = routines.filter(r => isRoutineCompleted(r.id)).length;
+  const completedCount = routines.filter((r) => isRoutineCompleted(r.id)).length;
   const progress = routines.length > 0 ? (completedCount / routines.length) * 100 : 0;
 
   const groupName = group?.name || 'Uncategorized';
-  const GroupIcon = group?.icon ? (iconMap[group.icon] || Sun) : RotateCcw;
+  const GroupIcon = group?.icon ? iconMap[group.icon] || Sun : RotateCcw;
 
   const { setNodeRef, isOver } = useDroppable({
     id: droppableId,
@@ -62,13 +58,16 @@ const RoutineGroupSection = ({
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-2">
       <div className="flex items-center gap-2">
         <CollapsibleTrigger asChild>
-          <button className="flex items-center gap-2 flex-1 hover:bg-secondary/50 rounded-lg p-1.5 -ml-1.5 transition-colors" aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${groupName} routines — ${completedCount} of ${routines.length} complete`}>
+          <button
+            className="-ml-1.5 flex flex-1 items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-secondary/50"
+            aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${groupName} routines — ${completedCount} of ${routines.length} complete`}
+          >
             {isOpen ? (
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             )}
-            <GroupIcon className="w-4 h-4 text-primary" />
+            <GroupIcon className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium">{groupName}</span>
             <span className="text-xs text-muted-foreground">
               {completedCount}/{routines.length}
@@ -79,20 +78,29 @@ const RoutineGroupSection = ({
         {isEditing && group && onDeleteGroup && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label={`Delete ${group.name} group`} className="h-6 w-6 text-destructive hover:text-destructive">
-                <Trash2 className="w-3 h-3" />
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={`Delete ${group.name} group`}
+                className="h-6 w-6 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-3 w-3" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete "{group.name}"?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  The group will be deleted, but all routines will be moved to "Uncategorized". Your tracking history will be preserved.
+                  The group will be deleted, but all routines will be moved to "Uncategorized". Your tracking history
+                  will be preserved.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={onDeleteGroup} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                <AlertDialogAction
+                  onClick={onDeleteGroup}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
                   Delete Group
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -102,9 +110,9 @@ const RoutineGroupSection = ({
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-secondary rounded-full overflow-hidden">
+      <div className="h-1 overflow-hidden rounded-full bg-secondary">
         <div
-          className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
+          className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -113,8 +121,8 @@ const RoutineGroupSection = ({
         <div
           ref={setNodeRef}
           className={cn(
-            "grid grid-cols-5 gap-2 pt-2 min-h-[60px] rounded-lg transition-colors",
-            isOver && isEditing && "bg-primary/10 ring-2 ring-primary/30"
+            'grid min-h-[60px] grid-cols-5 gap-2 rounded-lg pt-2 transition-colors',
+            isOver && isEditing && 'bg-primary/10 ring-2 ring-primary/30',
           )}
         >
           {routines.map((routine) => (
@@ -130,9 +138,7 @@ const RoutineGroupSection = ({
         </div>
 
         {routines.length === 0 && isEditing && (
-          <p className="text-xs text-muted-foreground text-center py-3">
-            Drop routines here
-          </p>
+          <p className="py-3 text-center text-xs text-muted-foreground">Drop routines here</p>
         )}
       </CollapsibleContent>
     </Collapsible>

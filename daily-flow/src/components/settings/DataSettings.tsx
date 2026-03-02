@@ -38,9 +38,22 @@ const DataSettings = () => {
 
     try {
       const [
-        tasks, subtasks, journals, captures, topics, topicPages,
-        tags, meetings, routineGroups, routines, routineCompletions,
-        widgetSettings, aiSettings, profile, projects, projectNotes,
+        tasks,
+        subtasks,
+        journals,
+        captures,
+        topics,
+        topicPages,
+        tags,
+        meetings,
+        routineGroups,
+        routines,
+        routineCompletions,
+        widgetSettings,
+        aiSettings,
+        profile,
+        projects,
+        projectNotes,
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', user.id),
         supabase.from('subtasks').select('*').eq('user_id', user.id),
@@ -107,7 +120,21 @@ const DataSettings = () => {
     setImporting(true);
 
     const errors: string[] = [];
-    const counts = { topics: 0, tags: 0, projects: 0, projectNotes: 0, tasks: 0, subtasks: 0, journals: 0, captures: 0, meetings: 0, routineGroups: 0, routines: 0, routineCompletions: 0, widgetSettings: 0 };
+    const counts = {
+      topics: 0,
+      tags: 0,
+      projects: 0,
+      projectNotes: 0,
+      tasks: 0,
+      subtasks: 0,
+      journals: 0,
+      captures: 0,
+      meetings: 0,
+      routineGroups: 0,
+      routines: 0,
+      routineCompletions: 0,
+      widgetSettings: 0,
+    };
 
     try {
       const text = await file.text();
@@ -138,7 +165,9 @@ const DataSettings = () => {
       if (data.tags?.length) {
         for (const tag of data.tags) {
           const { id: _id, user_id: _uid, ...rest } = tag;
-          const { error } = await supabase.from('tags').upsert({ ...rest, user_id: uid } as never, { onConflict: 'user_id,name' });
+          const { error } = await supabase
+            .from('tags')
+            .upsert({ ...rest, user_id: uid } as never, { onConflict: 'user_id,name' });
           if (error) errors.push(`Tag "${(tag.name as string) || 'unknown'}": ${error.message}`);
           else counts.tags++;
         }
@@ -146,23 +175,37 @@ const DataSettings = () => {
 
       // 3. Topics (parents first, then children)
       if (data.topics?.length) {
-        const roots = data.topics.filter(t => !t.parent_id);
-        const children = data.topics.filter(t => t.parent_id);
+        const roots = data.topics.filter((t) => !t.parent_id);
+        const children = data.topics.filter((t) => t.parent_id);
 
         for (const topic of roots) {
           const oldId = topic.id as string;
           const { id: _id, user_id: _uid, parent_id: _pid, ...rest } = topic;
-          const { data: inserted, error } = await supabase.from('topics').insert({ ...rest, user_id: uid } as never).select('id').single();
+          const { data: inserted, error } = await supabase
+            .from('topics')
+            .insert({ ...rest, user_id: uid } as never)
+            .select('id')
+            .single();
           if (error) errors.push(`Topic "${(topic.name as string) || 'unknown'}": ${error.message}`);
-          else if (inserted) { topicIdMap.set(oldId, inserted.id); counts.topics++; }
+          else if (inserted) {
+            topicIdMap.set(oldId, inserted.id);
+            counts.topics++;
+          }
         }
         for (const topic of children) {
           const oldId = topic.id as string;
           const { id: _id, user_id: _uid, parent_id: oldParent, ...rest } = topic;
           const newParent = topicIdMap.get(oldParent as string) || null;
-          const { data: inserted, error } = await supabase.from('topics').insert({ ...rest, user_id: uid, parent_id: newParent } as never).select('id').single();
+          const { data: inserted, error } = await supabase
+            .from('topics')
+            .insert({ ...rest, user_id: uid, parent_id: newParent } as never)
+            .select('id')
+            .single();
           if (error) errors.push(`Topic "${(topic.name as string) || 'unknown'}" (child): ${error.message}`);
-          else if (inserted) { topicIdMap.set(oldId, inserted.id); counts.topics++; }
+          else if (inserted) {
+            topicIdMap.set(oldId, inserted.id);
+            counts.topics++;
+          }
         }
       }
 
@@ -172,7 +215,9 @@ const DataSettings = () => {
           const { id: _id, user_id: _uid, topic_id: oldTopic, ...rest } = page;
           const newTopic = topicIdMap.get(oldTopic as string);
           if (newTopic) {
-            const { error } = await supabase.from('topic_pages').insert({ ...rest, user_id: uid, topic_id: newTopic } as never);
+            const { error } = await supabase
+              .from('topic_pages')
+              .insert({ ...rest, user_id: uid, topic_id: newTopic } as never);
             if (error) errors.push(`Topic page "${(page.name as string) || 'unknown'}": ${error.message}`);
           }
         }
@@ -184,9 +229,16 @@ const DataSettings = () => {
           const oldId = project.id as string;
           const { id: _id, user_id: _uid, topic_id: oldTopicId, ...rest } = project;
           const newTopicId = oldTopicId ? topicIdMap.get(oldTopicId as string) || null : null;
-          const { data: inserted, error } = await supabase.from('projects').insert({ ...rest, user_id: uid, topic_id: newTopicId } as never).select('id').single();
+          const { data: inserted, error } = await supabase
+            .from('projects')
+            .insert({ ...rest, user_id: uid, topic_id: newTopicId } as never)
+            .select('id')
+            .single();
           if (error) errors.push(`Project "${(project.name as string) || 'unknown'}": ${error.message}`);
-          else if (inserted) { projectIdMap.set(oldId, inserted.id); counts.projects++; }
+          else if (inserted) {
+            projectIdMap.set(oldId, inserted.id);
+            counts.projects++;
+          }
         }
       }
 
@@ -196,7 +248,9 @@ const DataSettings = () => {
           const { id: _id, user_id: _uid, project_id: oldProjectId, ...rest } = note;
           const newProjectId = oldProjectId ? projectIdMap.get(oldProjectId as string) : undefined;
           if (newProjectId) {
-            const { error } = await supabase.from('project_notes').insert({ ...rest, user_id: uid, project_id: newProjectId } as never);
+            const { error } = await supabase
+              .from('project_notes')
+              .insert({ ...rest, user_id: uid, project_id: newProjectId } as never);
             if (error) errors.push(`Project note: ${error.message}`);
             else counts.projectNotes++;
           }
@@ -209,9 +263,16 @@ const DataSettings = () => {
           const oldId = task.id as string;
           const { id: _id, user_id: _uid, project_id: oldProjectId, ...rest } = task;
           const newProjectId = oldProjectId ? projectIdMap.get(oldProjectId as string) || null : null;
-          const { data: inserted, error } = await supabase.from('tasks').insert({ ...rest, user_id: uid, project_id: newProjectId } as never).select('id').single();
+          const { data: inserted, error } = await supabase
+            .from('tasks')
+            .insert({ ...rest, user_id: uid, project_id: newProjectId } as never)
+            .select('id')
+            .single();
           if (error) errors.push(`Task "${(task.title as string) || 'unknown'}": ${error.message}`);
-          else if (inserted) { taskIdMap.set(oldId, inserted.id); counts.tasks++; }
+          else if (inserted) {
+            taskIdMap.set(oldId, inserted.id);
+            counts.tasks++;
+          }
         }
       }
 
@@ -221,7 +282,9 @@ const DataSettings = () => {
           const { id: _id, user_id: _uid, task_id: oldTaskId, ...rest } = sub;
           const newTaskId = taskIdMap.get(oldTaskId as string);
           if (newTaskId) {
-            const { error } = await supabase.from('subtasks').insert({ ...rest, user_id: uid, task_id: newTaskId } as never);
+            const { error } = await supabase
+              .from('subtasks')
+              .insert({ ...rest, user_id: uid, task_id: newTaskId } as never);
             if (error) errors.push(`Subtask "${(sub.title as string) || 'unknown'}": ${error.message}`);
             else counts.subtasks++;
           }
@@ -257,9 +320,16 @@ const DataSettings = () => {
         for (const group of data.routineGroups) {
           const oldId = group.id as string;
           const { id: _id, user_id: _uid, ...rest } = group;
-          const { data: inserted, error } = await supabase.from('routine_groups').insert({ ...rest, user_id: uid } as never).select('id').single();
+          const { data: inserted, error } = await supabase
+            .from('routine_groups')
+            .insert({ ...rest, user_id: uid } as never)
+            .select('id')
+            .single();
           if (error) errors.push(`Routine group "${(group.name as string) || 'unknown'}": ${error.message}`);
-          else if (inserted) { routineGroupIdMap.set(oldId, inserted.id); counts.routineGroups++; }
+          else if (inserted) {
+            routineGroupIdMap.set(oldId, inserted.id);
+            counts.routineGroups++;
+          }
         }
       }
 
@@ -269,9 +339,16 @@ const DataSettings = () => {
           const oldId = routine.id as string;
           const { id: _id, user_id: _uid, group_id: oldGroup, ...rest } = routine;
           const newGroup = oldGroup ? routineGroupIdMap.get(oldGroup as string) || null : null;
-          const { data: inserted, error } = await supabase.from('routines').insert({ ...rest, user_id: uid, group_id: newGroup } as never).select('id').single();
+          const { data: inserted, error } = await supabase
+            .from('routines')
+            .insert({ ...rest, user_id: uid, group_id: newGroup } as never)
+            .select('id')
+            .single();
           if (error) errors.push(`Routine "${(routine.name as string) || 'unknown'}": ${error.message}`);
-          else if (inserted) { routineIdMap.set(oldId, inserted.id); counts.routines++; }
+          else if (inserted) {
+            routineIdMap.set(oldId, inserted.id);
+            counts.routines++;
+          }
         }
       }
 
@@ -281,7 +358,9 @@ const DataSettings = () => {
           const { id: _id, user_id: _uid, routine_id: oldRoutine, ...rest } = comp;
           const newRoutine = routineIdMap.get(oldRoutine as string);
           if (newRoutine) {
-            const { error } = await supabase.from('routine_completions').insert({ ...rest, user_id: uid, routine_id: newRoutine } as never);
+            const { error } = await supabase
+              .from('routine_completions')
+              .insert({ ...rest, user_id: uid, routine_id: newRoutine } as never);
             if (error) errors.push(`Routine completion: ${error.message}`);
             else counts.routineCompletions++;
           }
@@ -306,10 +385,19 @@ const DataSettings = () => {
       // Report results
       if (errors.length > 0) {
         console.error('Import errors:', errors);
-        const summary = Object.entries(counts).filter(([, v]) => v > 0).map(([k, v]) => `${v} ${k}`).join(', ');
-        toast.warning(`Imported ${summary || 'nothing'}. ${errors.length} error(s) — check browser console for details.`, { duration: 8000 });
+        const summary = Object.entries(counts)
+          .filter(([, v]) => v > 0)
+          .map(([k, v]) => `${v} ${k}`)
+          .join(', ');
+        toast.warning(
+          `Imported ${summary || 'nothing'}. ${errors.length} error(s) — check browser console for details.`,
+          { duration: 8000 },
+        );
       } else {
-        const summary = Object.entries(counts).filter(([, v]) => v > 0).map(([k, v]) => `${v} ${k}`).join(', ');
+        const summary = Object.entries(counts)
+          .filter(([, v]) => v > 0)
+          .map(([k, v]) => `${v} ${k}`)
+          .join(', ');
         toast.success(`Imported: ${summary}. Refresh to see your data.`, { duration: 6000 });
       }
     } catch (error) {
@@ -323,7 +411,7 @@ const DataSettings = () => {
 
   return (
     <div className="space-y-6">
-      <div className="p-4 rounded-lg border border-border space-y-3">
+      <div className="space-y-3 rounded-lg border border-border p-4">
         <div>
           <h3 className="font-medium text-foreground">Export Your Data</h3>
           <p className="text-sm text-muted-foreground">
@@ -345,7 +433,7 @@ const DataSettings = () => {
         </Button>
       </div>
 
-      <div className="p-4 rounded-lg border border-border space-y-3">
+      <div className="space-y-3 rounded-lg border border-border p-4">
         <div>
           <h3 className="font-medium text-foreground">Import Data</h3>
           <p className="text-sm text-muted-foreground">
@@ -362,11 +450,7 @@ const DataSettings = () => {
             if (file) handleImport(file);
           }}
         />
-        <Button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={importing}
-          variant="outline"
-        >
+        <Button onClick={() => fileInputRef.current?.click()} disabled={importing} variant="outline">
           {importing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -381,19 +465,15 @@ const DataSettings = () => {
         </Button>
       </div>
 
-      <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/5 space-y-3">
+      <div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
         <div>
           <h3 className="font-medium text-destructive">Danger Zone</h3>
-          <p className="text-sm text-muted-foreground">
-            Account deletion is permanent and cannot be undone.
-          </p>
+          <p className="text-sm text-muted-foreground">Account deletion is permanent and cannot be undone.</p>
         </div>
         <Button variant="destructive" disabled>
           Delete Account
         </Button>
-        <p className="text-xs text-muted-foreground">
-          Contact support to delete your account.
-        </p>
+        <p className="text-xs text-muted-foreground">Contact support to delete your account.</p>
       </div>
     </div>
   );

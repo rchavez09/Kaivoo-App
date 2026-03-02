@@ -93,7 +93,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   addRecentSearch: (query) => {
     const trimmed = query.trim();
     if (!trimmed) return;
-    const current = get().recentSearches.filter(s => s !== trimmed);
+    const current = get().recentSearches.filter((s) => s !== trimmed);
     const updated = [trimmed, ...current].slice(0, MAX_RECENT);
     set({ recentSearches: updated });
     saveRecent(updated);

@@ -50,9 +50,9 @@ describe('useKaivooStore', () => {
       useKaivooStore.getState().updateTask(t1.id, { title: 'A Updated', status: 'doing' });
 
       const tasks = useKaivooStore.getState().tasks;
-      expect(tasks.find(t => t.id === t1.id)?.title).toBe('A Updated');
-      expect(tasks.find(t => t.id === t1.id)?.status).toBe('doing');
-      expect(tasks.find(t => t.title === 'B')?.status).toBe('todo'); // unchanged
+      expect(tasks.find((t) => t.id === t1.id)?.title).toBe('A Updated');
+      expect(tasks.find((t) => t.id === t1.id)?.status).toBe('doing');
+      expect(tasks.find((t) => t.title === 'B')?.status).toBe('todo'); // unchanged
     });
 
     it('deleteTask removes the correct task', () => {
@@ -73,7 +73,7 @@ describe('useKaivooStore', () => {
 
       useKaivooStore.getState().addSubtask(task.id, 'Child subtask');
 
-      const updated = useKaivooStore.getState().tasks.find(t => t.id === task.id);
+      const updated = useKaivooStore.getState().tasks.find((t) => t.id === task.id);
       expect(updated?.subtasks).toHaveLength(1);
       expect(updated?.subtasks[0].title).toBe('Child subtask');
       expect(updated?.subtasks[0].completed).toBe(false);
@@ -187,9 +187,39 @@ describe('useKaivooStore', () => {
       useKaivooStore.setState({
         ...emptyState,
         tasks: [
-          { id: 't1', title: 'Due today', status: 'todo', priority: 'medium', dueDate: 'Today', tags: [], topicIds: [], subtasks: [], createdAt: new Date() },
-          { id: 't2', title: 'Done today', status: 'done', priority: 'medium', dueDate: 'Today', tags: [], topicIds: [], subtasks: [], createdAt: new Date() },
-          { id: 't3', title: 'Due tomorrow', status: 'todo', priority: 'medium', dueDate: 'Tomorrow', tags: [], topicIds: [], subtasks: [], createdAt: new Date() },
+          {
+            id: 't1',
+            title: 'Due today',
+            status: 'todo',
+            priority: 'medium',
+            dueDate: 'Today',
+            tags: [],
+            topicIds: [],
+            subtasks: [],
+            createdAt: new Date(),
+          },
+          {
+            id: 't2',
+            title: 'Done today',
+            status: 'done',
+            priority: 'medium',
+            dueDate: 'Today',
+            tags: [],
+            topicIds: [],
+            subtasks: [],
+            createdAt: new Date(),
+          },
+          {
+            id: 't3',
+            title: 'Due tomorrow',
+            status: 'todo',
+            priority: 'medium',
+            dueDate: 'Tomorrow',
+            tags: [],
+            topicIds: [],
+            subtasks: [],
+            createdAt: new Date(),
+          },
         ] as any[],
       });
 
@@ -206,9 +236,38 @@ describe('useKaivooStore', () => {
       useKaivooStore.setState({
         ...emptyState,
         tasks: [
-          { id: 't1', title: 'This week', status: 'done', priority: 'medium', tags: [], topicIds: [], subtasks: [], createdAt: new Date(), completedAt: withinWeek },
-          { id: 't2', title: 'Last week', status: 'done', priority: 'medium', tags: [], topicIds: [], subtasks: [], createdAt: new Date(), completedAt: beforeWeek },
-          { id: 't3', title: 'Not done', status: 'todo', priority: 'medium', tags: [], topicIds: [], subtasks: [], createdAt: new Date() },
+          {
+            id: 't1',
+            title: 'This week',
+            status: 'done',
+            priority: 'medium',
+            tags: [],
+            topicIds: [],
+            subtasks: [],
+            createdAt: new Date(),
+            completedAt: withinWeek,
+          },
+          {
+            id: 't2',
+            title: 'Last week',
+            status: 'done',
+            priority: 'medium',
+            tags: [],
+            topicIds: [],
+            subtasks: [],
+            createdAt: new Date(),
+            completedAt: beforeWeek,
+          },
+          {
+            id: 't3',
+            title: 'Not done',
+            status: 'todo',
+            priority: 'medium',
+            tags: [],
+            topicIds: [],
+            subtasks: [],
+            createdAt: new Date(),
+          },
         ] as any[],
       });
 
@@ -321,7 +380,7 @@ describe('useKaivooStore', () => {
       expect(task.recurrence).toBeUndefined();
 
       useKaivooStore.getState().updateTask(task.id, { recurrence: { type: 'weekly', interval: 1 } });
-      const updated = useKaivooStore.getState().tasks.find(t => t.id === task.id);
+      const updated = useKaivooStore.getState().tasks.find((t) => t.id === task.id);
       expect(updated?.recurrence).toEqual({ type: 'weekly', interval: 1 });
     });
 
@@ -338,7 +397,7 @@ describe('useKaivooStore', () => {
       });
 
       useKaivooStore.getState().updateTask(task.id, { recurrence: undefined });
-      const updated = useKaivooStore.getState().tasks.find(t => t.id === task.id);
+      const updated = useKaivooStore.getState().tasks.find((t) => t.id === task.id);
       expect(updated?.recurrence).toBeUndefined();
     });
   });
@@ -351,24 +410,38 @@ describe('useKaivooStore', () => {
       const { addTask } = useKaivooStore.getState();
       addTask({ title: 'A', status: 'todo', priority: 'low', tags: [], topicIds: ['topic-1'], subtasks: [] });
       addTask({ title: 'B', status: 'todo', priority: 'low', tags: [], topicIds: ['topic-2'], subtasks: [] });
-      addTask({ title: 'C', status: 'todo', priority: 'low', tags: [], topicIds: ['topic-1', 'topic-2'], subtasks: [] });
+      addTask({
+        title: 'C',
+        status: 'todo',
+        priority: 'low',
+        tags: [],
+        topicIds: ['topic-1', 'topic-2'],
+        subtasks: [],
+      });
 
       const tasks = useKaivooStore.getState().tasks;
-      const filtered = tasks.filter(t => t.topicIds.includes('topic-1'));
+      const filtered = tasks.filter((t) => t.topicIds.includes('topic-1'));
       expect(filtered).toHaveLength(2);
-      expect(filtered.map(t => t.title).sort()).toEqual(['A', 'C']);
+      expect(filtered.map((t) => t.title).sort()).toEqual(['A', 'C']);
     });
 
     it('tasks can be filtered by tags', () => {
       const { addTask } = useKaivooStore.getState();
       addTask({ title: 'A', status: 'todo', priority: 'low', tags: ['frontend'], topicIds: [], subtasks: [] });
       addTask({ title: 'B', status: 'todo', priority: 'low', tags: ['backend'], topicIds: [], subtasks: [] });
-      addTask({ title: 'C', status: 'todo', priority: 'low', tags: ['frontend', 'backend'], topicIds: [], subtasks: [] });
+      addTask({
+        title: 'C',
+        status: 'todo',
+        priority: 'low',
+        tags: ['frontend', 'backend'],
+        topicIds: [],
+        subtasks: [],
+      });
 
       const tasks = useKaivooStore.getState().tasks;
-      const filtered = tasks.filter(t => t.tags.includes('backend'));
+      const filtered = tasks.filter((t) => t.tags.includes('backend'));
       expect(filtered).toHaveLength(2);
-      expect(filtered.map(t => t.title).sort()).toEqual(['B', 'C']);
+      expect(filtered.map((t) => t.title).sort()).toEqual(['B', 'C']);
     });
 
     it('combined topic + tag filtering works', () => {
@@ -378,7 +451,7 @@ describe('useKaivooStore', () => {
       addTask({ title: 'C', status: 'todo', priority: 'low', tags: ['low'], topicIds: ['topic-1'], subtasks: [] });
 
       const tasks = useKaivooStore.getState().tasks;
-      const filtered = tasks.filter(t => t.topicIds.includes('topic-1') && t.tags.includes('urgent'));
+      const filtered = tasks.filter((t) => t.topicIds.includes('topic-1') && t.tags.includes('urgent'));
       expect(filtered).toHaveLength(1);
       expect(filtered[0].title).toBe('A');
     });
@@ -390,13 +463,13 @@ describe('useKaivooStore', () => {
       addTask({ title: 'C', status: 'todo', priority: 'low', tags: [], topicIds: [], subtasks: [] });
 
       // Simulate bulk update
-      [t1.id, t2.id].forEach(id => {
+      [t1.id, t2.id].forEach((id) => {
         useKaivooStore.getState().updateTask(id, { status: 'done', completedAt: new Date() });
       });
 
       const tasks = useKaivooStore.getState().tasks;
-      expect(tasks.filter(t => t.status === 'done')).toHaveLength(2);
-      expect(tasks.filter(t => t.status === 'todo')).toHaveLength(1);
+      expect(tasks.filter((t) => t.status === 'done')).toHaveLength(2);
+      expect(tasks.filter((t) => t.status === 'todo')).toHaveLength(1);
     });
 
     it('bulk delete pattern works', () => {
@@ -405,7 +478,7 @@ describe('useKaivooStore', () => {
       const t2 = addTask({ title: 'B', status: 'todo', priority: 'low', tags: [], topicIds: [], subtasks: [] });
       addTask({ title: 'C', status: 'todo', priority: 'low', tags: [], topicIds: [], subtasks: [] });
 
-      [t1.id, t2.id].forEach(id => {
+      [t1.id, t2.id].forEach((id) => {
         useKaivooStore.getState().deleteTask(id);
       });
 

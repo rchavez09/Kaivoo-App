@@ -7,18 +7,13 @@
  *  - Browser (web): SupabaseDataAdapter + SupabaseAuthAdapter + SupabaseSearchAdapter
  */
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  SupabaseDataAdapter,
-  SupabaseAuthAdapter,
-  SupabaseSearchAdapter,
-} from "./supabase";
-import type { DataAdapter, AuthAdapter, SearchAdapter } from "./types";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { SupabaseDataAdapter, SupabaseAuthAdapter, SupabaseSearchAdapter } from './supabase';
+import type { DataAdapter, AuthAdapter, SearchAdapter } from './types';
 
 // Runtime detection: are we inside the Tauri desktop shell?
-const isTauri = (): boolean =>
-  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const isTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 interface AdapterContextValue {
   data: DataAdapter | null;
@@ -49,7 +44,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
 
     (async () => {
       try {
-        const { LocalDataAdapter, LocalAuthAdapter, LocalSearchAdapter } = await import("./local");
+        const { LocalDataAdapter, LocalAuthAdapter, LocalSearchAdapter } = await import('./local');
         const data = await LocalDataAdapter.create();
         dataAdapterRef.current = data;
         setLocalAdapters({
@@ -58,7 +53,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
           search: new LocalSearchAdapter(),
         });
       } catch (e) {
-        console.error("[AdapterProvider] Failed to initialize LocalAdapter:", e);
+        console.error('[AdapterProvider] Failed to initialize LocalAdapter:', e);
         // Fall back to Supabase if local init fails
       }
     })();
@@ -87,9 +82,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
     return { data, auth, search, isLocal: false };
   }, [isLocal, localAdapters, user?.id]);
 
-  return (
-    <AdapterContext.Provider value={value}>{children}</AdapterContext.Provider>
-  );
+  return <AdapterContext.Provider value={value}>{children}</AdapterContext.Provider>;
 };
 
 /**
@@ -99,7 +92,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
 export const useAdapters = (): AdapterContextValue => {
   const context = useContext(AdapterContext);
   if (context === undefined) {
-    throw new Error("useAdapters must be used within an AdapterProvider");
+    throw new Error('useAdapters must be used within an AdapterProvider');
   }
   return context;
 };
@@ -110,7 +103,7 @@ export const useAdapters = (): AdapterContextValue => {
 export const useDataAdapter = (): DataAdapter => {
   const { data } = useAdapters();
   if (!data) {
-    throw new Error("useDataAdapter requires an initialized adapter");
+    throw new Error('useDataAdapter requires an initialized adapter');
   }
   return data;
 };

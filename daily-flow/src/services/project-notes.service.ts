@@ -23,10 +23,7 @@ export const fetchProjectNotes = async (userId: string) => {
 };
 
 // Create
-export const createProjectNote = async (
-  userId: string,
-  note: Pick<ProjectNote, 'projectId' | 'content'>
-) => {
+export const createProjectNote = async (userId: string, note: Pick<ProjectNote, 'projectId' | 'content'>) => {
   const { data, error } = await supabase
     .from('project_notes')
     .insert({
@@ -41,11 +38,7 @@ export const createProjectNote = async (
 };
 
 // Update
-export const updateProjectNote = async (
-  userId: string,
-  id: string,
-  updates: Partial<Pick<ProjectNote, 'content'>>
-) => {
+export const updateProjectNote = async (userId: string, id: string, updates: Partial<Pick<ProjectNote, 'content'>>) => {
   const { error } = await supabase
     .from('project_notes')
     .update({ content: updates.content })
@@ -56,10 +49,6 @@ export const updateProjectNote = async (
 
 // Delete
 export const deleteProjectNote = async (userId: string, id: string) => {
-  const { error } = await supabase
-    .from('project_notes')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
+  const { error } = await supabase.from('project_notes').delete().eq('id', id).eq('user_id', userId);
   if (error) throw error;
 };

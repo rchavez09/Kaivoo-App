@@ -36,27 +36,23 @@ const EmojiPicker = ({ value, onChange, fallback }: EmojiPickerProps) => {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="flex items-center justify-center hover:bg-secondary/50 rounded-lg p-1 -m-1 transition-colors cursor-pointer"
+          className="-m-1 flex cursor-pointer items-center justify-center rounded-lg p-1 transition-colors hover:bg-secondary/50"
         >
-          {value ? (
-            <span className="text-2xl leading-none">{value}</span>
-          ) : (
-            fallback
-          )}
+          {value ? <span className="text-2xl leading-none">{value}</span> : fallback}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-3" align="start">
         <div className="space-y-2">
           {EMOJI_CATEGORIES.map((category) => (
             <div key={category.label}>
-              <p className="text-xs text-muted-foreground mb-1">{category.label}</p>
+              <p className="mb-1 text-xs text-muted-foreground">{category.label}</p>
               <div className="flex flex-wrap gap-1">
                 {category.emojis.map((emoji) => (
                   <button
                     key={emoji}
                     type="button"
                     onClick={() => handleSelect(emoji)}
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-secondary transition-colors text-lg"
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors hover:bg-secondary"
                   >
                     {emoji}
                   </button>
@@ -68,10 +64,10 @@ const EmojiPicker = ({ value, onChange, fallback }: EmojiPickerProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full h-7 text-xs gap-1.5 text-muted-foreground"
+              className="h-7 w-full gap-1.5 text-xs text-muted-foreground"
               onClick={handleRemove}
             >
-              <X className="w-3 h-3" />
+              <X className="h-3 w-3" />
               Remove icon
             </Button>
           )}

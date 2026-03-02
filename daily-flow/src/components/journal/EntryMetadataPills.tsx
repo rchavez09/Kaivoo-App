@@ -23,24 +23,24 @@ const EntryMetadataPills = ({ topicPath, tags, moodScore, maxTags = 3 }: EntryMe
   const overflow = tags.length - maxTags;
 
   return (
-    <div className="flex items-center gap-1.5 flex-wrap">
+    <div className="flex flex-wrap items-center gap-1.5">
       {topicPath && (
-        <span className="topic-chip text-[10px] py-0.5 px-1.5">
-          {isPage ? <FileText className="w-2.5 h-2.5" /> : <FolderOpen className="w-2.5 h-2.5" />}
+        <span className="topic-chip px-1.5 py-0.5 text-[10px]">
+          {isPage ? <FileText className="h-2.5 w-2.5" /> : <FolderOpen className="h-2.5 w-2.5" />}
           {topicPath}
         </span>
       )}
-      {visibleTags.map(tag => (
-        <span key={tag} className="tag-chip text-[10px] py-0.5 px-1.5">
-          <Hash className="w-2.5 h-2.5" />
+      {visibleTags.map((tag) => (
+        <span key={tag} className="tag-chip px-1.5 py-0.5 text-[10px]">
+          <Hash className="h-2.5 w-2.5" />
           {tag}
         </span>
       ))}
-      {overflow > 0 && (
-        <span className="text-[10px] text-muted-foreground">+{overflow}</span>
-      )}
+      {overflow > 0 && <span className="text-[10px] text-muted-foreground">+{overflow}</span>}
       {mood ? (
-        <span className="text-sm leading-none" title={mood.label}>{mood.emoji}</span>
+        <span className="text-sm leading-none" title={mood.label}>
+          {mood.emoji}
+        </span>
       ) : null}
     </div>
   );

@@ -39,21 +39,22 @@ const TaskRowContent = React.memo(function TaskRowContent({
 }) {
   const isDone = task.status === 'done';
   const hasSubtasks = task.subtasks.length > 0;
-  const completedSubtasks = task.subtasks.filter(s => s.completed).length;
+  const completedSubtasks = task.subtasks.filter((s) => s.completed).length;
   const progress = hasSubtasks ? Math.round((completedSubtasks / task.subtasks.length) * 100) : null;
 
-  const bgClass = variant === 'overdue'
-    ? 'bg-destructive/5 border border-destructive/20 hover:bg-destructive/10'
-    : isDone
-    ? 'opacity-60 hover:opacity-80 hover:bg-secondary/50'
-    : 'hover:bg-secondary/50';
+  const bgClass =
+    variant === 'overdue'
+      ? 'bg-destructive/5 border border-destructive/20 hover:bg-destructive/10'
+      : isDone
+        ? 'opacity-60 hover:opacity-80 hover:bg-secondary/50'
+        : 'hover:bg-secondary/50';
 
   return (
     <>
       <div
         className={cn(
-          "flex items-center gap-2 py-2.5 px-2 -mx-2 rounded-lg transition-colors cursor-pointer group",
-          bgClass
+          'group -mx-2 flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2.5 transition-colors',
+          bgClass,
         )}
         onClick={(e) => onTaskClick(task, e)}
       >
@@ -62,11 +63,11 @@ const TaskRowContent = React.memo(function TaskRowContent({
           <button
             {...dragProps.attributes}
             {...(dragProps.listeners as React.HTMLAttributes<HTMLButtonElement>)}
-            className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-muted-foreground/50 hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none"
+            className="flex h-5 w-5 flex-shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
             onClick={(e) => e.stopPropagation()}
             aria-label={`Reorder ${task.title}`}
           >
-            <GripVertical className="w-4 h-4" />
+            <GripVertical className="h-4 w-4" />
           </button>
         )}
 
@@ -75,35 +76,39 @@ const TaskRowContent = React.memo(function TaskRowContent({
           onClick={(e) => onQuickComplete(task, e)}
           aria-label={isDone ? `Mark "${task.title}" incomplete` : `Mark "${task.title}" complete`}
           className={cn(
-            "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+            'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors',
             isDone
-              ? "bg-success-foreground border-success-foreground"
-              : "border-muted-foreground/40 hover:border-success-foreground hover:bg-success-foreground/10"
+              ? 'border-success-foreground bg-success-foreground'
+              : 'border-muted-foreground/40 hover:border-success-foreground hover:bg-success-foreground/10',
           )}
         >
-          {isDone && <Check className="w-3 h-3 text-white" />}
+          {isDone && <Check className="h-3 w-3 text-white" />}
         </button>
 
         {/* Task content */}
-        <div className="flex-1 min-w-0 flex flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <span className={cn("text-sm", isDone ? "line-through text-muted-foreground" : "text-foreground")}>
+            <span className={cn('text-sm', isDone ? 'text-muted-foreground line-through' : 'text-foreground')}>
               {task.title}
             </span>
             {showDueDate && task.dueDate && (
               <Badge
                 variant="outline"
                 className={cn(
-                  "text-[10px] h-4 px-1 font-normal flex-shrink-0",
-                  variant === 'overdue' ? "text-destructive border-destructive/30" : "text-muted-foreground"
+                  'h-4 flex-shrink-0 px-1 text-[10px] font-normal',
+                  variant === 'overdue' ? 'border-destructive/30 text-destructive' : 'text-muted-foreground',
                 )}
               >
                 {task.dueDate}
               </Badge>
             )}
             {task.recurrence && (
-              <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal flex-shrink-0 text-info-foreground border-info/30">
-                ↻ {task.recurrence.type === 'daily' ? 'Daily' : task.recurrence.type === 'weekly' ? 'Weekly' : 'Monthly'}
+              <Badge
+                variant="outline"
+                className="h-4 flex-shrink-0 border-info/30 px-1 text-[10px] font-normal text-info-foreground"
+              >
+                ↻{' '}
+                {task.recurrence.type === 'daily' ? 'Daily' : task.recurrence.type === 'weekly' ? 'Weekly' : 'Monthly'}
               </Badge>
             )}
           </div>
@@ -113,47 +118,55 @@ const TaskRowContent = React.memo(function TaskRowContent({
               onClick={(e) => onToggleExpanded(task.id, e)}
               aria-label={isExpanded ? `Collapse subtasks for "${task.title}"` : `Expand subtasks for "${task.title}"`}
               className={cn(
-                "flex items-center gap-1.5 text-xs w-fit px-1.5 py-0.5 -ml-1.5 rounded hover:bg-secondary transition-colors",
-                isDone ? "text-muted-foreground" : "text-muted-foreground hover:text-foreground"
+                '-ml-1.5 flex w-fit items-center gap-1.5 rounded px-1.5 py-0.5 text-xs transition-colors hover:bg-secondary',
+                isDone ? 'text-muted-foreground' : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-              <span>Subtasks ({completedSubtasks}/{task.subtasks.length})</span>
-              {progress !== null && <Progress value={progress} className="h-1 w-10 ml-1" />}
+              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              <span>
+                Subtasks ({completedSubtasks}/{task.subtasks.length})
+              </span>
+              {progress !== null && <Progress value={progress} className="ml-1 h-1 w-10" />}
             </button>
           )}
         </div>
 
-        {task.priority === 'high' && <Flag className="w-3.5 h-3.5 flex-shrink-0 text-destructive" />}
+        {task.priority === 'high' && <Flag className="h-3.5 w-3.5 flex-shrink-0 text-destructive" />}
       </div>
 
       {/* Expanded subtasks */}
       {hasSubtasks && isExpanded && (
-        <div className="ml-6 pl-3 border-l-2 border-border/60 space-y-1 mt-1 mb-3">
+        <div className="mb-3 ml-6 mt-1 space-y-1 border-l-2 border-border/60 pl-3">
           {task.subtasks.map((subtask) => (
             <div
               key={subtask.id}
-              className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-secondary/30 transition-colors"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-secondary/30"
             >
               <button
                 onClick={(e) => onSubtaskToggle(task.id, subtask.id, e)}
-                aria-label={subtask.completed ? `Mark "${subtask.title}" incomplete` : `Mark "${subtask.title}" complete`}
+                aria-label={
+                  subtask.completed ? `Mark "${subtask.title}" incomplete` : `Mark "${subtask.title}" complete`
+                }
                 className={cn(
-                  "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                  'flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border-2 transition-colors',
                   subtask.completed
-                    ? "bg-success-foreground border-success-foreground"
-                    : "border-muted-foreground/40 hover:border-success-foreground hover:bg-success-foreground/10"
+                    ? 'border-success-foreground bg-success-foreground'
+                    : 'border-muted-foreground/40 hover:border-success-foreground hover:bg-success-foreground/10',
                 )}
               >
-                {subtask.completed && <Check className="w-2.5 h-2.5 text-white" />}
+                {subtask.completed && <Check className="h-2.5 w-2.5 text-white" />}
               </button>
-              <span className={cn("text-sm", subtask.completed ? "line-through text-muted-foreground" : "text-foreground")}>
+              <span
+                className={cn('text-sm', subtask.completed ? 'text-muted-foreground line-through' : 'text-foreground')}
+              >
                 {subtask.title}
               </span>
               {subtask.tags && subtask.tags.length > 0 && (
-                <div className="flex gap-1 ml-auto">
+                <div className="ml-auto flex gap-1">
                   {subtask.tags.slice(0, 2).map((tag, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-[9px] h-4 px-1.5">{tag}</Badge>
+                    <Badge key={idx} variant="secondary" className="h-4 px-1.5 text-[9px]">
+                      {tag}
+                    </Badge>
                   ))}
                 </div>
               )}
@@ -168,14 +181,7 @@ const TaskRowContent = React.memo(function TaskRowContent({
 /** Draggable task row -- wraps TaskRowContent with dnd-kit sortable. */
 export const SortableTaskRow = React.memo(function SortableTaskRow(props: TaskRowProps) {
   const { task } = props;
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -184,7 +190,11 @@ export const SortableTaskRow = React.memo(function SortableTaskRow(props: TaskRo
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={isDragging ? "shadow-lg ring-2 ring-primary/20 rounded-lg" : undefined}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={isDragging ? 'rounded-lg shadow-lg ring-2 ring-primary/20' : undefined}
+    >
       <TaskRowContent {...props} dragProps={{ attributes, listeners }} />
     </div>
   );

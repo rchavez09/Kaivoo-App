@@ -30,11 +30,9 @@ const DayHeader = memo(({ date, onDateChange }: DayHeaderProps) => {
   }, [goBack, goForward, goToday]);
 
   return (
-    <header className="flex items-center justify-between mb-6">
+    <header className="mb-6 flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">
-          {isTodayDate ? 'Today' : format(date, 'EEEE')}
-        </h1>
+        <h1 className="text-2xl font-semibold text-foreground">{isTodayDate ? 'Today' : format(date, 'EEEE')}</h1>
         <p className="text-sm text-muted-foreground">{formattedDate}</p>
       </div>
 
@@ -54,12 +52,7 @@ const DayHeader = memo(({ date, onDateChange }: DayHeaderProps) => {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(d) => d && onDateChange(d)}
-              initialFocus
-            />
+            <Calendar mode="single" selected={date} onSelect={(d) => d && onDateChange(d)} initialFocus />
           </PopoverContent>
         </Popover>
         <Button variant="ghost" size="icon" onClick={goForward} className="h-8 w-8" aria-label="Next day">

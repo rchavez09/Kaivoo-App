@@ -1,7 +1,17 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SearchResult {
-  entityType: 'task' | 'subtask' | 'note' | 'project' | 'project_note' | 'meeting' | 'capture' | 'topic' | 'topic_page' | 'habit';
+  entityType:
+    | 'task'
+    | 'subtask'
+    | 'note'
+    | 'project'
+    | 'project_note'
+    | 'meeting'
+    | 'capture'
+    | 'topic'
+    | 'topic_page'
+    | 'habit';
   entityId: string;
   title: string;
   preview: string;
@@ -51,15 +61,24 @@ export async function searchAll(query: string, limit = 50): Promise<(SearchResul
     return [];
   }
 
-  return (data ?? []).map((row: { entity_type: string; entity_id: string; title: string; preview: string; rank: number; metadata: Record<string, unknown> }) => {
-    const result: SearchResult = {
-      entityType: row.entity_type as SearchResult['entityType'],
-      entityId: row.entity_id,
-      title: row.title,
-      preview: row.preview,
-      rank: row.rank,
-      metadata: row.metadata ?? {},
-    };
-    return { ...result, path: getEntityPath(result) };
-  });
+  return (data ?? []).map(
+    (row: {
+      entity_type: string;
+      entity_id: string;
+      title: string;
+      preview: string;
+      rank: number;
+      metadata: Record<string, unknown>;
+    }) => {
+      const result: SearchResult = {
+        entityType: row.entity_type as SearchResult['entityType'],
+        entityId: row.entity_id,
+        title: row.title,
+        preview: row.preview,
+        rank: row.rank,
+        metadata: row.metadata ?? {},
+      };
+      return { ...result, path: getEntityPath(result) };
+    },
+  );
 }

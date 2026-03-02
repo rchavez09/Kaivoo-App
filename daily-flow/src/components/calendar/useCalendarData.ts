@@ -20,8 +20,8 @@ export interface CalendarData {
  * across a date range. Avoids N individual selector calls for the month grid.
  */
 export function useCalendarData(rangeStart: Date, rangeEnd: Date): CalendarData {
-  const meetings = useKaivooStore(s => s.meetings);
-  const tasks = useKaivooStore(s => s.tasks);
+  const meetings = useKaivooStore((s) => s.meetings);
+  const tasks = useKaivooStore((s) => s.tasks);
 
   return useMemo(() => {
     const start = startOfDay(rangeStart);

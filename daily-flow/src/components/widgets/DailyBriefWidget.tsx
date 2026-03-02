@@ -27,11 +27,11 @@ interface DailyBriefWidgetProps {
 }
 
 const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
-  const tasks = useKaivooStore(s => s.tasks);
-  const meetings = useKaivooStore(s => s.meetings);
-  const routines = useKaivooStore(s => s.routines);
-  const routineCompletions = useKaivooStore(s => s.routineCompletions);
-  const journalEntries = useKaivooStore(s => s.journalEntries);
+  const tasks = useKaivooStore((s) => s.tasks);
+  const meetings = useKaivooStore((s) => s.meetings);
+  const routines = useKaivooStore((s) => s.routines);
+  const routineCompletions = useKaivooStore((s) => s.routineCompletions);
+  const journalEntries = useKaivooStore((s) => s.journalEntries);
   const { addJournalEntry } = useKaivooActions();
 
   const dateStr = useMemo(() => formatStorageDate(date || new Date()), [date]);
@@ -40,7 +40,11 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
 
   const hour = new Date().getHours();
   const greeting = isViewingToday
-    ? (hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening')
+    ? hour < 12
+      ? 'Good morning'
+      : hour < 18
+        ? 'Good afternoon'
+        : 'Good evening'
     : format(refDate, 'EEEE, MMMM d');
 
   // Task stats for the reference date
@@ -48,20 +52,20 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
     const refStart = startOfDay(refDate);
     const refEnd = endOfDay(refDate);
 
-    const tasksDueOnDate = tasks.filter(task => {
+    const tasksDueOnDate = tasks.filter((task) => {
       if (task.status === 'done') return false;
       const parsed = parseDate(task.dueDate);
       return parsed ? isSameDay(parsed, refDate) : false;
     });
 
-    const tasksCompletedOnDate = tasks.filter(task => {
+    const tasksCompletedOnDate = tasks.filter((task) => {
       if (task.status !== 'done' || !task.completedAt) return false;
       const completedAt = parseDate(task.completedAt);
       if (!completedAt || !isValid(completedAt)) return false;
       return completedAt >= refStart && completedAt <= refEnd;
     });
 
-    const overdueTasks = tasks.filter(task => {
+    const overdueTasks = tasks.filter((task) => {
       if (task.status === 'done') return false;
       return isOverdue(task.dueDate);
     });
@@ -79,10 +83,8 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
   const eventsOnDate = useMemo(() => {
     const refStart = startOfDay(refDate);
     const refEnd = endOfDay(refDate);
-    return meetings.filter(meeting => {
-      const startTime = meeting.startTime instanceof Date
-        ? meeting.startTime
-        : new Date(meeting.startTime);
+    return meetings.filter((meeting) => {
+      const startTime = meeting.startTime instanceof Date ? meeting.startTime : new Date(meeting.startTime);
       return startTime >= refStart && startTime <= refEnd;
     });
   }, [meetings, dateStr, refDate]);
@@ -99,12 +101,12 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
   // Current mood from journal entries for this date
   const currentMood = useMemo(() => {
     const dayEntries = journalEntries
-      .filter(e => e.date === dateStr && e.moodScore != null)
+      .filter((e) => e.date === dateStr && e.moodScore != null)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return dayEntries.length > 0 ? dayEntries[0].moodScore : undefined;
   }, [journalEntries, dateStr]);
 
-  const currentMoodOption = MOOD_OPTIONS.find(m => m.score === currentMood);
+  const currentMoodOption = MOOD_OPTIONS.find((m) => m.score === currentMood);
 
   // Template-based AI summary
   const summary = useMemo(() => {
@@ -115,7 +117,9 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
     }
 
     if (taskStats.overdueTasks > 0) {
-      insights.push(`You have ${taskStats.overdueTasks} overdue task${taskStats.overdueTasks > 1 ? 's' : ''} \u2014 might want to tackle those first.`);
+      insights.push(
+        `You have ${taskStats.overdueTasks} overdue task${taskStats.overdueTasks > 1 ? 's' : ''} \u2014 might want to tackle those first.`,
+      );
     }
 
     if (routineStats.routinesDone === routineStats.routinesTotal && routineStats.routinesTotal > 0) {
@@ -131,60 +135,57 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
 
   // Mood setter — always appends a new entry to preserve mood timeline history.
   // The most recent mood entry for the date is used for display (see currentMood above).
-  const handleMoodSelect = useCallback(async (score: number) => {
-    await addJournalEntry({
-      date: dateStr,
-      content: '',
-      tags: ['mood'],
-      topicIds: [],
-      moodScore: score,
-    });
-  }, [dateStr, addJournalEntry]);
+  const handleMoodSelect = useCallback(
+    async (score: number) => {
+      await addJournalEntry({
+        date: dateStr,
+        content: '',
+        tags: ['mood'],
+        topicIds: [],
+        moodScore: score,
+      });
+    },
+    [dateStr, addJournalEntry],
+  );
 
   const handleChipClick = useCallback((section: string) => {
     const el = document.getElementById(`day-section-${section}`);
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
-  const taskProgress = taskStats.tasksToday > 0
-    ? Math.round((taskStats.tasksDone / taskStats.tasksToday) * 100)
-    : 100;
-  const routineProgress = routineStats.routinesTotal > 0
-    ? Math.round((routineStats.routinesDone / routineStats.routinesTotal) * 100)
-    : 100;
+  const taskProgress = taskStats.tasksToday > 0 ? Math.round((taskStats.tasksDone / taskStats.tasksToday) * 100) : 100;
+  const routineProgress =
+    routineStats.routinesTotal > 0 ? Math.round((routineStats.routinesDone / routineStats.routinesTotal) * 100) : 100;
 
   return (
-    <div className="widget-card bg-gradient-to-br from-primary/5 via-card to-accent/5 animate-fade-in border border-primary/10">
-      <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="w-4 h-4 text-primary" />
-        <span className="text-xs font-medium text-primary uppercase tracking-wider">Daily Brief</span>
+    <div className="widget-card animate-fade-in border border-primary/10 bg-gradient-to-br from-primary/5 via-card to-accent/5">
+      <div className="mb-3 flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <span className="text-xs font-medium uppercase tracking-wider text-primary">Daily Brief</span>
       </div>
 
-      <h2 className="text-xl font-semibold text-foreground mb-4">{greeting}</h2>
+      <h2 className="mb-4 text-xl font-semibold text-foreground">{greeting}</h2>
 
       {/* Zone 1: Insight Chips */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="mb-4 grid grid-cols-3 gap-3">
         <button
           onClick={() => handleChipClick('tasks')}
-          className="bg-background/60 rounded-lg p-3 space-y-2 text-left hover:bg-background/80 transition-colors"
+          className="space-y-2 rounded-lg bg-background/60 p-3 text-left transition-colors hover:bg-background/80"
         >
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle2 className="h-3.5 w-3.5" />
             <span className="text-xs font-medium">Tasks</span>
           </div>
           <div className="flex items-baseline gap-1">
             <span className="text-lg font-semibold text-foreground">{taskStats.tasksDone}</span>
             <span className="text-xs text-muted-foreground">/ {taskStats.tasksToday}</span>
           </div>
-          <div className="h-1 bg-secondary rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary rounded-full transition-all"
-              style={{ width: `${taskProgress}%` }}
-            />
+          <div className="h-1 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${taskProgress}%` }} />
           </div>
           {taskStats.overdueTasks > 0 && (
             <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive" />
               <span className="text-[10px] text-destructive">{taskStats.overdueTasks} overdue</span>
             </div>
           )}
@@ -192,10 +193,10 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
 
         <button
           onClick={() => handleChipClick('schedule')}
-          className="bg-background/60 rounded-lg p-3 space-y-2 text-left hover:bg-background/80 transition-colors"
+          className="space-y-2 rounded-lg bg-background/60 p-3 text-left transition-colors hover:bg-background/80"
         >
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="h-3.5 w-3.5" />
             <span className="text-xs font-medium">Meetings</span>
           </div>
           <div className="flex items-baseline gap-1">
@@ -206,45 +207,42 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
 
         <button
           onClick={() => handleChipClick('routines')}
-          className="bg-background/60 rounded-lg p-3 space-y-2 text-left hover:bg-background/80 transition-colors"
+          className="space-y-2 rounded-lg bg-background/60 p-3 text-left transition-colors hover:bg-background/80"
         >
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="h-3.5 w-3.5" />
             <span className="text-xs font-medium">Routines</span>
           </div>
           <div className="flex items-baseline gap-1">
             <span className="text-lg font-semibold text-foreground">{routineStats.routinesDone}</span>
             <span className="text-xs text-muted-foreground">/ {routineStats.routinesTotal}</span>
           </div>
-          <div className="h-1 bg-secondary rounded-full overflow-hidden">
-            <div
-              className="h-full bg-accent rounded-full transition-all"
-              style={{ width: `${routineProgress}%` }}
-            />
+          <div className="h-1 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${routineProgress}%` }} />
           </div>
         </button>
       </div>
 
       {/* Zone 2: AI Summary / Quote Fallback */}
       {isViewingToday && (
-        <div className="px-3 py-2 mb-4 rounded-lg bg-background/40 border border-border/30">
-          <p className="text-sm text-muted-foreground italic leading-relaxed">{summary}</p>
+        <div className="mb-4 rounded-lg border border-border/30 bg-background/40 px-3 py-2">
+          <p className="text-sm italic leading-relaxed text-muted-foreground">{summary}</p>
         </div>
       )}
 
       {/* Zone 3: Mood Selector */}
       <div className="flex items-center gap-3">
-        <span className="text-xs text-muted-foreground font-medium">How are you feeling?</span>
+        <span className="text-xs font-medium text-muted-foreground">How are you feeling?</span>
         <div className="flex gap-1.5">
-          {MOOD_OPTIONS.map(mood => (
+          {MOOD_OPTIONS.map((mood) => (
             <button
               key={mood.score}
               onClick={() => handleMoodSelect(mood.score)}
               className={cn(
-                'w-9 h-9 rounded-full flex items-center justify-center text-lg transition-all',
+                'flex h-9 w-9 items-center justify-center rounded-full text-lg transition-all',
                 currentMood === mood.score
-                  ? 'bg-primary/15 ring-2 ring-primary scale-110'
-                  : 'hover:bg-secondary/60 hover:scale-105'
+                  ? 'scale-110 bg-primary/15 ring-2 ring-primary'
+                  : 'hover:scale-105 hover:bg-secondary/60',
               )}
               aria-label={`Set mood to ${mood.label}`}
             >
@@ -253,7 +251,7 @@ const DailyBriefWidget = ({ date }: DailyBriefWidgetProps) => {
           ))}
         </div>
         {currentMoodOption && (
-          <span className="text-xs text-muted-foreground ml-auto">
+          <span className="ml-auto text-xs text-muted-foreground">
             Currently: {currentMoodOption.emoji} {currentMoodOption.label}
           </span>
         )}

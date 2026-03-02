@@ -14,6 +14,6 @@ export const useUIStore = create<UIStore>()(
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
       toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
     }),
-    { name: 'kaivoo-ui', partialize: (state) => ({ sidebarCollapsed: state.sidebarCollapsed }) }
-  )
+    { name: 'kaivoo-ui', partialize: (state) => ({ sidebarCollapsed: state.sidebarCollapsed }) },
+  ),
 );

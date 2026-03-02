@@ -29,12 +29,12 @@ const LinkCaptureResult = React.memo(function LinkCaptureResult({
   onApprove,
   onCancel,
 }: LinkCaptureResultProps) {
-  const selectedTaskCount = linkTasks.filter(t => t.selected).length;
+  const selectedTaskCount = linkTasks.filter((t) => t.selected).length;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium flex items-center gap-2">
+        <h4 className="flex items-center gap-2 text-sm font-medium">
           <Globe className="h-4 w-4 text-primary" />
           {linkResult.pageTitle || 'Link Capture'}
         </h4>
@@ -44,22 +44,24 @@ const LinkCaptureResult = React.memo(function LinkCaptureResult({
       </div>
 
       {/* Editable Note */}
-      <div className="p-3 rounded-xl border bg-primary/5 border-primary/30 space-y-3">
+      <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">Note</Badge>
+          <Badge variant="outline" className="text-xs">
+            Note
+          </Badge>
         </div>
 
         <Input
           value={editedNote.title}
           onChange={(e) => onEditNote({ ...editedNote, title: e.target.value })}
-          className="font-medium bg-background"
+          className="bg-background font-medium"
           placeholder="Note title"
         />
 
         <Textarea
           value={editedNote.content}
           onChange={(e) => onEditNote({ ...editedNote, content: e.target.value })}
-          className="min-h-[150px] text-sm bg-background"
+          className="min-h-[150px] bg-background text-sm"
           placeholder="Note content"
         />
 
@@ -83,16 +85,15 @@ const LinkCaptureResult = React.memo(function LinkCaptureResult({
           {linkTasks.map((task, index) => (
             <div
               key={index}
-              className={`p-2 rounded-lg border flex items-center gap-2 ${
-                task.selected ? 'bg-primary/5 border-primary/30' : 'bg-muted/30 border-border opacity-60'
+              className={`flex items-center gap-2 rounded-lg border p-2 ${
+                task.selected ? 'border-primary/30 bg-primary/5' : 'border-border bg-muted/30 opacity-60'
               }`}
             >
-              <Checkbox
-                checked={task.selected}
-                onCheckedChange={() => onToggleLinkTask(index)}
-              />
-              <span className="text-sm flex-1">{task.title}</span>
-              <Badge variant="outline" className="text-xs">{task.priority}</Badge>
+              <Checkbox checked={task.selected} onCheckedChange={() => onToggleLinkTask(index)} />
+              <span className="flex-1 text-sm">{task.title}</span>
+              <Badge variant="outline" className="text-xs">
+                {task.priority}
+              </Badge>
             </div>
           ))}
         </div>
@@ -100,11 +101,11 @@ const LinkCaptureResult = React.memo(function LinkCaptureResult({
 
       <div className="flex gap-2">
         <Button onClick={onApprove} disabled={isProcessing} className="flex-1">
-          <Check className="h-4 w-4 mr-2" />
+          <Check className="mr-2 h-4 w-4" />
           Save Note{selectedTaskCount > 0 && ` + ${selectedTaskCount} Tasks`}
         </Button>
         <Button variant="outline" onClick={onCancel} disabled={isProcessing}>
-          <X className="h-4 w-4 mr-2" />
+          <X className="mr-2 h-4 w-4" />
           Cancel
         </Button>
       </div>

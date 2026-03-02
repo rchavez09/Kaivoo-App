@@ -30,8 +30,8 @@ const DateChip = memo(({ date, className, showRelative = true }: DateChipProps) 
     <button
       onClick={() => navigate(`/?date=${dateParam}`)}
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium',
-        'bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer',
+        'inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium',
+        'cursor-pointer bg-primary/10 text-primary transition-colors hover:bg-primary/20',
         className,
       )}
     >

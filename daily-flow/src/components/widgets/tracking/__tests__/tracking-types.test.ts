@@ -3,10 +3,7 @@ import { iconMap, availableIcons } from '../tracking-types';
 
 describe('tracking-types', () => {
   it('iconMap contains all expected icons', () => {
-    const expectedIcons = [
-      'droplets', 'brain', 'dumbbell', 'book-open',
-      'coffee', 'sun', 'moon', 'heart', 'utensils',
-    ];
+    const expectedIcons = ['droplets', 'brain', 'dumbbell', 'book-open', 'coffee', 'sun', 'moon', 'heart', 'utensils'];
     expectedIcons.forEach((name) => {
       expect(iconMap[name]).toBeDefined();
     });

@@ -79,7 +79,7 @@ export const createHabit = async (
     schedule?: HabitSchedule;
     targetCount?: number;
     order?: number;
-  }
+  },
 ) => {
   const { data, error } = await supabase
     .from('routines')
@@ -104,11 +104,7 @@ export const createHabit = async (
   return dbToHabit(data);
 };
 
-export const updateHabit = async (
-  userId: string,
-  id: string,
-  updates: Partial<Omit<Habit, 'id' | 'createdAt'>>
-) => {
+export const updateHabit = async (userId: string, id: string, updates: Partial<Omit<Habit, 'id' | 'createdAt'>>) => {
   const dbUpdates: TablesUpdate<'routines'> = { updated_at: new Date().toISOString() };
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
@@ -123,27 +119,15 @@ export const updateHabit = async (
   if (updates.isArchived !== undefined) dbUpdates.is_archived = updates.isArchived;
   if (updates.order !== undefined) dbUpdates.order = updates.order;
 
-  const { error } = await supabase
-    .from('routines')
-    .update(dbUpdates)
-    .eq('id', id)
-    .eq('user_id', userId);
+  const { error } = await supabase.from('routines').update(dbUpdates).eq('id', id).eq('user_id', userId);
   if (error) throw error;
 };
 
 export const deleteHabit = async (userId: string, id: string) => {
   // Delete completions first (FK constraint)
-  await supabase
-    .from('routine_completions')
-    .delete()
-    .eq('routine_id', id)
-    .eq('user_id', userId);
+  await supabase.from('routine_completions').delete().eq('routine_id', id).eq('user_id', userId);
 
-  const { error } = await supabase
-    .from('routines')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
+  const { error } = await supabase.from('routines').delete().eq('id', id).eq('user_id', userId);
   if (error) throw error;
 };
 
@@ -162,7 +146,7 @@ export const toggleHabitCompletion = async (
   userId: string,
   habitId: string,
   date: string,
-  isCurrentlyCompleted: boolean
+  isCurrentlyCompleted: boolean,
 ) => {
   if (isCurrentlyCompleted) {
     const { error } = await supabase
@@ -173,19 +157,12 @@ export const toggleHabitCompletion = async (
       .eq('user_id', userId);
     if (error) throw error;
   } else {
-    const { error } = await supabase
-      .from('routine_completions')
-      .insert({ user_id: userId, routine_id: habitId, date });
+    const { error } = await supabase.from('routine_completions').insert({ user_id: userId, routine_id: habitId, date });
     if (error) throw error;
   }
 };
 
-export const incrementHabitCount = async (
-  userId: string,
-  habitId: string,
-  date: string,
-  currentCount: number
-) => {
+export const incrementHabitCount = async (userId: string, habitId: string, date: string, currentCount: number) => {
   // Check if a completion row exists for this habit+date
   const { data: existing } = await supabase
     .from('routine_completions')
@@ -214,7 +191,7 @@ export const updateHabitStrengthAndStreak = async (
   habitId: string,
   strength: number,
   currentStreak: number,
-  bestStreak: number
+  bestStreak: number,
 ) => {
   const { error } = await supabase
     .from('routines')

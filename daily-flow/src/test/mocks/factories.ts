@@ -1,4 +1,15 @@
-import { Task, Subtask, JournalEntry, Capture, Meeting, RoutineItem, RoutineGroup, Topic, TopicPage, Tag } from '@/types';
+import {
+  Task,
+  Subtask,
+  JournalEntry,
+  Capture,
+  Meeting,
+  RoutineItem,
+  RoutineGroup,
+  Topic,
+  TopicPage,
+  Tag,
+} from '@/types';
 
 let counter = 0;
 const nextId = (prefix: string) => `${prefix}-test-${++counter}`;
@@ -91,4 +102,6 @@ export const createTag = (overrides: Partial<Tag> = {}): Tag => ({
   ...overrides,
 });
 
-export const resetCounter = () => { counter = 0; };
+export const resetCounter = () => {
+  counter = 0;
+};

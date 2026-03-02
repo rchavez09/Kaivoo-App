@@ -16,12 +16,8 @@ const ProfileSettings = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('display_name')
-        .eq('user_id', user.id)
-        .single();
+
+      const { data, error } = await supabase.from('profiles').select('display_name').eq('user_id', user.id).single();
 
       if (data) {
         setDisplayName(data.display_name || '');
@@ -36,10 +32,7 @@ const ProfileSettings = () => {
     if (!user) return;
     setSaving(true);
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ display_name: displayName })
-      .eq('user_id', user.id);
+    const { error } = await supabase.from('profiles').update({ display_name: displayName }).eq('user_id', user.id);
 
     if (error) {
       toast.error('Failed to update profile');
@@ -52,7 +45,7 @@ const ProfileSettings = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -61,13 +54,7 @@ const ProfileSettings = () => {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={user?.email || ''}
-          disabled
-          className="bg-muted"
-        />
+        <Input id="email" type="email" value={user?.email || ''} disabled className="bg-muted" />
         <p className="text-xs text-muted-foreground">Email cannot be changed</p>
       </div>
 

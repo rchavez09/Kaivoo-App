@@ -10,7 +10,7 @@
 
 // Check if we're running inside Tauri
 export function isTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
 /**
@@ -21,14 +21,14 @@ export async function testSQLite(): Promise<{
   details: string;
 }> {
   if (!isTauri()) {
-    return { success: false, details: "Not running in Tauri — skipping SQLite test" };
+    return { success: false, details: 'Not running in Tauri — skipping SQLite test' };
   }
 
   try {
-    const { default: Database } = await import("@tauri-apps/plugin-sql");
+    const { default: Database } = await import('@tauri-apps/plugin-sql');
 
     // Connect to SQLite (creates file if not exists)
-    const db = await Database.load("sqlite:kaivoo-test.db");
+    const db = await Database.load('sqlite:kaivoo-test.db');
 
     // Create test table
     await db.execute(`
@@ -40,18 +40,15 @@ export async function testSQLite(): Promise<{
     `);
 
     // Insert
-    const insertResult = await db.execute(
-      "INSERT INTO test_items (title) VALUES ($1)",
-      ["Hello from Tauri SQLite"]
-    );
+    const insertResult = await db.execute('INSERT INTO test_items (title) VALUES ($1)', ['Hello from Tauri SQLite']);
 
     // Select
-    const rows = await db.select<
-      Array<{ id: number; title: string; created_at: string }>
-    >("SELECT * FROM test_items ORDER BY id DESC LIMIT 5");
+    const rows = await db.select<Array<{ id: number; title: string; created_at: string }>>(
+      'SELECT * FROM test_items ORDER BY id DESC LIMIT 5',
+    );
 
     // Cleanup
-    await db.execute("DROP TABLE IF EXISTS test_items");
+    await db.execute('DROP TABLE IF EXISTS test_items');
     await db.close();
 
     return {
@@ -74,15 +71,14 @@ export async function testFileSystem(): Promise<{
   details: string;
 }> {
   if (!isTauri()) {
-    return { success: false, details: "Not running in Tauri — skipping FS test" };
+    return { success: false, details: 'Not running in Tauri — skipping FS test' };
   }
 
   try {
-    const { writeTextFile, readTextFile, exists, remove, BaseDirectory } =
-      await import("@tauri-apps/plugin-fs");
+    const { writeTextFile, readTextFile, exists, remove, BaseDirectory } = await import('@tauri-apps/plugin-fs');
 
     const testContent = `# Tauri FS Test\nWritten at: ${new Date().toISOString()}`;
-    const testPath = "kaivoo-fs-test.md";
+    const testPath = 'kaivoo-fs-test.md';
     const opts = { baseDir: BaseDirectory.AppData };
 
     // Write
@@ -115,19 +111,15 @@ export async function testFileSystem(): Promise<{
  * Run all Tauri validation tests
  */
 export async function runTauriTests(): Promise<void> {
-  console.log("=== Tauri Plugin Validation Tests ===");
+  console.log('=== Tauri Plugin Validation Tests ===');
   console.log(`Running in Tauri: ${isTauri()}`);
 
   const sqliteResult = await testSQLite();
-  console.log(
-    `[${sqliteResult.success ? "PASS" : "FAIL"}] SQLite: ${sqliteResult.details}`
-  );
+  console.log(`[${sqliteResult.success ? 'PASS' : 'FAIL'}] SQLite: ${sqliteResult.details}`);
 
   const fsResult = await testFileSystem();
-  console.log(
-    `[${fsResult.success ? "PASS" : "FAIL"}] FileSystem: ${fsResult.details}`
-  );
+  console.log(`[${fsResult.success ? 'PASS' : 'FAIL'}] FileSystem: ${fsResult.details}`);
 
   const allPassed = sqliteResult.success && fsResult.success;
-  console.log(`\n=== ${allPassed ? "ALL TESTS PASSED" : "SOME TESTS FAILED"} ===`);
+  console.log(`\n=== ${allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`);
 }

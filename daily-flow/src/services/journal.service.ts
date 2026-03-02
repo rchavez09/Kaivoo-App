@@ -33,7 +33,10 @@ export const fetchJournalEntries = async (userId: string) => {
 };
 
 // CRUD
-export const createJournalEntry = async (userId: string, entry: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt' | 'timestamp'>) => {
+export const createJournalEntry = async (
+  userId: string,
+  entry: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt' | 'timestamp'>,
+) => {
   const payload: Record<string, unknown> = {
     user_id: userId,
     date: entry.date,
@@ -48,11 +51,7 @@ export const createJournalEntry = async (userId: string, entry: Omit<JournalEntr
     payload.label = entry.label;
   }
 
-  const { data, error } = await supabase
-    .from('journal_entries')
-    .insert(payload)
-    .select()
-    .single();
+  const { data, error } = await supabase.from('journal_entries').insert(payload).select().single();
   if (error) throw error;
   return dbToJournalEntry(data);
 };
@@ -65,7 +64,11 @@ export const updateJournalEntry = async (userId: string, id: string, updates: Pa
   if ('moodScore' in updates) dbUpdates.mood_score = updates.moodScore ?? null;
   if ('label' in updates) dbUpdates.label = updates.label ?? null;
 
-  const { error } = await supabase.from('journal_entries').update(dbUpdates as TablesUpdate<'journal_entries'>).eq('id', id).eq('user_id', userId);
+  const { error } = await supabase
+    .from('journal_entries')
+    .update(dbUpdates as TablesUpdate<'journal_entries'>)
+    .eq('id', id)
+    .eq('user_id', userId);
   if (error) throw error;
 };
 

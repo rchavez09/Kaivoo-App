@@ -1,6 +1,19 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, CheckSquare, Calendar, FolderOpen, BarChart3, Settings, PanelLeftClose, PanelLeft, LogOut, BookOpen, Briefcase, Repeat } from 'lucide-react';
+import {
+  Sun,
+  CheckSquare,
+  Calendar,
+  FolderOpen,
+  BarChart3,
+  Settings,
+  PanelLeftClose,
+  PanelLeft,
+  LogOut,
+  BookOpen,
+  Briefcase,
+  Repeat,
+} from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -16,133 +29,144 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-const navItems = [{
-  path: '/',
-  label: 'Today',
-  icon: Sun
-}, {
-  path: '/notes',
-  label: 'Notes',
-  icon: BookOpen
-}, {
-  path: '/tasks',
-  label: 'Tasks',
-  icon: CheckSquare
-}, {
-  path: '/projects',
-  label: 'Projects',
-  icon: Briefcase
-}, {
-  path: '/routines',
-  label: 'Routines',
-  icon: Repeat
-}, {
-  path: '/calendar',
-  label: 'Calendar',
-  icon: Calendar
-}, {
-  path: '/topics',
-  label: 'Topics',
-  icon: FolderOpen
-}, {
-  path: '/insights',
-  label: 'Insights',
-  icon: BarChart3
-}];
+const navItems = [
+  {
+    path: '/',
+    label: 'Today',
+    icon: Sun,
+  },
+  {
+    path: '/notes',
+    label: 'Notes',
+    icon: BookOpen,
+  },
+  {
+    path: '/tasks',
+    label: 'Tasks',
+    icon: CheckSquare,
+  },
+  {
+    path: '/projects',
+    label: 'Projects',
+    icon: Briefcase,
+  },
+  {
+    path: '/routines',
+    label: 'Routines',
+    icon: Repeat,
+  },
+  {
+    path: '/calendar',
+    label: 'Calendar',
+    icon: Calendar,
+  },
+  {
+    path: '/topics',
+    label: 'Topics',
+    icon: FolderOpen,
+  },
+  {
+    path: '/insights',
+    label: 'Insights',
+    icon: BarChart3,
+  },
+];
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
 }
-const Sidebar = ({
-  collapsed,
-  onToggle
-}: SidebarProps) => {
+const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const location = useLocation();
   const { signOut, user } = useAuth();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
-  
+
   const handleSignOut = async () => {
     await signOut();
     setShowSignOutDialog(false);
   };
 
-  const NavItem = ({
-    path,
-    label,
-    icon: Icon
-  }: {
-    path: string;
-    label: string;
-    icon: typeof Sun;
-  }) => {
+  const NavItem = ({ path, label, icon: Icon }: { path: string; label: string; icon: typeof Sun }) => {
     const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
-    const linkContent = <Link to={path} className={cn('nav-item', isActive && 'active', collapsed && 'justify-center px-2')}>
-        <Icon className="w-5 h-5 shrink-0" />
+    const linkContent = (
+      <Link to={path} className={cn('nav-item', isActive && 'active', collapsed && 'justify-center px-2')}>
+        <Icon className="h-5 w-5 shrink-0" />
         {!collapsed && <span>{label}</span>}
-      </Link>;
+      </Link>
+    );
     if (collapsed) {
-      return <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            {linkContent}
-          </TooltipTrigger>
+      return (
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
           <TooltipContent side="right" sideOffset={10}>
             {label}
           </TooltipContent>
-        </Tooltip>;
+        </Tooltip>
+      );
     }
     return linkContent;
   };
-  return <aside className={cn(
-    "h-screen bg-sidebar border-r border-sidebar-border flex flex-col",
-    "transition-all duration-300 ease-in-out",
-    collapsed ? "w-16" : "w-60"
-  )}>
+  return (
+    <aside
+      className={cn(
+        'flex h-screen flex-col border-r border-sidebar-border bg-sidebar',
+        'transition-all duration-300 ease-in-out',
+        collapsed ? 'w-16' : 'w-60',
+      )}
+    >
       {/* Logo */}
-      <div className={cn(
-        "p-5 border-b border-sidebar-border flex items-center transition-all duration-300",
-        collapsed ? "justify-center" : "justify-between"
-      )}>
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 bg-primary flex items-center justify-center shrink-0 rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
-            <img src={kaivooLogo} alt="Kaivoo" className="w-5 h-5" />
+      <div
+        className={cn(
+          'flex items-center border-b border-sidebar-border p-5 transition-all duration-300',
+          collapsed ? 'justify-center' : 'justify-between',
+        )}
+      >
+        <Link to="/" className="group flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary shadow-sm transition-shadow group-hover:shadow-md">
+            <img src={kaivooLogo} alt="Kaivoo" className="h-5 w-5" />
           </div>
-          <span className={cn(
-            "text-lg font-semibold text-foreground tracking-tight transition-all duration-300",
-            collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-          )}>Kaivoo</span>
+          <span
+            className={cn(
+              'text-lg font-semibold tracking-tight text-foreground transition-all duration-300',
+              collapsed ? 'w-0 overflow-hidden opacity-0' : 'opacity-100',
+            )}
+          >
+            Kaivoo
+          </span>
         </Link>
       </div>
 
       {/* Toggle Button */}
-      <div className={cn("p-2 transition-all duration-300", collapsed ? "flex justify-center" : "flex justify-end")}>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onToggle} 
-          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      <div className={cn('p-2 transition-all duration-300', collapsed ? 'flex justify-center' : 'flex justify-end')}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          className="h-8 w-8 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
-        {navItems.map(item => <NavItem key={item.path} {...item} />)}
+      <nav className="flex-1 space-y-1 p-3">
+        {navItems.map((item) => (
+          <NavItem key={item.path} {...item} />
+        ))}
       </nav>
 
       {/* Settings & Sign Out */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
+      <div className="space-y-1 border-t border-sidebar-border p-3">
         <NavItem path="/settings" label="Settings" icon={Settings} />
-        {user && (
-          collapsed ? (
+        {user &&
+          (collapsed ? (
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowSignOutDialog(true)}
-                  className="nav-item justify-center px-2 w-full text-muted-foreground hover:text-destructive"
+                  className="nav-item w-full justify-center px-2 text-muted-foreground hover:text-destructive"
                 >
-                  <LogOut className="w-5 h-5 shrink-0" />
+                  <LogOut className="h-5 w-5 shrink-0" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={10}>
@@ -154,11 +178,10 @@ const Sidebar = ({
               onClick={() => setShowSignOutDialog(true)}
               className="nav-item w-full text-muted-foreground hover:text-destructive"
             >
-              <LogOut className="w-5 h-5 shrink-0" />
+              <LogOut className="h-5 w-5 shrink-0" />
               <span>Sign Out</span>
             </button>
-          )
-        )}
+          ))}
       </div>
 
       {/* Sign Out Confirmation Dialog */}
@@ -166,9 +189,7 @@ const Sidebar = ({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Sign out?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You'll need to sign in again to access your data.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You'll need to sign in again to access your data.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -176,6 +197,7 @@ const Sidebar = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </aside>;
+    </aside>
+  );
 };
 export default Sidebar;

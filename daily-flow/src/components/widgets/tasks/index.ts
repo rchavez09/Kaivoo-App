@@ -10,12 +10,7 @@ export {
   AVAILABLE_BUILTIN_SECTIONS,
   DEFAULT_SETTINGS,
 } from './TasksWidgetConfig';
-export type {
-  BuiltInSectionId,
-  SectionId,
-  TasksWidgetSection,
-  TasksWidgetSettings,
-} from './TasksWidgetConfig';
+export type { BuiltInSectionId, SectionId, TasksWidgetSection, TasksWidgetSettings } from './TasksWidgetConfig';
 
 export {
   isDueToday,
@@ -27,7 +22,4 @@ export {
   getSectionDisplayConfig,
   statusConfig,
 } from './task-section-utils';
-export type {
-  TaskVariant,
-  SectionDisplayConfig,
-} from './task-section-utils';
+export type { TaskVariant, SectionDisplayConfig } from './task-section-utils';

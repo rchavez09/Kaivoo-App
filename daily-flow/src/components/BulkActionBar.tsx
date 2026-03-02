@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,11 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Trash2, Flag, Circle, Calendar } from 'lucide-react';
 import { TaskStatus, TaskPriority } from '@/types';
@@ -48,25 +38,23 @@ const BulkActionBar = ({
   const [dueDateOpen, setDueDateOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 bg-background border border-border rounded-xl shadow-lg">
-      <span className="text-sm font-medium text-foreground whitespace-nowrap">
-        {selectedCount} selected
-      </span>
+    <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-xl border border-border bg-background px-5 py-3 shadow-lg">
+      <span className="whitespace-nowrap text-sm font-medium text-foreground">{selectedCount} selected</span>
 
-      <div className="w-px h-6 bg-border" />
+      <div className="h-6 w-px bg-border" />
 
       {/* Status */}
       <Select onValueChange={(v) => onBulkStatusChange(v as TaskStatus)}>
-        <SelectTrigger className="w-[130px] h-8 text-xs">
+        <SelectTrigger className="h-8 w-[130px] text-xs">
           <div className="flex items-center gap-1.5">
-            <Circle className="w-3 h-3" />
+            <Circle className="h-3 w-3" />
             <SelectValue placeholder="Set Status" />
           </div>
         </SelectTrigger>
         <SelectContent>
           {Object.entries(statusConfig).map(([key, config]) => (
             <SelectItem key={key} value={key}>
-              <span className={cn("flex items-center gap-2", config.color)}>
+              <span className={cn('flex items-center gap-2', config.color)}>
                 {config.icon}
                 {config.label}
               </span>
@@ -77,17 +65,17 @@ const BulkActionBar = ({
 
       {/* Priority */}
       <Select onValueChange={(v) => onBulkPriorityChange(v as TaskPriority)}>
-        <SelectTrigger className="w-[130px] h-8 text-xs">
+        <SelectTrigger className="h-8 w-[130px] text-xs">
           <div className="flex items-center gap-1.5">
-            <Flag className="w-3 h-3" />
+            <Flag className="h-3 w-3" />
             <SelectValue placeholder="Set Priority" />
           </div>
         </SelectTrigger>
         <SelectContent>
           {Object.entries(priorityConfig).map(([key, config]) => (
             <SelectItem key={key} value={key}>
-              <span className={cn("flex items-center gap-2", config.color)}>
-                <Flag className="w-3 h-3" />
+              <span className={cn('flex items-center gap-2', config.color)}>
+                <Flag className="h-3 w-3" />
                 {config.label}
               </span>
             </SelectItem>
@@ -98,18 +86,18 @@ const BulkActionBar = ({
       {/* Due Date */}
       <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
-            <Calendar className="w-3 h-3" />
+          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+            <Calendar className="h-3 w-3" />
             Set Due Date
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="center">
           <div className="flex flex-col">
-            <div className="flex flex-col gap-1 p-2 border-b border-border">
+            <div className="flex flex-col gap-1 border-b border-border p-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="justify-start text-xs h-7"
+                className="h-7 justify-start text-xs"
                 onClick={() => {
                   onBulkDueDateChange(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
                   setDueDateOpen(false);
@@ -120,7 +108,7 @@ const BulkActionBar = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="justify-start text-xs h-7"
+                className="h-7 justify-start text-xs"
                 onClick={() => {
                   onBulkDueDateChange(format(nextMonday(new Date()), 'yyyy-MM-dd'));
                   setDueDateOpen(false);
@@ -131,7 +119,7 @@ const BulkActionBar = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="justify-start text-xs h-7 text-destructive"
+                className="h-7 justify-start text-xs text-destructive"
                 onClick={() => {
                   onBulkDueDateChange(null);
                   setDueDateOpen(false);
@@ -153,26 +141,32 @@ const BulkActionBar = ({
         </PopoverContent>
       </Popover>
 
-      <div className="w-px h-6 bg-border" />
+      <div className="h-6 w-px bg-border" />
 
       {/* Delete */}
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="sm" className="h-8 text-xs gap-1.5">
-            <Trash2 className="w-3 h-3" />
+          <Button variant="destructive" size="sm" className="h-8 gap-1.5 text-xs">
+            <Trash2 className="h-3 w-3" />
             Delete
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {selectedCount} task{selectedCount !== 1 ? 's' : ''}?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {selectedCount} task{selectedCount !== 1 ? 's' : ''}?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the selected task{selectedCount !== 1 ? 's' : ''} and all their subtasks.
+              This action cannot be undone. This will permanently delete the selected task
+              {selectedCount !== 1 ? 's' : ''} and all their subtasks.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onBulkDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={onBulkDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

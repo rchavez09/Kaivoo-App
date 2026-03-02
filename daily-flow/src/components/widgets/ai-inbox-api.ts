@@ -31,7 +31,7 @@ export async function fetchThoughtSuggestions(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
     body: JSON.stringify({
       input: text,
@@ -63,7 +63,7 @@ export async function fetchLinkCapture(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
     body: JSON.stringify({
       url,
@@ -83,5 +83,9 @@ export async function fetchLinkCapture(
 }
 
 export function normalizeTopicPath(rawPath: string): string {
-  return rawPath.split('/').map(p => p.trim().replace(/\s+/g, ' ')).filter(Boolean).join('/');
+  return rawPath
+    .split('/')
+    .map((p) => p.trim().replace(/\s+/g, ' '))
+    .filter(Boolean)
+    .join('/');
 }

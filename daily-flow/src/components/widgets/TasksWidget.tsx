@@ -19,12 +19,7 @@ import {
   isOverdue,
   isDueThisWeek,
 } from './tasks';
-import {
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
+import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 const COLLAPSED_SECTIONS_KEY = 'kaivoo-tasks-widget-collapsed-sections';
@@ -37,25 +32,36 @@ interface TasksWidgetProps {
 }
 
 const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
-  const tasks = useKaivooStore(s => s.tasks);
-  const topics = useKaivooStore(s => s.topics);
-  const tags = useKaivooStore(s => s.tags);
+  const tasks = useKaivooStore((s) => s.tasks);
+  const topics = useKaivooStore((s) => s.topics);
+  const tags = useKaivooStore((s) => s.tags);
   const { addTask, updateTask, toggleSubtask } = useKaivooActions();
-  const { settings, loading: settingsLoading, updateSettings, updateSection, addSection, removeSection, reorderSections, setTaskOrderForSection } = useTasksWidgetSettings();
+  const {
+    settings,
+    loading: settingsLoading,
+    updateSettings,
+    updateSection,
+    addSection,
+    removeSection,
+    reorderSections,
+    setTaskOrderForSection,
+  } = useTasksWidgetSettings();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
-    tags.forEach(t => tagSet.add(t.name));
-    tasks.forEach(task => task.tags?.forEach(tag => tagSet.add(tag)));
-    return Array.from(tagSet).sort().map(name => {
-      const existing = tags.find(t => t.name === name);
-      return existing || { id: `derived-${name}`, name, color: null };
-    });
+    tags.forEach((t) => tagSet.add(t.name));
+    tasks.forEach((task) => task.tags?.forEach((tag) => tagSet.add(tag)));
+    return Array.from(tagSet)
+      .sort()
+      .map((name) => {
+        const existing = tags.find((t) => t.name === name);
+        return existing || { id: `derived-${name}`, name, color: null };
+      });
   }, [tags, tasks]);
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -66,7 +72,9 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
     try {
       const stored = localStorage.getItem(EXPANDED_TASKS_KEY);
       if (stored) return new Set(JSON.parse(stored));
-    } catch { /* localStorage unavailable */ }
+    } catch {
+      /* localStorage unavailable */
+    }
     return new Set();
   });
 
@@ -76,10 +84,12 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
       const stored = localStorage.getItem(COLLAPSED_SECTIONS_KEY);
       if (stored) {
         const collapsed = new Set<SectionId>(JSON.parse(stored));
-        return new Set(s.sections.map(sec => sec.id).filter(id => !collapsed.has(id)));
+        return new Set(s.sections.map((sec) => sec.id).filter((id) => !collapsed.has(id)));
       }
-    } catch { /* localStorage unavailable */ }
-    return new Set(s.sections.map(sec => sec.id));
+    } catch {
+      /* localStorage unavailable */
+    }
+    return new Set(s.sections.map((sec) => sec.id));
   }, []);
 
   const computeShowCompleted = useCallback((s: typeof settings): Set<SectionId> => {
@@ -87,73 +97,121 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
       const stored = localStorage.getItem(COLLAPSED_COMPLETED_KEY);
       if (stored) {
         const collapsed = new Set<SectionId>(JSON.parse(stored));
-        return new Set(s.sections.map(sec => sec.id).filter(id => !collapsed.has(id)));
+        return new Set(s.sections.map((sec) => sec.id).filter((id) => !collapsed.has(id)));
       }
-    } catch { /* localStorage unavailable */ }
+    } catch {
+      /* localStorage unavailable */
+    }
     if (s.collapseCompletedByDefault) return new Set();
-    return new Set(s.sections.map(sec => sec.id));
+    return new Set(s.sections.map((sec) => sec.id));
   }, []);
 
   const [expandedSections, setExpandedSections] = useState<Set<SectionId>>(() => computeExpandedSections(settings));
-  const [showCompletedInSection, setShowCompletedInSection] = useState<Set<SectionId>>(() => computeShowCompleted(settings));
+  const [showCompletedInSection, setShowCompletedInSection] = useState<Set<SectionId>>(() =>
+    computeShowCompleted(settings),
+  );
 
-  const settingsSectionsJson = JSON.stringify(settings.sections.map(s => ({ id: s.id, visible: s.visible })));
+  const settingsSectionsJson = JSON.stringify(settings.sections.map((s) => ({ id: s.id, visible: s.visible })));
   useEffect(() => {
     setExpandedSections(computeExpandedSections(settings));
     setShowCompletedInSection(computeShowCompleted(settings));
-  }, [settingsSectionsJson, settings.collapseSectionsByDefault, settings.collapseCompletedByDefault, computeExpandedSections, computeShowCompleted]);
+  }, [
+    settingsSectionsJson,
+    settings.collapseSectionsByDefault,
+    settings.collapseCompletedByDefault,
+    computeExpandedSections,
+    computeShowCompleted,
+  ]);
 
   // Handlers
   const toggleTaskExpanded = useCallback((taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setExpandedTasks(prev => {
+    setExpandedTasks((prev) => {
       const next = new Set(prev);
-      if (next.has(taskId)) { next.delete(taskId); } else { next.add(taskId); }
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
       localStorage.setItem(EXPANDED_TASKS_KEY, JSON.stringify(Array.from(next)));
       return next;
     });
   }, []);
 
-  const toggleSectionExpanded = useCallback((sectionId: SectionId) => {
-    setExpandedSections(prev => {
-      const next = new Set(prev);
-      if (next.has(sectionId)) { next.delete(sectionId); } else { next.add(sectionId); }
-      const allIds = settings.sections.map(s => s.id);
-      localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify(allIds.filter(id => !next.has(id))));
-      return next;
-    });
-  }, [settings.sections]);
+  const toggleSectionExpanded = useCallback(
+    (sectionId: SectionId) => {
+      setExpandedSections((prev) => {
+        const next = new Set(prev);
+        if (next.has(sectionId)) {
+          next.delete(sectionId);
+        } else {
+          next.add(sectionId);
+        }
+        const allIds = settings.sections.map((s) => s.id);
+        localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify(allIds.filter((id) => !next.has(id))));
+        return next;
+      });
+    },
+    [settings.sections],
+  );
 
-  const toggleCompletedInSection = useCallback((sectionId: SectionId, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowCompletedInSection(prev => {
-      const next = new Set(prev);
-      if (next.has(sectionId)) { next.delete(sectionId); } else { next.add(sectionId); }
-      const allIds = settings.sections.map(s => s.id);
-      localStorage.setItem(COLLAPSED_COMPLETED_KEY, JSON.stringify(allIds.filter(id => !next.has(id))));
-      return next;
-    });
-  }, [settings.sections]);
+  const toggleCompletedInSection = useCallback(
+    (sectionId: SectionId, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setShowCompletedInSection((prev) => {
+        const next = new Set(prev);
+        if (next.has(sectionId)) {
+          next.delete(sectionId);
+        } else {
+          next.add(sectionId);
+        }
+        const allIds = settings.sections.map((s) => s.id);
+        localStorage.setItem(COLLAPSED_COMPLETED_KEY, JSON.stringify(allIds.filter((id) => !next.has(id))));
+        return next;
+      });
+    },
+    [settings.sections],
+  );
 
-  const handleQuickComplete = useCallback((task: Task, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done';
-    updateTask(task.id, { status: newStatus, completedAt: newStatus === 'done' ? new Date() : undefined });
-  }, [updateTask]);
+  const handleQuickComplete = useCallback(
+    (task: Task, e: React.MouseEvent) => {
+      e.stopPropagation();
+      const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done';
+      updateTask(task.id, { status: newStatus, completedAt: newStatus === 'done' ? new Date() : undefined });
+    },
+    [updateTask],
+  );
 
-  const handleSubtaskToggle = useCallback((taskId: string, subtaskId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleSubtask(taskId, subtaskId);
-  }, [toggleSubtask]);
+  const handleSubtaskToggle = useCallback(
+    (taskId: string, subtaskId: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      toggleSubtask(taskId, subtaskId);
+    },
+    [toggleSubtask],
+  );
 
-  const handleTaskClick = useCallback((task: Task, e: React.MouseEvent) => {
-    if (onTaskClick) { e.stopPropagation(); onTaskClick(task.id); }
-  }, [onTaskClick]);
+  const handleTaskClick = useCallback(
+    (task: Task, e: React.MouseEvent) => {
+      if (onTaskClick) {
+        e.stopPropagation();
+        onTaskClick(task.id);
+      }
+    },
+    [onTaskClick],
+  );
 
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) return;
     try {
-      await addTask({ title: newTaskTitle.trim(), status: 'todo', priority: 'medium', dueDate: 'Today', tags: [], topicIds: [], subtasks: [] });
+      await addTask({
+        title: newTaskTitle.trim(),
+        status: 'todo',
+        priority: 'medium',
+        dueDate: 'Today',
+        tags: [],
+        topicIds: [],
+        subtasks: [],
+      });
       setNewTaskTitle('');
       setShowInput(false);
     } catch (e: unknown) {
@@ -166,25 +224,39 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
 
   const totalPending = useMemo(() => {
     let count = 0;
-    settings.sections.forEach(section => {
+    settings.sections.forEach((section) => {
       if (section.visible) count += getTasksForSection(section, tasks, settings.taskOrder, date).pending.length;
     });
     return count;
   }, [tasks, settings.sections, settings.taskOrder]);
 
-  const pinnedTodayPendingTasks = useMemo(() => tasks.filter(t => t.status !== 'done' && t.dueDate === 'Today'), [tasks]);
-  const otherTasks = useMemo(() => tasks.filter(t => t.dueDate !== 'Today' && t.status !== 'done' && !isDueToday(t.dueDate) && !isOverdue(t.dueDate) && !isDueThisWeek(t.dueDate)), [tasks]);
+  const pinnedTodayPendingTasks = useMemo(
+    () => tasks.filter((t) => t.status !== 'done' && t.dueDate === 'Today'),
+    [tasks],
+  );
+  const otherTasks = useMemo(
+    () =>
+      tasks.filter(
+        (t) =>
+          t.dueDate !== 'Today' &&
+          t.status !== 'done' &&
+          !isDueToday(t.dueDate) &&
+          !isOverdue(t.dueDate) &&
+          !isDueThisWeek(t.dueDate),
+      ),
+    [tasks],
+  );
 
   if (settingsLoading) {
     return (
       <div className="widget-card animate-fade-in" style={{ animationDelay: '0.05s' }} id="day-section-tasks">
         <div className="widget-header">
           <div className="flex items-center gap-2">
-            <CheckSquare className="w-4 h-4 text-primary" />
+            <CheckSquare className="h-4 w-4 text-primary" />
             <span className="widget-title">Tasks</span>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground py-6 text-center">Loading...</p>
+        <p className="py-6 text-center text-sm text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -193,9 +265,9 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
     <div className="widget-card animate-fade-in" style={{ animationDelay: '0.05s' }} id="day-section-tasks">
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <CheckSquare className="w-4 h-4 text-primary" />
+          <CheckSquare className="h-4 w-4 text-primary" />
           <span className="widget-title">Tasks</span>
-          <span className="text-xs text-muted-foreground font-normal ml-1">{totalPending} pending</span>
+          <span className="ml-1 text-xs font-normal text-muted-foreground">{totalPending} pending</span>
         </div>
         <div className="flex items-center gap-1">
           <TasksWidgetConfigDialog
@@ -217,16 +289,16 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
           />
 
           <Link to="/tasks">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-8 px-2">
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground">
               <span className="text-xs">View all</span>
-              <ChevronRight className="w-3 h-3 ml-1" />
+              <ChevronRight className="ml-1 h-3 w-3" />
             </Button>
           </Link>
         </div>
       </div>
 
       <div className="space-y-1">
-        {sortedSections.map(section => {
+        {sortedSections.map((section) => {
           if (!section.visible) return null;
           const config = getSectionDisplayConfig(section);
           const { pending, completed } = getTasksForSection(section, tasks, settings.taskOrder, date);
@@ -254,25 +326,35 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
         })}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-border/50">
+      <div className="mt-4 border-t border-border/50 pt-3">
         {showInput ? (
           <div className="flex gap-2">
             <Input
               placeholder="New task..."
               value={newTaskTitle}
-              onChange={e => setNewTaskTitle(e.target.value)}
-              onKeyDown={e => {
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAddTask();
-                if (e.key === 'Escape') { setShowInput(false); setNewTaskTitle(''); }
+                if (e.key === 'Escape') {
+                  setShowInput(false);
+                  setNewTaskTitle('');
+                }
               }}
               autoFocus
               className="h-8 text-sm"
             />
-            <Button size="sm" onClick={handleAddTask} className="h-8 px-3">Add</Button>
+            <Button size="sm" onClick={handleAddTask} className="h-8 px-3">
+              Add
+            </Button>
           </div>
         ) : (
-          <Button variant="ghost" size="sm" onClick={() => setShowInput(true)} className="w-full justify-start text-muted-foreground hover:text-foreground h-8">
-            <Plus className="w-4 h-4 mr-2" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowInput(true)}
+            className="h-8 w-full justify-start text-muted-foreground hover:text-foreground"
+          >
+            <Plus className="mr-2 h-4 w-4" />
             Add task
           </Button>
         )}

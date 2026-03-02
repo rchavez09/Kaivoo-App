@@ -28,18 +28,21 @@ export const useCaptureStore = create<CaptureStore>()(
         return capture;
       },
 
-      updateCapture: (id, updates) => set((state) => ({ captures: state.captures.map(c => c.id === id ? { ...c, ...updates } : c) })),
+      updateCapture: (id, updates) =>
+        set((state) => ({ captures: state.captures.map((c) => (c.id === id ? { ...c, ...updates } : c)) })),
 
-      deleteCapture: (id) => set((state) => ({ captures: state.captures.filter(c => c.id !== id) })),
+      deleteCapture: (id) => set((state) => ({ captures: state.captures.filter((c) => c.id !== id) })),
 
       getCapturesByTopic: (topicId, childPageIds) => {
-        return get().captures.filter(c => c.topicIds.includes(topicId) || c.topicIds.some(id => childPageIds.includes(id)));
+        return get().captures.filter(
+          (c) => c.topicIds.includes(topicId) || c.topicIds.some((id) => childPageIds.includes(id)),
+        );
       },
 
-      getCapturesByTag: (tagName) => get().captures.filter(c => c.tags.includes(tagName.toLowerCase())),
+      getCapturesByTag: (tagName) => get().captures.filter((c) => c.tags.includes(tagName.toLowerCase())),
 
-      getCapturesForDate: (date) => get().captures.filter(c => c.date === date),
+      getCapturesForDate: (date) => get().captures.filter((c) => c.date === date),
     }),
-    { name: 'kaivoo-captures', partialize: (state) => ({ captures: state.captures }) }
-  )
+    { name: 'kaivoo-captures', partialize: (state) => ({ captures: state.captures }) },
+  ),
 );

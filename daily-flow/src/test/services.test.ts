@@ -6,7 +6,20 @@ const { mockFrom, createChainMock } = vi.hoisted(() => {
 
   function createChainMock(result: { data: unknown; error: unknown }) {
     const chain: Record<string, unknown> = {};
-    const methods = ['select', 'insert', 'update', 'delete', 'eq', 'order', 'single', 'maybeSingle', 'gte', 'limit', 'ilike', 'is'];
+    const methods = [
+      'select',
+      'insert',
+      'update',
+      'delete',
+      'eq',
+      'order',
+      'single',
+      'maybeSingle',
+      'gte',
+      'limit',
+      'ilike',
+      'is',
+    ];
     for (const m of methods) {
       chain[m] = vi.fn().mockReturnValue(chain);
     }
@@ -63,9 +76,19 @@ describe('tasks.service', () => {
 
     it('handles null tags and topicIds', () => {
       const row = {
-        id: 'task-2', title: 'T', description: null, status: 'done', priority: 'low',
-        due_date: null, start_date: null, tags: null, topic_ids: null, source_link: null,
-        created_at: '2026-01-15T10:00:00Z', completed_at: '2026-01-16T10:00:00Z', user_id: 'u',
+        id: 'task-2',
+        title: 'T',
+        description: null,
+        status: 'done',
+        priority: 'low',
+        due_date: null,
+        start_date: null,
+        tags: null,
+        topic_ids: null,
+        source_link: null,
+        created_at: '2026-01-15T10:00:00Z',
+        completed_at: '2026-01-16T10:00:00Z',
+        user_id: 'u',
       };
       const task = dbToTask(row as any);
       expect(task.tags).toEqual([]);
@@ -96,15 +119,30 @@ describe('tasks.service', () => {
   describe('createTask', () => {
     it('inserts with user_id and returns converted task', async () => {
       const dbRow = {
-        id: 'task-new', title: 'New', description: null, status: 'todo', priority: 'medium',
-        due_date: null, start_date: null, tags: [], topic_ids: [], source_link: null,
-        created_at: '2026-02-01T00:00:00Z', completed_at: null, user_id: 'user-1',
+        id: 'task-new',
+        title: 'New',
+        description: null,
+        status: 'todo',
+        priority: 'medium',
+        due_date: null,
+        start_date: null,
+        tags: [],
+        topic_ids: [],
+        source_link: null,
+        created_at: '2026-02-01T00:00:00Z',
+        completed_at: null,
+        user_id: 'user-1',
       };
       const chain = createChainMock({ data: dbRow, error: null });
       mockFrom.mockReturnValue(chain);
 
       const task = await createTask('user-1', {
-        title: 'New', status: 'todo', priority: 'medium', tags: [], topicIds: [], subtasks: [],
+        title: 'New',
+        status: 'todo',
+        priority: 'medium',
+        tags: [],
+        topicIds: [],
+        subtasks: [],
       } as any);
 
       expect(mockFrom).toHaveBeenCalledWith('tasks');
@@ -157,9 +195,15 @@ describe('captures.service', () => {
   describe('dbToCapture', () => {
     it('converts a DB row to a Capture', () => {
       const row = {
-        id: 'cap-1', content: 'Test capture', source: 'journal', source_id: null,
-        date: '2026-01-15', tags: ['tag1'], topic_ids: ['topic-1'],
-        created_at: '2026-01-15T10:00:00Z', user_id: 'u',
+        id: 'cap-1',
+        content: 'Test capture',
+        source: 'journal',
+        source_id: null,
+        date: '2026-01-15',
+        tags: ['tag1'],
+        topic_ids: ['topic-1'],
+        created_at: '2026-01-15T10:00:00Z',
+        user_id: 'u',
       };
       const capture = dbToCapture(row as any);
       expect(capture.id).toBe('cap-1');
@@ -170,9 +214,15 @@ describe('captures.service', () => {
 
     it('defaults null tags/topicIds to empty arrays', () => {
       const row = {
-        id: 'cap-2', content: 'X', source: 'manual', source_id: null,
-        date: '2026-01-15', tags: null, topic_ids: null,
-        created_at: '2026-01-15T10:00:00Z', user_id: 'u',
+        id: 'cap-2',
+        content: 'X',
+        source: 'manual',
+        source_id: null,
+        date: '2026-01-15',
+        tags: null,
+        topic_ids: null,
+        created_at: '2026-01-15T10:00:00Z',
+        user_id: 'u',
       };
       const capture = dbToCapture(row as any);
       expect(capture.tags).toEqual([]);
@@ -198,13 +248,26 @@ describe('captures.service', () => {
   describe('createCapture', () => {
     it('inserts with user_id', async () => {
       const dbRow = {
-        id: 'cap-new', content: 'New', source: 'manual', source_id: null,
-        date: '2026-02-01', tags: [], topic_ids: [], created_at: '2026-02-01T00:00:00Z', user_id: 'u',
+        id: 'cap-new',
+        content: 'New',
+        source: 'manual',
+        source_id: null,
+        date: '2026-02-01',
+        tags: [],
+        topic_ids: [],
+        created_at: '2026-02-01T00:00:00Z',
+        user_id: 'u',
       };
       const chain = createChainMock({ data: dbRow, error: null });
       mockFrom.mockReturnValue(chain);
 
-      const capture = await createCapture('u', { content: 'New', source: 'manual', date: '2026-02-01', tags: [], topicIds: [] } as any);
+      const capture = await createCapture('u', {
+        content: 'New',
+        source: 'manual',
+        date: '2026-02-01',
+        tags: [],
+        topicIds: [],
+      } as any);
       expect(capture.id).toBe('cap-new');
     });
   });

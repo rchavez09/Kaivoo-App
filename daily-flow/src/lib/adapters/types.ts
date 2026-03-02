@@ -35,7 +35,7 @@ import type {
   TimeBlock,
   HabitSchedule,
   RecurrenceRule,
-} from "@/types";
+} from '@/types';
 
 // ═══════════════════════════════════════════════════════
 // Input Types — what callers pass to create/update
@@ -110,7 +110,7 @@ export interface UpdateJournalInput {
 
 export interface CreateCaptureInput {
   content: string;
-  source: "journal" | "quick" | "task" | "video";
+  source: 'journal' | 'quick' | 'task' | 'video';
   sourceId?: string;
   date: string;
   tags: string[];
@@ -229,7 +229,7 @@ export interface CreateMeetingInput {
   description?: string;
   attendees?: string[];
   isExternal: boolean;
-  source?: "google" | "outlook" | "manual";
+  source?: 'google' | 'outlook' | 'manual';
 }
 
 export interface UpdateMeetingInput {
@@ -240,7 +240,7 @@ export interface UpdateMeetingInput {
   description?: string | null;
   attendees?: string[];
   isExternal?: boolean;
-  source?: "google" | "outlook" | "manual";
+  source?: 'google' | 'outlook' | 'manual';
 }
 
 // ─── Projects ───
@@ -367,27 +367,14 @@ export interface HabitAdapter {
   update(id: string, input: UpdateHabitInput): Promise<void>;
   delete(id: string): Promise<void>;
   archive(id: string): Promise<void>;
-  updateStrengthAndStreak(
-    id: string,
-    strength: number,
-    currentStreak: number,
-    bestStreak: number,
-  ): Promise<void>;
+  updateStrengthAndStreak(id: string, strength: number, currentStreak: number, bestStreak: number): Promise<void>;
 }
 
 export interface HabitCompletionAdapter {
   /** Fetches completions within the lookback window (default: 365 days) */
   fetchAll(): Promise<HabitCompletion[]>;
-  toggle(
-    habitId: string,
-    date: string,
-    isCurrentlyCompleted: boolean,
-  ): Promise<void>;
-  incrementCount(
-    habitId: string,
-    date: string,
-    currentCount: number,
-  ): Promise<void>;
+  toggle(habitId: string, date: string, isCurrentlyCompleted: boolean): Promise<void>;
+  incrementCount(habitId: string, date: string, currentCount: number): Promise<void>;
 }
 
 export interface MeetingAdapter {
@@ -484,9 +471,7 @@ export interface AuthAdapter {
   signOut(): Promise<void>;
 
   /** Subscribe to auth state changes. Returns an unsubscribe function. */
-  onAuthStateChange(
-    callback: (event: string, session: AuthSession | null) => void,
-  ): () => void;
+  onAuthStateChange(callback: (event: string, session: AuthSession | null) => void): () => void;
 }
 
 /**
@@ -515,10 +500,7 @@ export interface FileAdapter {
   deleteFile(path: string): Promise<void>;
   exists(path: string): Promise<boolean>;
   listDir(path: string): Promise<FileEntry[]>;
-  watchDir(
-    path: string,
-    callback: (event: FileWatchEvent) => void,
-  ): Promise<() => void>;
+  watchDir(path: string, callback: (event: FileWatchEvent) => void): Promise<() => void>;
 }
 
 export interface FileEntry {
@@ -530,7 +512,7 @@ export interface FileEntry {
 }
 
 export interface FileWatchEvent {
-  type: "create" | "modify" | "delete";
+  type: 'create' | 'modify' | 'delete';
   path: string;
 }
 

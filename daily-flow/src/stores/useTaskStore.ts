@@ -41,60 +41,65 @@ export const useTaskStore = create<TaskStore>()(
 
       updateTask: (id, updates) => {
         set((state) => ({
-          tasks: state.tasks.map(t => t.id === id ? { ...t, ...updates } : t),
+          tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
         }));
       },
 
       deleteTask: (id) => {
-        set((state) => ({ tasks: state.tasks.filter(t => t.id !== id) }));
+        set((state) => ({ tasks: state.tasks.filter((t) => t.id !== id) }));
       },
 
       addSubtask: (taskId, title) => {
         const subtask = { id: `subtask-${generateId()}`, title, completed: false, tags: [] as string[] };
         set((state) => ({
-          tasks: state.tasks.map(t =>
-            t.id === taskId ? { ...t, subtasks: [...t.subtasks, subtask] } : t
-          ),
+          tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, subtask] } : t)),
         }));
       },
 
       updateSubtask: (taskId, subtaskId, updates) => {
         set((state) => ({
-          tasks: state.tasks.map(t =>
+          tasks: state.tasks.map((t) =>
             t.id === taskId
-              ? { ...t, subtasks: t.subtasks.map(s => s.id === subtaskId ? { ...s, ...updates } : s) }
-              : t
+              ? { ...t, subtasks: t.subtasks.map((s) => (s.id === subtaskId ? { ...s, ...updates } : s)) }
+              : t,
           ),
         }));
       },
 
       toggleSubtask: (taskId, subtaskId) => {
         set((state) => ({
-          tasks: state.tasks.map(t =>
+          tasks: state.tasks.map((t) =>
             t.id === taskId
-              ? { ...t, subtasks: t.subtasks.map(s => s.id === subtaskId ? { ...s, completed: !s.completed, completedAt: !s.completed ? new Date() : undefined } : s) }
-              : t
+              ? {
+                  ...t,
+                  subtasks: t.subtasks.map((s) =>
+                    s.id === subtaskId
+                      ? { ...s, completed: !s.completed, completedAt: !s.completed ? new Date() : undefined }
+                      : s,
+                  ),
+                }
+              : t,
           ),
         }));
       },
 
       deleteSubtask: (taskId, subtaskId) => {
         set((state) => ({
-          tasks: state.tasks.map(t =>
-            t.id === taskId ? { ...t, subtasks: t.subtasks.filter(s => s.id !== subtaskId) } : t
+          tasks: state.tasks.map((t) =>
+            t.id === taskId ? { ...t, subtasks: t.subtasks.filter((s) => s.id !== subtaskId) } : t,
           ),
         }));
       },
 
       getTasksByTopic: (topicId, childPageIds) => {
-        return get().tasks.filter(t =>
-          t.topicIds.includes(topicId) || t.topicIds.some(id => childPageIds.includes(id))
+        return get().tasks.filter(
+          (t) => t.topicIds.includes(topicId) || t.topicIds.some((id) => childPageIds.includes(id)),
         );
       },
 
-      getTasksByTag: (tagName) => get().tasks.filter(t => t.tags.includes(tagName.toLowerCase())),
+      getTasksByTag: (tagName) => get().tasks.filter((t) => t.tags.includes(tagName.toLowerCase())),
 
-      getTasksDueToday: () => get().tasks.filter(t => t.dueDate === 'Today' && t.status !== 'done'),
+      getTasksDueToday: () => get().tasks.filter((t) => t.dueDate === 'Today' && t.status !== 'done'),
 
       getTasksForDate: (date) => {
         const isToday = isSameDay(date, new Date());
@@ -109,21 +114,25 @@ export const useTaskStore = create<TaskStore>()(
             if (isValid(parsed)) return isSameDay(parsed, targetDate);
             const generalParsed = new Date(dueDate);
             if (isValid(generalParsed)) return isSameDay(generalParsed, targetDate);
-          } catch { /* not parseable */ }
+          } catch {
+            /* not parseable */
+          }
           return false;
         };
 
-        const pending = tasks.filter(t => t.status !== 'done' && isDueDateMatch(t.dueDate, date));
-        const completed = tasks.filter(t => t.status === 'done' && t.completedAt && isSameDay(new Date(t.completedAt), date));
+        const pending = tasks.filter((t) => t.status !== 'done' && isDueDateMatch(t.dueDate, date));
+        const completed = tasks.filter(
+          (t) => t.status === 'done' && t.completedAt && isSameDay(new Date(t.completedAt), date),
+        );
 
         return { pending, completed };
       },
 
       getCompletedTasksThisWeek: () => {
         const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-        return get().tasks.filter(t => t.status === 'done' && t.completedAt && new Date(t.completedAt) >= weekStart);
+        return get().tasks.filter((t) => t.status === 'done' && t.completedAt && new Date(t.completedAt) >= weekStart);
       },
     }),
-    { name: 'kaivoo-tasks', partialize: (state) => ({ tasks: state.tasks }) }
-  )
+    { name: 'kaivoo-tasks', partialize: (state) => ({ tasks: state.tasks }) },
+  ),
 );

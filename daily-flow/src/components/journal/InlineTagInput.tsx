@@ -20,7 +20,7 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
   const normalizedInput = inputValue.trim().toLowerCase().replace(/^#/, '');
 
   const suggestions = existingTags
-    .filter(t => {
+    .filter((t) => {
       const name = t.name.toLowerCase();
       return name.includes(normalizedInput) && !tags.includes(name);
     })
@@ -35,8 +35,10 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
-        dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
-        inputRef.current && !inputRef.current.contains(e.target as Node)
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -65,10 +67,10 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
       }
     } else if (e.key === 'ArrowDown' && showDropdown) {
       e.preventDefault();
-      setHighlightedIndex(i => Math.min(i + 1, suggestions.length - 1));
+      setHighlightedIndex((i) => Math.min(i + 1, suggestions.length - 1));
     } else if (e.key === 'ArrowUp' && showDropdown) {
       e.preventDefault();
-      setHighlightedIndex(i => Math.max(i - 1, 0));
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === 'Escape') {
       setIsOpen(false);
       setInputValue('');
@@ -78,8 +80,8 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
   return (
     <div className="space-y-2">
       <div className="relative">
-        <div className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-md bg-background focus-within:ring-1 focus-within:ring-ring">
-          <Hash className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        <div className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 focus-within:ring-1 focus-within:ring-ring">
+          <Hash className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <input
             ref={inputRef}
             type="text"
@@ -91,7 +93,7 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
             onFocus={() => setIsOpen(true)}
             onKeyDown={handleKeyDown}
             placeholder="Add tag..."
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60 min-w-[80px]"
+            className="min-w-[80px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
             aria-label="Add tag"
           />
         </div>
@@ -99,7 +101,7 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
         {showDropdown && (
           <div
             ref={dropdownRef}
-            className="absolute z-50 top-full left-0 right-0 mt-1 border border-border rounded-md bg-popover shadow-md overflow-hidden"
+            className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover shadow-md"
           >
             {suggestions.map((tag, i) => (
               <button
@@ -107,11 +109,11 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
                 type="button"
                 onClick={() => addTag(tag.name)}
                 className={cn(
-                  'w-full text-left px-3 py-1.5 text-sm transition-colors',
-                  i === highlightedIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
+                  'w-full px-3 py-1.5 text-left text-sm transition-colors',
+                  i === highlightedIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50',
                 )}
               >
-                <span className="text-muted-foreground mr-1">#</span>
+                <span className="mr-1 text-muted-foreground">#</span>
                 {tag.name}
               </button>
             ))}
@@ -121,16 +123,16 @@ const InlineTagInput = ({ tags, existingTags, onAddTag, onRemoveTag }: InlineTag
 
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {tags.map(tag => (
-            <Badge key={tag} variant="outline" className="gap-1 text-xs group">
-              <Hash className="w-3 h-3" />
+          {tags.map((tag) => (
+            <Badge key={tag} variant="outline" className="group gap-1 text-xs">
+              <Hash className="h-3 w-3" />
               {tag}
               <button
                 onClick={() => onRemoveTag(tag)}
-                className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
+                className="ml-0.5 opacity-60 transition-opacity hover:opacity-100"
                 aria-label={`Remove tag ${tag}`}
               >
-                <X className="w-3 h-3" />
+                <X className="h-3 w-3" />
               </button>
             </Badge>
           ))}

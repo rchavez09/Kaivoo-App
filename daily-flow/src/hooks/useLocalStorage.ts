@@ -9,19 +9,26 @@ export function useLocalStorage<T>(key: string, defaultValue: T): [T, (value: T 
     try {
       const stored = localStorage.getItem(key);
       if (stored !== null) return JSON.parse(stored) as T;
-    } catch { /* localStorage unavailable */ }
+    } catch {
+      /* localStorage unavailable */
+    }
     return defaultValue;
   });
 
-  const setValue = useCallback((value: T | ((prev: T) => T)) => {
-    setState(prev => {
-      const next = value instanceof Function ? value(prev) : value;
-      try {
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch { /* localStorage unavailable */ }
-      return next;
-    });
-  }, [key]);
+  const setValue = useCallback(
+    (value: T | ((prev: T) => T)) => {
+      setState((prev) => {
+        const next = value instanceof Function ? value(prev) : value;
+        try {
+          localStorage.setItem(key, JSON.stringify(next));
+        } catch {
+          /* localStorage unavailable */
+        }
+        return next;
+      });
+    },
+    [key],
+  );
 
   return [state, setValue];
 }

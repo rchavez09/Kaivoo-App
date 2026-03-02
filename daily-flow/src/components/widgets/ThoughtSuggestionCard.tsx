@@ -26,19 +26,14 @@ const ThoughtSuggestionCard = React.memo(function ThoughtSuggestionCard({
 }: ThoughtSuggestionCardProps) {
   return (
     <div
-      className={`p-3 rounded-xl border transition-colors ${
-        suggestion.selected
-          ? 'bg-primary/5 border-primary/30'
-          : 'bg-muted/30 border-border opacity-60'
+      className={`rounded-xl border p-3 transition-colors ${
+        suggestion.selected ? 'border-primary/30 bg-primary/5' : 'border-border bg-muted/30 opacity-60'
       }`}
     >
       <div className="flex items-start gap-3">
-        <Checkbox
-          checked={suggestion.selected}
-          onCheckedChange={() => onToggle(index)}
-        />
+        <Checkbox checked={suggestion.selected} onCheckedChange={() => onToggle(index)} />
         <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="text-xs">
               {suggestion.type === 'task' ? 'Task' : suggestion.type === 'subtask' ? 'Subtask' : 'Note'}
             </Badge>
@@ -49,10 +44,7 @@ const ThoughtSuggestionCard = React.memo(function ThoughtSuggestionCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={cn(
-                      "h-6 px-2 text-xs gap-1",
-                      !suggestion.dueDate && "text-muted-foreground"
-                    )}
+                    className={cn('h-6 gap-1 px-2 text-xs', !suggestion.dueDate && 'text-muted-foreground')}
                   >
                     <CalendarIcon className="h-3 w-3" />
                     {suggestion.dueDate || 'No date'}
@@ -66,7 +58,7 @@ const ThoughtSuggestionCard = React.memo(function ThoughtSuggestionCard({
                       onUpdate(index, { dueDate: date ? format(date, 'yyyy-MM-dd') : null });
                     }}
                     initialFocus
-                    className={cn("p-3 pointer-events-auto")}
+                    className={cn('pointer-events-auto p-3')}
                   />
                 </PopoverContent>
               </Popover>
@@ -79,7 +71,7 @@ const ThoughtSuggestionCard = React.memo(function ThoughtSuggestionCard({
                   onUpdate(index, { priority: value });
                 }}
               >
-                <SelectTrigger className="h-6 w-auto px-2 text-xs border-0 bg-transparent">
+                <SelectTrigger className="h-6 w-auto border-0 bg-transparent px-2 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -97,9 +89,7 @@ const ThoughtSuggestionCard = React.memo(function ThoughtSuggestionCard({
             )}
           </div>
           <p className="text-sm">
-            {suggestion.type === 'task' || suggestion.type === 'subtask'
-              ? suggestion.title
-              : suggestion.content}
+            {suggestion.type === 'task' || suggestion.type === 'subtask' ? suggestion.title : suggestion.content}
           </p>
 
           {suggestion.type !== 'subtask' && (

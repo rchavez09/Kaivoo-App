@@ -16,7 +16,7 @@ interface TopicCapturesWidgetProps {
 }
 
 const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }: TopicCapturesWidgetProps) => {
-  const updateCapture = useKaivooStore(s => s.updateCapture);
+  const updateCapture = useKaivooStore((s) => s.updateCapture);
   const [editingCapture, setEditingCapture] = useState<Capture | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -32,16 +32,14 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
 
   // Combine entries and captures, sorted by date
   let allItems = [
-    ...entries.map(e => ({ ...e, type: 'entry' as const, sortDate: new Date(e.timestamp) })),
-    ...captures.map(c => ({ ...c, type: 'capture' as const, sortDate: new Date(c.createdAt) })),
+    ...entries.map((e) => ({ ...e, type: 'entry' as const, sortDate: new Date(e.timestamp) })),
+    ...captures.map((c) => ({ ...c, type: 'capture' as const, sortDate: new Date(c.createdAt) })),
   ].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
 
   // Filter by selected tag if any
   if (selectedTag) {
     const tagLower = selectedTag.toLowerCase();
-    allItems = allItems.filter(item => 
-      item.tags.some(t => t.toLowerCase() === tagLower)
-    );
+    allItems = allItems.filter((item) => item.tags.some((t) => t.toLowerCase() === tagLower));
   }
 
   const totalCount = allItems.length;
@@ -57,7 +55,7 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
   };
 
   const toggleExpand = (id: string) => {
-    setExpandedIds(prev => {
+    setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -68,7 +66,7 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
     });
   };
 
-  const handleCaptureClick = (item: typeof allItems[0]) => {
+  const handleCaptureClick = (item: (typeof allItems)[0]) => {
     if (item.type === 'capture') {
       // Convert back to Capture type for the dialog
       const capture: Capture = {
@@ -93,15 +91,11 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
     <div className="widget-card animate-fade-in">
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-primary" />
+          <BookOpen className="h-4 w-4 text-primary" />
           <span className="widget-title">Mentions</span>
-          <span className="text-xs text-muted-foreground font-normal ml-1">
+          <span className="ml-1 text-xs font-normal text-muted-foreground">
             {totalCount} item{totalCount !== 1 ? 's' : ''}
-            {selectedTag && (
-              <span className="ml-1 text-primary">
-                (filtered by #{selectedTag})
-              </span>
-            )}
+            {selectedTag && <span className="ml-1 text-primary">(filtered by #{selectedTag})</span>}
           </span>
         </div>
       </div>
@@ -116,39 +110,33 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
             return (
               <div
                 key={item.id}
-                className={`p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors ${isCapture ? 'cursor-pointer' : ''}`}
+                className={`rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/50 ${isCapture ? 'cursor-pointer' : ''}`}
                 onClick={() => isCapture && handleCaptureClick(item)}
               >
                 <div className="flex items-start gap-3">
                   {item.type === 'capture' ? (
-                    <Globe className="w-4 h-4 text-info-foreground mt-0.5 flex-shrink-0" />
+                    <Globe className="mt-0.5 h-4 w-4 flex-shrink-0 text-info-foreground" />
                   ) : (
-                    <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <BookOpen className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                   )}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     {isMarkdown(item.content) ? (
-                      <div className={`prose prose-sm dark:prose-invert max-w-none text-sm text-foreground leading-relaxed
-                        prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-3 prose-headings:mb-2
-                        prose-h1:text-lg prose-h2:text-base prose-h3:text-sm
-                        prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5
-                        prose-li:my-0.5
-                        prose-strong:text-foreground prose-strong:font-semibold
-                        prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                        [&>*:first-child]:mt-0
-                        ${!isExpanded && needsExpansion ? 'max-h-32 overflow-hidden relative' : ''}`}>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {item.content}
-                        </ReactMarkdown>
+                      <div
+                        className={`prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-3 prose-headings:mb-2 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-foreground prose-strong:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline max-w-none text-sm leading-relaxed text-foreground [&>*:first-child]:mt-0 ${!isExpanded && needsExpansion ? 'relative max-h-32 overflow-hidden' : ''}`}
+                      >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
                         {!isExpanded && needsExpansion && (
                           <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-secondary/30 to-transparent" />
                         )}
                       </div>
                     ) : (
-                      <p className={`text-sm text-foreground leading-relaxed ${!isExpanded && needsExpansion ? 'line-clamp-4' : ''}`}>
+                      <p
+                        className={`text-sm leading-relaxed text-foreground ${!isExpanded && needsExpansion ? 'line-clamp-4' : ''}`}
+                      >
                         {item.content}
                       </p>
                     )}
-                    
+
                     {needsExpansion && (
                       <Button
                         variant="ghost"
@@ -162,25 +150,25 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
                         {isExpanded ? 'Show less' : 'Read more'}
                       </Button>
                     )}
-                    
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
+
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
                         {formatDate(item.type === 'entry' ? item.timestamp : item.createdAt)}
                       </span>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
                         {formatTime(item.type === 'entry' ? item.timestamp : item.createdAt)}
                       </span>
-                      
+
                       {item.tags.length > 0 && (
                         <div className="flex items-center gap-1">
-                          {item.tags.map(tag => (
-                            <span 
-                              key={tag} 
-                              className="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-0.5"
+                          {item.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="flex items-center gap-0.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary"
                             >
-                              <Hash className="w-2.5 h-2.5" />
+                              <Hash className="h-2.5 w-2.5" />
                               {tag}
                             </span>
                           ))}
@@ -188,8 +176,8 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
                       )}
 
                       {isCapture && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1 ml-auto">
-                          <Pencil className="w-3 h-3" />
+                        <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
+                          <Pencil className="h-3 w-3" />
                           Click to edit
                         </span>
                       )}
@@ -202,12 +190,11 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
         </div>
       ) : (
         <div className="py-8 text-center">
-          <BookOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+          <BookOpen className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">
-            {selectedTag 
+            {selectedTag
               ? `No mentions with #${selectedTag} tag.`
-              : `No mentions yet. Use [[${topicName}]] in your journal to add content here.`
-            }
+              : `No mentions yet. Use [[${topicName}]] in your journal to add content here.`}
           </p>
         </div>
       )}

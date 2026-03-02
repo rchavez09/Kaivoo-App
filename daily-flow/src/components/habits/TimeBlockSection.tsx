@@ -19,15 +19,11 @@ const TimeBlockSection = ({ timeBlock, children }: TimeBlockSectionProps) => {
   return (
     <div role="group" aria-label={`${label} habits`}>
       <div className="flex items-center gap-3 py-3">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {label}
-        </span>
-        <div className="flex-1 h-px bg-border/50" />
+        <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        <div className="h-px flex-1 bg-border/50" />
       </div>
-      <div className="space-y-2">
-        {children}
-      </div>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 };

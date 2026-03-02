@@ -3,8 +3,17 @@ import { useAuth } from './useAuth';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useAdapters } from '@/lib/adapters';
 import {
-  Task, Subtask, Topic, TopicPage, JournalEntry, Capture,
-  Meeting, RoutineItem, RoutineGroup, Project, ProjectNote,
+  Task,
+  Subtask,
+  Topic,
+  TopicPage,
+  JournalEntry,
+  Capture,
+  Meeting,
+  RoutineItem,
+  RoutineGroup,
+  Project,
+  ProjectNote,
 } from '@/types';
 
 export const useDatabase = (options?: { autoLoad?: boolean }) => {
@@ -110,34 +119,31 @@ export const useDatabaseOperations = () => {
       const { subtasks: _, ...input } = task;
       return ensureAdapter().tasks.create(input);
     },
-    updateTask: (id: string, updates: Partial<Task>) =>
-      ensureAdapter().tasks.update(id, updates),
+    updateTask: (id: string, updates: Partial<Task>) => ensureAdapter().tasks.update(id, updates),
     deleteTask: (id: string) => ensureAdapter().tasks.delete(id),
 
     // Subtasks
-    createSubtask: (taskId: string, title: string) =>
-      ensureAdapter().subtasks.create({ taskId, title }),
-    updateSubtask: (id: string, updates: { completed?: boolean; completedAt?: Date; title?: string; tags?: string[] }) =>
-      ensureAdapter().subtasks.update(id, updates),
+    createSubtask: (taskId: string, title: string) => ensureAdapter().subtasks.create({ taskId, title }),
+    updateSubtask: (
+      id: string,
+      updates: { completed?: boolean; completedAt?: Date; title?: string; tags?: string[] },
+    ) => ensureAdapter().subtasks.update(id, updates),
     deleteSubtask: (id: string) => ensureAdapter().subtasks.delete(id),
 
     // Topics
-    createTopic: (topic: Omit<Topic, 'id' | 'createdAt'>) =>
-      ensureAdapter().topics.create(topic),
+    createTopic: (topic: Omit<Topic, 'id' | 'createdAt'>) => ensureAdapter().topics.create(topic),
     updateTopic: (id: string, updates: { name?: string; description?: string; icon?: string }) =>
       ensureAdapter().topics.update(id, updates),
     deleteTopic: (id: string) => ensureAdapter().topics.delete(id),
 
     // Topic Pages
-    createTopicPage: (page: Omit<TopicPage, 'id' | 'createdAt'>) =>
-      ensureAdapter().topicPages.create(page),
+    createTopicPage: (page: Omit<TopicPage, 'id' | 'createdAt'>) => ensureAdapter().topicPages.create(page),
     updateTopicPage: (id: string, updates: { name?: string; description?: string }) =>
       ensureAdapter().topicPages.update(id, updates),
     deleteTopicPage: (id: string) => ensureAdapter().topicPages.delete(id),
 
     // Tags
-    createTag: (name: string, color?: string) =>
-      ensureAdapter().tags.create({ name, color }),
+    createTag: (name: string, color?: string) => ensureAdapter().tags.create({ name, color }),
 
     // Journal
     createJournalEntry: (entry: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt' | 'timestamp'>) =>
@@ -147,17 +153,13 @@ export const useDatabaseOperations = () => {
     deleteJournalEntry: (id: string) => ensureAdapter().journalEntries.delete(id),
 
     // Captures
-    createCapture: (capture: Omit<Capture, 'id' | 'createdAt'>) =>
-      ensureAdapter().captures.create(capture),
-    updateCapture: (id: string, updates: Partial<Capture>) =>
-      ensureAdapter().captures.update(id, updates),
+    createCapture: (capture: Omit<Capture, 'id' | 'createdAt'>) => ensureAdapter().captures.create(capture),
+    updateCapture: (id: string, updates: Partial<Capture>) => ensureAdapter().captures.update(id, updates),
     deleteCapture: (id: string) => ensureAdapter().captures.delete(id),
 
     // Meetings
-    createMeeting: (meeting: Omit<Meeting, 'id'>) =>
-      ensureAdapter().meetings.create(meeting),
-    updateMeeting: (id: string, updates: Partial<Meeting>) =>
-      ensureAdapter().meetings.update(id, updates),
+    createMeeting: (meeting: Omit<Meeting, 'id'>) => ensureAdapter().meetings.create(meeting),
+    updateMeeting: (id: string, updates: Partial<Meeting>) => ensureAdapter().meetings.update(id, updates),
     deleteMeeting: (id: string) => ensureAdapter().meetings.delete(id),
 
     // Routines
@@ -181,13 +183,11 @@ export const useDatabaseOperations = () => {
     // Projects
     createProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) =>
       ensureAdapter().projects.create(project),
-    updateProject: (id: string, updates: Partial<Project>) =>
-      ensureAdapter().projects.update(id, updates),
+    updateProject: (id: string, updates: Partial<Project>) => ensureAdapter().projects.update(id, updates),
     deleteProject: (id: string) => ensureAdapter().projects.delete(id),
 
     // Project Notes
-    createProjectNote: (note: Pick<ProjectNote, 'projectId' | 'content'>) =>
-      ensureAdapter().projectNotes.create(note),
+    createProjectNote: (note: Pick<ProjectNote, 'projectId' | 'content'>) => ensureAdapter().projectNotes.create(note),
     updateProjectNote: (id: string, updates: Partial<Pick<ProjectNote, 'content'>>) =>
       ensureAdapter().projectNotes.update(id, updates),
     deleteProjectNote: (id: string) => ensureAdapter().projectNotes.delete(id),

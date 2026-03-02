@@ -26,77 +26,81 @@ interface HabitTrackingSectionProps {
 const HabitTrackingSection = ({ date }: HabitTrackingSectionProps) => {
   const { user } = useAuth();
   const { invalidate } = useInvalidate();
-  const habits = useKaivooStore(s => s.habits);
-  const isHabitCompleted = useKaivooStore(s => s.isHabitCompleted);
-  const getHabitCompletionCount = useKaivooStore(s => s.getHabitCompletionCount);
-  const toggleHabitCompletion = useKaivooStore(s => s.toggleHabitCompletion);
-  const incrementHabitCount = useKaivooStore(s => s.incrementHabitCount);
+  const habits = useKaivooStore((s) => s.habits);
+  const isHabitCompleted = useKaivooStore((s) => s.isHabitCompleted);
+  const getHabitCompletionCount = useKaivooStore((s) => s.getHabitCompletionCount);
+  const toggleHabitCompletion = useKaivooStore((s) => s.toggleHabitCompletion);
+  const incrementHabitCount = useKaivooStore((s) => s.incrementHabitCount);
 
-  const dateStr = useMemo(
-    () => date ? format(date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
-    [date]
-  );
+  const dateStr = useMemo(() => (date ? format(date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')), [date]);
 
-  const activeHabits = useMemo(() => habits.filter(h => !h.isArchived), [habits]);
+  const activeHabits = useMemo(() => habits.filter((h) => !h.isArchived), [habits]);
 
   const habitsByBlock = useMemo(() => {
     const grouped: Record<TimeBlock, Habit[]> = {
-      morning: [], afternoon: [], evening: [], anytime: [],
+      morning: [],
+      afternoon: [],
+      evening: [],
+      anytime: [],
     };
-    activeHabits.forEach(h => grouped[h.timeBlock].push(h));
-    Object.values(grouped).forEach(arr => arr.sort((a, b) => a.order - b.order));
+    activeHabits.forEach((h) => grouped[h.timeBlock].push(h));
+    Object.values(grouped).forEach((arr) => arr.sort((a, b) => a.order - b.order));
     return grouped;
   }, [activeHabits]);
 
-  const handleToggle = useCallback(async (habitId: string) => {
-    const wasCompleted = isHabitCompleted(habitId, dateStr);
-    toggleHabitCompletion(habitId, dateStr);
-    if (user) {
-      try {
-        await HabitsService.toggleHabitCompletion(user.id, habitId, dateStr, wasCompleted);
-        invalidate('habitCompletions', 'routineCompletions');
-      } catch {
-        toggleHabitCompletion(habitId, dateStr);
-        toast.error('Failed to update habit.');
+  const handleToggle = useCallback(
+    async (habitId: string) => {
+      const wasCompleted = isHabitCompleted(habitId, dateStr);
+      toggleHabitCompletion(habitId, dateStr);
+      if (user) {
+        try {
+          await HabitsService.toggleHabitCompletion(user.id, habitId, dateStr, wasCompleted);
+          invalidate('habitCompletions', 'routineCompletions');
+        } catch {
+          toggleHabitCompletion(habitId, dateStr);
+          toast.error('Failed to update habit.');
+        }
       }
-    }
-  }, [user, dateStr, isHabitCompleted, toggleHabitCompletion, invalidate]);
+    },
+    [user, dateStr, isHabitCompleted, toggleHabitCompletion, invalidate],
+  );
 
-  const handleIncrement = useCallback(async (habitId: string) => {
-    const currentCount = getHabitCompletionCount(habitId, dateStr);
-    incrementHabitCount(habitId, dateStr);
-    if (user) {
-      try {
-        await HabitsService.incrementHabitCount(user.id, habitId, dateStr, currentCount);
-        invalidate('habitCompletions', 'routineCompletions');
-      } catch {
-        toast.error('Failed to update habit count.');
+  const handleIncrement = useCallback(
+    async (habitId: string) => {
+      const currentCount = getHabitCompletionCount(habitId, dateStr);
+      incrementHabitCount(habitId, dateStr);
+      if (user) {
+        try {
+          await HabitsService.incrementHabitCount(user.id, habitId, dateStr, currentCount);
+          invalidate('habitCompletions', 'routineCompletions');
+        } catch {
+          toast.error('Failed to update habit count.');
+        }
       }
-    }
-  }, [user, dateStr, getHabitCompletionCount, incrementHabitCount, invalidate]);
+    },
+    [user, dateStr, getHabitCompletionCount, incrementHabitCount, invalidate],
+  );
 
   if (activeHabits.length === 0) return null;
 
-  const populatedBlocks = TIME_BLOCKS.filter(b => habitsByBlock[b].length > 0);
+  const populatedBlocks = TIME_BLOCKS.filter((b) => habitsByBlock[b].length > 0);
 
   return (
     <div className="space-y-4 pt-2">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Habits
-        </span>
-        <div className="flex-1 h-px bg-border/50" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Habits</span>
+        <div className="h-px flex-1 bg-border/50" />
       </div>
 
-      {populatedBlocks.map(block => (
+      {populatedBlocks.map((block) => (
         <div key={block} className="space-y-2">
           {populatedBlocks.length > 1 && (
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">
+            <span className="block text-[10px] uppercase tracking-wider text-muted-foreground">
               {TIME_BLOCK_LABELS[block]}
             </span>
           )}
           <div className="grid grid-cols-5 gap-2">
-            {habitsByBlock[block].map(habit => {
+            {habitsByBlock[block].map((habit) => {
               const completed = isHabitCompleted(habit.id, dateStr);
               const count = getHabitCompletionCount(habit.id, dateStr);
               const isMultiCount = habit.type === 'multi-count';
@@ -118,11 +122,13 @@ const HabitTrackingSection = ({ date }: HabitTrackingSectionProps) => {
                     isMultiCount
                       ? `${habit.name}: ${count} of ${targetCount}`
                       : isNegative
-                        ? completed ? `${habit.name}: slipped` : `${habit.name}: on track`
+                        ? completed
+                          ? `${habit.name}: slipped`
+                          : `${habit.name}: on track`
                         : `${completed ? 'Unmark' : 'Mark'} ${habit.name} as ${completed ? 'incomplete' : 'complete'}`
                   }
                   className={cn(
-                    'w-full flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200',
+                    'flex w-full flex-col items-center gap-1.5 rounded-xl p-3 transition-all duration-200',
                     isMultiCount
                       ? count >= targetCount
                         ? 'text-foreground'
@@ -142,9 +148,7 @@ const HabitTrackingSection = ({ date }: HabitTrackingSectionProps) => {
                   }
                 >
                   <div
-                    className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200',
-                    )}
+                    className={cn('flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200')}
                     style={
                       (isMultiCount && count >= targetCount) || (!isMultiCount && !isNegative && completed)
                         ? { backgroundColor: habit.color, color: 'white' }
@@ -156,22 +160,26 @@ const HabitTrackingSection = ({ date }: HabitTrackingSectionProps) => {
                     }
                   >
                     {isMultiCount ? (
-                      count >= targetCount
-                        ? <Check className="w-4 h-4" />
-                        : <span className="text-[10px] font-medium">{count}/{targetCount}</span>
+                      count >= targetCount ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <span className="text-[10px] font-medium">
+                          {count}/{targetCount}
+                        </span>
+                      )
                     ) : isNegative ? (
-                      completed
-                        ? <Minus className="w-4 h-4" />
-                        : <Check className="w-4 h-4" />
+                      completed ? (
+                        <Minus className="h-4 w-4" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )
                     ) : completed ? (
-                      <Check className="w-4 h-4" />
+                      <Check className="h-4 w-4" />
                     ) : (
-                      <Icon className="w-4 h-4" />
+                      <Icon className="h-4 w-4" />
                     )}
                   </div>
-                  <span className="text-[10px] font-medium text-center leading-tight line-clamp-2">
-                    {habit.name}
-                  </span>
+                  <span className="line-clamp-2 text-center text-[10px] font-medium leading-tight">{habit.name}</span>
                 </button>
               );
             })}

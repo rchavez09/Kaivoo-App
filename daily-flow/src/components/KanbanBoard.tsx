@@ -39,32 +39,25 @@ interface SortableTaskCardProps {
 }
 
 const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
-  const topics = useKaivooStore(s => s.topics);
-  const topicPages = useKaivooStore(s => s.topicPages);
-  const projects = useKaivooStore(s => s.projects);
-  
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
+  const topics = useKaivooStore((s) => s.topics);
+  const topicPages = useKaivooStore((s) => s.topicPages);
+  const projects = useKaivooStore((s) => s.projects);
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
-  const project = task.projectId ? projects.find(p => p.id === task.projectId) : null;
+  const project = task.projectId ? projects.find((p) => p.id === task.projectId) : null;
 
   const getTopicName = (topicId: string) => {
-    const topic = topics.find(t => t.id === topicId);
+    const topic = topics.find((t) => t.id === topicId);
     if (topic) return topic.name;
-    const page = topicPages.find(p => p.id === topicId);
+    const page = topicPages.find((p) => p.id === topicId);
     if (page) {
-      const parentTopic = topics.find(t => t.id === page.topicId);
+      const parentTopic = topics.find((t) => t.id === page.topicId);
       return parentTopic ? `${parentTopic.name}/${page.name}` : page.name;
     }
     return null;
@@ -72,7 +65,7 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
 
   const getProgress = () => {
     if (task.subtasks.length === 0) return null;
-    const completed = task.subtasks.filter(s => s.completed).length;
+    const completed = task.subtasks.filter((s) => s.completed).length;
     return Math.round((completed / task.subtasks.length) * 100);
   };
 
@@ -83,83 +76,89 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "bg-card rounded-xl p-3 shadow-sm border border-border/50 cursor-pointer transition-all hover:shadow-md group",
-        isDragging && "opacity-50 shadow-lg"
+        'group cursor-pointer rounded-xl border border-border/50 bg-card p-3 shadow-sm transition-all hover:shadow-md',
+        isDragging && 'opacity-50 shadow-lg',
       )}
       onClick={() => onTaskClick(task)}
     >
       {project && (
-        <div className="flex items-center gap-1.5 mb-2">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
-          <span className="text-[10px] text-muted-foreground font-medium truncate">{project.name}</span>
+        <div className="mb-2 flex items-center gap-1.5">
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: project.color }} />
+          <span className="truncate text-[10px] font-medium text-muted-foreground">{project.name}</span>
         </div>
       )}
       <div className="flex items-start gap-2">
         <button
           {...attributes}
           {...listeners}
-          className="mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+          className="mt-0.5 cursor-grab opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100"
           onClick={(e) => e.stopPropagation()}
         >
-          <GripVertical className="w-4 h-4 text-muted-foreground" />
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
         </button>
-        <div className="flex-1 min-w-0">
-          <p className={cn(
-            "text-sm font-medium line-clamp-2",
-            task.status === 'done' ? 'line-through text-muted-foreground' : 'text-foreground'
-          )}>
+        <div className="min-w-0 flex-1">
+          <p
+            className={cn(
+              'line-clamp-2 text-sm font-medium',
+              task.status === 'done' ? 'text-muted-foreground line-through' : 'text-foreground',
+            )}
+          >
             {task.title}
           </p>
 
           {progress !== null && (
-            <div className="flex items-center gap-1.5 mt-2">
+            <div className="mt-2 flex items-center gap-1.5">
               <Progress value={progress} className="h-1.5 flex-1" />
               <span className="text-[10px] text-muted-foreground">{progress}%</span>
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {task.dueDate && (
-              <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
-                <Calendar className="w-2.5 h-2.5" />
+              <Badge variant="outline" className="h-5 gap-1 px-1.5 text-[10px] font-normal">
+                <Calendar className="h-2.5 w-2.5" />
                 {task.dueDate}
               </Badge>
             )}
             <Badge
               variant="secondary"
               className={cn(
-                'text-[10px] h-5 px-1.5 font-normal',
+                'h-5 px-1.5 text-[10px] font-normal',
                 priorityConfig[task.priority].bg,
-                priorityConfig[task.priority].color
+                priorityConfig[task.priority].color,
               )}
             >
-              <Flag className="w-2.5 h-2.5 mr-0.5" />
+              <Flag className="mr-0.5 h-2.5 w-2.5" />
               {priorityConfig[task.priority].label}
             </Badge>
           </div>
 
           {(task.topicIds.length > 0 || task.tags.length > 0) && (
-            <div className="flex items-center gap-1 mt-2 flex-wrap">
-              {task.topicIds.slice(0, 1).map(topicId => {
+            <div className="mt-2 flex flex-wrap items-center gap-1">
+              {task.topicIds.slice(0, 1).map((topicId) => {
                 const name = getTopicName(topicId);
                 return name ? (
-                  <Badge key={topicId} variant="secondary" className="text-[10px] h-5 px-1.5 text-info-foreground font-normal">
+                  <Badge
+                    key={topicId}
+                    variant="secondary"
+                    className="h-5 px-1.5 text-[10px] font-normal text-info-foreground"
+                  >
                     [[{name}]]
                   </Badge>
                 ) : null;
               })}
               {task.topicIds.length > 1 && (
-                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 text-muted-foreground font-normal">
+                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] font-normal text-muted-foreground">
                   +{task.topicIds.length - 1}
                 </Badge>
               )}
-              {task.tags.slice(0, 1).map(tag => (
-                <Badge key={tag} variant="secondary" className="text-[10px] h-5 px-1.5 text-primary font-normal">
+              {task.tags.slice(0, 1).map((tag) => (
+                <Badge key={tag} variant="secondary" className="h-5 px-1.5 text-[10px] font-normal text-primary">
                   #{tag}
                 </Badge>
               ))}
               {task.tags.length > 1 && (
-                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 text-muted-foreground font-normal">
+                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] font-normal text-muted-foreground">
                   +{task.tags.length - 1}
                 </Badge>
               )}
@@ -172,17 +171,17 @@ const SortableTaskCard = ({ task, onTaskClick }: SortableTaskCardProps) => {
 };
 
 const TaskCard = ({ task, onTaskClick }: { task: Task; onTaskClick: (task: Task) => void }) => {
-  const topics = useKaivooStore(s => s.topics);
-  const topicPages = useKaivooStore(s => s.topicPages);
-  const projects = useKaivooStore(s => s.projects);
-  const project = task.projectId ? projects.find(p => p.id === task.projectId) : null;
+  const topics = useKaivooStore((s) => s.topics);
+  const topicPages = useKaivooStore((s) => s.topicPages);
+  const projects = useKaivooStore((s) => s.projects);
+  const project = task.projectId ? projects.find((p) => p.id === task.projectId) : null;
 
   const getTopicName = (topicId: string) => {
-    const topic = topics.find(t => t.id === topicId);
+    const topic = topics.find((t) => t.id === topicId);
     if (topic) return topic.name;
-    const page = topicPages.find(p => p.id === topicId);
+    const page = topicPages.find((p) => p.id === topicId);
     if (page) {
-      const parentTopic = topics.find(t => t.id === page.topicId);
+      const parentTopic = topics.find((t) => t.id === page.topicId);
       return parentTopic ? `${parentTopic.name}/${page.name}` : page.name;
     }
     return null;
@@ -190,50 +189,52 @@ const TaskCard = ({ task, onTaskClick }: { task: Task; onTaskClick: (task: Task)
 
   const getProgress = () => {
     if (task.subtasks.length === 0) return null;
-    const completed = task.subtasks.filter(s => s.completed).length;
+    const completed = task.subtasks.filter((s) => s.completed).length;
     return Math.round((completed / task.subtasks.length) * 100);
   };
 
   const progress = getProgress();
 
   return (
-    <div className="bg-card rounded-xl p-3 shadow-lg border border-border">
+    <div className="rounded-xl border border-border bg-card p-3 shadow-lg">
       {project && (
-        <div className="flex items-center gap-1.5 mb-2">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
-          <span className="text-[10px] text-muted-foreground font-medium truncate">{project.name}</span>
+        <div className="mb-2 flex items-center gap-1.5">
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: project.color }} />
+          <span className="truncate text-[10px] font-medium text-muted-foreground">{project.name}</span>
         </div>
       )}
-      <p className={cn(
-        "text-sm font-medium line-clamp-2",
-        task.status === 'done' ? 'line-through text-muted-foreground' : 'text-foreground'
-      )}>
+      <p
+        className={cn(
+          'line-clamp-2 text-sm font-medium',
+          task.status === 'done' ? 'text-muted-foreground line-through' : 'text-foreground',
+        )}
+      >
         {task.title}
       </p>
-      
+
       {progress !== null && (
-        <div className="flex items-center gap-1.5 mt-2">
+        <div className="mt-2 flex items-center gap-1.5">
           <Progress value={progress} className="h-1.5 flex-1" />
           <span className="text-[10px] text-muted-foreground">{progress}%</span>
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {task.dueDate && (
-          <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
-            <Calendar className="w-2.5 h-2.5" />
+          <Badge variant="outline" className="h-5 gap-1 px-1.5 text-[10px] font-normal">
+            <Calendar className="h-2.5 w-2.5" />
             {task.dueDate}
           </Badge>
         )}
-        <Badge 
+        <Badge
           variant="secondary"
           className={cn(
-            'text-[10px] h-5 px-1.5 font-normal',
+            'h-5 px-1.5 text-[10px] font-normal',
             priorityConfig[task.priority].bg,
-            priorityConfig[task.priority].color
+            priorityConfig[task.priority].color,
           )}
         >
-          <Flag className="w-2.5 h-2.5 mr-0.5" />
+          <Flag className="mr-0.5 h-2.5 w-2.5" />
           {priorityConfig[task.priority].label}
         </Badge>
       </div>
@@ -251,24 +252,24 @@ const KanbanColumn = ({ status, tasks, onTaskClick }: KanbanColumnProps) => {
   const config = statusConfig[status];
 
   return (
-    <div className="flex flex-col min-w-[280px] w-[280px] bg-secondary/30 rounded-xl">
+    <div className="flex w-[280px] min-w-[280px] flex-col rounded-xl bg-secondary/30">
       {/* Column header */}
-      <div className={cn("flex items-center gap-2 px-3 py-2.5 rounded-t-xl", config.bgHeader)}>
+      <div className={cn('flex items-center gap-2 rounded-t-xl px-3 py-2.5', config.bgHeader)}>
         <span className={config.color}>{config.icon}</span>
         <span className="text-sm font-medium">{config.label}</span>
-        <span className="text-xs text-muted-foreground ml-auto bg-background/50 px-1.5 py-0.5 rounded-full">
+        <span className="ml-auto rounded-full bg-background/50 px-1.5 py-0.5 text-xs text-muted-foreground">
           {tasks.length}
         </span>
       </div>
 
       {/* Tasks */}
-      <div className="flex-1 p-2 space-y-2 overflow-y-auto max-h-[calc(100vh-280px)] scrollbar-thin">
-        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-          {tasks.map(task => (
+      <div className="scrollbar-thin max-h-[calc(100vh-280px)] flex-1 space-y-2 overflow-y-auto p-2">
+        <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+          {tasks.map((task) => (
             <SortableTaskCard key={task.id} task={task} onTaskClick={onTaskClick} />
           ))}
         </SortableContext>
-        
+
         {tasks.length === 0 && (
           <div className="py-8 text-center">
             <p className="text-xs text-muted-foreground">No tasks</p>
@@ -291,16 +292,19 @@ const KanbanBoard = ({ tasks, onTaskClick }: KanbanBoardProps) => {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
-  const tasksByStatus = COLUMNS.reduce((acc, status) => {
-    acc[status] = tasks.filter(t => t.status === status);
-    return acc;
-  }, {} as Record<TaskStatus, Task[]>);
+  const tasksByStatus = COLUMNS.reduce(
+    (acc, status) => {
+      acc[status] = tasks.filter((t) => t.status === status);
+      return acc;
+    },
+    {} as Record<TaskStatus, Task[]>,
+  );
 
   const handleDragStart = (event: DragStartEvent) => {
-    const task = tasks.find(t => t.id === event.active.id);
+    const task = tasks.find((t) => t.id === event.active.id);
     if (task) {
       setActiveTask(task);
     }
@@ -312,21 +316,21 @@ const KanbanBoard = ({ tasks, onTaskClick }: KanbanBoardProps) => {
 
     if (!over) return;
 
-    const activeTask = tasks.find(t => t.id === active.id);
+    const activeTask = tasks.find((t) => t.id === active.id);
     if (!activeTask) return;
 
     // Check if dropped over a column (status)
-    const newStatus = COLUMNS.find(status => {
+    const newStatus = COLUMNS.find((status) => {
       const columnTasks = tasksByStatus[status];
-      return columnTasks.some(t => t.id === over.id) || over.id === status;
+      return columnTasks.some((t) => t.id === over.id) || over.id === status;
     });
 
     // Also check if dropped in empty column area
-    const droppedOnTask = tasks.find(t => t.id === over.id);
+    const droppedOnTask = tasks.find((t) => t.id === over.id);
     const finalStatus = droppedOnTask ? droppedOnTask.status : newStatus;
 
     if (finalStatus && finalStatus !== activeTask.status) {
-      void updateTask(activeTask.id, { 
+      void updateTask(activeTask.id, {
         status: finalStatus,
         completedAt: finalStatus === 'done' ? new Date() : undefined,
       });
@@ -340,22 +344,13 @@ const KanbanBoard = ({ tasks, onTaskClick }: KanbanBoardProps) => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
-        {COLUMNS.map(status => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            tasks={tasksByStatus[status]}
-            onTaskClick={onTaskClick}
-          />
+      <div className="scrollbar-thin flex gap-4 overflow-x-auto pb-4">
+        {COLUMNS.map((status) => (
+          <KanbanColumn key={status} status={status} tasks={tasksByStatus[status]} onTaskClick={onTaskClick} />
         ))}
       </div>
 
-      <DragOverlay>
-        {activeTask ? (
-          <TaskCard task={activeTask} onTaskClick={() => {}} />
-        ) : null}
-      </DragOverlay>
+      <DragOverlay>{activeTask ? <TaskCard task={activeTask} onTaskClick={() => {}} /> : null}</DragOverlay>
     </DndContext>
   );
 };

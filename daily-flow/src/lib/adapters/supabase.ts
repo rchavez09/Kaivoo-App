@@ -9,7 +9,7 @@
  * migration guards) while exposing the uniform adapter interface.
  */
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 import type {
   DataAdapter,
@@ -58,7 +58,7 @@ import type {
   UpdateProjectInput,
   CreateProjectNoteInput,
   UpdateProjectNoteInput,
-} from "./types";
+} from './types';
 
 // Existing service functions — preserved as-is
 import {
@@ -71,21 +71,15 @@ import {
   updateSubtask,
   deleteSubtask,
   dbToTask,
-} from "@/services/tasks.service";
+} from '@/services/tasks.service';
 import {
   fetchJournalEntries,
   createJournalEntry,
   updateJournalEntry,
   deleteJournalEntry,
   dbToJournalEntry,
-} from "@/services/journal.service";
-import {
-  fetchCaptures,
-  createCapture,
-  updateCapture,
-  deleteCapture,
-  dbToCapture,
-} from "@/services/captures.service";
+} from '@/services/journal.service';
+import { fetchCaptures, createCapture, updateCapture, deleteCapture, dbToCapture } from '@/services/captures.service';
 import {
   fetchTopics,
   fetchTopicPages,
@@ -100,7 +94,7 @@ import {
   dbToTopic,
   dbToTopicPage,
   dbToTag,
-} from "@/services/topics.service";
+} from '@/services/topics.service';
 import {
   fetchRoutines,
   fetchRoutineGroups,
@@ -114,7 +108,7 @@ import {
   toggleRoutineCompletion,
   dbToRoutine,
   dbToRoutineGroup,
-} from "@/services/routines.service";
+} from '@/services/routines.service';
 import {
   fetchHabits,
   fetchHabitCompletions,
@@ -127,31 +121,19 @@ import {
   updateHabitStrengthAndStreak,
   dbToHabit,
   dbToHabitCompletion,
-} from "@/services/habits.service";
-import {
-  fetchMeetings,
-  createMeeting,
-  updateMeeting,
-  deleteMeeting,
-  dbToMeeting,
-} from "@/services/meetings.service";
-import {
-  fetchProjects,
-  createProject,
-  updateProject,
-  deleteProject,
-  dbToProject,
-} from "@/services/projects.service";
+} from '@/services/habits.service';
+import { fetchMeetings, createMeeting, updateMeeting, deleteMeeting, dbToMeeting } from '@/services/meetings.service';
+import { fetchProjects, createProject, updateProject, deleteProject, dbToProject } from '@/services/projects.service';
 import {
   fetchProjectNotes,
   createProjectNote,
   updateProjectNote,
   deleteProjectNote,
   dbToProjectNote,
-} from "@/services/project-notes.service";
-import { searchAll } from "@/services/search.service";
+} from '@/services/project-notes.service';
+import { searchAll } from '@/services/search.service';
 
-import type { Subtask, RoutineCompletion } from "@/types";
+import type { Subtask, RoutineCompletion } from '@/types';
 
 // ═══════════════════════════════════════════════════════
 // SupabaseDataAdapter
@@ -186,19 +168,13 @@ class SupabaseSubtaskAdapter implements SubtaskAdapter {
         taskId: r.task_id,
         title: r.title,
         completed: r.completed,
-        completedAt: r.completed_at
-          ? new Date(r.completed_at)
-          : undefined,
+        completedAt: r.completed_at ? new Date(r.completed_at) : undefined,
         tags: r.tags || [],
       }),
     );
   }
   async create(input: CreateSubtaskInput) {
-    const result = await createSubtask(
-      this.userId,
-      input.taskId,
-      input.title,
-    );
+    const result = await createSubtask(this.userId, input.taskId, input.title);
     return { ...result, taskId: input.taskId, tags: [], completedAt: undefined } as Subtask;
   }
   async update(id: string, input: UpdateSubtaskInput) {
@@ -301,13 +277,7 @@ class SupabaseRoutineAdapter implements RoutineAdapter {
     return rows.map((r) => dbToRoutine(r));
   }
   async create(input: CreateRoutineInput) {
-    return createRoutine(
-      this.userId,
-      input.name,
-      input.icon,
-      input.order,
-      input.groupId,
-    );
+    return createRoutine(this.userId, input.name, input.icon, input.order, input.groupId);
   }
   async update(id: string, input: UpdateRoutineInput) {
     return updateRoutine(this.userId, id, input);
@@ -325,13 +295,7 @@ class SupabaseRoutineGroupAdapter implements RoutineGroupAdapter {
     return rows.map((r) => dbToRoutineGroup(r));
   }
   async create(input: CreateRoutineGroupInput) {
-    return createRoutineGroup(
-      this.userId,
-      input.name,
-      input.icon,
-      input.color,
-      input.order,
-    );
+    return createRoutineGroup(this.userId, input.name, input.icon, input.color, input.order);
   }
   async update(id: string, input: UpdateRoutineGroupInput) {
     return updateRoutineGroup(this.userId, id, input);
@@ -356,12 +320,7 @@ class SupabaseRoutineCompletionAdapter implements RoutineCompletionAdapter {
     );
   }
   async toggle(routineId: string, date: string, isCompleted: boolean) {
-    return toggleRoutineCompletion(
-      this.userId,
-      routineId,
-      date,
-      isCompleted,
-    );
+    return toggleRoutineCompletion(this.userId, routineId, date, isCompleted);
   }
 }
 
@@ -384,19 +343,8 @@ class SupabaseHabitAdapter implements HabitAdapter {
   async archive(id: string) {
     return archiveHabit(this.userId, id);
   }
-  async updateStrengthAndStreak(
-    id: string,
-    strength: number,
-    currentStreak: number,
-    bestStreak: number,
-  ) {
-    return updateHabitStrengthAndStreak(
-      this.userId,
-      id,
-      strength,
-      currentStreak,
-      bestStreak,
-    );
+  async updateStrengthAndStreak(id: string, strength: number, currentStreak: number, bestStreak: number) {
+    return updateHabitStrengthAndStreak(this.userId, id, strength, currentStreak, bestStreak);
   }
 }
 
@@ -407,17 +355,8 @@ class SupabaseHabitCompletionAdapter implements HabitCompletionAdapter {
     const rows = await fetchHabitCompletions(this.userId);
     return rows.map((r) => dbToHabitCompletion(r));
   }
-  async toggle(
-    habitId: string,
-    date: string,
-    isCurrentlyCompleted: boolean,
-  ) {
-    return toggleHabitCompletion(
-      this.userId,
-      habitId,
-      date,
-      isCurrentlyCompleted,
-    );
+  async toggle(habitId: string, date: string, isCurrentlyCompleted: boolean) {
+    return toggleHabitCompletion(this.userId, habitId, date, isCurrentlyCompleted);
   }
   async incrementCount(habitId: string, date: string, currentCount: number) {
     return incrementHabitCount(this.userId, habitId, date, currentCount);
@@ -549,10 +488,7 @@ export class SupabaseAuthAdapter implements AuthAdapter {
     };
   }
 
-  async signInWithPassword(
-    email: string,
-    password: string,
-  ): Promise<AuthSession> {
+  async signInWithPassword(email: string, password: string): Promise<AuthSession> {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -572,7 +508,7 @@ export class SupabaseAuthAdapter implements AuthAdapter {
     });
     if (error) throw error;
     if (!data.session) {
-      throw new Error("Sign-up succeeded but no session returned (check email confirmation)");
+      throw new Error('Sign-up succeeded but no session returned (check email confirmation)');
     }
     return {
       user: { id: data.session.user.id, email: data.session.user.email },
@@ -582,18 +518,16 @@ export class SupabaseAuthAdapter implements AuthAdapter {
 
   async signInWithOAuth(provider: string): Promise<void> {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider as "google" | "github",
+      provider: provider as 'google' | 'github',
     });
     if (error) throw error;
   }
 
   async signOut(): Promise<void> {
-    await supabase.auth.signOut({ scope: "local" });
+    await supabase.auth.signOut({ scope: 'local' });
   }
 
-  onAuthStateChange(
-    callback: (event: string, session: AuthSession | null) => void,
-  ): () => void {
+  onAuthStateChange(callback: (event: string, session: AuthSession | null) => void): () => void {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {

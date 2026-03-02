@@ -15,51 +15,53 @@ export interface DayStats {
 
 export const useDayData = (date: Date) => {
   const dateStr = format(date, 'yyyy-MM-dd');
-  const tasks = useKaivooStore(s => s.tasks);
-  const meetings = useKaivooStore(s => s.meetings);
-  const routines = useKaivooStore(s => s.routines);
-  const routineCompletions = useKaivooStore(s => s.routineCompletions);
-  const journalEntries = useKaivooStore(s => s.journalEntries);
-  const captures = useKaivooStore(s => s.captures);
+  const tasks = useKaivooStore((s) => s.tasks);
+  const meetings = useKaivooStore((s) => s.meetings);
+  const routines = useKaivooStore((s) => s.routines);
+  const routineCompletions = useKaivooStore((s) => s.routineCompletions);
+  const journalEntries = useKaivooStore((s) => s.journalEntries);
+  const captures = useKaivooStore((s) => s.captures);
 
   const dayTasks = useMemo(() => {
-    const dueTodayOrOverdue = tasks.filter(t => {
+    const dueTodayOrOverdue = tasks.filter((t) => {
       if (t.status === 'done') {
         // Show if completed today
         return t.completedAt && format(new Date(t.completedAt), 'yyyy-MM-dd') === dateStr;
       }
-      return t.dueDate === dateStr || (t.dueDate && isBefore(new Date(t.dueDate), startOfDay(date)) && t.status !== 'done');
+      return (
+        t.dueDate === dateStr || (t.dueDate && isBefore(new Date(t.dueDate), startOfDay(date)) && t.status !== 'done')
+      );
     });
 
-    const pending = dueTodayOrOverdue.filter(t => t.status !== 'done');
-    const completed = dueTodayOrOverdue.filter(t => t.status === 'done');
+    const pending = dueTodayOrOverdue.filter((t) => t.status !== 'done');
+    const completed = dueTodayOrOverdue.filter((t) => t.status === 'done');
 
     return { all: dueTodayOrOverdue, pending, completed };
   }, [tasks, dateStr, date]);
 
-  const dayMeetings = useMemo(() =>
-    meetings
-      .filter(m => format(new Date(m.startTime), 'yyyy-MM-dd') === dateStr)
-      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()),
+  const dayMeetings = useMemo(
+    () =>
+      meetings
+        .filter((m) => format(new Date(m.startTime), 'yyyy-MM-dd') === dateStr)
+        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()),
     [meetings, dateStr],
   );
 
-  const dayRoutineCompletions = useMemo(() =>
-    routineCompletions[dateStr] || [],
-    [routineCompletions, dateStr],
-  );
+  const dayRoutineCompletions = useMemo(() => routineCompletions[dateStr] || [], [routineCompletions, dateStr]);
 
-  const dayJournalEntries = useMemo(() =>
-    journalEntries
-      .filter(e => e.date === dateStr)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+  const dayJournalEntries = useMemo(
+    () =>
+      journalEntries
+        .filter((e) => e.date === dateStr)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [journalEntries, dateStr],
   );
 
-  const dayCaptures = useMemo(() =>
-    captures
-      .filter(c => c.date === dateStr)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+  const dayCaptures = useMemo(
+    () =>
+      captures
+        .filter((c) => c.date === dateStr)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [captures, dateStr],
   );
 
@@ -69,7 +71,7 @@ export const useDayData = (date: Date) => {
       return sum + text.split(/\s+/).filter(Boolean).length;
     }, 0);
 
-    const latestMood = dayJournalEntries.find(e => e.moodScore != null);
+    const latestMood = dayJournalEntries.find((e) => e.moodScore != null);
 
     return {
       routinesDone: dayRoutineCompletions.length,

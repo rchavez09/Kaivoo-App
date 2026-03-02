@@ -28,21 +28,21 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const resolveTopicPath = useKaivooStore(s => s.resolveTopicPath);
-  const getTopicPath = useKaivooStore(s => s.getTopicPath);
+  const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
+  const getTopicPath = useKaivooStore((s) => s.getTopicPath);
   const { addTask, addJournalEntry, resolveTopicPathAsync } = useKaivooActions();
 
   const today = new Date();
-  const formattedDate = today.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = today.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
   });
 
   // Parse content for #tags and [[Topic]] or [[Topic/Page]]
   const parseContent = useCallback((text: string) => {
     const parsed: ParsedChip[] = [];
-    
+
     // Match #tags (word characters after #)
     const tagRegex = /#(\w+)/g;
     let match;
@@ -51,10 +51,10 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
         type: 'tag',
         value: match[1],
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + match[0].length,
       });
     }
-    
+
     // Match [[topics]] or [[Topic/Page]] paths
     const topicRegex = /\[\[([^\]]+)\]\]/g;
     while ((match = topicRegex.exec(text)) !== null) {
@@ -62,10 +62,10 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
         type: 'topic',
         value: match[1], // This can be "Topic" or "Topic/Page" or "Topic/Page/Sub"
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + match[0].length,
       });
     }
-    
+
     setChips(parsed);
   }, []);
 
@@ -78,7 +78,7 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   const handleTextSelect = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    
+
     const selected = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
     if (selected.length > 0) {
       setSelectedText(selected);
@@ -91,14 +91,14 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   const insertTag = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    
+
     const pos = textarea.selectionStart;
     const before = content.substring(0, pos);
     const after = content.substring(pos);
     const newContent = `${before}#${after}`;
     setContent(newContent);
     parseContent(newContent);
-    
+
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(pos + 1, pos + 1);
@@ -108,25 +108,25 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   const insertTopic = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    
+
     // Show the topic picker
     const rect = textarea.getBoundingClientRect();
     const containerRect = containerRef.current?.getBoundingClientRect();
-    
+
     if (containerRect) {
       setPickerPosition({
         top: rect.bottom - containerRect.top + 4,
-        left: 0
+        left: 0,
       });
     }
-    
+
     setShowTopicPicker(true);
   };
 
   const handleTopicSelect = (path: string) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    
+
     const pos = textarea.selectionStart;
     const before = content.substring(0, pos);
     const after = content.substring(pos);
@@ -134,7 +134,7 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
     setContent(newContent);
     parseContent(newContent);
     setShowTopicPicker(false);
-    
+
     setTimeout(() => {
       textarea.focus();
       const newPos = pos + path.length + 4; // [[path]]
@@ -145,14 +145,14 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   const insertTopicManually = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    
+
     const pos = textarea.selectionStart;
     const before = content.substring(0, pos);
     const after = content.substring(pos);
     const newContent = `${before}[[]]${after}`;
     setContent(newContent);
     parseContent(newContent);
-    
+
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(pos + 2, pos + 2);
@@ -160,13 +160,13 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   };
 
   const createTaskFromSelection = () => {
-    const uniqueTopics = [...new Set(chips.filter(c => c.type === 'topic').map(c => c.value))];
+    const uniqueTopics = [...new Set(chips.filter((c) => c.type === 'topic').map((c) => c.value))];
     const topicIds = uniqueTopics
-      .map(path => resolveTopicPath(path, false))
+      .map((path) => resolveTopicPath(path, false))
       .filter(Boolean)
       .flat() as string[];
 
-    const uniqueTags = [...new Set(chips.filter(c => c.type === 'tag').map(c => c.value.toLowerCase()))];
+    const uniqueTags = [...new Set(chips.filter((c) => c.type === 'tag').map((c) => c.value.toLowerCase()))];
 
     addTask({
       title: selectedText,
@@ -188,13 +188,11 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   const saveEntry = async () => {
     if (!content.trim()) return;
 
-    const uniqueTopicPaths = [...new Set(chips.filter(c => c.type === 'topic').map(c => c.value))];
-    const uniqueTags = [...new Set(chips.filter(c => c.type === 'tag').map(c => c.value.toLowerCase()))];
+    const uniqueTopicPaths = [...new Set(chips.filter((c) => c.type === 'topic').map((c) => c.value))];
+    const uniqueTags = [...new Set(chips.filter((c) => c.type === 'tag').map((c) => c.value.toLowerCase()))];
 
     // Resolve topic paths to IDs using async resolver (creates in DB when logged in)
-    const topicIdArrays = await Promise.all(
-      uniqueTopicPaths.map(path => resolveTopicPathAsync(path, true))
-    );
+    const topicIdArrays = await Promise.all(uniqueTopicPaths.map((path) => resolveTopicPathAsync(path, true)));
     const topicIds = topicIdArrays.filter(Boolean).flat() as string[];
 
     try {
@@ -228,8 +226,8 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
     parseContent(newContent);
   };
 
-  const uniqueTags = [...new Set(chips.filter(c => c.type === 'tag').map(c => c.value))];
-  const uniqueTopics = [...new Set(chips.filter(c => c.type === 'topic').map(c => c.value))];
+  const uniqueTags = [...new Set(chips.filter((c) => c.type === 'tag').map((c) => c.value))];
+  const uniqueTopics = [...new Set(chips.filter((c) => c.type === 'topic').map((c) => c.value))];
 
   // Check if a topic path exists
   const topicExists = (path: string) => {
@@ -237,25 +235,21 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
   };
 
   return (
-    <div ref={containerRef} className="widget-card animate-fade-in relative">
+    <div ref={containerRef} className="widget-card relative animate-fade-in">
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-primary" />
+          <BookOpen className="h-4 w-4 text-primary" />
           <span className="widget-title">Notes</span>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-muted-foreground hover:text-foreground h-8 px-2"
-        >
+        <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground">
           <span className="text-xs">View all</span>
-          <ChevronRight className="w-3 h-3 ml-1" />
+          <ChevronRight className="ml-1 h-3 w-3" />
         </Button>
       </div>
 
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">{formattedDate}</p>
-        
+
         <div className="relative">
           <textarea
             ref={textareaRef}
@@ -264,19 +258,14 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
             onChange={handleContentChange}
             onSelect={handleTextSelect}
             onBlur={() => setTimeout(() => setShowTaskAction(false), 200)}
-            className="w-full min-h-[120px] resize-none border-none bg-secondary/50 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary/30 placeholder:text-muted-foreground/60 font-serif text-base leading-relaxed"
+            className="min-h-[120px] w-full resize-none rounded-lg border-none bg-secondary/50 p-3 font-serif text-base leading-relaxed placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
-          
+
           {/* Floating task action */}
           {showTaskAction && selectedText && (
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-popover border border-border shadow-lg rounded-lg px-2 py-1.5 flex items-center gap-1 animate-fade-in">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs gap-1.5"
-                onClick={createTaskFromSelection}
-              >
-                <ListTodo className="w-3 h-3" />
+            <div className="absolute -top-10 left-1/2 flex -translate-x-1/2 animate-fade-in items-center gap-1 rounded-lg border border-border bg-popover px-2 py-1.5 shadow-lg">
+              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" onClick={createTaskFromSelection}>
+                <ListTodo className="h-3 w-3" />
                 Create Task
               </Button>
             </div>
@@ -296,17 +285,14 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
         {(uniqueTags.length > 0 || uniqueTopics.length > 0) && (
           <div className="flex flex-wrap gap-1.5">
             {uniqueTags.map((tag) => (
-              <span 
-                key={`tag-${tag}`} 
-                className="tag-chip group"
-              >
-                <Hash className="w-3 h-3" />
+              <span key={`tag-${tag}`} className="tag-chip group">
+                <Hash className="h-3 w-3" />
                 {tag}
-                <button 
-                  onClick={() => removeChip(chips.find(c => c.type === 'tag' && c.value === tag)!)}
-                  className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                <button
+                  onClick={() => removeChip(chips.find((c) => c.type === 'tag' && c.value === tag)!)}
+                  className="ml-1 opacity-0 transition-opacity group-hover:opacity-100"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="h-3 w-3" />
                 </button>
               </span>
             ))}
@@ -314,19 +300,19 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
               const exists = topicExists(topicPath);
               const isPage = topicPath.includes('/');
               return (
-                <span 
-                  key={`topic-${topicPath}`} 
+                <span
+                  key={`topic-${topicPath}`}
                   className={`topic-chip group ${!exists ? 'opacity-60' : ''}`}
                   title={!exists ? 'Will be created on save' : topicPath}
                 >
-                  {isPage ? <FileText className="w-3 h-3" /> : <FolderOpen className="w-3 h-3" />}
+                  {isPage ? <FileText className="h-3 w-3" /> : <FolderOpen className="h-3 w-3" />}
                   {topicPath}
-                  {!exists && <span className="text-[10px] ml-0.5">+</span>}
-                  <button 
-                    onClick={() => removeChip(chips.find(c => c.type === 'topic' && c.value === topicPath)!)}
-                    className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  {!exists && <span className="ml-0.5 text-[10px]">+</span>}
+                  <button
+                    onClick={() => removeChip(chips.find((c) => c.type === 'topic' && c.value === topicPath)!)}
+                    className="ml-1 opacity-0 transition-opacity group-hover:opacity-100"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="h-3 w-3" />
                   </button>
                 </span>
               );
@@ -337,33 +323,29 @@ const JournalWidget = ({ onEntrySaved }: JournalWidgetProps) => {
         {/* Action buttons */}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
               onClick={insertTopic}
             >
-              <FolderOpen className="w-3 h-3" />
+              <FolderOpen className="h-3 w-3" />
               Add Topic
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
               onClick={insertTag}
             >
-              <Hash className="w-3 h-3" />
+              <Hash className="h-3 w-3" />
               Add Tag
             </Button>
           </div>
-          
+
           {content.trim() && (
-            <Button 
-              size="sm" 
-              className="h-7 text-xs gap-1.5"
-              onClick={saveEntry}
-            >
-              <Send className="w-3 h-3" />
+            <Button size="sm" className="h-7 gap-1.5 text-xs" onClick={saveEntry}>
+              <Send className="h-3 w-3" />
               Save
             </Button>
           )}

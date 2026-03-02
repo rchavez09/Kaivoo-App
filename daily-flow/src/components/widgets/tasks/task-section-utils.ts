@@ -51,12 +51,12 @@ export function getTasksForSection(
   section: TasksWidgetSection,
   tasks: Task[],
   taskOrder?: TasksWidgetSettings['taskOrder'],
-  referenceDate?: Date
+  referenceDate?: Date,
 ): { pending: Task[]; completed: Task[] } {
   const pending: Task[] = [];
   const completed: Task[] = [];
 
-  tasks.forEach(task => {
+  tasks.forEach((task) => {
     const isDone = task.status === 'done';
     if (isDone && !wasCompletedOnDate(task, referenceDate)) return;
 
@@ -68,20 +68,42 @@ export function getTasksForSection(
       matches = task.tags?.includes(section.tagName) ?? false;
     } else {
       switch (section.id) {
-        case 'overdue': matches = isOverdue(task.dueDate, referenceDate); break;
-        case 'dueToday': matches = isDueToday(task.dueDate, referenceDate); break;
-        case 'dueThisWeek': matches = isDueThisWeek(task.dueDate, referenceDate); break;
-        case 'highPriority': matches = task.priority === 'high'; break;
-        case 'mediumPriority': matches = task.priority === 'medium'; break;
-        case 'lowPriority': matches = task.priority === 'low'; break;
-        case 'doing': matches = task.status === 'doing'; break;
-        case 'blocked': matches = task.status === 'blocked'; break;
-        case 'backlog': matches = task.status === 'backlog'; break;
+        case 'overdue':
+          matches = isOverdue(task.dueDate, referenceDate);
+          break;
+        case 'dueToday':
+          matches = isDueToday(task.dueDate, referenceDate);
+          break;
+        case 'dueThisWeek':
+          matches = isDueThisWeek(task.dueDate, referenceDate);
+          break;
+        case 'highPriority':
+          matches = task.priority === 'high';
+          break;
+        case 'mediumPriority':
+          matches = task.priority === 'medium';
+          break;
+        case 'lowPriority':
+          matches = task.priority === 'low';
+          break;
+        case 'doing':
+          matches = task.status === 'doing';
+          break;
+        case 'blocked':
+          matches = task.status === 'blocked';
+          break;
+        case 'backlog':
+          matches = task.status === 'backlog';
+          break;
       }
     }
 
     if (matches) {
-      if (isDone) { completed.push(task); } else { pending.push(task); }
+      if (isDone) {
+        completed.push(task);
+      } else {
+        pending.push(task);
+      }
     }
   });
 
@@ -111,31 +133,86 @@ export interface SectionDisplayConfig {
 /** Returns icon name (lucide), colors, and empty state text for a section. */
 export function getSectionDisplayConfig(section: TasksWidgetSection): SectionDisplayConfig {
   if (section.type === 'topic') {
-    return { icon: 'Folder', iconColor: 'text-accent', labelColor: 'text-accent', emptyText: `No tasks in ${section.label}` };
+    return {
+      icon: 'Folder',
+      iconColor: 'text-accent',
+      labelColor: 'text-accent',
+      emptyText: `No tasks in ${section.label}`,
+    };
   }
   if (section.type === 'tag') {
-    return { icon: 'Hash', iconColor: 'text-info-foreground', labelColor: 'text-info-foreground', emptyText: `No tasks tagged ${section.label}` };
+    return {
+      icon: 'Hash',
+      iconColor: 'text-info-foreground',
+      labelColor: 'text-info-foreground',
+      emptyText: `No tasks tagged ${section.label}`,
+    };
   }
 
   switch (section.id) {
     case 'overdue':
-      return { icon: 'AlertTriangle', iconColor: 'text-destructive', labelColor: 'text-destructive', emptyText: 'No overdue tasks' };
+      return {
+        icon: 'AlertTriangle',
+        iconColor: 'text-destructive',
+        labelColor: 'text-destructive',
+        emptyText: 'No overdue tasks',
+      };
     case 'highPriority':
-      return { icon: 'Flag', iconColor: 'text-destructive', labelColor: 'text-destructive', emptyText: 'No high priority tasks' };
+      return {
+        icon: 'Flag',
+        iconColor: 'text-destructive',
+        labelColor: 'text-destructive',
+        emptyText: 'No high priority tasks',
+      };
     case 'mediumPriority':
-      return { icon: 'Flag', iconColor: 'text-warning-foreground', labelColor: 'text-warning-foreground', emptyText: 'No medium priority tasks' };
+      return {
+        icon: 'Flag',
+        iconColor: 'text-warning-foreground',
+        labelColor: 'text-warning-foreground',
+        emptyText: 'No medium priority tasks',
+      };
     case 'lowPriority':
-      return { icon: 'Flag', iconColor: 'text-muted-foreground', labelColor: 'text-muted-foreground', emptyText: 'No low priority tasks' };
+      return {
+        icon: 'Flag',
+        iconColor: 'text-muted-foreground',
+        labelColor: 'text-muted-foreground',
+        emptyText: 'No low priority tasks',
+      };
     case 'dueToday':
-      return { icon: 'CheckSquare', iconColor: 'text-primary', labelColor: 'text-primary', emptyText: 'No tasks due today' };
+      return {
+        icon: 'CheckSquare',
+        iconColor: 'text-primary',
+        labelColor: 'text-primary',
+        emptyText: 'No tasks due today',
+      };
     case 'dueThisWeek':
-      return { icon: 'Calendar', iconColor: 'text-info-foreground', labelColor: 'text-info-foreground', emptyText: 'No tasks due this week' };
+      return {
+        icon: 'Calendar',
+        iconColor: 'text-info-foreground',
+        labelColor: 'text-info-foreground',
+        emptyText: 'No tasks due this week',
+      };
     case 'doing':
-      return { icon: 'Clock', iconColor: 'text-info-foreground', labelColor: 'text-info-foreground', emptyText: 'No tasks in progress' };
+      return {
+        icon: 'Clock',
+        iconColor: 'text-info-foreground',
+        labelColor: 'text-info-foreground',
+        emptyText: 'No tasks in progress',
+      };
     case 'blocked':
-      return { icon: 'Pause', iconColor: 'text-destructive', labelColor: 'text-destructive', emptyText: 'No blocked tasks' };
+      return {
+        icon: 'Pause',
+        iconColor: 'text-destructive',
+        labelColor: 'text-destructive',
+        emptyText: 'No blocked tasks',
+      };
     case 'backlog':
-      return { icon: 'Archive', iconColor: 'text-muted-foreground', labelColor: 'text-muted-foreground', emptyText: 'No backlog tasks' };
+      return {
+        icon: 'Archive',
+        iconColor: 'text-muted-foreground',
+        labelColor: 'text-muted-foreground',
+        emptyText: 'No backlog tasks',
+      };
     default:
       return { icon: 'CheckSquare', iconColor: 'text-primary', labelColor: 'text-primary', emptyText: 'No tasks' };
   }

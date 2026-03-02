@@ -62,6 +62,6 @@ export type {
   // File types
   FileEntry,
   FileWatchEvent,
-} from "./types";
+} from './types';
 
-export { AdapterProvider, useAdapters, useDataAdapter } from "./provider";
+export { AdapterProvider, useAdapters, useDataAdapter } from './provider';

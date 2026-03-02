@@ -34,13 +34,13 @@ const TimelineHeader = ({ days, dayWidth }: TimelineHeaderProps) => {
   }, [days]);
 
   return (
-    <div className="sticky top-0 z-10 bg-background border-b border-border">
+    <div className="sticky top-0 z-10 border-b border-border bg-background">
       {/* Month row */}
       <div className="flex" style={{ height: 28 }}>
         {months.map((m, i) => (
           <div
             key={i}
-            className="text-xs font-medium text-foreground px-2 flex items-center border-r border-border/30"
+            className="flex items-center border-r border-border/30 px-2 text-xs font-medium text-foreground"
             style={{ width: m.span * dayWidth }}
           >
             {m.label}
@@ -57,9 +57,9 @@ const TimelineHeader = ({ days, dayWidth }: TimelineHeaderProps) => {
             <div
               key={i}
               className={cn(
-                'text-[10px] text-center border-r border-border/20 flex items-center justify-center',
-                isWeekend ? 'text-muted-foreground/50 bg-muted/20' : 'text-muted-foreground',
-                today && 'bg-primary/10 text-primary font-bold'
+                'flex items-center justify-center border-r border-border/20 text-center text-[10px]',
+                isWeekend ? 'bg-muted/20 text-muted-foreground/50' : 'text-muted-foreground',
+                today && 'bg-primary/10 font-bold text-primary',
               )}
               style={{ width: dayWidth }}
             >
