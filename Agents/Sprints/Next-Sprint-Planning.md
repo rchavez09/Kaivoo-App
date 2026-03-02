@@ -1,75 +1,59 @@
-# Next Sprint Planning — Sprint 20
+# Next Sprint Planning — Sprint 21
 
-**Status:** NOT STARTED — awaiting Director planning session
+**Status:** NOT STARTED — awaiting Sprint 20 completion
 **Compiled by:** Director
-**Date:** March 1, 2026
+**Date:** TBD
 
 ---
 
 ## Previous Sprint Summary
 
-**Sprint 19 (Topics & Quality):** COMPLETED — PR #2 merged to `main`
-- Topics restructure shipped (Feature Bible, store consolidation, full CRUD, UX fixes)
-- Bundle size: 482KB → ~210KB initial JS gzipped (56% reduction)
-- Tech debt: FTS bold rendering, WeekTimeline task blocks
-- E2E infrastructure: Playwright installed, 4 smoke tests passing
-- See `Sprint-19-Topics-Quality.md` for full retrospective
+**Sprint 20 (Local-First Foundation):** IN PROGRESS
+- See `Sprint-20-Local-First-Foundation.md` for live status
 
 ---
 
 ## Backlog — Prioritized
 
-### From CEO Session #4 (Phase A Must-Haves)
+### From Sprint 20 Backlog (Ordered)
 
-| Item | Owner | Priority | Notes |
-|---|---|---|---|
-| Electron vs. Tauri evaluation | Agent 9 (DevOps) | **BLOCKS EVERYTHING** | Framework decision needed before any local-first work |
-| Data layer abstraction (LocalAdapter/CloudAdapter) | Agent 3 (Architect) | **Must-have Phase A** | Refactor services to adapter pattern |
-| Desktop packaging sprint | Agent 9 (DevOps) | **Must-have Phase A** | Depends on Electron/Tauri decision |
-| Local-first storage (SQLite + file system) | Agent 3 / Agent 2 | **Must-have Phase A** | Vault folder, real files on disk |
-| File attachments + image embedding | Agent 2 | **Must-have Phase A** | Files in project/topic folders, images inline |
-| Setup wizard + vault selection + Obsidian import | Agent 2 | **Must-have Phase A** | Choose folder, AI config, file copy import |
-
-### From CEO Priorities
-
-| Item | Priority | Notes |
+| Item | Depends On | Priority |
 |---|---|---|
-| AI settings page + BYO API key wizard | CEO Priority #2 | AI infrastructure foundation |
-| AI chat concierge | CEO Priority #3 | Depends on AI settings |
-| Google Calendar integration | CEO Priority #4 | Separate sprint |
-| Gmail integration | CEO Priority #5 | Separate sprint |
+| Local-first storage (SQLite full implementation) | Sprint 20 adapter layer | **Must-have Phase A** |
+| Vault file browser UI | Sprint 20 LocalAdapter + Tauri FS | **Must-have Phase A** |
+| Setup wizard + vault selection + Obsidian import | Vault file browser | **Must-have Phase A** |
+| File attachments + image embedding | Vault | **Must-have Phase A** |
+| Cross-platform CI builds (macOS/Windows/Linux) | Sprint 20 Tauri scaffold | **Must-have Phase A** |
+| AI settings page + BYO API key wizard | Independent | CEO Priority #2 |
+| AI chat concierge | AI settings | CEO Priority #3 |
+| Google Calendar integration | Independent | CEO Priority #4 |
+| Gmail integration | Google Calendar | CEO Priority #5 |
 
-### Quality & Tech Debt
+### Quality Debt
 
 | Item | Source | Notes |
 |---|---|---|
-| Lint errors cleanup | Sprint 19 retro | Pre-existing unsafe `any` casts, unused imports, empty interfaces |
-| E2E test expansion | Sprint 19 retro | Authenticated flows, Topics CRUD journeys, daily use flow |
-| Notifications & reminders | Ongoing backlog | Should-have Phase A |
-| parentId topic nesting | Issue #9 | Dead schema — tech debt |
-| Hardcoded Daily Notes topic | Issue #10 | Complex, risk of breaking journal |
+| parentId topic nesting | Issue #9 | Dead schema — clean up during local-first migration |
+| Hardcoded Daily Notes topic | Issue #10 | Address during vault/topics restructure |
+| Notifications & reminders | Ongoing | Should-have Phase A |
 
-### Deferred Features
+### Deferred Features (P2)
 
-| Item | Source | Notes |
-|---|---|---|
-| "Don't Miss Twice" forgiveness | Sprint 18 | P2 |
-| Year in Pixels | Sprint 18 | P2 |
-| AI "Organize My Day" | Sprint 18 | Feeds into AI concierge |
-| Filter/entity toggle system | Sprint 18 | P2 |
-| Timed habits | Sprint 18 | P2 |
-| Cross-platform shortcut recording | Sprint 18 | Low priority |
+| Item | Source |
+|---|---|
+| "Don't Miss Twice" forgiveness | Sprint 18 |
+| Year in Pixels | Sprint 18 |
+| AI "Organize My Day" | Sprint 18 |
+| Filter/entity toggle system | Sprint 18 |
+| Timed habits | Sprint 18 |
+| Cross-platform shortcut recording | Sprint 18 |
 
 ---
 
 ## Planning Notes
 
-Sprint 20 scope TBD. Key decisions for Director:
-
-1. **Does Sprint 20 focus on local-first foundation (Electron/Tauri + data layer)?** This is the CEO's strategic priority from Session #4 and blocks everything downstream.
-2. **Or does Sprint 20 focus on AI infrastructure (settings + concierge)?** CEO Priority #2/#3, but doesn't depend on local-first.
-3. **Quality baseline:** Lint errors should be cleaned up regardless of feature focus. E2E should expand to cover authenticated flows.
+Sprint 21 scope TBD. Likely candidates: local-first SQLite implementation + vault file browser UI (completing the local-first foundation started in Sprint 20). AI settings could run as a parallel track if Sprint 20 finishes cleanly.
 
 ---
 
-*Next Sprint Planning — Awaiting Director session*
+*Next Sprint Planning — Awaiting Sprint 20 completion*

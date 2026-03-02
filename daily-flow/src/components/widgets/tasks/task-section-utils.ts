@@ -81,7 +81,7 @@ export function getTasksForSection(
     }
 
     if (matches) {
-      isDone ? completed.push(task) : pending.push(task);
+      if (isDone) { completed.push(task); } else { pending.push(task); }
     }
   });
 

@@ -36,3 +36,7 @@ Thumbs.db
 
 # Local Netlify folder
 .netlify
+
+# Tauri build artifacts
+daily-flow/src-tauri/target/
+daily-flow/src-tauri/gen/

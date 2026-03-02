@@ -48,7 +48,7 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
 
   // Check if content is markdown (has headers, lists, bold, etc.)
   const isMarkdown = (content: string) => {
-    return /^#+ |^\*\*|^\- |^\d+\. |^> /m.test(content);
+    return /^#+ |^\*\*|^- |^\d+\. |^> /m.test(content);
   };
 
   // Check if content is long enough to need expansion

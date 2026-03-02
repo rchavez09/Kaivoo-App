@@ -66,7 +66,7 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
     try {
       const stored = localStorage.getItem(EXPANDED_TASKS_KEY);
       if (stored) return new Set(JSON.parse(stored));
-    } catch {}
+    } catch { /* localStorage unavailable */ }
     return new Set();
   });
 
@@ -78,7 +78,7 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
         const collapsed = new Set<SectionId>(JSON.parse(stored));
         return new Set(s.sections.map(sec => sec.id).filter(id => !collapsed.has(id)));
       }
-    } catch {}
+    } catch { /* localStorage unavailable */ }
     return new Set(s.sections.map(sec => sec.id));
   }, []);
 
@@ -89,7 +89,7 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
         const collapsed = new Set<SectionId>(JSON.parse(stored));
         return new Set(s.sections.map(sec => sec.id).filter(id => !collapsed.has(id)));
       }
-    } catch {}
+    } catch { /* localStorage unavailable */ }
     if (s.collapseCompletedByDefault) return new Set();
     return new Set(s.sections.map(sec => sec.id));
   }, []);
@@ -108,7 +108,7 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
     e.stopPropagation();
     setExpandedTasks(prev => {
       const next = new Set(prev);
-      next.has(taskId) ? next.delete(taskId) : next.add(taskId);
+      if (next.has(taskId)) { next.delete(taskId); } else { next.add(taskId); }
       localStorage.setItem(EXPANDED_TASKS_KEY, JSON.stringify(Array.from(next)));
       return next;
     });
@@ -117,7 +117,7 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
   const toggleSectionExpanded = useCallback((sectionId: SectionId) => {
     setExpandedSections(prev => {
       const next = new Set(prev);
-      next.has(sectionId) ? next.delete(sectionId) : next.add(sectionId);
+      if (next.has(sectionId)) { next.delete(sectionId); } else { next.add(sectionId); }
       const allIds = settings.sections.map(s => s.id);
       localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify(allIds.filter(id => !next.has(id))));
       return next;
@@ -128,7 +128,7 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
     e.stopPropagation();
     setShowCompletedInSection(prev => {
       const next = new Set(prev);
-      next.has(sectionId) ? next.delete(sectionId) : next.add(sectionId);
+      if (next.has(sectionId)) { next.delete(sectionId); } else { next.add(sectionId); }
       const allIds = settings.sections.map(s => s.id);
       localStorage.setItem(COLLAPSED_COMPLETED_KEY, JSON.stringify(allIds.filter(id => !next.has(id))));
       return next;

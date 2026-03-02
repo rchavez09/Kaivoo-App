@@ -50,7 +50,7 @@ export function useWidgetSettings<T extends Record<string, any>>(
                 const parsed = JSON.parse(local) as T;
                 setSettings({ ...defaultSettings, ...parsed });
               }
-            } catch {}
+            } catch { /* localStorage unavailable */ }
           }
           setLoading(false);
         }
@@ -62,7 +62,7 @@ export function useWidgetSettings<T extends Record<string, any>>(
             const parsed = JSON.parse(local) as T;
             setSettings({ ...defaultSettings, ...parsed });
           }
-        } catch {}
+        } catch { /* localStorage unavailable */ }
         if (!cancelled) setLoading(false);
       }
     };
