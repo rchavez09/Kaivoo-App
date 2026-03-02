@@ -376,7 +376,7 @@ Every 1st-party module passes through the same packaging checks that marketplace
 | Topics as Knowledge OS — local-first file browser, smart folder hierarchy, single source of truth for all content and files | PLANNED | Must-have |
 | Desktop packaging (Tauri 2.0) — macOS scaffold complete, .dmg builds. Windows/Linux CI in Sprint 22. | **DONE** | Sprint 20 |
 | Data layer abstraction — DataAdapter pattern (4 interfaces, 15 entity sub-adapters). SupabaseAdapter + LocalAdapter. Runtime switching via `isTauri()`. | **DONE** | Sprint 20 |
-| Local-first storage — SQLite CRUD persistence, FTS5 search, local auth session. Data persists to disk without Supabase. | **IN PROGRESS** | Sprint 21 |
+| Local-first storage — SQLite CRUD persistence, FTS5 search, local auth session. Data persists to disk without Supabase. | **DONE** | Sprint 21 |
 | File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | PLANNED | Must-have |
 | AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | PLANNED | Must-have |
