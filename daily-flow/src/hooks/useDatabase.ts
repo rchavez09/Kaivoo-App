@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { useKaivooStore } from '@/stores/useKaivooStore';
-import { useAdapters } from '@/lib/adapters';
+import { useAdapters, type CreateHabitInput, type UpdateHabitInput } from '@/lib/adapters';
 import {
   Task,
   Subtask,
@@ -12,6 +12,7 @@ import {
   Meeting,
   RoutineItem,
   RoutineGroup,
+  Habit,
   Project,
   ProjectNote,
 } from '@/types';
@@ -179,6 +180,18 @@ export const useDatabaseOperations = () => {
     // Routine Completions
     toggleRoutineCompletion: (routineId: string, date: string, isCompleted: boolean) =>
       ensureAdapter().routineCompletions.toggle(routineId, date, isCompleted),
+
+    // Habits
+    createHabit: (input: CreateHabitInput) => ensureAdapter().habits.create(input),
+    updateHabit: (id: string, updates: UpdateHabitInput) => ensureAdapter().habits.update(id, updates),
+    deleteHabit: (id: string) => ensureAdapter().habits.delete(id),
+    archiveHabit: (id: string) => ensureAdapter().habits.archive(id),
+
+    // Habit Completions
+    toggleHabitCompletion: (habitId: string, date: string, isCurrentlyCompleted: boolean) =>
+      ensureAdapter().habitCompletions.toggle(habitId, date, isCurrentlyCompleted),
+    incrementHabitCount: (habitId: string, date: string, currentCount: number) =>
+      ensureAdapter().habitCompletions.incrementCount(habitId, date, currentCount),
 
     // Projects
     createProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) =>

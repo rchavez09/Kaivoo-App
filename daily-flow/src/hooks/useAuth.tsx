@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+// Runtime detection: are we inside the Tauri desktop shell?
+const isTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -19,9 +22,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Single source of truth: onAuthStateChange fires INITIAL_SESSION on mount,
-    // then SIGNED_IN / SIGNED_OUT / TOKEN_REFRESHED for all subsequent changes.
-    // No separate getSession() call needed — avoids race conditions.
+    if (isTauri()) {
+      // Desktop mode: provide a local user shim so ProtectedRoute and components
+      // see a valid user. The actual user identity is managed by LocalAuthAdapter
+      // in the adapter layer (persisted to SQLite).
+      setUser({
+        id: 'local-user',
+        email: 'local@kaivoo.desktop',
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'local',
+        created_at: new Date().toISOString(),
+      } as User);
+      setLoading(false);
+      return;
+    }
+
+    // Web mode: single source of truth via onAuthStateChange.
+    // Fires INITIAL_SESSION on mount, then SIGNED_IN / SIGNED_OUT / TOKEN_REFRESHED.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -53,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    if (isTauri()) return; // Desktop mode: no-op (single-user, no sign-out)
     await supabase.auth.signOut({ scope: 'local' });
   };
 

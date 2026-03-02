@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 4.4
+**Version:** 4.5
 **Last Updated:** March 2, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -12,7 +12,7 @@ Kaivoo is an AI-powered workflow OS that puts the power of a whole business in y
 
 The platform ships as **two products on one foundation:**
 
-- **Product 1: Kaivoo Productivity** ($249 one-time) — A polished, self-contained productivity app. Journal, tasks, projects, calendar, email, routines, captures, AI concierge. Local-first, BYO API keys, you own everything. The Obsidian + Notion + Calendar replacement.
+- **Product 1: Kaivoo Productivity** ($99 one-time / $49 founding member) — A polished, self-contained productivity app. Journal, tasks, projects, calendar, captures, widgets, theme customization, data export. Local-first, you own everything. The Obsidian + Notion + Calendar replacement.
 
 - **Product 2: Kaivoo Orchestrator** (premium subscription, pricing TBD) — An AI agent orchestration platform for builders. Sprint management, multi-model routing, messaging-based control (Telegram or equivalent), autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can manage from their phone.
 
@@ -265,11 +265,11 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 ### Phase A: The Individual
 
-**The AI Power User** — Uses ChatGPT/Claude daily but frustrated by context loss, fragmented workflows, and lack of personalization. Willing to pay $249 once for something that actually remembers them and integrates into their life.
+**The AI Power User** — Uses ChatGPT/Claude daily but frustrated by context loss, fragmented workflows, and lack of personalization. Willing to pay $49-99 once for something that actually remembers them and integrates into their life.
 
-**The Self-Hoster** — Privacy-conscious, technically capable. Runs Nextcloud, Home Assistant, or Obsidian. Wants AI on their own hardware with their own keys. Willing to pay $249 for a polished, packaged solution that saves them weeks of DIY setup.
+**The Self-Hoster** — Privacy-conscious, technically capable. Runs Nextcloud, Home Assistant, or Obsidian. Wants a polished local-first app on their own hardware. Willing to pay $49-99 for a packaged solution that saves them weeks of DIY setup.
 
-**The Productivity Optimizer** — Uses Notion/Sunsama/Obsidian but wants AI deeply woven into their daily workflow, not a separate chat window. Willing to pay for the "10x moment" of AI that actually understands their day.
+**The Productivity Optimizer** — Uses Notion/Sunsama/Obsidian but wants a unified workflow — journal, tasks, calendar, captures in one place. Willing to pay for the "10x moment" of replacing their fragmented stack.
 
 ### Phase B: The Business Operator
 
@@ -293,11 +293,18 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 | Tier | Price | What They Get | Target |
 |---|---|---|---|
-| **Productivity App** | $249 one-time | Full app, BYO API keys, local data, email/calendar integration, AI concierge, all updates for 1 year | AI power users, productivity optimizers, self-hosters |
+| **Standard** | $99 one-time | Full productivity app, widget system, theme customization, data export, 1 year of updates, single device | AI power users, productivity optimizers, self-hosters |
+| **Founding Member** | $49 one-time | Everything in Standard + permanent discount on Phase B subscription tiers | All buyers before Phase B launches (no cap) |
+
+**What's included in Phase A:** Journal, tasks, calendar, captures, daily view, widget system, theme customization, data export (markdown/JSON), 1 year of updates, single device.
+
+**What's NOT in Phase A (deferred to Phase B):** AI features, multi-device sync, marketplace, collaboration.
 
 **License:** Proprietary EULA. Personal or internal business use only. No redistribution, resale, sublicensing, or derivative products for sale. Source access (if provided) is for customization only. License key required for activation.
 
-**Revenue milestone:** 400 sales = ~$100K. This funds Phase B development and validates demand.
+**Pricing strategy:** Volume over margin. $49 is impulse pricing — no week of deliberation. Every Phase A buyer is a warm lead for Phase B subscriptions. "Pay once, own forever" resonates with subscription-fatigued market.
+
+**Revenue milestone:** 2,000+ founding member sales = ~$100K. This funds Phase B development and validates demand.
 
 #### Phase B: One Workflow Cloud Subscription (ARR)
 
@@ -313,13 +320,13 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 ### Revenue Target: $1M ARR
 
-| Scenario | Mix | Timeline |
-|---|---|---|
-| Conservative | 400 one-time ($100K) + 1,500 subs at $39/mo ($702K/yr) | 24-30 months |
-| Moderate | 600 one-time ($150K) + 1,800 subs at $39/mo ($842K/yr) | 18-24 months |
-| Aggressive | Focus on subs: 2,200 at $39/mo = $1.03M ARR | 12-18 months |
+| Scenario | Phase A One-Time | Phase B Subscriptions (TBD pricing) | Timeline |
+|---|---|---|---|
+| Conservative | 2,000 founding members ($98K) | + subscription ARR (pricing TBD) | 24-30 months |
+| Moderate | 3,500 founding members ($172K) | + subscription ARR (pricing TBD) | 18-24 months |
+| Aggressive | 5,000+ founding members ($245K+) | + subscription ARR (pricing TBD) | 12-18 months |
 
-*These projections are estimates. Subscription pricing is placeholder pending research. Agent 8 (Product Manager) will validate with market research.*
+*Phase A projections based on $49 founding member pricing. Phase B subscription pricing requires research on AI token costs, competitive pricing, and addon model. Agent 5 + Agent 8 to deliver when Phase B feature scope is finalized.*
 
 ### Widget & Module Add-Ons (Phase B+)
 
@@ -338,7 +345,7 @@ Every 1st-party module passes through the same packaging checks that marketplace
 ## Phased Roadmap
 
 ### Phase A: Ship & Sell the Productivity App
-*Finish the product. Charge $249. Hit $100K. Learn from real users.*
+*Finish the product. Charge $99/$49. Hit $100K. Learn from real users.*
 
 #### Completed (Sprints 0–18)
 
@@ -367,9 +374,9 @@ Every 1st-party module passes through the same packaging checks that marketplace
 | Milestone | Status | Priority |
 |---|---|---|
 | Topics as Knowledge OS — local-first file browser, smart folder hierarchy, single source of truth for all content and files | PLANNED | Must-have |
-| Desktop packaging (Electron or Tauri) — macOS, Windows, Linux. Required for local file system access. One codebase, three platform builds. | PLANNED | Must-have |
-| Data layer abstraction — LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B. Swappable backend, one codebase. | PLANNED | Must-have |
-| Local-first storage — SQLite database + real files on disk. Vault folder chosen during setup. No cloud dependency for core functionality. | PLANNED | Must-have |
+| Desktop packaging (Tauri 2.0) — macOS scaffold complete, .dmg builds. Windows/Linux CI in Sprint 22. | **DONE** | Sprint 20 |
+| Data layer abstraction — DataAdapter pattern (4 interfaces, 15 entity sub-adapters). SupabaseAdapter + LocalAdapter. Runtime switching via `isTauri()`. | **DONE** | Sprint 20 |
+| Local-first storage — SQLite CRUD persistence, FTS5 search, local auth session. Data persists to disk without Supabase. | **IN PROGRESS** | Sprint 21 |
 | File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | PLANNED | Must-have |
 | AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | PLANNED | Must-have |
@@ -481,7 +488,7 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (completing pre-ship features)
-**Active sprint:** None — Sprint 21 planning pending
+**Active sprint:** Sprint 21 (Local-First Storage) — SQLite persistence, adapter completion, FTS5, local auth
 **Last completed:** Sprint 20 (Local-First Foundation) — DataAdapter pattern, Tauri 2.0 scaffold, SQLite schema, E2E expansion
 
 **Sprint 20 delivered:** DataAdapter abstraction layer (4 top-level interfaces, 15 entity sub-adapters), runtime switching via `isTauri()`. LocalDataAdapter with static factory pattern + SQLite schema for all 13 entities. SupabaseDataAdapter wrapping existing queries. AdapterProvider React context with Suspense boundary. Tauri 2.0 scaffold (Cargo.toml, plugins: sql/fs/shell, capabilities, RGBA icon generation). 18 Playwright E2E tests. Sprint Protocol v1.8 (living sprint file + E2E gate). See `Sprints/Sprint-20-Local-First-Foundation.md`.
@@ -495,7 +502,7 @@ These run in parallel with sprint work, not blocking it.
 **Sprint 14 delivered:** Project Notes CRUD (project_notes table, RLS, service layer, Zustand store). ProjectDetail Notes section with inline editing. Quick Add note-to-project from anywhere (Cmd+Shift+N). Notes included in data export/import. See `Sprints/Sprint-14-Connect.md`.
 
 **Key decisions resolved (CEO Session — March 1, 2026):**
-- ~~Business model: one-time only vs. subscription~~ → **Two-phase strategy** (Phase A: $249 one-time, Phase B: subscription ARR)
+- ~~Business model: one-time only vs. subscription~~ → **Two-phase strategy** (Phase A: $99/$49 one-time, Phase B: subscription ARR)
 - ~~Product positioning~~ → **AI-powered workflow OS** — guided, outcome-first AI, not blank chat boxes
 - ~~Enterprise vs. SMB focus~~ → **SMB focus** — solopreneurs to small teams (1-25), no "enterprise" language
 - ~~Rebrand timing~~ → **Phase A ships under current branding, Phase B launches as "One Workflow by Kaivoo Media"**
@@ -518,7 +525,7 @@ These run in parallel with sprint work, not blocking it.
 - ~~Phase B onboarding~~ → **Concierge-led guided tour** — the hatched concierge walks users through platform capabilities
 
 **Key decisions resolved (CEO Session #3 — March 1, 2026):**
-- ~~Single product vs. multi-product~~ → **Two products on one platform** — Kaivoo Productivity ($249 one-time) + Kaivoo Orchestrator (premium subscription)
+- ~~Single product vs. multi-product~~ → **Two products on one platform** — Kaivoo Productivity ($99/$49 one-time) + Kaivoo Orchestrator (premium subscription)
 - ~~Concierge scope~~ → **Clean boundary** — Productivity concierge = helper (find, summarize, add, recall). Orchestrator concierge = builder (sprint, agents, deploy). Same architecture, different capability ceiling.
 - ~~Modular toggle architecture~~ → **Settings-driven modules** — productivity and builder features as toggleable surfaces, dashboard adapts to active modules
 - ~~Productization requirement~~ → **Clean templates required before Orchestrator ships** — no Kaivoo-specific content in user-facing agent specs, blank-slate onboarding
@@ -527,7 +534,7 @@ These run in parallel with sprint work, not blocking it.
 - ~~Phase A vs. Phase B priority~~ → **Ship productivity app first** — revenue now funds Orchestrator development. Research runs in parallel.
 
 **Key decisions resolved (CEO Session #4 — March 1, 2026):**
-- ~~Local-first storage phasing~~ → **Phase A must-have** — $249 one-time model requires local storage. Supabase cloud dependency creates inverted unit economics. Local-first solves business model and aligns with Core Principle #1.
+- ~~Local-first storage phasing~~ → **Phase A must-have** — one-time purchase model requires local storage. Supabase cloud dependency creates inverted unit economics. Local-first solves business model and aligns with Core Principle #1.
 - ~~Desktop packaging priority~~ → **Promoted to Phase A must-have** — required for file system access. One codebase, three platform builds (macOS, Windows, Linux).
 - ~~Topics page role~~ → **Knowledge OS** — Topics is the top-level hierarchy (Topics > Projects > Tasks/Files). Smart file browser, single source of truth for all content and files. Convention with flexibility: opinionated default, permissive by nature.
 - ~~Data architecture for local~~ → **Swappable backend** — Data layer abstraction with LocalAdapter (SQLite + file system) for Phase A and CloudAdapter (Supabase) for Phase B. One codebase, no split.
@@ -544,11 +551,17 @@ These run in parallel with sprint work, not blocking it.
 - ~~SQLite schema design~~ → **Mirror Supabase with camelCase** — 13-entity SQLite schema mirroring Supabase tables. DataAdapter abstraction with `LocalDataAdapter` (SQLite) and `SupabaseDataAdapter` (Supabase). Runtime switching via `isTauri()`. One codebase, swappable backend.
 - ~~Data architecture for local~~ → **Implemented** — DataAdapter pattern with 4 top-level interfaces (DataAdapter, AuthAdapter, SearchAdapter, StorageAdapter) and 15 entity sub-adapters. Static factory pattern eliminates uninitialized state.
 
+**Key decisions resolved (CEO Strategic Brief — March 2, 2026):**
+- ~~Phase A pricing~~ → **$99 standard / $49 founding member** (one-time). Volume over margin. Every Phase A buyer is a Phase B subscription lead. Founding member status closes when Phase B launches. No cap. See `Research/Agent-5-Docs/CEO-Strategic-Brief-Phase-A-Pricing.md`.
+- ~~Phase A feature scope~~ → **No AI in Phase A**. AI features (concierge, BYO keys) deferred to Phase B. Phase A ships: journal, tasks, calendar, captures, widgets, themes, data export.
+
+**Key decisions resolved (Sprint 21 — March 2, 2026):**
+- ~~Phase A sprint sequencing~~ → **Sprint 21: Local-First Storage** (SQLite persistence, adapter completion, FTS5, local auth). Sprint 22: Vault file browser. Sprint 23: Setup wizard + AI settings. Sprint 24+: Calendar, email, licensing, launch.
+
 **Key decisions ahead:**
 - **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
 - **Desktop auto-update** — How do users get updates for the desktop app? Agent 9.
 - **Code signing** — Apple notarization + Windows signing. Agent 9.
-- **Phase A sprint sequencing** — Which pre-ship features to group into Sprint 21, 22, etc. (Director to plan)
 - **Phase B subscription pricing** — Pending research on token costs, competitive pricing, addon model
 - **Skills store architecture** — MCP-based vs. custom plugin API (Agent 3 to evaluate during Phase B)
 - **Sandboxed module runtime** — How user-built modules run safely (iframe, Web Components, controlled runtime) (Agent 3)
@@ -574,7 +587,7 @@ These run in parallel with sprint work, not blocking it.
 | API Response Time (p50) | < 100ms |
 | Accessibility | WCAG AA compliance |
 | Code Audit Score | 8.5+/10 |
-| Phase A Sales | 400 units ($100K) |
+| Phase A Sales | 2,000+ founding members ($100K) |
 | Time to Value (setup → "aha moment") | < 5 minutes |
 
 ### Phase B (Business Metrics)
@@ -632,8 +645,10 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v4.3 — March 1, 2026*
-*v4.3: CEO Session #4 — Local-First Knowledge OS. Topics elevated to single source of truth for all content and files (Topics > Projects > Tasks/Files hierarchy). Desktop packaging (Electron/Tauri) promoted to Phase A must-have — $249 model requires local storage, Supabase cloud creates inverted unit economics. Data layer abstraction: LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B, swappable backend, no codebase split. File attachments + image embedding promoted to must-have. Hashtags as virtual filters not folders. Convention-with-flexibility folder structure (opinionated default, permissive by nature). Obsidian import (file copy, not headline). Entry-to-file export. Setup wizard includes vault folder selection. Four new research parcels: Electron vs. Tauri (urgent), SQLite schema design, file watching, desktop auto-update + code signing. See CEO-Sessions/CEO-Session-4-Local-First-Knowledge-OS.md.*
+*Vision v4.5 — March 2, 2026*
+*v4.5: CEO Strategic Brief — Phase A pricing revised ($99 standard / $49 founding member). Volume-over-margin strategy. AI features deferred to Phase B. Sprint 21 (Local-First Storage) started — SQLite persistence, adapter completion, FTS5 search, local auth. Sprint sequencing resolved through Sprint 24+. Revenue projections updated for new pricing. See `Research/Agent-5-Docs/CEO-Strategic-Brief-Phase-A-Pricing.md`.*
+*v4.4: Sprint 20 completion — Tauri 2.0 selected, DataAdapter pattern implemented, SQLite schema designed, 18 E2E tests, lint cleanup. See `Sprints/Sprint-20-Local-First-Foundation.md`.*
+*v4.3: CEO Session #4 — Local-First Knowledge OS. Topics elevated to single source of truth for all content and files (Topics > Projects > Tasks/Files hierarchy). Desktop packaging (Electron/Tauri) promoted to Phase A must-have. Data layer abstraction: LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B, swappable backend, no codebase split. File attachments + image embedding promoted to must-have. Hashtags as virtual filters not folders. Convention-with-flexibility folder structure (opinionated default, permissive by nature). Obsidian import (file copy, not headline). Entry-to-file export. Setup wizard includes vault folder selection.*
 *v4.2: CEO Session #3 — Two-product architecture (Kaivoo Productivity + Kaivoo Orchestrator). Concierge scope boundary (productivity helper vs. builder). Modular toggle architecture (settings-driven module activation). Productization requirement (clean templates, no Kaivoo-specific content in shipped specs). Orchestrator as addon/integration for SMBs. Solo Builder target customer added. Phase B split into Orchestrator + One Workflow Cloud sections. Seven new research parcels assigned (messaging channel, agent productization, Solo Builder market, remote execution security, Orchestrator pricing, template design, multi-model overhead).*
 *v4.1: CEO Session #2 — Concierge Identity & Soul (naming, hatching, soul file). Concierge-as-Builder (personal customization Phase B, marketplace creation Phase C). 1st-party modules as marketplace templates (Page + Today Widget format). Phase B concierge-led onboarding wizard. New research parcels: marketplace model analysis (Agent 8), sandboxed module runtime (Agent 3).*
 *v4.0: CEO Session strategic pivot — Two-phase revenue strategy (Phase A: $249 productivity app, Phase B: One Workflow cloud subscription). New core principles: "Guided, not open-ended" and "Progressive autonomy." Autonomy Ladder (manual → concierge → autonomous). SMB focus, enterprise language dropped. White-label architecture. Skills/integration architecture elevated. Research parcels assigned. Competitive edge articulated.*

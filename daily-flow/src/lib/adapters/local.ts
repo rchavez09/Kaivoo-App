@@ -242,6 +242,20 @@ CREATE INDEX IF NOT EXISTS idx_routines_group ON routines(group_id);
 CREATE INDEX IF NOT EXISTS idx_routine_comp_date ON routine_completions(date);
 CREATE INDEX IF NOT EXISTS idx_meetings_time ON meetings(start_time);
 CREATE INDEX IF NOT EXISTS idx_topic_pages_topic ON topic_pages(topic_id);
+
+CREATE TABLE IF NOT EXISTS local_session (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS search_fts USING fts5(
+  title,
+  body,
+  entity_type UNINDEXED,
+  entity_id UNINDEXED,
+  metadata UNINDEXED,
+  tokenize='porter unicode61'
+);
 `;
 
 // ─── Database type ───
@@ -1114,6 +1128,11 @@ export class LocalDataAdapter implements DataAdapter {
     this.projectNotes = new LocalProjectNoteAdapter(db);
   }
 
+  /** Exposes the database for shared adapters (e.g., LocalSearchAdapter). */
+  get database(): TauriDatabase {
+    return this.db;
+  }
+
   /** No-op — initialization is handled by the static factory. */
   async initialize(): Promise<void> {}
 
@@ -1141,41 +1160,201 @@ export class LocalDataAdapter implements DataAdapter {
 }
 
 // ═══════════════════════════════════════════════════════
-// LocalAuthAdapter — offline/no-op auth for desktop
+// LocalAuthAdapter — SQLite-persisted offline auth for desktop (Sprint 21 P6)
 // ═══════════════════════════════════════════════════════
 
-const LOCAL_USER: AuthUser = { id: 'local-user', email: 'local@kaivoo.desktop' };
-
 export class LocalAuthAdapter implements AuthAdapter {
+  private user: AuthUser;
+
+  private constructor(user: AuthUser) {
+    this.user = user;
+  }
+
+  /** Create the auth adapter, loading or generating the local user identity from SQLite. */
+  static async create(db: TauriDatabase): Promise<LocalAuthAdapter> {
+    // Try to load existing user from local_session table
+    const rows = await db.select<{ value: string }[]>(
+      "SELECT value FROM local_session WHERE key = 'user'",
+    );
+    if (rows.length > 0) {
+      const user = JSON.parse(rows[0].value) as AuthUser;
+      return new LocalAuthAdapter(user);
+    }
+
+    // First launch: generate a persistent local identity
+    const user: AuthUser = { id: uuid(), email: 'local@kaivoo.desktop' };
+    await db.execute(
+      "INSERT INTO local_session (key, value) VALUES ('user', $1)",
+      [JSON.stringify(user)],
+    );
+    return new LocalAuthAdapter(user);
+  }
+
   async getUser(): Promise<AuthUser> {
-    return LOCAL_USER;
+    return this.user;
   }
   async getSession(): Promise<AuthSession> {
-    return { user: LOCAL_USER, accessToken: 'local' };
+    return { user: this.user, accessToken: 'local' };
   }
   async signInWithPassword(): Promise<AuthSession> {
-    return { user: LOCAL_USER, accessToken: 'local' };
+    return { user: this.user, accessToken: 'local' };
   }
   async signUp(): Promise<AuthSession> {
-    return { user: LOCAL_USER, accessToken: 'local' };
+    return { user: this.user, accessToken: 'local' };
   }
   async signInWithOAuth(): Promise<void> {}
   async signOut(): Promise<void> {}
   onAuthStateChange(callback: (event: string, session: AuthSession | null) => void): () => void {
-    // Fire initial session immediately
-    setTimeout(() => callback('INITIAL_SESSION', { user: LOCAL_USER, accessToken: 'local' }), 0);
+    const session = { user: this.user, accessToken: 'local' };
+    setTimeout(() => callback('INITIAL_SESSION', session), 0);
     return () => {};
   }
 }
 
 // ═══════════════════════════════════════════════════════
-// LocalSearchAdapter — stub (FTS5 deferred to Sprint 21)
+// LocalSearchAdapter — FTS5 full-text search (Sprint 21 P5)
 // ═══════════════════════════════════════════════════════
 
+/** Map entity types to their navigation routes (mirrors search.service.ts) */
+function getEntityPath(entityType: string, entityId: string, metadata: Record<string, unknown>): string {
+  switch (entityType) {
+    case 'task':
+    case 'subtask':
+      return '/tasks';
+    case 'note':
+      return '/notes';
+    case 'project':
+      return `/projects/${entityId}`;
+    case 'project_note':
+      return metadata.projectId ? `/projects/${metadata.projectId as string}` : '/projects';
+    case 'meeting':
+      return '/calendar';
+    case 'capture':
+      return '/notes';
+    case 'topic':
+      return `/topics/${entityId}`;
+    case 'topic_page':
+      return metadata.topicId ? `/topics/${metadata.topicId as string}/pages/${entityId}` : '/topics';
+    case 'habit':
+      return '/routines';
+    default:
+      return '/';
+  }
+}
+
 export class LocalSearchAdapter implements SearchAdapter {
-  async searchAll(): Promise<SearchResult[]> {
-    // TODO(Sprint 21): Implement FTS5 virtual table search
-    return [];
+  constructor(private db: TauriDatabase) {}
+
+  /** Rebuild the FTS5 index from all source tables. Called on app startup. */
+  async rebuildIndex(): Promise<void> {
+    await this.db.execute('DELETE FROM search_fts');
+
+    // Index tasks
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'task', id, title, COALESCE(description, ''), '{}'
+      FROM tasks
+    `);
+
+    // Index subtasks
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'subtask', id, title, '', json_object('taskId', task_id)
+      FROM subtasks
+    `);
+
+    // Index journal entries (mapped as 'note' to match web search)
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'note', id, COALESCE(label, 'Journal Entry'), content, json_object('date', date)
+      FROM journal_entries
+    `);
+
+    // Index captures
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'capture', id, SUBSTR(content, 1, 100), content, '{}'
+      FROM captures
+    `);
+
+    // Index topics
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'topic', id, name, COALESCE(description, ''), '{}'
+      FROM topics
+    `);
+
+    // Index topic pages
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'topic_page', id, name, COALESCE(description, ''), json_object('topicId', topic_id)
+      FROM topic_pages
+    `);
+
+    // Index project notes
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'project_note', id, SUBSTR(content, 1, 100), content, json_object('projectId', project_id)
+      FROM project_notes
+    `);
+
+    // Index projects
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'project', id, name, COALESCE(description, ''), '{}'
+      FROM projects
+    `);
+
+    // Index meetings
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'meeting', id, title, COALESCE(description, ''), '{}'
+      FROM meetings
+    `);
+
+    // Index active habits
+    await this.db.execute(`
+      INSERT INTO search_fts(entity_type, entity_id, title, body, metadata)
+      SELECT 'habit', id, name, '', '{}'
+      FROM routines WHERE is_archived = 0
+    `);
+  }
+
+  async searchAll(query: string, limit = 50): Promise<SearchResult[]> {
+    const trimmed = query.trim();
+    if (!trimmed) return [];
+
+    // Escape FTS5 special chars and add prefix matching for each word
+    const ftsQuery = trimmed
+      .split(/\s+/)
+      .map((word) => `"${word.replace(/"/g, '""')}"*`)
+      .join(' ');
+
+    const rows = await this.db.select<Array<Record<string, unknown>>>(
+      `SELECT entity_type, entity_id, title,
+              snippet(search_fts, 1, '**', '**', '...', 32) as preview,
+              rank
+       FROM search_fts
+       WHERE search_fts MATCH $1
+       ORDER BY rank
+       LIMIT $2`,
+      [ftsQuery, limit],
+    );
+
+    return rows.map((r) => {
+      const entityType = r.entity_type as string;
+      const entityId = r.entity_id as string;
+      const metadata = parseJSON(r.metadata as string, {});
+      return {
+        entityType,
+        entityId,
+        title: r.title as string,
+        preview: (r.preview as string) || '',
+        rank: r.rank as number,
+        metadata,
+        path: getEntityPath(entityType, entityId, metadata),
+      };
+    });
   }
 }
 

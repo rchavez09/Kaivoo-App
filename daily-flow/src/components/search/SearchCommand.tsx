@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSearchStore } from '@/stores/useSearchStore';
-import type { SearchResult } from '@/services/search.service';
+import { useAdapters, type SearchResult } from '@/lib/adapters';
 
 const ENTITY_CONFIG: Record<SearchResult['entityType'], { icon: typeof Search; label: string; color: string }> = {
   task: { icon: CheckSquare, label: 'Task', color: 'text-accent' },
@@ -49,6 +49,8 @@ export default function SearchCommand() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const { search: searchAdapter } = useAdapters();
 
   // P1-1 fix: individual selectors instead of full-store destructure
   const query = useSearchStore((s) => s.query);
@@ -123,16 +125,16 @@ export default function SearchCommand() {
     return () => document.removeEventListener('keydown', handleTab);
   }, [isOpen]);
 
-  // Debounced search
+  // Debounced search — delegates to SearchAdapter via adapter layer
   const handleQueryChange = useCallback(
     (value: string) => {
       setQuery(value);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
-        void search(value);
+        void search(value, (q) => searchAdapter.searchAll(q));
       }, 300);
     },
-    [setQuery, search],
+    [setQuery, search, searchAdapter],
   );
 
   // Navigate to result
