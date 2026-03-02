@@ -124,9 +124,10 @@ function TreeNode({ node, depth, expanded, onToggle, onNavigate, searchQuery }: 
             onNavigate(node);
           }
         }}
-        className="group -mx-2 flex w-[calc(100%+16px)] items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-secondary/50"
-        style={{ paddingLeft: `${depth * 20 + 8}px` }}
+        className="group -mx-2 flex w-[calc(100%+16px)] items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        style={{ paddingLeft: `${depth * 24 + 8}px` }}
         aria-expanded={node.isDirectory ? isExpanded : undefined}
+        aria-label={node.isDirectory ? `${isExpanded ? 'Collapse' : 'Expand'} ${node.name} folder` : node.name}
       >
         {/* Expand/collapse chevron */}
         {node.isDirectory ? (
@@ -340,6 +341,7 @@ const Vault = () => {
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search vault"
           />
         </div>
 

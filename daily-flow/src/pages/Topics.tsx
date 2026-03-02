@@ -301,6 +301,7 @@ const Topics = () => {
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search topics and pages"
           />
         </div>
 

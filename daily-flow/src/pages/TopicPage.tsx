@@ -165,10 +165,13 @@ const TopicPage = () => {
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-destructive"
+                aria-label={`Delete page ${displayName}`}
                 onClick={() => {
-                  void deleteTopicPage(pageId);
-                  toast.success(`Deleted page "${displayName}"`);
-                  navigate(`/topics/${topicId}`);
+                  if (window.confirm(`Delete "${displayName}"? This cannot be undone.`)) {
+                    void deleteTopicPage(pageId);
+                    toast.success(`Deleted page "${displayName}"`);
+                    navigate(`/topics/${topicId}`);
+                  }
                 }}
               >
                 <Trash2 className="h-4 w-4" />
