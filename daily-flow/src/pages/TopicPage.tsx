@@ -34,6 +34,16 @@ const TopicPage = () => {
   const topic = topics.find((t) => t.id === topicId);
   const page = pageId ? topicPages.find((p) => p.id === pageId) : null;
 
+  // Build parent chain for breadcrumbs (walk up parentId)
+  const parentChain: typeof topics = [];
+  if (topic) {
+    let current = topics.find((t) => t.id === topic.parentId);
+    while (current) {
+      parentChain.unshift(current);
+      current = topics.find((t) => t.id === current!.parentId);
+    }
+  }
+
   // Get pages for this topic (sorted by most recent first)
   const pagesInTopic = topicPages
     .filter((p) => p.topicId === topicId)
@@ -79,6 +89,14 @@ const TopicPage = () => {
             <Link to="/topics" className="transition-colors hover:text-foreground">
               Topics
             </Link>
+            {parentChain.map((parent) => (
+              <span key={parent.id} className="contents">
+                <ChevronLeft className="h-4 w-4 rotate-180" aria-hidden="true" />
+                <Link to={`/topics/${parent.id}`} className="transition-colors hover:text-foreground">
+                  {parent.name}
+                </Link>
+              </span>
+            ))}
             <ChevronLeft className="h-4 w-4 rotate-180" aria-hidden="true" />
             {isPage && topic && (
               <>

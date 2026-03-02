@@ -13,6 +13,7 @@ import {
   BookOpen,
   Briefcase,
   Repeat,
+  HardDrive,
 } from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 import { cn } from '@/lib/utils';
@@ -59,6 +60,11 @@ const navItems = [
     path: '/calendar',
     label: 'Calendar',
     icon: Calendar,
+  },
+  {
+    path: '/vault',
+    label: 'Vault',
+    icon: HardDrive,
   },
   {
     path: '/topics',

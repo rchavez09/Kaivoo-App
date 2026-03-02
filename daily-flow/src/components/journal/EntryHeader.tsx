@@ -189,8 +189,7 @@ const EntryHeader = ({ node, updateAttributes, editor, getPos: _getPos }: NodeVi
   const overflowCount = Math.max(0, tags.length - 3);
   const isPage = topicPath?.includes('/');
 
-  // Filter out Daily Notes from topic picker
-  const selectableTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
+  const selectableTopics = topics;
 
   return (
     <NodeViewWrapper

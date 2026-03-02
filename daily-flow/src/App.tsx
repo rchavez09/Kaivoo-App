@@ -16,6 +16,7 @@ const Tasks = lazy(() => import('./pages/Tasks'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const Topics = lazy(() => import('./pages/Topics'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
+const Vault = lazy(() => import('./pages/Vault'));
 const Insights = lazy(() => import('./pages/Insights'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const JournalPage = lazy(() => import('./pages/JournalPage'));
@@ -119,6 +120,14 @@ const App = () => (
                     element={
                       <ProtectedPage>
                         <CalendarPage />
+                      </ProtectedPage>
+                    }
+                  />
+                  <Route
+                    path="/vault"
+                    element={
+                      <ProtectedPage>
+                        <Vault />
                       </ProtectedPage>
                     }
                   />
