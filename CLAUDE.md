@@ -8,8 +8,11 @@
 
 ## Agent System
 
+### The CEO
+`Agents/CEO.md` — Strategic layer above all operations. Activated with **"CEO mode"** prefix. Brainstorms market opportunities, challenges assumptions, synthesizes scattered ideas into strategic themes, and hands direction to the Director. This is the strategy room — not for sprint planning.
+
 ### The Director
-`Agents/Director.md` — The orchestrator. Sits above all departments. Owns the product vision and coordinates sprint planning. When you need to plan a sprint or understand product direction, start here.
+`Agents/Director.md` — The operational orchestrator (COO role). Activated with **"Director mode"** prefix, or by default for sprint planning. Sits above all departments. Translates strategic direction from CEO sessions into executable sprints. When you need to plan a sprint or coordinate agents, start here.
 
 ### Vision
 `Agents/Vision.md` — The North Star. A living roadmap that all sprints lead toward. Updated as phases complete.
@@ -49,7 +52,9 @@ npm run typecheck    # TypeScript type check (tsc --noEmit)
 
 **Pre-commit quality check:** `cd daily-flow && npm run lint && npm run typecheck && npm run test && npm run build`
 
-**Deploy to Netlify:** `cd daily-flow && npm run build && npx netlify-cli deploy --prod --dir=dist --site de0f2e66-5652-4a86-952c-9ee803e80893`
+**Deploy to production:** Merge PR to `main` on GitHub → Netlify auto-deploys via `netlify.toml`
+**Deploy previews:** Open PR from sprint branch → Netlify generates a preview URL automatically
+**Manual deploy (fallback only):** `cd daily-flow && npm run build && npx netlify-cli deploy --prod --dir=dist --site de0f2e66-5652-4a86-952c-9ee803e80893`
 
 ## Key Rules
 
@@ -59,6 +64,7 @@ npm run typecheck    # TypeScript type check (tsc --noEmit)
 4. **Sprint files** are never deleted — they are historical records
 5. **Agent documents** are archived (`ARCHIVED-` prefix), never deleted
 6. **The Director** orchestrates all sprint planning through `Vision.md` and `Sprint-Protocol.md`
-7. **Sprint work** happens on dedicated branches (`sprint/N-theme`), never directly on `main` — see Sprint Protocol v1.1
-8. **Before merging to main**, Agent 7 (code) AND Agent 11 (feature integrity) AND all 3 design agents must pass
-9. **For UI sprints**, design agents produce pre-implementation specs (Gate 1) BEFORE Agent 2 starts coding new UI surfaces
+7. **Sprint work** happens on dedicated branches (`sprint/N-theme`), never directly on `main` — see Sprint Protocol v1.7
+8. **Before merging to main**, Agent 7 (code) AND Agent 11 (feature integrity) AND all 3 design agents AND E2E tester must pass
+9. **Production deploys** happen automatically when PRs merge to `main` via Netlify — no manual deploys
+10. **Sandbox testing** uses Netlify deploy preview URLs (accessible from any device), not localhost

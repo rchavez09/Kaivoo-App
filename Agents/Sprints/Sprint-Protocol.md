@@ -1,7 +1,7 @@
 # Sprint Protocol — Kaivoo Agent Coordination System
 
-**Version:** 1.6
-**Last Updated:** February 26, 2026
+**Version:** 1.7
+**Last Updated:** March 1, 2026
 
 ---
 
@@ -40,36 +40,72 @@ LIFECYCLE:
   3. Sprint completes → Run deterministic checks (lint, typecheck, test, build)
   4. Agent 7 code audit + Agent 11 feature integrity check on the branch
   5. Fix all P0 issues from gates before proceeding
-  6. SANDBOX REVIEW: Start dev server on sprint branch (npm run dev)
-     → User reviews the running app and approves UX
+  6. Open PR from sprint branch → main on GitHub
+     → CI runs automatically (lint, typecheck, test, build)
+     → Netlify generates a deploy preview URL (unique per PR)
+  7. E2E TESTING: AI-powered E2E tester runs against the deploy preview URL
+     → Follows test plan derived from sprint DoD + Feature Bible
+     → Produces pass/fail report with screenshots and findings
+  8. SANDBOX REVIEW: User reviews the deploy preview URL from any device
+     → No localhost required — test from phone, laptop, anywhere
+     → User approves UX or requests changes
      → This is a blocking gate — do NOT merge without user approval
-  7. Sprint retrospective section added to sprint file
-  8. Merge to main: git merge --no-ff sprint/N-theme-slug
-  9. Tag main: git tag post-sprint-N
-  10. Deploy to production (Netlify)
-  11. If sprint is rejected → branch is abandoned, main is untouched
+  9. Sprint retrospective section added to sprint file
+  10. Merge PR to main on GitHub
+     → Netlify auto-deploys to production (no manual deploy step)
+  11. Tag main: git tag post-sprint-N
+  12. If sprint is rejected → PR is closed, branch is abandoned, main is untouched
 
 RULES:
   - NEVER commit sprint work directly to main
+  - NEVER manually deploy to Netlify — production deploys via GitHub merge only
   - Tag main after every successful sprint merge: post-sprint-N
-  - If a sprint breaks core functionality, the user can revert:
-      git checkout main (returns to last approved state)
   - Sprint branches are preserved after merge (never deleted)
   - Hotfix branches are for critical fixes between sprints
+
+SAFETY:
+  - Deploy previews are ISOLATED from production — they cannot break live
+  - Only merges to main trigger production deployment
+  - Tags (post-sprint-N) provide known-good rollback points
+  - If a merged sprint breaks production:
+      1. git revert the merge commit → push → Netlify auto-deploys reverted state
+      2. Or: git reset --hard post-sprint-(N-1) → force push (last resort)
+  - Sprint branches are never deleted — you can always inspect what was merged
+  - GitHub PR history provides full audit trail of what was reviewed and approved
 ```
 
 ### Pre-Merge Checklist (Sprint Branch → Main)
 
-Before any sprint branch merges to main, ALL of the following must pass:
+Before any sprint branch PR merges to main, ALL of the following must pass:
 
 ```
 □ Deterministic checks pass: npm run lint && npm run typecheck && npm run test && npm run build
+□ GitHub Actions CI passes on the PR (automated — same checks as above)
 □ Agent 7 code audit completed (no unresolved P0 issues)
 □ Agent 11 feature integrity check passed (no regressions)
 □ 3-agent design review completed (for UI sprints): Visual Design + Accessibility & Theming + UX Completeness — all PASS, no unresolved P0 issues. Design review happens RIGHT BEFORE sandbox.
-□ SANDBOX: Dev server started on sprint branch, user has reviewed the running app and approved UX
+□ E2E TEST: AI-powered E2E tester has run against the Netlify deploy preview URL and passed
+□ SANDBOX: User has reviewed the Netlify deploy preview URL and approved UX (can test from any device)
 □ Sprint retrospective section added to sprint file (MANDATORY — do NOT merge without it)
 □ All sprint files committed to the sprint branch
+```
+
+### Deployment Pipeline
+
+```
+GitHub repo (rchavez09/Kaivoo-App)
+     │
+     ├── Push to sprint/* branch → CI runs (lint, typecheck, test, build)
+     │
+     ├── PR opened to main → CI runs + Netlify deploy preview generated
+     │                        Preview URL: deploy-preview-{N}--{site}.netlify.app
+     │                        Accessible from any device (phone, laptop, etc.)
+     │
+     └── PR merged to main → Netlify auto-deploys to production
+                              No manual deployment step required
+
+Config: netlify.toml (repo root) — base=daily-flow, publish=dist, Node 20
+Env vars: Set in Netlify dashboard (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY)
 ```
 
 ### Recovery Protocol
@@ -231,22 +267,29 @@ Common document types:
    - **UX Completeness Agent:** 5-step review (States, Navigation, Input Patterns, Edit-in-Place, Anti-Patterns)
    Each agent produces a separate verdict document. All 3 must PASS. No unresolved P0 issues allowed before proceeding.
 6. Fix all P0 issues from design review
-7. **SANDBOX REVIEW:** Start dev server on sprint branch (`npm run dev`)
-   - User reviews the running application in their browser
+7. **OPEN PR:** Push sprint branch to GitHub, open PR to main
+   - GitHub Actions CI runs automatically (lint, typecheck, test, build)
+   - Netlify generates a deploy preview URL for the PR
+   - CI must pass before proceeding
+8. **E2E TEST:** AI-powered E2E tester runs against the Netlify deploy preview URL
+   - Receives test plan from sprint DoD + relevant Feature Bible sections
+   - Tests critical user flows, reports findings with screenshots
+   - Must PASS before user sandbox review
+9. **SANDBOX REVIEW:** User reviews the Netlify deploy preview URL
+   - Accessible from any device — phone, laptop, coffee shop, anywhere
    - User approves UX or requests changes
    - This is a **blocking gate** — do NOT proceed without user approval
-8. **MANDATORY: Add `## Sprint Retrospective` section to the sprint file BEFORE merging.**
-   This is a blocking requirement — no merge without a retrospective. Include:
-   - Completed date
-   - Parcels completed (X/Y)
-   - What was delivered (brief summary)
-   - Verification results (build, typecheck, tests, agent gates)
-   - Deferred items
-   - Key learnings
-9. Merge to main: `git merge --no-ff sprint/N-theme-slug`
-10. Tag main: `git tag post-sprint-N`
-11. Deploy to production (Netlify)
-12. Director updates `Vision.md` to reflect progress
+10. **MANDATORY: Add `## Sprint Retrospective` section to the sprint file BEFORE merging.**
+    This is a blocking requirement — no merge without a retrospective. Include:
+    - Completed date
+    - Parcels completed (X/Y)
+    - What was delivered (brief summary)
+    - Verification results (build, typecheck, tests, agent gates)
+    - Deferred items
+    - Key learnings
+11. Merge PR to main on GitHub (Netlify auto-deploys to production)
+12. Tag main: `git tag post-sprint-N`
+13. Director updates `Vision.md` to reflect progress
 
 ### Phase 5: Archival
 
@@ -344,21 +387,27 @@ Fix P0 issues from code/integrity gates
 Fix P0 issues from design review
          |
          v
-SANDBOX REVIEW: User reviews running app on sprint branch
+Open PR to main → CI runs + Netlify deploy preview generated
+         |
+         v
+E2E TEST: AI tester runs against deploy preview URL
+         |
+         v
+SANDBOX REVIEW: User reviews deploy preview URL (any device)
          |
          v
 Sprint retrospective added to sprint file
          |
          v
-Merge to main + tag + deploy
+Merge PR to main → Netlify auto-deploys to production
          |
          v
-Vision.md updated (mark phase progress)
+Tag main (post-sprint-N) + Vision.md updated
 ```
 
 ---
 
-*Sprint Protocol v1.6 — February 26, 2026*
+*Sprint Protocol v1.7 — March 1, 2026*
 *v1.0: Initial protocol*
 *v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
 *v1.2: Explicit sandbox review step in lifecycle + pre-merge checklist. Deterministic checks before agent gates.*
@@ -366,3 +415,4 @@ Vision.md updated (mark phase progress)
 *v1.4: Mandatory Design Agent gate in Phase 4 (5-step review + dark mode pass). Design Agent added to Phase 1 (screen specs for new UI). Pre-merge checklist updated. Sprint 10 stabilization drove this change.*
 *v1.5: Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Added pre-implementation design gate (Gate 1) in Phase 3. Phase 4 now requires 3 independent design verdicts. Sprint 12 restructuring per Agent 5 research.*
 *v1.6: Removed pre-implementation design gate (Gate 1). Design review now happens right before sandbox preview in Phase 4. Cleaner flow: build → code review → integrity check → design review → sandbox.*
+*v1.7: Deployment pipeline overhaul. GitHub → Netlify auto-deploy (netlify.toml config). Sandbox replaced localhost with Netlify deploy preview URLs (test from any device). Added E2E testing gate (AI-powered browser testing against preview URL). Added Deployment Pipeline section. Strengthened safety/rollback guarantees. Manual Netlify deploys eliminated.*

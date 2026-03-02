@@ -1,0 +1,24 @@
+# Netlify Configuration — Kaivoo App
+# Auto-deploys from GitHub: main → production, PRs → deploy previews
+
+[build]
+  base = "daily-flow"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA routing — all paths serve index.html (React Router handles routing)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Deploy previews for sprint branch PRs — test from any device
+[context.deploy-preview]
+  command = "npm run build"
+
+# Branch deploys disabled — only PRs get previews, not every push
+[context.branch-deploy]
+  command = "echo 'Branch deploys disabled — use PR deploy previews instead' && exit 1"
