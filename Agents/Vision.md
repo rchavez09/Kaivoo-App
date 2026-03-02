@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 4.3
-**Last Updated:** March 1, 2026
+**Version:** 4.4
+**Last Updated:** March 2, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -471,8 +471,8 @@ These run in parallel with sprint work, not blocking it.
 | Orchestrator pricing model | Agent 8 | Subscription vs. usage-based vs. hybrid pricing for Product 2 | PLANNED |
 | Productization template design | Agent 3 + Agent 8 | What does a blank agent system look like for a new user? Guided not empty. First-run wizard design | PLANNED |
 | Multi-model orchestration overhead | Agent 5 | Users pay API costs — what's the platform orchestration overhead on top? | PLANNED |
-| Electron vs. Tauri evaluation | Agent 9 | Desktop framework for Phase A — performance, bundle size, file system API, cross-platform maturity, Rust vs. Node | **URGENT** |
-| SQLite schema + adapter interface | Agent 3 | Local-first schema design. Mirror Supabase or redesign? Adapter pattern for swappable backend. | PLANNED |
+| Electron vs. Tauri evaluation | Agent 9 | Desktop framework for Phase A — performance, bundle size, file system API, cross-platform maturity, Rust vs. Node | **DONE (Sprint 20)** — Tauri 2.0 selected |
+| SQLite schema + adapter interface | Agent 3 | Local-first schema design. Mirror Supabase or redesign? Adapter pattern for swappable backend. | **DONE (Sprint 20)** — DataAdapter pattern implemented |
 | File watching mechanism | Agent 3 | How to detect manual file changes on disk for "permissive by nature" design | PLANNED |
 | Desktop auto-update + code signing | Agent 9 | Update distribution mechanism, Apple notarization, Windows signing | PLANNED |
 
@@ -481,8 +481,12 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (completing pre-ship features)
-**Active sprint:** None — Sprint 19 planning pending
-**Last completed:** Sprint 18 (Search & Week View) — Global FTS, command palette, calendar week view, customizable keyboard shortcuts
+**Active sprint:** None — Sprint 21 planning pending
+**Last completed:** Sprint 20 (Local-First Foundation) — DataAdapter pattern, Tauri 2.0 scaffold, SQLite schema, E2E expansion
+
+**Sprint 20 delivered:** DataAdapter abstraction layer (4 top-level interfaces, 15 entity sub-adapters), runtime switching via `isTauri()`. LocalDataAdapter with static factory pattern + SQLite schema for all 13 entities. SupabaseDataAdapter wrapping existing queries. AdapterProvider React context with Suspense boundary. Tauri 2.0 scaffold (Cargo.toml, plugins: sql/fs/shell, capabilities, RGBA icon generation). 18 Playwright E2E tests. Sprint Protocol v1.8 (living sprint file + E2E gate). See `Sprints/Sprint-20-Local-First-Foundation.md`.
+
+**Sprint 19 delivered:** Topics restructure (parent-child topic pages, inline edit, emoji picker), bundle optimization (8 vendor chunks via Vite manualChunks), tech debt cleanup. See `Sprints/Sprint-19-Topics-Quality.md`.
 
 **Sprint 18 delivered:** Supabase Postgres FTS with GIN indexes across 10 tables, `search_all` RPC with `websearch_to_tsquery`, SearchCommand command palette (Cmd+K), SearchTrigger bar on Today page, Calendar week view (7-column hourly grid, 3-mode switcher), customizable keyboard shortcuts system (Settings UI, shortcut recorder, browser conflict validation). See `Sprints/Sprint-18-Search-Week-View.md`.
 
@@ -535,13 +539,16 @@ These run in parallel with sprint work, not blocking it.
 - ~~Codebase split~~ → **No split until Phase A ships** — same React frontend, same repo, adapter pattern handles local vs. cloud.
 - ~~Entry export~~ → **Export to file** — journal entries/captures can be exported as .md files to chosen Topics folder location.
 
+**Key decisions resolved (Sprint 20 — March 2, 2026):**
+- ~~Electron vs. Tauri~~ → **Tauri 2.0** — 3-10MB bundles vs. 150MB+ Electron, Rust backend, native system tray, plugin ecosystem. Scaffold complete, first build compiled 539 Rust crates. See `Sprints/Sprint-20-Local-First-Foundation.md`.
+- ~~SQLite schema design~~ → **Mirror Supabase with camelCase** — 13-entity SQLite schema mirroring Supabase tables. DataAdapter abstraction with `LocalDataAdapter` (SQLite) and `SupabaseDataAdapter` (Supabase). Runtime switching via `isTauri()`. One codebase, swappable backend.
+- ~~Data architecture for local~~ → **Implemented** — DataAdapter pattern with 4 top-level interfaces (DataAdapter, AuthAdapter, SearchAdapter, StorageAdapter) and 15 entity sub-adapters. Static factory pattern eliminates uninitialized state.
+
 **Key decisions ahead:**
-- **Electron vs. Tauri** — Agent 9 to evaluate urgently. Blocks desktop packaging and all local-first features.
-- **SQLite schema design** — Agent 3 to design local schema and adapter interface. Mirror Supabase or redesign for local-first?
 - **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
 - **Desktop auto-update** — How do users get updates for the desktop app? Agent 9.
 - **Code signing** — Apple notarization + Windows signing. Agent 9.
-- **Phase A sprint sequencing** — Which pre-ship features to group into Sprint 19, 20, etc. (Director to plan)
+- **Phase A sprint sequencing** — Which pre-ship features to group into Sprint 21, 22, etc. (Director to plan)
 - **Phase B subscription pricing** — Pending research on token costs, competitive pricing, addon model
 - **Skills store architecture** — MCP-based vs. custom plugin API (Agent 3 to evaluate during Phase B)
 - **Sandboxed module runtime** — How user-built modules run safely (iframe, Web Components, controlled runtime) (Agent 3)
