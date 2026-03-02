@@ -45,36 +45,36 @@
 
   --radius: 1rem;
   /* 16px */
-  --font-sans: "Inter", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --font-sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
 
   /* GlowingEffect: required var */
   --black: #000000;
 
   /* === Ocean Gradient System (Kaivoo Design System v2.0) === */
-  --ocean-foam: #D4EDE4;
-  --ocean-shallow: #7EC8C8;
-  --ocean-surface: #3B8C8C;
-  --ocean-mid: #2B6E8A;
-  --ocean-deep: #1E4D7A;
-  --ocean-twilight: #1E3364;
-  --ocean-abyss: #2A1B4E;
-  --ocean-trench: #1A1232;
+  --ocean-foam: #d4ede4;
+  --ocean-shallow: #7ec8c8;
+  --ocean-surface: #3b8c8c;
+  --ocean-mid: #2b6e8a;
+  --ocean-deep: #1e4d7a;
+  --ocean-twilight: #1e3364;
+  --ocean-abyss: #2a1b4e;
+  --ocean-trench: #1a1232;
 
   /* Named gradients */
   --gradient-depth-full: linear-gradient(
     90deg,
-    #D4EDE4 0%,
-    #7EC8C8 20%,
-    #3B8C8C 40%,
-    #2B6E8A 55%,
-    #1E4D7A 70%,
-    #1E3364 85%,
-    #2A1B4E 100%
+    #d4ede4 0%,
+    #7ec8c8 20%,
+    #3b8c8c 40%,
+    #2b6e8a 55%,
+    #1e4d7a 70%,
+    #1e3364 85%,
+    #2a1b4e 100%
   );
-  --gradient-depth-surface: linear-gradient(90deg, #D4EDE4 0%, #7EC8C8 40%, #3B8C8C 100%);
-  --gradient-depth-deep: linear-gradient(90deg, #3B8C8C 0%, #1E4D7A 50%, #2A1B4E 100%);
-  --gradient-depth-abyss: linear-gradient(90deg, #1E4D7A 0%, #1E3364 40%, #2A1B4E 70%, #1A1232 100%);
-  --gradient-chart-fill: linear-gradient(180deg, rgba(59, 140, 140, 0.20) 0%, rgba(30, 77, 122, 0.05) 100%);
+  --gradient-depth-surface: linear-gradient(90deg, #d4ede4 0%, #7ec8c8 40%, #3b8c8c 100%);
+  --gradient-depth-deep: linear-gradient(90deg, #3b8c8c 0%, #1e4d7a 50%, #2a1b4e 100%);
+  --gradient-depth-abyss: linear-gradient(90deg, #1e4d7a 0%, #1e3364 40%, #2a1b4e 70%, #1a1232 100%);
+  --gradient-chart-fill: linear-gradient(180deg, rgba(59, 140, 140, 0.2) 0%, rgba(30, 77, 122, 0.05) 100%);
 
   --spacing-sm: 0.5rem;
   /* 8px */
@@ -108,9 +108,22 @@
   /* Mist — slightly more visible than global border */
   --sidebar-ring: 180 41% 39%;
 
+  /* === Task Drawer Panel — Light Mode === */
+  --panel-task-from: 36 38% 97%;
+  /* Warm Sand */
+  --panel-task-to: 0 0% 100%;
+  /* White */
+  --panel-task-accent: 180 41% 39%;
+  /* Resonance Teal */
+  --panel-task-section: 220 14% 96%;
+  /* Cloud-light */
+
+  /* === Elevated Surface (for opacity-safe backgrounds) === */
+  --surface-elevated: 220 14% 93%;
+
   /* === Widget Shadows — Light Mode === */
   --widget-shadow: 0 1px 4px rgba(26, 31, 46, 0.06), 0 1px 2px rgba(26, 31, 46, 0.04);
-  --widget-shadow-hover: 0 4px 16px rgba(26, 31, 46, 0.10), 0 2px 6px rgba(26, 31, 46, 0.06);
+  --widget-shadow-hover: 0 4px 16px rgba(26, 31, 46, 0.1), 0 2px 6px rgba(26, 31, 46, 0.06);
 }
 
 .dark {
@@ -175,9 +188,22 @@
   /* Visible border within sidebar depth */
   --sidebar-ring: 180 43% 46%;
 
+  /* === Task Drawer Panel — Dark Mode === */
+  --panel-task-from: 245 35% 15%;
+  /* Card layer */
+  --panel-task-to: 249 30% 11%;
+  /* Slightly deeper */
+  --panel-task-accent: 180 43% 46%;
+  /* Teal brightened */
+  --panel-task-section: 246 34% 19%;
+  /* Elevated layer */
+
+  /* === Elevated Surface — Dark Mode === */
+  --surface-elevated: 246 34% 22%;
+
   /* === Widget Shadows — Dark Mode === */
   --widget-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.35);
-  --widget-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.40);
+  --widget-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -220,8 +246,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "calt", "tnum", "case";
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: 'calt', 'tnum', 'case';
   }
 
   h1 {
@@ -259,7 +285,7 @@
 
 @layer components {
   .widget-card {
-    @apply bg-card rounded-2xl p-5 transition-all duration-200 border border-border/50;
+    @apply rounded-2xl border border-border/50 bg-card p-6 transition-all duration-200;
     box-shadow: var(--widget-shadow);
   }
 
@@ -268,43 +294,43 @@
   }
 
   .widget-header {
-    @apply flex items-center justify-between mb-4;
+    @apply mb-4 flex items-center justify-between;
   }
 
   .widget-title {
-    @apply text-sm font-semibold text-muted-foreground uppercase tracking-wider;
+    @apply text-sm font-semibold uppercase tracking-wider text-muted-foreground;
   }
 
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground transition-all duration-200 ease-out;
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sidebar-foreground transition-all duration-200 ease-out;
   }
 
   .nav-item:hover {
-    @apply bg-sidebar-accent text-sidebar-accent-foreground translate-x-0.5;
+    @apply translate-x-0.5 bg-sidebar-accent text-sidebar-accent-foreground;
   }
 
   .nav-item.active {
-    @apply bg-primary/10 text-primary font-medium shadow-sm;
+    @apply bg-primary/10 font-medium text-primary shadow-sm;
     box-shadow: inset 3px 0 0 hsl(var(--primary));
   }
 
   .tag-chip {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 cursor-pointer transition-colors hover:bg-primary/20;
+    @apply inline-flex cursor-pointer items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/20;
   }
 
   .topic-chip {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-accent/20 text-accent-foreground border border-accent/30 cursor-pointer transition-colors hover:bg-accent/30;
+    @apply inline-flex cursor-pointer items-center gap-1 rounded-lg border border-accent/30 bg-accent/20 px-2.5 py-1 text-xs font-medium text-accent-foreground transition-colors hover:bg-accent/30;
   }
 
   /* Glassmorphism effect for special cards */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-md rounded-2xl border border-white/20;
+    @apply rounded-2xl border border-white/20 bg-card/80 backdrop-blur-md;
     box-shadow: var(--widget-shadow);
   }
 
   /* Progress bar styling */
   .progress-bar {
-    @apply h-2 rounded-full bg-muted overflow-hidden;
+    @apply h-2 overflow-hidden rounded-full bg-muted;
   }
 
   .progress-bar-fill {
@@ -349,5 +375,20 @@
   /* Gradient text utility */
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+}
+
+/* Accessibility: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
   }
 }

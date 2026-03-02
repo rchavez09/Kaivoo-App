@@ -35,13 +35,13 @@ const CapturesList = memo(({ dateStr, captures, onEditCapture }: CapturesListPro
       <h3 className="widget-title mb-3">Captures</h3>
 
       {/* Quick capture input */}
-      <div className="flex gap-2 mb-3">
+      <div className="mb-3 flex gap-2">
         <Input
           value={newCapture}
-          onChange={e => setNewCapture(e.target.value)}
+          onChange={(e) => setNewCapture(e.target.value)}
           placeholder="Quick capture..."
           className="h-8 text-sm"
-          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         />
         <Button
           size="icon"
@@ -55,22 +55,18 @@ const CapturesList = memo(({ dateStr, captures, onEditCapture }: CapturesListPro
       </div>
 
       {/* Captures list */}
-      {captures.length === 0 && (
-        <p className="text-xs text-muted-foreground text-center py-3">No captures today</p>
-      )}
+      {captures.length === 0 && <p className="py-3 text-center text-xs text-muted-foreground">No captures today</p>}
       <div className="space-y-1">
-        {captures.map(c => (
+        {captures.map((c) => (
           <button
             key={c.id}
             onClick={() => onEditCapture?.(c)}
-            className="w-full text-left flex items-start gap-2 p-2 rounded-lg hover:bg-accent/10 transition-colors"
+            className="flex w-full items-start gap-2 rounded-lg p-2 text-left transition-colors hover:bg-accent/10"
           >
-            <Inbox className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm truncate">{c.content}</p>
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(c.createdAt), 'h:mm a')}
-              </span>
+            <Inbox className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm">{c.content}</p>
+              <span className="text-xs text-muted-foreground">{format(new Date(c.createdAt), 'h:mm a')}</span>
             </div>
           </button>
         ))}

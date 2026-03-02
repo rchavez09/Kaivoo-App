@@ -1,25 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { 
-  Calendar, Clock, MapPin, Users, Trash2, Video, 
-  Plus, X as XIcon, FileText, Check
-} from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Trash2, Video, Plus, X as XIcon, FileText, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { toast } from 'sonner';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -31,11 +19,11 @@ interface MeetingDetailsDrawerProps {
 }
 
 const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsDrawerProps) => {
-  const { meetings } = useKaivooStore();
+  const meetings = useKaivooStore((s) => s.meetings);
   const { updateMeeting, deleteMeeting } = useKaivooActions();
 
-  const meeting = useMemo(() => meetings.find(m => m.id === meetingId), [meetings, meetingId]);
-  
+  const meeting = useMemo(() => meetings.find((m) => m.id === meetingId), [meetings, meetingId]);
+
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
@@ -58,9 +46,9 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
   if (!meeting) return null;
 
   const showSavedFeedback = () => {
-    toast.success('Changes saved', { 
+    toast.success('Changes saved', {
       duration: 1500,
-      icon: <Check className="w-4 h-4" />,
+      icon: <Check className="h-4 w-4" />,
     });
   };
 
@@ -113,13 +101,13 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
       // Update both start and end times with new date
       const [startHours, startMinutes] = startTime.split(':').map(Number);
       const [endHours, endMinutes] = endTime.split(':').map(Number);
-      
+
       const newStartTime = new Date(date);
       newStartTime.setHours(startHours || 9, startMinutes || 0, 0, 0);
-      
+
       const newEndTime = new Date(date);
       newEndTime.setHours(endHours || 10, endMinutes || 0, 0, 0);
-      
+
       updateMeeting(meeting.id, { startTime: newStartTime, endTime: newEndTime });
       showSavedFeedback();
     }
@@ -138,7 +126,7 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
 
   const handleRemoveAttendee = (attendee: string) => {
     const attendees = meeting.attendees || [];
-    updateMeeting(meeting.id, { attendees: attendees.filter(a => a !== attendee) });
+    updateMeeting(meeting.id, { attendees: attendees.filter((a) => a !== attendee) });
     showSavedFeedback();
   };
 
@@ -151,39 +139,45 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-gradient-to-b from-panel-meeting-from to-panel-meeting-to border-l-4 border-panel-meeting-accent/30">
-        <SheetHeader className="space-y-4 pb-4 mb-2">
+      <SheetContent className="w-full overflow-y-auto border-l-4 border-panel-meeting-accent/30 bg-gradient-to-b from-panel-meeting-from to-panel-meeting-to sm:max-w-lg">
+        <SheetHeader className="mb-2 space-y-4 pb-4">
           <SheetTitle className="sr-only">Edit Meeting</SheetTitle>
           <div className="flex items-start gap-2">
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={handleTitleBlur}
-              className="text-lg font-semibold border-0 px-0 focus-visible:ring-0 shadow-none flex-1 bg-transparent"
+              className="flex-1 border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0"
               placeholder="Meeting title"
             />
           </div>
-          
+
           {/* Date & Time display */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="w-4 h-4" />
+            <Calendar className="h-4 w-4" />
             <span>{format(meeting.startTime, 'EEEE, MMMM d, yyyy')}</span>
             <span className="mx-1">•</span>
-            <Clock className="w-4 h-4" />
-            <span>{format(meeting.startTime, 'h:mm a')} - {format(meeting.endTime, 'h:mm a')}</span>
+            <Clock className="h-4 w-4" />
+            <span>
+              {format(meeting.startTime, 'h:mm a')} - {format(meeting.endTime, 'h:mm a')}
+            </span>
           </div>
         </SheetHeader>
 
-        <div className="py-6 space-y-4">
+        <div className="space-y-4 py-6">
           {/* Date Picker */}
-          <div className="bg-panel-meeting-section rounded-xl p-4 space-y-2 shadow-sm">
-            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
+          <div className="space-y-2 rounded-xl bg-panel-meeting-section p-4 shadow-sm">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5" />
               Date
             </label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full justify-start text-left font-normal bg-card/50 hover:bg-card">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start bg-card/50 text-left font-normal hover:bg-card"
+                >
                   {selectedDate ? format(selectedDate, 'PPP') : 'Pick a date'}
                 </Button>
               </PopoverTrigger>
@@ -193,16 +187,16 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
                   selected={selectedDate}
                   onSelect={handleDateChange}
                   initialFocus
-                  className="p-3 pointer-events-auto"
+                  className="pointer-events-auto p-3"
                 />
               </PopoverContent>
             </Popover>
           </div>
 
           {/* Time */}
-          <div className="bg-panel-meeting-section rounded-xl p-4 space-y-2 shadow-sm">
-            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
+          <div className="space-y-2 rounded-xl bg-panel-meeting-section p-4 shadow-sm">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />
               Time
             </label>
             <div className="flex items-center gap-2">
@@ -210,22 +204,22 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
                 type="time"
                 value={startTime}
                 onChange={(e) => handleTimeChange('start', e.target.value)}
-                className="flex-1 bg-card/50 border-0"
+                className="flex-1 border-0 bg-card/50"
               />
               <span className="text-muted-foreground">to</span>
               <Input
                 type="time"
                 value={endTime}
                 onChange={(e) => handleTimeChange('end', e.target.value)}
-                className="flex-1 bg-card/50 border-0"
+                className="flex-1 border-0 bg-card/50"
               />
             </div>
           </div>
 
           {/* Location */}
-          <div className="bg-panel-meeting-section rounded-xl p-4 space-y-2 shadow-sm">
-            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              {isZoom ? <Video className="w-3.5 h-3.5" /> : <MapPin className="w-3.5 h-3.5" />}
+          <div className="space-y-2 rounded-xl bg-panel-meeting-section p-4 shadow-sm">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              {isZoom ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
               Location
             </label>
             <Input
@@ -233,14 +227,14 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
               onChange={(e) => setLocation(e.target.value)}
               onBlur={handleLocationBlur}
               placeholder="Add location or video link..."
-              className="bg-card/50 border-0"
+              className="border-0 bg-card/50"
             />
           </div>
 
           {/* Description */}
-          <div className="bg-panel-meeting-section rounded-xl p-4 space-y-2 shadow-sm">
-            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" />
+          <div className="space-y-2 rounded-xl bg-panel-meeting-section p-4 shadow-sm">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
               Description
             </label>
             <Textarea
@@ -248,25 +242,25 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
               onChange={(e) => setDescription(e.target.value)}
               onBlur={handleDescriptionBlur}
               placeholder="Add meeting notes or agenda..."
-              className="min-h-[100px] resize-none bg-card/50 border-0"
+              className="min-h-[100px] resize-none border-0 bg-card/50"
             />
           </div>
 
           {/* Attendees */}
-          <div className="bg-panel-meeting-section rounded-xl p-4 space-y-2 shadow-sm">
-            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5" />
+          <div className="space-y-2 rounded-xl bg-panel-meeting-section p-4 shadow-sm">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Users className="h-3.5 w-3.5" />
               Attendees
             </label>
             <div className="flex flex-wrap gap-1.5">
-              {(meeting.attendees || []).map(attendee => (
-                <Badge 
-                  key={attendee} 
-                  variant="secondary" 
-                  className="text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors bg-card/80"
+              {(meeting.attendees || []).map((attendee) => (
+                <Badge
+                  key={attendee}
+                  variant="secondary"
+                  className="cursor-pointer bg-card/80 text-xs transition-colors hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => handleRemoveAttendee(attendee)}
                 >
-                  {attendee} <XIcon className="w-2.5 h-2.5 ml-1" />
+                  {attendee} <XIcon className="ml-1 h-2.5 w-2.5" />
                 </Badge>
               ))}
               <div className="flex items-center gap-1">
@@ -275,10 +269,16 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
                   onChange={(e) => setNewAttendee(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddAttendee()}
                   placeholder="Add attendee..."
-                  className="h-6 text-xs w-28 px-2 bg-card/50 border-0"
+                  className="h-6 w-28 border-0 bg-card/50 px-2 text-xs"
                 />
-                <Button variant="ghost" size="icon" aria-label="Add attendee" className="h-6 w-6" onClick={handleAddAttendee}>
-                  <Plus className="w-3 h-3" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Add attendee"
+                  className="h-6 w-6"
+                  onClick={handleAddAttendee}
+                >
+                  <Plus className="h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -286,20 +286,20 @@ const MeetingDetailsDrawer = ({ meetingId, open, onOpenChange }: MeetingDetailsD
 
           {/* Source indicator */}
           {meeting.isExternal && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+            <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
               <span className="capitalize">From {meeting.source}</span>
             </div>
           )}
         </div>
 
         {/* Delete button */}
-        <div className="pt-4 border-t border-border mt-auto">
-          <Button 
-            variant="ghost" 
-            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+        <div className="mt-auto border-t border-border pt-4">
+          <Button
+            variant="ghost"
+            className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={handleDelete}
           >
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 className="mr-2 h-4 w-4" />
             Delete meeting
           </Button>
         </div>

@@ -45,15 +45,16 @@ export function useAISettings() {
     const newValue = !aiEnabled;
     setAiEnabled(newValue);
 
-    const { error } = await supabase
-      .from('ai_settings')
-      .upsert({
+    const { error } = await supabase.from('ai_settings').upsert(
+      {
         user_id: user.id,
         ai_enabled: newValue,
         updated_at: new Date().toISOString(),
-      }, {
+      },
+      {
         onConflict: 'user_id',
-      });
+      },
+    );
 
     if (error) {
       console.error('Failed to update AI settings:', error);

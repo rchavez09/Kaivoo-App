@@ -10,7 +10,8 @@ interface TopicPagePickerProps {
 }
 
 const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) => {
-  const { topics, getTopicPages } = useKaivooStore();
+  const topics = useKaivooStore((s) => s.topics);
+  const getTopicPages = useKaivooStore((s) => s.getTopicPages);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
   const [newPageName, setNewPageName] = useState('');
   const [creatingPageFor, setCreatingPageFor] = useState<string | null>(null);
@@ -43,12 +44,12 @@ const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) 
   };
 
   // Filter out Daily Notes from the picker
-  const selectableTopics = topics.filter(t => t.id !== 'topic-daily-notes');
+  const selectableTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="absolute z-50 bg-popover border border-border rounded-lg shadow-lg min-w-[220px] max-h-[300px] overflow-y-auto animate-fade-in"
+      className="absolute z-50 max-h-[300px] min-w-[220px] animate-fade-in overflow-y-auto rounded-lg border border-border bg-popover shadow-lg"
       style={position ? { top: position.top, left: position.left } : undefined}
     >
       <div className="p-1">
@@ -61,20 +62,19 @@ const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) 
               <div className="flex items-center">
                 <button
                   onClick={() => handleSelectTopic(topic.name)}
-                  className="flex-1 flex items-center gap-2 px-2 py-1.5 text-sm text-left rounded hover:bg-secondary/70 transition-colors"
+                  className="flex flex-1 items-center gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors hover:bg-secondary/70"
                 >
-                  <FolderOpen className="w-3.5 h-3.5 text-primary" />
+                  <FolderOpen className="h-3.5 w-3.5 text-primary" />
                   <span>{topic.name}</span>
                 </button>
                 {pages.length > 0 && (
                   <button
                     onClick={() => setExpandedTopic(isExpanded ? null : topic.id)}
-                    className="p-1.5 hover:bg-secondary rounded transition-colors"
+                    className="rounded p-1.5 transition-colors hover:bg-secondary"
                   >
-                    <ChevronRight className={cn(
-                      "w-3 h-3 text-muted-foreground transition-transform",
-                      isExpanded && "rotate-90"
-                    )} />
+                    <ChevronRight
+                      className={cn('h-3 w-3 text-muted-foreground transition-transform', isExpanded && 'rotate-90')}
+                    />
                   </button>
                 )}
                 <button
@@ -82,10 +82,10 @@ const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) 
                     setExpandedTopic(topic.id);
                     setCreatingPageFor(topic.id);
                   }}
-                  className="p-1.5 hover:bg-secondary rounded transition-colors"
+                  className="rounded p-1.5 transition-colors hover:bg-secondary"
                   title="Add page"
                 >
-                  <Plus className="w-3 h-3 text-muted-foreground" />
+                  <Plus className="h-3 w-3 text-muted-foreground" />
                 </button>
               </div>
 
@@ -96,17 +96,17 @@ const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) 
                     <button
                       key={page.id}
                       onClick={() => handleSelectPage(topic.name, page.name)}
-                      className="flex items-center gap-2 px-2 py-1.5 w-full text-sm text-left rounded hover:bg-secondary/70 transition-colors"
+                      className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors hover:bg-secondary/70"
                     >
-                      <FileText className="w-3.5 h-3.5 text-info" />
+                      <FileText className="h-3.5 w-3.5 text-info-foreground" />
                       <span>{page.name}</span>
                     </button>
                   ))}
-                  
+
                   {/* Create new page input */}
                   {creatingPageFor === topic.id && (
                     <div className="flex items-center gap-1 px-2 py-1">
-                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                       <input
                         type="text"
                         placeholder="New page name..."
@@ -119,7 +119,7 @@ const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) 
                             setNewPageName('');
                           }
                         }}
-                        className="flex-1 text-sm bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/50"
+                        className="flex-1 border-none bg-transparent text-sm placeholder:text-muted-foreground/50 focus:outline-none"
                         autoFocus
                       />
                     </div>

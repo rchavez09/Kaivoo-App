@@ -11,8 +11,17 @@ import * as JournalService from '@/services/journal.service';
 import * as CapturesService from '@/services/captures.service';
 import * as MeetingsService from '@/services/meetings.service';
 import * as RoutinesService from '@/services/routines.service';
+import * as HabitsService from '@/services/habits.service';
+import * as ProjectsService from '@/services/projects.service';
+import * as ProjectNotesService from '@/services/project-notes.service';
 
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
+// Tracks the last dataUpdatedAt fingerprint that was synced to the Zustand store.
+// Module-level so it survives DataLoader mount/unmount cycles across route changes.
+// This prevents setFromDatabase() from re-running with stale cached data when
+// the user navigates between pages before a mutation's invalidation completes.
+let lastSyncedDataKey = '';
 
 /**
  * Master data sync hook — replaces useDatabase.
@@ -21,7 +30,7 @@ const STALE_TIME = 5 * 60 * 1000; // 5 minutes
  */
 export function useKaivooQueries() {
   const { user } = useAuth();
-  const setFromDatabase = useKaivooStore(s => s.setFromDatabase);
+  const setFromDatabase = useKaivooStore((s) => s.setFromDatabase);
   const userId = user?.id ?? '';
 
   const results = useQueries({
@@ -92,23 +101,71 @@ export function useKaivooQueries() {
         enabled: !!user,
         staleTime: STALE_TIME,
       },
+      {
+        queryKey: queryKeys.projects(userId),
+        queryFn: () => ProjectsService.fetchProjects(userId),
+        enabled: !!user,
+        staleTime: STALE_TIME,
+      },
+      {
+        queryKey: queryKeys.projectNotes(userId),
+        queryFn: () => ProjectNotesService.fetchProjectNotes(userId),
+        enabled: !!user,
+        staleTime: STALE_TIME,
+      },
+      {
+        queryKey: queryKeys.habits(userId),
+        queryFn: () => HabitsService.fetchHabits(userId),
+        enabled: !!user,
+        staleTime: STALE_TIME,
+      },
+      {
+        queryKey: queryKeys.habitCompletions(userId),
+        queryFn: () => HabitsService.fetchHabitCompletions(userId),
+        enabled: !!user,
+        staleTime: STALE_TIME,
+      },
     ],
     combine: (queryResults) => {
-      const allSuccess = queryResults.every(r => r.isSuccess);
-      const anyLoading = queryResults.some(r => r.isLoading);
-      const anyError = queryResults.find(r => r.error);
+      const allSuccess = queryResults.every((r) => r.isSuccess);
+      const anyLoading = queryResults.some((r) => r.isLoading);
+      const anyFetching = queryResults.some((r) => r.isFetching);
+      const anyError = queryResults.find((r) => r.error);
 
-      // Only sync to store when ALL queries have fresh data
-      if (allSuccess) {
+      // Only sync to store when ALL queries have settled with genuinely fresh data.
+      // Guard 1: !anyFetching — don't overwrite during background refetches
+      // Guard 2: dataKey — only sync when data was actually re-fetched from the
+      // server (dataUpdatedAt changes), not when stale cache is re-read on navigation.
+      // This prevents optimistic Zustand updates from being overwritten by cached
+      // data when the user navigates before a mutation's invalidation completes.
+      if (allSuccess && !anyFetching) {
+        const dataKey = queryResults.map((r) => r.dataUpdatedAt).join(',');
+        if (dataKey === lastSyncedDataKey) {
+          return { isLoading: anyLoading, isSuccess: allSuccess, error: anyError?.error ?? null };
+        }
+        lastSyncedDataKey = dataKey;
+
         const [
-          topicsResult, topicPagesResult, tagsResult, tasksResult,
-          subtasksResult, journalResult, capturesResult, meetingsResult,
-          routinesResult, routineGroupsResult, routineCompletionsResult,
+          topicsResult,
+          topicPagesResult,
+          tagsResult,
+          tasksResult,
+          subtasksResult,
+          journalResult,
+          capturesResult,
+          meetingsResult,
+          routinesResult,
+          routineGroupsResult,
+          routineCompletionsResult,
+          projectsResult,
+          projectNotesResult,
+          habitsResult,
+          habitCompletionsResult,
         ] = queryResults;
 
         // Group subtasks by task_id
         const subtasksByTask: Record<string, Subtask[]> = {};
-        (subtasksResult.data as Tables<'subtasks'>[] || []).forEach((s) => {
+        ((subtasksResult.data as Tables<'subtasks'>[]) || []).forEach((s) => {
           if (!subtasksByTask[s.task_id]) subtasksByTask[s.task_id] = [];
           subtasksByTask[s.task_id].push({
             id: s.id,
@@ -121,7 +178,7 @@ export function useKaivooQueries() {
 
         // Convert routine completions
         const completionsMap: Record<string, { routineId: string; completedAt: Date }[]> = {};
-        (routineCompletionsResult.data as Tables<'routine_completions'>[] || []).forEach((rc) => {
+        ((routineCompletionsResult.data as Tables<'routine_completions'>[]) || []).forEach((rc) => {
           if (!completionsMap[rc.date]) completionsMap[rc.date] = [];
           completionsMap[rc.date].push({
             routineId: rc.routine_id,
@@ -129,19 +186,40 @@ export function useKaivooQueries() {
           });
         });
 
+        const journalData = (journalResult.data || []).map(JournalService.dbToJournalEntry);
+
+        // Convert habit completions to map by date
+        const habitCompletionsMap: Record<
+          string,
+          { habitId: string; count?: number; skipped: boolean; completedAt: Date }[]
+        > = {};
+        ((habitCompletionsResult.data as Tables<'routine_completions'>[]) || []).forEach((hc) => {
+          if (!habitCompletionsMap[hc.date]) habitCompletionsMap[hc.date] = [];
+          habitCompletionsMap[hc.date].push({
+            habitId: hc.routine_id,
+            count: hc.count || undefined,
+            skipped: hc.skipped || false,
+            completedAt: new Date(hc.completed_at),
+          });
+        });
+
         setFromDatabase({
           topics: (topicsResult.data || []).map(TopicsService.dbToTopic),
           topicPages: (topicPagesResult.data || []).map(TopicsService.dbToTopicPage),
           tags: (tagsResult.data || []).map(TopicsService.dbToTag),
-          tasks: (tasksResult.data as Tables<'tasks'>[] || []).map(
-            (t) => TasksService.dbToTask(t, subtasksByTask[t.id] || [])
+          tasks: ((tasksResult.data as Tables<'tasks'>[]) || []).map((t) =>
+            TasksService.dbToTask(t, subtasksByTask[t.id] || []),
           ),
-          journalEntries: (journalResult.data || []).map(JournalService.dbToJournalEntry),
+          journalEntries: journalData,
           captures: (capturesResult.data || []).map(CapturesService.dbToCapture),
           meetings: (meetingsResult.data || []).map(MeetingsService.dbToMeeting),
           routines: (routinesResult.data || []).map(RoutinesService.dbToRoutine),
           routineGroups: (routineGroupsResult.data || []).map(RoutinesService.dbToRoutineGroup),
           routineCompletions: completionsMap,
+          habits: (habitsResult.data || []).map(HabitsService.dbToHabit),
+          habitCompletions: habitCompletionsMap,
+          projects: (projectsResult.data || []).map(ProjectsService.dbToProject),
+          projectNotes: (projectNotesResult.data || []).map(ProjectNotesService.dbToProjectNote),
         });
       }
 

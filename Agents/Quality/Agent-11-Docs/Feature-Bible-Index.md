@@ -1,8 +1,8 @@
 # Feature Use Case Bible — Index
 
 **Purpose:** Master map of all Feature Bible files. Each Bible covers one page or module of the Kaivoo app.
-**Version:** 1.0
-**Date:** February 22, 2026
+**Version:** 1.7
+**Date:** March 1, 2026
 
 ---
 
@@ -10,15 +10,15 @@
 
 | Bible | File | Status | Covers |
 |-------|------|--------|--------|
-| **Today Page** | `Feature-Use-Case-Bible.md` | v0.4 — All questions resolved, settings extracted | Day Brief, Tasks widget, Routines widget, Schedule widget, Floating Chat, Daily Shutdown, Date Navigation |
+| **Today Page** | `Feature-Bible-Today-Page.md` | v0.4 — All questions resolved, settings extracted | Day Brief, Tasks widget, Routines widget, Schedule widget, Floating Chat, Daily Shutdown, Date Navigation |
 | **Settings** | `Feature-Bible-Settings.md` | v0.1 — Extracted from Today Bible | All user-facing settings consolidated: Day Brief AI, Tasks widget, Schedule Mode, Routines management, Daily Shutdown, Concierge |
-| **Journal Page** | TBD | Not started | Journal editor, calendar navigation, folder structure, AI features |
-| **Routines & Habits Page** | TBD | Not started | Full category management, goal tracking, gamification, challenges (discovered from Today Bible Q11/Q12) |
-| **Tasks Page** | TBD | Not started | Full task management outside the Today widget |
+| **Tasks Page** | `Feature-Bible-Tasks-Page.md` | v0.1 DRAFT — Awaiting user Q&A | List/Kanban views, filtering, sorting, task detail drawer, subtasks, creation flow |
+| **Journal Page** | `Feature-Bible-Journal-Page.md` | v0.2 — Q&A resolved, Canvas design, Sprint 7 baseline | Daily Canvas (continuous writing), calendar sidebar with section anchors, AI extraction, mood, auto-save, inline tag input |
+| **Projects Page** | `Feature-Bible-Projects-Page.md` | v0.2 — Sprint 14 Project Notes | Projects list (card grid, status tabs, search, topic filter, create dialog), Project Detail (inline editing, task list, **project notes**, link existing, stats bar, settings, delete), Timeline View (Gantt bars, today line, date axis, click-to-drill), Project Selector in TaskDetailsDrawer, Project Badges on task rows, **Quick-Add Note (Cmd+Shift+N)** |
+| **Routines & Habits Page** | `Feature-Bible-Routines-Habits.md` | Planned — Sprint 17+ (research complete, design brief ready) | Full routines page, habit tracking, streaks, analytics, frequency scheduling, mood-habit correlation |
 | **Calendar Page** | TBD | Not started | Calendar integrations, event management |
-| **Captures** | TBD | Not started | Quick capture, processing, organization |
 | **Insights Page** | TBD | Not started | Analytics, correlations, trends |
-| **Topics Page** | TBD | Not started | Knowledge base, folders, topic management |
+| **Topics Page** | `Feature-Bible-Topics-Page.md` | v0.1 — Sprint 19 baseline, all questions resolved, Knowledge OS context | Topics list (search, expand/collapse, create/delete, inline rename), Topic Detail (inline editing, pages, projects section, mentions, tasks, tag filter, icon picker), Page Detail (sibling navigation, breadcrumbs), `[[double-bracket]]` linking, TopicPicker, TopicTagEditor, empty states, Knowledge OS future context |
 
 ---
 
@@ -38,4 +38,10 @@
 
 ---
 
-*Feature Bible Index v1.0 — February 22, 2026*
+*Feature Bible Index v1.7 — March 1, 2026*
+*v1.7: Topics Page Bible v0.1 completed — Sprint 19 baseline. Full coverage of Topics list, Topic Detail, Page Detail, [[double-bracket]] linking, widgets, empty states, Knowledge OS future context, all design questions resolved.*
+*v1.6: Removed Captures (page deprecated — not needed, Notes covers the use case). Added Routines & Habits entry (Sprint 17+ research complete).*
+*v1.2: Journal Page Bible v0.2 (Q&A resolved, Canvas design direction, Sprint 7 baseline)*
+*v1.3: Added Projects Page entry (Sprint 9 delivered, Bible pending for Sprint 11)*
+*v1.4: Projects Page Bible v0.1 completed — full coverage of Projects list, Project Detail, Timeline View, Project Selector, Project Badges, data model*
+*v1.5: Projects Page Bible v0.2 — Added Project Notes (Sprint 14): notes section on ProjectDetail, Quick-Add dialog, data model, must-never-lose checklist*

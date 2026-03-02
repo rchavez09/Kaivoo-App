@@ -1,18 +1,30 @@
 # Kaivoo — Product Vision
 
-**Version:** 3.0
-**Last Updated:** February 22, 2026
+**Version:** 4.3
+**Last Updated:** March 1, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
 
 ## What Is Kaivoo?
 
-Kaivoo is a modular AI operating system built on a central Command Space — your journal, todos, calendar, captures, and second brain under one roof. It starts as a cloud-hosted Command Center for daily productivity, evolves into a self-hosted AI Hub, and scales into a platform where specialized modules (marketing agency, trading bot, content factory) plug into your personal foundation. The Command Space is the nervous system. Modules make it powerful.
+Kaivoo is an AI-powered workflow OS that puts the power of a whole business in your hands. It starts as a personal productivity command center — your journal, todos, calendar, captures, and second brain under one roof — and scales into a collaborative platform where solopreneurs and small teams run their entire operation from one place.
 
-**One sentence:** Your hub. Your modules. Your AI. Your rules. Your business.
+The platform ships as **two products on one foundation:**
 
-**The product promise:** Start with the essentials — journal, tasks, calendar — and scale into a full AI-powered operating system. Buy it once and self-host, or subscribe and let us handle the infrastructure. Either way, you're in control.
+- **Product 1: Kaivoo Productivity** ($249 one-time) — A polished, self-contained productivity app. Journal, tasks, projects, calendar, email, routines, captures, AI concierge. Local-first, BYO API keys, you own everything. The Obsidian + Notion + Calendar replacement.
+
+- **Product 2: Kaivoo Orchestrator** (premium subscription, pricing TBD) — An AI agent orchestration platform for builders. Sprint management, multi-model routing, messaging-based control (Telegram or equivalent), autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can manage from their phone.
+
+- **Full Stack:** Both together. Productivity modules + Orchestrator modules, one platform. Toggle what you need in settings.
+
+**Phase A** ships the Productivity app. **Phase B** adds the Orchestrator as a standalone product AND as an integration/addon for productivity users, plus the One Workflow cloud platform (oneworkflow.ai) with collaboration, business tools, and AI-powered widgets.
+
+The AI isn't a chat box. It's an engine underneath purpose-built tools. Users see specific actions and clear outcomes — not blank prompts. Every widget tells them exactly what it does and what's possible. One button to the moon.
+
+**One sentence:** One workflow. One place. One AI brain that grows from personal assistant to autonomous operator.
+
+**The product promise:** Start with the essentials — journal, tasks, calendar, email, AI concierge — and scale into a full AI-powered operating system for your life and your business. Or skip straight to the builder tools and let your AI team ship code while you're on the couch.
 
 ---
 
@@ -36,293 +48,516 @@ These are non-negotiable. Every feature, sprint, and decision must align with th
 
 8. **Modular by design.** The Command Space is the foundation. Everything else plugs in as a module. New capabilities extend the platform without breaking existing functionality. Users build up like a lego castle — same foundation, unique structure.
 
+9. **Guided, not open-ended.** AI powers everything but users see specific actions, not blank prompts. Every widget defines its capability. No decision paralysis. No prompt engineering. The AI is the engine — the app is the car. Think side-scroller, not open world.
+
+10. **Progressive autonomy.** Start manual, graduate to assisted, evolve to autonomous. The AI earns trust by suggesting before it acts. Every suggestion teaches the user what's possible. The goal: your AI runs your business while you steer.
+
+---
+
+## The Autonomy Ladder
+
+The product evolves through three levels of AI involvement. Each level builds on the last.
+
+### Level 1: You Drive (Phase A)
+You do everything. The app is your command center. AI is available when you ask — "draft this email," "summarize this note," "what's on my calendar." The concierge responds to requests. It doesn't initiate.
+
+### Level 2: AI Suggests (Phase B — Concierge)
+The AI starts watching and suggesting. "You have a PPT due at 3pm — want me to draft it?" "You got 4 emails from this client — want me to summarize and draft responses?" "You haven't checked Project X in 5 days — here's the status." It sees your data, understands your patterns, and offers to act. You approve. It executes.
+
+This is the "I can do that for you" layer. Critically, it teaches the user what's possible. Every suggestion is a discovery moment: "Oh, it can do *that*?" This solves the blank-chat-box problem — users don't need to know what to ask because the AI tells them what it can do.
+
+### Level 3: AI Operates (Future)
+The AI doesn't ask. It just does. Your todo list isn't yours — it's the AI's work queue. Emails get answered. Reports get generated. Follow-ups happen. You review and course-correct. You're the CEO of your own operation, and the AI is your staff.
+
+---
+
+## The Concierge — Identity & Soul
+
+The AI concierge isn't a nameless chatbot. It's a character the user creates and bonds with.
+
+### Hatching
+
+During first-run setup (Phase A wizard) and account creation (Phase B), users "hatch" their concierge — choosing a name, a communication style (formal, casual, direct, warm), and basic preferences. This moment is intentional: people form bonds with things they name. A concierge named "Atlas" that calls you by name and knows you prefer bullet points over paragraphs isn't a tool — it's a partner.
+
+The hatching experience draws inspiration from the AI community's concept of "hatching" — the first interaction that gives an AI its identity. It's not just setup. It's an origin moment. The user is creating something, and that emotional investment drives engagement and retention.
+
+**Phase A hatching:** Part of the setup wizard. Name your concierge, choose a tone, tell it what to call you. Lightweight, warm, memorable.
+
+**Phase B hatching:** Extended onboarding wizard. Name your concierge, set your communication style, then the concierge itself leads a guided tour of the platform — "I'm [name], and here's what we can do together." This is where the user discovers the platform's full power, guided by the AI they just created. Stays in line with "guided, not open-ended" — the concierge shows you what's possible instead of dropping you on a blank dashboard.
+
+### The Soul File
+
+A lightweight, persistent memory layer that gives the concierge personality and continuity. Not a full RAG knowledge base — just the essentials:
+
+- User's name and how they want to be addressed
+- Concierge name and personality settings (tone, verbosity, formality)
+- Communication style preference ("give me bullet points," "be brief," "explain your reasoning")
+- Key patterns observed over time (e.g., "reviews email first thing," "prefers tasks grouped by project")
+- Things the user has explicitly told the concierge to remember
+
+The soul file is readable and editable by the user (Core Principle #2 — no black boxes). It grows naturally through use, not through invasive data collection. It's the difference between an assistant that knows you and one that doesn't.
+
+**Design constraint:** The soul must be lightweight enough to load on every interaction without adding latency. A few KB of structured data, not an embedding store. Phase B's RAG and semantic search layer can deepen the concierge's knowledge, but the core soul stays fast and simple.
+
+### Concierge Scope Boundary
+
+The concierge has two capability tiers, cleanly separated by product:
+
+**Productivity Concierge (Product 1 — Phase A):**
+- Find notes, summarize content
+- Add/complete tasks, add calendar events
+- Add context to existing data
+- Trainable personality (hatching, soul file, tone preferences)
+- Long-term memory stored in files, recall-only (no autonomous actions)
+- BYO API keys — Claude, ChatGPT, Llama, any provider the user wants
+- **It helps you manage your day. It does not build things.**
+
+**Orchestrator Concierge (Product 2 — Phase B):**
+- Everything above, plus...
+- Sprint orchestration, agent coordination, build-review-test-push pipeline
+- Messaging control (Telegram or equivalent)
+- Multi-model routing across roles (e.g., cheap model for chat, Sonnet for search, Opus for building, Gemini for testing)
+- Remote-triggered code execution with security gates
+- **It builds things for you.**
+
+Same concierge architecture. Same soul file. Same hatching. Different capability ceiling. The Orchestrator unlocks the builder layer — it doesn't replace the productivity layer.
+
+---
+
+## Modular Toggle Architecture
+
+Productivity modules and builder modules are **settings-driven toggles**, not hardwired surfaces. The core platform supports both experiences:
+
+- **Productivity modules:** Journal, Tasks, Projects, Calendar, Routines, Captures, Email — toggle on for the productivity app experience
+- **Builder modules:** Sprint Dashboard, Agent Roster, Sandbox, Production Connections, Deployment Status — toggle on for the orchestrator experience
+- **Full Stack:** Toggle everything on
+
+The Settings page has a "Modules" section. Users activate what they need. The dashboard adapts to show the relevant surfaces. A pure-builder user sees sprint completions and deployment status, not journal entries. A pure-productivity user sees their day view and tasks, not build logs.
+
+This architecture also enables the **integration play**: an SMB using the productivity app can upgrade to add Orchestrator capabilities. They point it at any repo, any tech stack, and it builds — not just widgets for Kaivoo, but anything. Premium pricing reflects premium capability.
+
+---
+
+## Productization Requirement
+
+Both products ship as **clean template systems**. No Kaivoo-specific content in user-facing specs.
+
+- **Vision.md** → Guided template: "Describe your product. What problem does it solve? Who's the customer?"
+- **Director.md** → Generic sprint orchestrator: "I read your Vision, plan your sprints, coordinate your agents."
+- **Agent specs** → Role templates: "Software Engineer," "Code Reviewer," "Architect" — no project-specific content
+- **Sprint Protocol** → Generic framework, stripped of Kaivoo references
+- **First-run experience** → "Describe your project. What's your tech stack? What does your team look like?" — the concierge generates initial Vision, agent roster, and first sprint
+
+**The story:** "Kaivoo was built by this system. Now you can build your thing with it too."
+
+A productization sprint is required before the Orchestrator ships — clean templates, blank-slate onboarding, no user will accidentally clone Kaivoo's internal roadmap.
+
 ---
 
 ## Platform Vision — The Central Hub
 
 ### The Foundation
 
-The Journal, Daily View, Todo system, Calendar, and Captures aren't features — they're the **foundation layer** that everything else builds on. Kaivoo's Command Space is the central nervous system: the place where a user lives, thinks, plans, and operates. Every module extends this foundation rather than replacing it.
+The Journal, Daily View, Todo system, Calendar, Email, and Captures aren't features — they're the **foundation layer** that everything else builds on. The Command Space is the central nervous system: the place where a user lives, thinks, plans, and operates. Every module and integration extends this foundation rather than replacing it.
 
-Think of it as a lego castle. The Command Space is the baseplate and first few layers. Modules are the towers, walls, and turrets you build on top. The foundation ships with every Kaivoo instance. What you build on it is up to you.
-
-### How It Works — The Agency Owner Example
-
-A marketing agency owner opens Kaivoo. Their Day View shows todos, calendar, journal, captures — the same foundation everyone shares. But they also have the Marketing Agency module active.
-
-They join a client meeting through their Kaivoo calendar. The client wants a landing page focused on their spring campaign. They add it to their todo list. The AI orchestrator detects the task context, asks if it should start working. The user confirms.
-
-The Marketing Agency module's agents activate: Research agent does competitive analysis. Copywriter drafts the landing page copy. Designer builds the layout. UX/UI and code engineers produce the page. DevOps deploys it. The deliverable lands back in the user's Kaivoo workspace. The todo updates. The client work is tracked, versioned, and stored.
-
-The foundation stayed constant. The module made it powerful.
+Think of it as a lego castle. The Command Space is the baseplate and first few layers. Modules are the towers, walls, and turrets you build on top. The foundation ships with every instance. What you build on it is up to you.
 
 ### Architecture
 
 ```
 ┌───────────────────────────────────────────────────────────┐
-│                      KAIVOO PLATFORM                      │
+│                    ONE WORKFLOW PLATFORM                    │
 │                                                           │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
-│  │Marketing │  │ Trading  │  │ YouTube  │  │  User-   │  │
-│  │  Agency  │  │   Bot    │  │ Factory  │  │  Built   │  │
+│  │Marketing │  │  Sales   │  │  Doc     │  │  User-   │  │
+│  │  Tools   │  │Dashboard │  │  Mgmt    │  │  Built   │  │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  │
 │       └──────────────┴──────────────┴──────────────┘      │
 │                          │                                │
 │  ┌────────────────────────────────────────────────────┐   │
-│  │          AI ORCHESTRATOR (The Concierge)            │   │
-│  │   Routes tasks · Coordinates agents · Learns you   │   │
+│  │       AI CONCIERGE (The Orchestrator)               │   │
+│  │  Routes tasks · Suggests actions · Learns you       │   │
+│  │  Watches → Offers → Executes (with permission)      │   │
 │  └────────────────────────────────────────────────────┘   │
 │                          │                                │
 │  ┌────────────────────────────────────────────────────┐   │
-│  │          CORE FOUNDATION (Command Space)            │   │
-│  │   Journal · Todos · Calendar · Captures · Vault    │   │
-│  │   Theming · Workshop · Auth · Data Layer           │   │
+│  │       INTEGRATIONS & SKILLS LAYER                   │   │
+│  │  Gmail · Calendar · Slack/Teams · Skills Store      │   │
+│  └────────────────────────────────────────────────────┘   │
+│                          │                                │
+│  ┌────────────────────────────────────────────────────┐   │
+│  │       CORE FOUNDATION (Command Space)               │   │
+│  │  Journal · Todos · Calendar · Captures · Vault      │   │
+│  │  Theming · White-Label Config · Auth · Data Layer   │   │
 │  └────────────────────────────────────────────────────┘   │
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Core Foundation (always present):** Journal, Daily View, Todos, Calendar, Captures, Second Brain, AI Orchestrator, Theming, Workshop, Auth, Data Layer.
+**Core Foundation (always present):** Journal, Daily View, Projects & Tasks, Calendar, Captures, Second Brain, AI Concierge, Theming, White-Label Config, Auth, Data Layer.
 
-**Modules (plug in):** Each module registers its own AI agents with the orchestrator, adds its own UI sections/pages, reads from and writes to core data (todos, calendar, journal), and has its own specialized tools and workflows.
+**Integrations Layer:** Email (Gmail/Outlook), Calendar sync, messaging (Slack/Teams integration), and the skills store. Users connect their existing tools — they don't replace them. Everything flows through one place.
 
-### Customization — No Two Users Look the Same
+**Business Widgets (Phase B):** Marketing tools, sales dashboards, document management, CRM — purpose-built interfaces with AI underneath. Not chat prompts. Specific tools. Clear outcomes.
 
-Every Kaivoo instance is unique. Users customize their experience through the Workshop AI — from branding and color schemes to dashboard layout and active modules. When you say "customize my dashboard to reflect these brand guidelines," the Workshop AI applies it. Foundation updates ship without breaking user customizations.
+### How It Works — The Solopreneur Example
 
-**Access tiers:**
-- **Subscribers:** AI-assisted customization within guardrails — theme builder, widget arrangement, preset layouts
-- **Full access / Self-hosted:** Full Workshop access — build custom integrations, deep customization, module development
+A freelance marketing consultant opens One Workflow. Their Day View shows todos, calendar, journal, captures, and email — all in one place. The AI concierge notices a todo: "Create social media content for Client X's spring campaign."
+
+It surfaces a suggestion: "I can draft 5 Instagram captions based on Client X's brand guidelines. Want me to start?" The user taps yes. The Marketing widget activates. Copy appears. The user reviews, edits, and exports — never leaving the app.
+
+The concierge didn't wait to be asked. It saw the task, knew it could help, and offered. The user didn't need to know what prompt to write or what tool to use. The system guided them.
 
 ### Intelligent Capability Boundaries
 
-The AI orchestrator is self-aware about what the platform can and can't do. It doesn't fail silently and it doesn't overpromise.
+The AI concierge is self-aware about what the platform can and can't do. It doesn't fail silently and it doesn't overpromise.
 
-**When partial help is possible:** A user's todo says "Create a :30 commercial." No video production module exists yet. The orchestrator doesn't ignore it — it offers what it can: *"I can't help you make a video yet, but I can draft a few script options and sketch out a storyboard. Want me to do that?"* The user still gets value. The gap is visible, not hidden.
+**When partial help is possible:** A user's todo says "Create a :30 commercial." No video production capability exists yet. The concierge doesn't ignore it — it offers what it can: *"I can't help you make a video yet, but I can draft a few script options and sketch out a storyboard. Want me to do that?"* The user still gets value. The gap is visible, not hidden.
 
-**When no help applies:** "Eat healthy." "Go to gym." These are personal tasks. The orchestrator recognizes them and stays out of the way. The intelligence is in knowing when to help, when to offer partial help, and when to say nothing.
+**When no help applies:** "Eat healthy." "Go to gym." These are personal tasks. The concierge recognizes them and stays out of the way. The intelligence is in knowing when to help, when to offer partial help, and when to say nothing.
 
 This behavior is core to trust. Users need to know the AI is honest about its limits — and genuinely useful within them.
 
+### Customization & White-Labeling
+
+Every instance can be branded. Logo, colors, app name — stored as settings, not hardcoded. This serves two purposes:
+
+1. **Personal users:** Make it feel like theirs. Custom themes, layout preferences.
+2. **SMBs and agencies:** White-label the platform with their own brand for internal or client-facing use.
+
+**Phase A:** Settings-driven branding config (logo, colors, app name). Lightweight. Architectural foundation.
+**Phase B:** Full white-label capabilities. Workshop AI for deeper customization.
+
 ### Module Demand Intelligence
 
-For cloud subscribers (not self-hosted users who own their data), anonymized and aggregated todo list patterns become a product intelligence signal. When thousands of users are creating tasks like "edit video for YouTube" or "design social media posts," that data directly informs which module to build next.
+For cloud subscribers (not self-hosted users who own their data), anonymized and aggregated todo list patterns become a product intelligence signal. When thousands of users are creating tasks like "edit video for YouTube" or "design social media posts," that data directly informs which widget or module to build next.
 
-The platform doesn't guess what users want — it watches what they're already trying to do and builds the tools to help them do it. This creates a data-driven module roadmap that follows actual demand rather than assumptions.
+The platform doesn't guess what users want — it watches what they're already trying to do and builds the tools to help them do it.
 
 **Privacy boundary:** This only applies to cloud subscribers who consent to anonymized usage analytics. Self-hosted users own their data completely — nothing is collected, nothing is transmitted. This distinction is non-negotiable (see Core Principle #1).
 
-### Module Roadmap
+### Concierge-as-Builder
 
-| # | Module | Role | Status |
-|---|--------|------|--------|
-| — | **Command Space** | Core Foundation — journal, todos, calendar, captures, daily view | In progress (80-85%) |
-| 2 | **Marketing Agency** | Brand guidelines → campaigns, copy, landing pages, social content, asset generation | Planned — begins after Command Space is monetizing |
-| 3 | **Trading Bot** | Multi-strategy automated trading, multi-account management, backtesting | Deferred — requires legal/compliance review before development |
-| N | **Future Modules** | Prioritized by Module Demand Intelligence — build what users are already trying to do | Long-term — platform architecture must be proven first |
+The concierge doesn't just operate within the app — it builds within the app. Users describe what they want in natural language, and the concierge creates it: new pages, widgets, integrations, and workflows.
 
-**Revenue gate:** Each module begins development only after the previous module is generating revenue. No speculative investment in Module 3 before Module 2 proves the architecture.
+**Personal customization (Phase B):** "I want my Notes in rich text, not markdown." "Add a field to my Captures for priority level." "Build me a client dashboard that pulls from Projects and Email." The concierge modifies and extends the user's instance through conversation. No code. No prompts. Just outcomes.
+
+**Marketplace creation (Phase C):** Users package their concierge-built creations and list them for others to install. A marketing consultant builds a "Client Pulse" dashboard, polishes it, and sells it for $9.99. The platform earns commission. The ecosystem grows.
+
+**Guardrails:**
+- The Core Foundation (Journal, Todos, Calendar, Captures, Auth, Data Layer) is immutable — the concierge builds on top of it, never modifies it
+- User-built modules run in sandboxed environments with declared capability permissions
+- Marketplace listings go through automated quality and security review before publishing
+
+### 1st-Party Modules & Marketplace Architecture
+
+Kaivoo ships its own business widgets (Marketing Tools, Sales Dashboard, Document Management) as **1st-party modules** built in the same Page + Today Widget format that the marketplace uses. These serve two purposes:
+
+1. **Product value:** Polished, supported business tools that subscribers pay for
+2. **Template standard:** The reference implementation for how marketplace modules should be built — packaging structure, permission declarations, widget patterns, data access conventions
+
+Every 1st-party module passes through the same packaging checks that marketplace submissions require. This ensures the format is proven, documented, and battle-tested before third-party creators use it. When a user wants to build their own module, they can study how the 1st-party ones work — the format is the teacher.
+
+**The Page + Today Widget pattern:** Every module consists of at least a full Page (the workspace) and a Today Widget (the at-a-glance summary). This is the atomic unit of the platform. The Marketing Tools module has a Marketing page and a "Content Due Today" widget. A user-built Reddit Scraper has a Reddit Feed page and a "Trending Topics" widget. Same structure, infinite variety.
 
 ---
 
 ## Target Customer
 
-### Primary Personas
+### Phase A: The Individual
 
-**The AI Power User** — Uses ChatGPT/Claude daily but frustrated by context loss, fragmented workflows, and lack of personalization. Willing to pay $29-49/mo for something that actually remembers them and integrates into their life.
+**The AI Power User** — Uses ChatGPT/Claude daily but frustrated by context loss, fragmented workflows, and lack of personalization. Willing to pay $249 once for something that actually remembers them and integrates into their life.
 
-**The Self-Hoster** — Privacy-conscious, technically capable. Runs Nextcloud, Home Assistant, or Obsidian. Wants AI on their own hardware with their own keys. Willing to pay $199 once for a polished, packaged solution that saves them weeks of DIY setup.
+**The Self-Hoster** — Privacy-conscious, technically capable. Runs Nextcloud, Home Assistant, or Obsidian. Wants AI on their own hardware with their own keys. Willing to pay $249 for a polished, packaged solution that saves them weeks of DIY setup.
 
 **The Productivity Optimizer** — Uses Notion/Sunsama/Obsidian but wants AI deeply woven into their daily workflow, not a separate chat window. Willing to pay for the "10x moment" of AI that actually understands their day.
 
-### Secondary Personas (Phase 6+)
+### Phase B: The Business Operator
 
-**The Agency Owner** — Runs a marketing agency, consulting firm, or creative studio. Uses Kaivoo as their operational hub — client meetings, deliverables, project tracking — with specialized modules (Marketing Agency) to execute client work directly from their todo list. Core + module pricing.
+**The Solopreneur** — Runs one or more ventures. Currently duct-taping Notion + Google Calendar + spreadsheet CRM + a separate AI chat. Wants one AI-powered place that replaces the stack. Willing to pay $29-49/mo for the tool that runs their whole operation.
 
-**The Solo Entrepreneur** — Runs multiple ventures or side projects. Wants an all-in-one AI-powered command center that handles productivity, marketing, content creation, and beyond — all from one dashboard. High willingness-to-pay for modules that replace entire SaaS subscriptions.
+**The Agency Owner** — Runs a marketing agency, consulting firm, or creative studio. Uses One Workflow as their operational hub — client meetings, deliverables, project tracking — with business widgets to execute work directly from their dashboard. High willingness-to-pay.
 
-**The Small Team** — 3-10 people who want shared AI-powered productivity without enterprise pricing. $99/mo team tier.
+**The Small Team** — 2-25 people who want shared AI-powered productivity without HubSpot/Salesforce complexity or pricing. Shared tasks, shared calendars, role-based access. One tool for the whole team.
 
-**The Builder** — Wants to create their own agents, skills, and integrations on top of Kaivoo's platform. Workshop/marketplace customer.
+**The Builder** — Wants to create their own integrations and skills on top of the platform. Skills store / marketplace customer.
+
+**The Solo Builder (Orchestrator)** — A developer or technical founder building a product alone or with a tiny team. Currently babysitting AI code assistants, manually managing context, doing the review-test-push loop dozens of times a day. Wants an autonomous AI dev team they can text from their couch. High willingness-to-pay ($99-199/mo) for a system that turns "boot up sprint 5" into tested, reviewed code.
 
 ---
 
 ## Business Model
 
-### Hybrid Model (Recommended — pending Agent 8 market validation)
+### Two-Phase Revenue Strategy
+
+#### Phase A: One-Time Purchase (Revenue Now)
 
 | Tier | Price | What They Get | Target |
 |---|---|---|---|
-| **Kaivoo Self-Hosted** | $199 one-time | Downloadable installer, full app, BYO API keys, local data, all updates for 1 year | Self-hosters, developers, privacy-first users |
-| **Kaivoo Cloud** | $29-49/mo | Managed hosting, managed AI (no API keys needed), web access from any device, automatic backups | "Just make it work" users, non-technical users |
-| **Kaivoo Team** | $99/mo (up to 10 seats) | Cloud tier + shared workspaces, team vaults, role-based access | Small teams, agencies, studios |
+| **Productivity App** | $249 one-time | Full app, BYO API keys, local data, email/calendar integration, AI concierge, all updates for 1 year | AI power users, productivity optimizers, self-hosters |
+
+**License:** Proprietary EULA. Personal or internal business use only. No redistribution, resale, sublicensing, or derivative products for sale. Source access (if provided) is for customization only. License key required for activation.
+
+**Revenue milestone:** 400 sales = ~$100K. This funds Phase B development and validates demand.
+
+#### Phase B: One Workflow Cloud Subscription (ARR)
+
+| Tier | Price | What They Get | Target |
+|---|---|---|---|
+| **One Workflow Solo** | TBD (research needed) | Managed hosting, managed AI, full feature access, email/calendar/messaging integration | Solopreneurs, freelancers |
+| **One Workflow Team** | TBD (research needed) | Solo tier + shared workspaces, task assignment, role-based access (admin/manager/member) | Small teams (2-25) |
+| **Business Widgets** | TBD (addon pricing) | Marketing tools, sales dashboards, document management, CRM — per-widget or bundled | Teams needing business-grade tools |
+
+**Pricing note:** Subscription pricing requires research on AI token costs per user, competitive pricing teardowns (HubSpot, Monday, Notion), and addon model analysis. Agent 5 + Agent 8 to deliver before Phase B pricing is finalized.
+
+**The HubSpot play:** Cut their pricing at the core. Target the SMBs that are confused by HubSpot's 47 tiers and using a tenth of its features. Simple pricing. Clear capabilities. AI that actually helps instead of adding complexity.
 
 ### Revenue Target: $1M ARR
 
 | Scenario | Mix | Timeline |
 |---|---|---|
-| Conservative | 500 self-hosted ($99.5K) + 2,000 cloud subs at $39/mo ($936K/yr) | 24-30 months |
-| Moderate | 1,000 self-hosted ($199K) + 1,500 cloud subs at $39/mo ($702K/yr) + 10 teams at $99/mo ($11.9K/yr) | 18-24 months |
-| Aggressive | Focus on cloud subs: 2,200 at $39/mo = $1.03M ARR | 12-18 months |
+| Conservative | 400 one-time ($100K) + 1,500 subs at $39/mo ($702K/yr) | 24-30 months |
+| Moderate | 600 one-time ($150K) + 1,800 subs at $39/mo ($842K/yr) | 18-24 months |
+| Aggressive | Focus on subs: 2,200 at $39/mo = $1.03M ARR | 12-18 months |
 
-*These projections are estimates. Agent 8 (Product Manager) will validate with market research.*
+*These projections are estimates. Subscription pricing is placeholder pending research. Agent 8 (Product Manager) will validate with market research.*
 
-### Module Add-Ons (Phase 7+)
+### Widget & Module Add-Ons (Phase B+)
 
-| Module | Price | What They Get |
+| Widget/Module | Price Model | What They Get |
 |---|---|---|
-| **Command Space** | Included | Core foundation — journal, todos, calendar, captures, daily view, AI orchestrator |
-| **Marketing Agency** | $29-49/mo or $149 one-time | Brand guidelines ingestion → campaigns, copy, landing pages, social content. Full AI agent team. |
-| **Trading Bot** | TBD (pending legal review) | Multi-strategy automated trading, multi-account management, backtesting. |
-| **Custom Modules** | Marketplace pricing | User-built and community modules via the Workshop. |
+| **Command Space** | Included | Core foundation — journal, todos, calendar, captures, daily view, AI concierge |
+| **Marketing Tools** | Addon (TBD) | Content creation, social media, campaign planning, brand guidelines |
+| **Sales Dashboard** | Addon (TBD) | Pipeline tracking, contact management, lightweight CRM |
+| **Document Management** | Addon (TBD) | Upload, organize, share, version business documents |
+| **Skills Store** | Marketplace pricing | Community-built integrations and skills |
 
-*Module pricing is preliminary. Agent 8 will validate with market research as each module approaches development.*
+*Widget pricing TBD — per-seat, per-widget, or bundled tiers. Research required on token costs and competitive positioning.*
 
 ---
 
 ## Phased Roadmap
 
-### Phase 1: Cloud Command Center (Current)
-*Ship a polished, production-grade web app on Supabase.*
+### Phase A: Ship & Sell the Productivity App
+*Finish the product. Charge $249. Hit $100K. Learn from real users.*
+
+#### Completed (Sprints 0–18)
 
 | Milestone | Status | Sprint |
 |---|---|---|
 | Foundation scaffold (Lovable prototype) | DONE | Sprint 0 |
 | Security hardening + performance + code quality | DONE | Sprint 1 |
-| Design System migration (Kaivoo palette, components) | PLANNED | — |
-| Unified Day View (Today page redesign) | PLANNED | — |
-| Core feature enhancement (task recurrence, better journal) | PLANNED | — |
-| Search & file attachments | PLANNED | — |
-| Analytics & insights dashboard rebuild | PLANNED | — |
-| Notifications & reminders | PLANNED | — |
-| PWA (installable, offline read) | PLANNED | — |
-
-### Phase 2: Product Foundation
-*Make Kaivoo installable, configurable, and ready to distribute.*
-
-| Milestone | Status | Sprint |
-|---|---|---|
+| Error sanitization, accessibility, TrackingWidget refactor, test infrastructure | DONE | Sprint 4 |
+| CI/CD pipeline, Zustand optimization, service typing, test expansion (81 tests) | DONE | Sprint 5 |
+| Design System migration (Kaivoo palette, components) | DONE | Sprint 3–5 (incremental) |
+| Unified Day View (Today page redesign) | DONE | Sprint 3 |
+| Task recurrence (Daily/Weekly/Monthly), Tasks page filtering & bulk actions | DONE | Sprint 6 |
+| Calendar page redesign — month grid + hourly day view, meetings-first hierarchy | DONE | Sprint 16 |
+| Core feature enhancement (journal, topics, notes, captures) | DONE | Sprints 7–8, 14 |
+| Routines & Habits — streaks, strength, analytics, mood correlation, Today widget redesign | DONE | Sprint 17 |
+| Global full-text search (FTS, GIN indexes, command palette, search trigger) | DONE | Sprint 18 |
+| Calendar week view (7-column hourly grid, 3-mode switcher) | DONE | Sprint 18 |
+| Customizable keyboard shortcuts (Settings UI, shortcut recorder, browser conflict validation) | DONE | Sprint 18 |
 | Market analysis & competitive landscape (Agent 8) | DONE | Sprint 2 (parallel) |
 | Customer personas & pricing validation | DONE | Sprint 2 (parallel) |
-| Desktop packaging (Electron or Tauri) — macOS, Windows, Linux | PLANNED | — |
-| Setup wizard — hosting choice, AI config, account setup | PLANNED | — |
-| BYO API key architecture — secure storage, multi-provider routing | PLANNED | — |
-| Configuration system — settings that persist across install/update | PLANNED | — |
-| CI/CD pipeline — automated builds, testing, deployment | PLANNED | — |
-| Dockerized local stack — one-command self-hosted setup | PLANNED | — |
-| Telegram bot integration — mobile access channel | PLANNED | — |
-| License key / account system | PLANNED | — |
+| CI/CD pipeline — automated builds, testing, deployment | DONE | Sprint 5 |
+| Projects system — Project → Task → Subtask hierarchy, project date ranges | DONE | Sprint 8 |
 
-### Phase 3: Self-Hosted Hub
-*The local-first experience: run Kaivoo on your own hardware.*
+#### Remaining (Pre-Ship)
 
-| Milestone | Status | Sprint |
+| Milestone | Status | Priority |
 |---|---|---|
-| Hub server setup (Node.js + Express + SQLite) | PLANNED | — |
-| The Vault — file system + file browser | PLANNED | — |
-| Journal on disk (markdown files) | PLANNED | — |
-| Dashboard migration (Supabase → SQLite) | PLANNED | — |
-| Multi-device sync via WebSocket | PLANNED | — |
-| Remote access via Tailscale | PLANNED | — |
+| Topics as Knowledge OS — local-first file browser, smart folder hierarchy, single source of truth for all content and files | PLANNED | Must-have |
+| Desktop packaging (Electron or Tauri) — macOS, Windows, Linux. Required for local file system access. One codebase, three platform builds. | PLANNED | Must-have |
+| Data layer abstraction — LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B. Swappable backend, one codebase. | PLANNED | Must-have |
+| Local-first storage — SQLite database + real files on disk. Vault folder chosen during setup. No cloud dependency for core functionality. | PLANNED | Must-have |
+| File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
+| AI settings page + BYO API key wizard — choose provider, enter keys, test connection | PLANNED | Must-have |
+| AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | PLANNED | Must-have |
+| Google Calendar integration — OAuth, two-way sync | PLANNED | Must-have |
+| Gmail integration — read, send, organize email within the app | PLANNED | Must-have |
+| Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | PLANNED | Must-have |
+| License key system — activation, tier validation, commercial distribution | PLANNED | Must-have |
+| Landing page & marketing site | PLANNED | Must-have |
+| Stripe integration — one-time payment flow | PLANNED | Must-have |
+| EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED | Must-have |
+| Product Hunt launch | PLANNED | Must-have |
+| White-label config layer — logo, colors, app name as settings (not hardcoded) | PLANNED | Should-have |
+| Outlook integration — email + calendar (fast-follow after Google) | PLANNED | Should-have |
+| PWA (installable, offline read) | PLANNED | Should-have |
+| Notifications & reminders | PLANNED | Should-have |
 
-### Phase 4: AI Integration
-*Add the Concierge AI orchestrator and semantic search.*
+### Phase B: One Workflow Cloud Platform + Orchestrator
+*Two revenue streams: One Workflow subscriptions for solopreneurs/teams + Kaivoo Orchestrator for builders. ARR engine. Target $1M.*
 
-| Milestone | Status | Sprint |
-|---|---|---|
-| The Concierge — AI routing engine (Ollama + Claude/OpenAI/Gemini) | PLANNED | — |
-| Agent file parser (markdown → structured config) | PLANNED | — |
-| Soul file — persistent AI memory | PLANNED | — |
-| RAG + semantic search (embeddings, vector store) | PLANNED | — |
-| Journal AI analysis (patterns, themes, mood over time) | PLANNED | — |
+#### Orchestrator (Product 2)
 
-### Phase 5: Distribution & Monetization
-*Start charging money. Launch publicly.*
+| Milestone | Status |
+|---|---|
+| Productize agent system — markdown specs → executable agent templates | PLANNED |
+| Orchestrator dashboard — sprint completions, production connections, sandbox, deployment status | PLANNED |
+| Multi-model routing engine — assign models to roles, API key management, cost tracking | PLANNED |
+| Messaging integration (Telegram or alternative) — first-class control surface, not just notifications | PLANNED |
+| "New Project" wizard — concierge generates Vision, agent roster, first sprint from conversation | PLANNED |
+| Productization sprint — clean templates, strip Kaivoo-specific content, blank-slate onboarding | PLANNED |
+| Security model — auth for remote-triggered execution, confirmation flows, blast-radius controls | PLANNED |
+| Orchestrator-as-addon — toggle for existing productivity app users to add builder capabilities | PLANNED |
+| Orchestrator subscription billing — premium pricing, Stripe recurring | PLANNED |
 
-| Milestone | Status | Sprint |
-|---|---|---|
-| Stripe integration — subscription + one-time payment flows | PLANNED | — |
-| Landing page & marketing site | PLANNED | — |
-| Product Hunt launch | PLANNED | — |
-| Self-hosted marketplace listing (GitHub, indie platforms) | PLANNED | — |
-| User onboarding flow optimization | PLANNED | — |
-| Feedback collection & NPS system | PLANNED | — |
-| Monitoring & observability for production users | PLANNED | — |
+#### One Workflow Cloud
 
-### Phase 6: Platform Architecture
-*Transform Kaivoo from a product into a platform. The Command Space becomes the foundation for modules.*
+| Milestone | Status |
+|---|---|
+| Shared notes, tasks, calendars — collaboration foundation | PLANNED |
+| Task assignment & delegation — assign, track, complete | PLANNED |
+| Role-based access — admin / manager / member tiers | PLANNED |
+| Team onboarding — invite, set roles, configure shared workspaces | PLANNED |
+| AI Concierge Level 2 — proactive suggestions, "I can do that for you" prompts | PLANNED |
+| Skills & integration architecture — plugin API, MCP-based skills store design | PLANNED |
+| Integration: Slack/Teams — connect (not rebuild), messages flow through One Workflow | PLANNED |
+| Marketing widget — content creation, social media, campaign planning | PLANNED |
+| Sales dashboard widget — pipeline tracking, contact management, lightweight CRM | PLANNED |
+| Document management widget — upload, organize, share, version | PLANNED |
+| The Concierge — AI routing engine (Claude/OpenAI/Gemini, Ollama for self-hosted) | PLANNED |
+| Soul file — concierge identity, user preferences, communication style, persistent memory | PLANNED |
+| Concierge-as-Builder — personal customization through conversation (pages, widgets, field changes) | PLANNED |
+| Concierge Hatching (Phase B) — extended onboarding wizard, guided platform tour led by the concierge | PLANNED |
+| 1st-party modules — Marketing, Sales, Docs built in Page + Today Widget format (marketplace template) | PLANNED |
+| RAG + semantic search (embeddings, vector store) | PLANNED |
+| Journal AI analysis (patterns, themes, mood over time) | PLANNED |
+| Subscription billing — Stripe recurring payments, tier management | PLANNED |
+| Monitoring & observability for production users | PLANNED |
+| Analytics & insights dashboard rebuild | PLANNED |
+| "One Workflow" branding & marketing site (oneworkflow.ai) | PLANNED |
 
-| Milestone | Status | Sprint |
-|---|---|---|
-| Module system architecture — registration, lifecycle, sandboxing | PLANNED | — |
-| Integration API — modules read/write core data (todos, calendar, journal) | PLANNED | — |
-| AI Orchestrator enhancement — route tasks to module agents based on context | PLANNED | — |
-| The Workshop — AI-powered customization engine (theming, layout, branding) | PLANNED | — |
-| Guardrailed customization for subscribers (presets, theme builder, widget arrangement) | PLANNED | — |
-| Full Workshop access for self-hosted users (custom integrations, deep customization) | PLANNED | — |
-| Sharing & collaboration (multi-user topics) | PLANNED | — |
-| Team workspaces with role-based access | PLANNED | — |
+### Phase C: Platform & Marketplace
+*Open the ecosystem. Let users and developers build on top of One Workflow.*
 
-### Phase 7: Module 2 — Marketing Agency
-*The first extension module. Proves the platform architecture works.*
+| Milestone | Status |
+|---|---|
+| Skills store & marketplace — browse, install, rate community and 1st-party modules | PLANNED |
+| Module SDK — documentation, tooling, and Page + Today Widget packaging format for builders | PLANNED |
+| Concierge-as-Builder (marketplace) — users publish concierge-built creations, automated quality/security review | PLANNED |
+| Revenue sharing — creators earn from marketplace sales, Kaivoo earns commission | PLANNED |
+| AI Concierge Level 3 — autonomous operation, AI executes without asking | PLANNED |
+| Email/CMS/Social Media/Website Hosting widgets — addon business tools | PLANNED |
+| Full white-label Workshop — deep customization, branding, layout composition | PLANNED |
+| Business Hub (multi-user, roles, team vaults) | PLANNED |
+| The Theater — media previews (PDF, video, audio, slides) | PLANNED |
+| The Vault — full file system + file browser (Phase A local-first storage is the architectural foundation) | PLANNED |
+| Self-hosted hub (Node.js + SQLite, Dockerized, multi-device sync) | PLANNED |
+| Trading Bot module (requires legal/compliance review before development) | PLANNED |
+| YouTube / Content Factory module | PLANNED |
+| Additional community-driven modules via Skills Store | PLANNED |
 
-| Milestone | Status | Sprint |
-|---|---|---|
-| Brand guidelines ingestion — upload brand docs, AI extracts tokens and voice | PLANNED | — |
-| Marketing agent team — Research, Copywriter, Designer, UX/UI, Engineer agents | PLANNED | — |
-| Content generation — landing pages, social posts, email campaigns, ad copy | PLANNED | — |
-| Campaign management — plan, schedule, track marketing campaigns | PLANNED | — |
-| Asset repository — generated materials stored and versioned in the Vault | PLANNED | — |
-| Client/project management — track deliverables, meetings, feedback per client | PLANNED | — |
-| Todo integration — AI orchestrator detects marketing tasks, offers to engage agents | PLANNED | — |
+---
 
-### Phase 8: Workshop & Marketplace
-*Let users build and share their own modules.*
+## Research Parcels (Active)
 
-| Milestone | Status | Sprint |
-|---|---|---|
-| Module SDK — documentation and tooling for building custom modules | PLANNED | — |
-| Module marketplace — browse, install, rate community modules | PLANNED | — |
-| Revenue sharing — creators earn from marketplace module sales | PLANNED | — |
-| The Theater — media previews (PDF, video, audio, slides) | PLANNED | — |
-| Business Hub (multi-user, roles, team vaults) | PLANNED | — |
-| Enterprise tier exploration | PLANNED | — |
+These run in parallel with sprint work, not blocking it.
 
-### Phase 9+: Future Modules
-*Expand the module ecosystem as the platform matures.*
-
-| Milestone | Status | Sprint |
-|---|---|---|
-| Trading Bot module — multi-strategy automated trading (requires legal/compliance review before development) | PLANNED | — |
-| YouTube / Content Factory module — video production, thumbnails, publishing pipeline | PLANNED | — |
-| Additional community-driven modules via Workshop & Marketplace | PLANNED | — |
+| Parcel | Owner | Deliverable | Status |
+|---|---|---|---|
+| Token cost modeling | Agent 5 | Cost-per-user estimates at light/medium/heavy AI usage tiers | PLANNED |
+| Competitive pricing teardown | Agent 8 | HubSpot, Monday, Notion, Asana pricing analysis — where the floor is for SMBs | PLANNED |
+| Addon pricing model | Agent 8 | Per-seat vs. per-workspace vs. usage-based analysis with widget addon tiers | PLANNED |
+| Legal / EULA research | Agent 5 | EULA template, redistribution terms, privacy policy framework — to be reviewed by attorney | PLANNED |
+| "One Workflow" positioning validation | Agent 8 | Does the name resonate? Does "replace your stack" land with target personas? | PLANNED |
+| Marketplace model analysis | Agent 8 | Shopify Apps, Figma Community, Notion Templates — commission structures, quality control, creator incentives | PLANNED |
+| Sandboxed module runtime | Agent 3 | Evaluate iframe sandboxing, Web Components, controlled runtimes for user-built modules — security vs. capability | PLANNED |
+| Messaging channel evaluation | Agent 5 | Telegram Bot API capabilities/limitations vs. custom messaging layer — viability for Orchestrator control surface | PLANNED |
+| Agent system productization | Agent 3 | How to turn markdown agent specs into executable, shippable agent templates without losing simplicity | PLANNED |
+| Solo Builder market validation | Agent 8 | Is the autonomous AI dev team market big enough? Willingness-to-pay for $99-199/mo Orchestrator subscription | PLANNED |
+| Remote execution security model | Agent 4 | Auth, confirmation flows, blast-radius controls for text-triggered code execution and git operations | PLANNED |
+| Orchestrator pricing model | Agent 8 | Subscription vs. usage-based vs. hybrid pricing for Product 2 | PLANNED |
+| Productization template design | Agent 3 + Agent 8 | What does a blank agent system look like for a new user? Guided not empty. First-run wizard design | PLANNED |
+| Multi-model orchestration overhead | Agent 5 | Users pay API costs — what's the platform orchestration overhead on top? | PLANNED |
+| Electron vs. Tauri evaluation | Agent 9 | Desktop framework for Phase A — performance, bundle size, file system API, cross-platform maturity, Rust vs. Node | **URGENT** |
+| SQLite schema + adapter interface | Agent 3 | Local-first schema design. Mirror Supabase or redesign? Adapter pattern for swappable backend. | PLANNED |
+| File watching mechanism | Agent 3 | How to detect manual file changes on disk for "permissive by nature" design | PLANNED |
+| Desktop auto-update + code signing | Agent 9 | Update distribution mechanism, Apple notarization, Windows signing | PLANNED |
 
 ---
 
 ## Current Position
 
-**We are in:** Phase 1 — Cloud Command Center
-**Active sprint:** Sprint 2 — Core Experience (approved Feb 22, 2026)
-**Last completed:** Sprint 1 (Security, Performance & Foundation) — raised audit score from 4.1 to 7.5+ target
+**We are in:** Phase A — Productivity App (completing pre-ship features)
+**Active sprint:** None — Sprint 19 planning pending
+**Last completed:** Sprint 18 (Search & Week View) — Global FTS, command palette, calendar week view, customizable keyboard shortcuts
 
-**Sprint 2 delivers:** Widget decomposition, React Query full migration, Kaivoo Design System overhaul, Unified Day View, Daily Shutdown ritual. See `Sprints/Sprint-2-Core-Experience.md`.
+**Sprint 18 delivered:** Supabase Postgres FTS with GIN indexes across 10 tables, `search_all` RPC with `websearch_to_tsquery`, SearchCommand command palette (Cmd+K), SearchTrigger bar on Today page, Calendar week view (7-column hourly grid, 3-mode switcher), customizable keyboard shortcuts system (Settings UI, shortcut recorder, browser conflict validation). See `Sprints/Sprint-18-Search-Week-View.md`.
 
-**Key decisions resolved:**
+**Sprint 17 delivered:** Three habit types (Positive, Negative, Multi-count), streaks, exponential-smoothing strength scores, analytics dashboard with mood-habit correlation, Today widget upgrade with two-way sync, habit detail view with calendar dots. See `Sprints/Sprint-17-Routines-Habits.md`.
+
+**Sprint 14 delivered:** Project Notes CRUD (project_notes table, RLS, service layer, Zustand store). ProjectDetail Notes section with inline editing. Quick Add note-to-project from anywhere (Cmd+Shift+N). Notes included in data export/import. See `Sprints/Sprint-14-Connect.md`.
+
+**Key decisions resolved (CEO Session — March 1, 2026):**
+- ~~Business model: one-time only vs. subscription~~ → **Two-phase strategy** (Phase A: $249 one-time, Phase B: subscription ARR)
+- ~~Product positioning~~ → **AI-powered workflow OS** — guided, outcome-first AI, not blank chat boxes
+- ~~Enterprise vs. SMB focus~~ → **SMB focus** — solopreneurs to small teams (1-25), no "enterprise" language
+- ~~Rebrand timing~~ → **Phase A ships under current branding, Phase B launches as "One Workflow by Kaivoo Media"**
+- ~~White-label architecture~~ → **Build config layer now (Phase A), full white-label in Phase B**
+- ~~Skills/integration priority~~ → **Elevated from Phase 8 to Phase B core** — design alongside AI orchestrator
+- ~~Phase B subscription pricing~~ → **Deferred pending research** on token costs and competitive analysis
+- ~~Legal protection~~ → **Required before Phase A ship** — EULA, license key, redistribution restrictions
+
+**Key decisions resolved (earlier sprints):**
 - ~~Design System migration vs. feature work~~ → **Both in Sprint 2** (merged sprint)
 - ~~React Query adoption~~ → **Full migration** approved
 - ~~Business model validation~~ → **Agent 8 delivered** (Competitive Landscape + Customer Persona reports)
+- ~~Projects data model~~ → **Implemented in Sprint 8** (Project → Task linking, status transitions, timeline view)
+- ~~Design Agent structure~~ → **Split into 3 agents in Sprint 12** (Visual Design, Accessibility & Theming, UX Completeness)
+
+**Key decisions resolved (CEO Session #2 — March 1, 2026):**
+- ~~Concierge identity~~ → **Users name and personalize their concierge** — soul file for memory/personality, hatching during setup wizard
+- ~~Concierge-as-Builder~~ → **Confirmed for Phase B (personal) and Phase C (marketplace)** — AI builds pages, widgets, and customizations through conversation
+- ~~1st-party module format~~ → **Page + Today Widget pattern** — Kaivoo's own modules serve as marketplace templates, same packaging checks
+- ~~Phase B onboarding~~ → **Concierge-led guided tour** — the hatched concierge walks users through platform capabilities
+
+**Key decisions resolved (CEO Session #3 — March 1, 2026):**
+- ~~Single product vs. multi-product~~ → **Two products on one platform** — Kaivoo Productivity ($249 one-time) + Kaivoo Orchestrator (premium subscription)
+- ~~Concierge scope~~ → **Clean boundary** — Productivity concierge = helper (find, summarize, add, recall). Orchestrator concierge = builder (sprint, agents, deploy). Same architecture, different capability ceiling.
+- ~~Modular toggle architecture~~ → **Settings-driven modules** — productivity and builder features as toggleable surfaces, dashboard adapts to active modules
+- ~~Productization requirement~~ → **Clean templates required before Orchestrator ships** — no Kaivoo-specific content in user-facing agent specs, blank-slate onboarding
+- ~~Orchestrator as integration~~ → **Confirmed** — SMBs can add Orchestrator as addon to productivity app, works with any repo/tech stack, premium pricing
+- ~~Phase A concierge BYO keys~~ → **Scoped to productivity use** — users connect Claude, ChatGPT, Llama, any provider. Multi-model routing architecture ships in Phase A but only productivity capabilities exposed.
+- ~~Phase A vs. Phase B priority~~ → **Ship productivity app first** — revenue now funds Orchestrator development. Research runs in parallel.
+
+**Key decisions resolved (CEO Session #4 — March 1, 2026):**
+- ~~Local-first storage phasing~~ → **Phase A must-have** — $249 one-time model requires local storage. Supabase cloud dependency creates inverted unit economics. Local-first solves business model and aligns with Core Principle #1.
+- ~~Desktop packaging priority~~ → **Promoted to Phase A must-have** — required for file system access. One codebase, three platform builds (macOS, Windows, Linux).
+- ~~Topics page role~~ → **Knowledge OS** — Topics is the top-level hierarchy (Topics > Projects > Tasks/Files). Smart file browser, single source of truth for all content and files. Convention with flexibility: opinionated default, permissive by nature.
+- ~~Data architecture for local~~ → **Swappable backend** — Data layer abstraction with LocalAdapter (SQLite + file system) for Phase A and CloudAdapter (Supabase) for Phase B. One codebase, no split.
+- ~~File attachments priority~~ → **Promoted to Phase A must-have** — files in project/topic folders, images embedded inline in notes.
+- ~~Hashtags as folders vs. filters~~ → **Virtual groupings (filters)** — hashtags are metadata filters, not physical subfolders. Files can have multiple tags but live in one folder.
+- ~~Folder structure ownership~~ → **SQLite is source of truth** — folder structure on disk is the default representation, but metadata/relationships tracked in SQLite. If user rearranges files manually, app detects and updates index.
+- ~~Obsidian import scope~~ → **File copy, feature not headline** — copy .md files into Topics, index #hashtags and [[wiki-links]], no plugins/frontmatter/graph. Default copy, optional adopt-in-place.
+- ~~Supabase during development~~ → **Keep for dev/test** — Supabase stays for development. Shipped product uses local SQLite. Data layer abstraction enables the swap.
+- ~~Codebase split~~ → **No split until Phase A ships** — same React frontend, same repo, adapter pattern handles local vs. cloud.
+- ~~Entry export~~ → **Export to file** — journal entries/captures can be exported as .md files to chosen Topics folder location.
 
 **Key decisions ahead:**
-- **Desktop framework choice** — Electron vs. Tauri (Agent 9 to evaluate)
-- **Platform architecture scoping** — When to begin module system design alongside core product work
-- **Module 2 revenue gate** — Command Space must be generating revenue before Marketing Agency development begins
-- **Trading Bot legal review** — Required before any technical planning on Module 3
-- **Workshop architecture** — How deep does AI-powered customization go? Theming only, or layout and component composition?
+- **Electron vs. Tauri** — Agent 9 to evaluate urgently. Blocks desktop packaging and all local-first features.
+- **SQLite schema design** — Agent 3 to design local schema and adapter interface. Mirror Supabase or redesign for local-first?
+- **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
+- **Desktop auto-update** — How do users get updates for the desktop app? Agent 9.
+- **Code signing** — Apple notarization + Windows signing. Agent 9.
+- **Phase A sprint sequencing** — Which pre-ship features to group into Sprint 19, 20, etc. (Director to plan)
+- **Phase B subscription pricing** — Pending research on token costs, competitive pricing, addon model
+- **Skills store architecture** — MCP-based vs. custom plugin API (Agent 3 to evaluate during Phase B)
+- **Sandboxed module runtime** — How user-built modules run safely (iframe, Web Components, controlled runtime) (Agent 3)
+- **Marketplace commission model** — Revenue split that attracts creators without undercutting platform revenue (Agent 8)
+- **Legal review** — EULA needs attorney review before Phase A ships
+- **Messaging channel for Orchestrator** — Telegram vs. custom vs. multi-platform (Agent 5 research)
+- **Agent system productization** — How to ship executable agent templates without losing markdown simplicity (Agent 3)
+- **Orchestrator pricing** — Subscription, usage-based, or hybrid (Agent 8)
+- **Solo Builder market validation** — Is the market real and big enough? (Agent 8)
+- **Remote execution security** — Auth and blast-radius controls for text-triggered git operations (Agent 4)
 
 ---
 
 ## Target Metrics
 
-### Phase 1 (Technical Quality)
+### Phase A (Technical Quality + Ship Readiness)
 
 | Metric | Target |
 |---|---|
@@ -332,8 +567,10 @@ The platform doesn't guess what users want — it watches what they're already t
 | API Response Time (p50) | < 100ms |
 | Accessibility | WCAG AA compliance |
 | Code Audit Score | 8.5+/10 |
+| Phase A Sales | 400 units ($100K) |
+| Time to Value (setup → "aha moment") | < 5 minutes |
 
-### Phase 5+ (Business Metrics)
+### Phase B (Business Metrics)
 
 | Metric | Target |
 |---|---|
@@ -343,14 +580,15 @@ The platform doesn't guess what users want — it watches what they're already t
 | Lifetime Value (LTV) | > $400 |
 | LTV:CAC Ratio | > 3:1 |
 | Net Promoter Score (NPS) | > 50 |
-| Time to Value (setup → "aha moment") | < 5 minutes |
 
 ---
 
 ## The $1M Target
 
-The north star business goal is **$1M in annual revenue** — whether through subscriptions, one-time sales, or a combination. This target guides every product and prioritization decision:
+The north star business goal is **$1M in annual revenue** — through one-time sales (Phase A) and subscriptions (Phase B). This target guides every product and prioritization decision:
 
+- Phase A sales fund Phase B development — no speculative investment
+- Phase A users validate Phase B assumptions — build on pull, not guesses
 - Features that increase willingness-to-pay are prioritized over nice-to-haves
 - Every phase must move us closer to a chargeable product
 - Agent 8 (Product Manager) owns the strategy to get there
@@ -358,18 +596,44 @@ The north star business goal is **$1M in annual revenue** — whether through su
 
 ---
 
+## The Competitive Edge
+
+Why One Workflow wins where others don't:
+
+1. **Guided AI, not open-ended AI.** Claude and ChatGPT are power tools with no instruction manual. They hand you infinite capability and zero direction. One Workflow gives users specific tools with clear outcomes. No prompt engineering. No decision paralysis.
+
+2. **Replace the stack, don't add to it.** Notion + Google Calendar + journal app + CRM spreadsheet + AI chat = 5 tabs, 5 logins, 5 subscriptions. One Workflow = one place.
+
+3. **HubSpot for humans.** HubSpot is 47 tiers of confusion built for enterprises. One Workflow is clear, simple, and built for the solopreneur and small team that uses a tenth of HubSpot's features and pays too much for it.
+
+4. **AI that teaches you what it can do.** The concierge doesn't wait for instructions — it suggests actions based on your data. Every suggestion is a discovery moment. Users don't need to know what's possible because the AI shows them.
+
+5. **Grows with you.** Start personal, go professional. The same tool that manages your journal and habits also runs your team's projects and client work. No migration. No second tool. One workflow.
+
+---
+
 ## How This Document Is Used
 
-1. **The Director** reads this before every sprint planning session
-2. **All agents** can reference this for product context
-3. **Agent 8 (Product Manager)** uses this to align business strategy with engineering reality
-4. **The user** updates this when priorities shift or new features are requested
-5. **Sprint retrospectives** update the Status column as milestones complete
+1. **The CEO** owns this document philosophically — is Kaivoo/One Workflow solving the right problem?
+2. **The Director** reads this before every sprint planning session
+3. **All agents** can reference this for product context
+4. **Agent 8 (Product Manager)** uses this to align business strategy with engineering reality
+5. **The user** updates this when priorities shift or new features are requested
+6. **Sprint retrospectives** update the Status column as milestones complete
 
 When a milestone moves from PLANNED to DONE, update the Status and Sprint columns. When new milestones are added, place them in the appropriate phase.
 
 ---
 
-*Vision v3.0 — February 22, 2026*
-*Updated to reflect platform pivot: modular architecture, Command Space as foundation, Marketing Agency as Module 2, long-term module ecosystem*
-*Synthesized from Agent 2 (Cloud Roadmap), Agent 3 (Hub Architecture), Agent 8 (Product Strategy), and user platform vision*
+*Vision v4.3 — March 1, 2026*
+*v4.3: CEO Session #4 — Local-First Knowledge OS. Topics elevated to single source of truth for all content and files (Topics > Projects > Tasks/Files hierarchy). Desktop packaging (Electron/Tauri) promoted to Phase A must-have — $249 model requires local storage, Supabase cloud creates inverted unit economics. Data layer abstraction: LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B, swappable backend, no codebase split. File attachments + image embedding promoted to must-have. Hashtags as virtual filters not folders. Convention-with-flexibility folder structure (opinionated default, permissive by nature). Obsidian import (file copy, not headline). Entry-to-file export. Setup wizard includes vault folder selection. Four new research parcels: Electron vs. Tauri (urgent), SQLite schema design, file watching, desktop auto-update + code signing. See CEO-Sessions/CEO-Session-4-Local-First-Knowledge-OS.md.*
+*v4.2: CEO Session #3 — Two-product architecture (Kaivoo Productivity + Kaivoo Orchestrator). Concierge scope boundary (productivity helper vs. builder). Modular toggle architecture (settings-driven module activation). Productization requirement (clean templates, no Kaivoo-specific content in shipped specs). Orchestrator as addon/integration for SMBs. Solo Builder target customer added. Phase B split into Orchestrator + One Workflow Cloud sections. Seven new research parcels assigned (messaging channel, agent productization, Solo Builder market, remote execution security, Orchestrator pricing, template design, multi-model overhead).*
+*v4.1: CEO Session #2 — Concierge Identity & Soul (naming, hatching, soul file). Concierge-as-Builder (personal customization Phase B, marketplace creation Phase C). 1st-party modules as marketplace templates (Page + Today Widget format). Phase B concierge-led onboarding wizard. New research parcels: marketplace model analysis (Agent 8), sandboxed module runtime (Agent 3).*
+*v4.0: CEO Session strategic pivot — Two-phase revenue strategy (Phase A: $249 productivity app, Phase B: One Workflow cloud subscription). New core principles: "Guided, not open-ended" and "Progressive autonomy." Autonomy Ladder (manual → concierge → autonomous). SMB focus, enterprise language dropped. White-label architecture. Skills/integration architecture elevated. Research parcels assigned. Competitive edge articulated.*
+*v3.7: Sprint 18 — Search + Calendar Week View + Keyboard Shortcuts. Phase 1 ~100%*
+*v3.6: Sprint 17 — Routines & Habits shipped*
+*v3.5: Sprint 16 — Calendar redesign*
+*v3.4: Sprint 14 — Project Notes, UX polish*
+*v3.3: Sprint 12 — Design Agent split, code quality verified*
+*v3.2: Sprint 7 — Supabase cloud migration*
+*v3.0: Platform pivot — modular architecture, Command Space as foundation*

@@ -36,17 +36,22 @@ const AIActionHistory = React.memo(function AIActionHistory({
           {showHistory ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-2 mt-2">
-        {logs.map(log => (
-          <div key={log.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 text-sm">
+      <CollapsibleContent className="mt-2 space-y-2">
+        {logs.map((log) => (
+          <div key={log.id} className="flex items-center justify-between rounded-lg bg-muted/30 p-2 text-sm">
             <div>
               <span className="font-medium">{log.actionType.replace('_', ' ')}</span>
-              <span className="text-muted-foreground ml-2">
+              <span className="ml-2 text-muted-foreground">
                 {(log.actionData as Record<string, string>).title ||
-                 (log.actionData as Record<string, string>).content?.substring(0, 30)}
+                  (log.actionData as Record<string, string>).content?.substring(0, 30)}
               </span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onUndo(log.id)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onUndo(log.id)}
+              aria-label={`Undo ${log.actionType.replace('_', ' ')}`}
+            >
               <Undo2 className="h-4 w-4" />
             </Button>
           </div>

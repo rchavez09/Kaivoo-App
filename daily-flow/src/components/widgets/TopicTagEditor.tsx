@@ -26,7 +26,10 @@ export function TopicTagEditor({
   onTopicChange,
   onTagsChange,
 }: TopicTagEditorProps) {
-  const { topics, getTopicPages, tags: storeTags, tasks } = useKaivooStore();
+  const topics = useKaivooStore((s) => s.topics);
+  const getTopicPages = useKaivooStore((s) => s.getTopicPages);
+  const storeTags = useKaivooStore((s) => s.tags);
+  const tasks = useKaivooStore((s) => s.tasks);
   const [topicOpen, setTopicOpen] = useState(false);
   const [tagOpen, setTagOpen] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
@@ -36,8 +39,8 @@ export function TopicTagEditor({
   // Get unique existing tags - memoized to prevent infinite loops
   const existingTags = useMemo(() => {
     const tagSet = new Set<string>();
-    storeTags.forEach(t => tagSet.add(t.name.toLowerCase()));
-    tasks.forEach(t => t.tags?.forEach(tag => tagSet.add(tag.toLowerCase())));
+    storeTags.forEach((t) => tagSet.add(t.name.toLowerCase()));
+    tasks.forEach((t) => t.tags?.forEach((tag) => tagSet.add(tag.toLowerCase())));
     return Array.from(tagSet).sort();
   }, [storeTags, tasks]);
 
@@ -56,15 +59,18 @@ export function TopicTagEditor({
 
   const handleAddTag = (tagName: string, isNew: boolean) => {
     const normalized = tagName.toLowerCase().replace(/^#/, '');
-    if (normalized && !tags.map(t => t.replace(/^#/, '').toLowerCase()).includes(normalized)) {
+    if (normalized && !tags.map((t) => t.replace(/^#/, '').toLowerCase()).includes(normalized)) {
       const newTags = [...tags, `#${normalized}`];
-      onTagsChange(newTags, isNew || tags.some(t => !existingTags.includes(t.replace(/^#/, '').toLowerCase())));
+      onTagsChange(newTags, isNew || tags.some((t) => !existingTags.includes(t.replace(/^#/, '').toLowerCase())));
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    const newTags = tags.filter(t => t !== tagToRemove);
-    onTagsChange(newTags, newTags.some(t => !existingTags.includes(t.replace(/^#/, '').toLowerCase())));
+    const newTags = tags.filter((t) => t !== tagToRemove);
+    onTagsChange(
+      newTags,
+      newTags.some((t) => !existingTags.includes(t.replace(/^#/, '').toLowerCase())),
+    );
   };
 
   const handleCreateNewTag = () => {
@@ -75,33 +81,28 @@ export function TopicTagEditor({
   };
 
   // Filter out already used tags
-  const availableTags = existingTags.filter(
-    t => !tags.map(tag => tag.replace(/^#/, '').toLowerCase()).includes(t)
-  );
+  const availableTags = existingTags.filter((t) => !tags.map((tag) => tag.replace(/^#/, '').toLowerCase()).includes(t));
 
   // Combine suggested new tags that aren't already added
   const availableSuggestedTags = suggestedNewTags.filter(
-    t => !tags.map(tag => tag.replace(/^#/, '').toLowerCase()).includes(t.replace(/^#/, '').toLowerCase())
+    (t) => !tags.map((tag) => tag.replace(/^#/, '').toLowerCase()).includes(t.replace(/^#/, '').toLowerCase()),
   );
 
   return (
-    <div className="flex flex-wrap gap-1.5 items-center">
+    <div className="flex flex-wrap items-center gap-1.5">
       {/* Topic Picker */}
       <Popover open={topicOpen} onOpenChange={setTopicOpen}>
         <PopoverTrigger asChild>
           <button type="button" className="inline-flex">
-            <Badge 
-              variant={topicPath ? "outline" : "secondary"}
-              className={cn(
-                "text-xs font-mono cursor-pointer hover:bg-muted gap-1",
-                topicPath && "border-primary/40"
-              )}
+            <Badge
+              variant={topicPath ? 'outline' : 'secondary'}
+              className={cn('cursor-pointer gap-1 font-mono text-xs hover:bg-muted', topicPath && 'border-primary/40')}
             >
               {topicPath ? (
                 <>
                   <FolderOpen className="h-3 w-3" />
                   {topicPath.replace(/^\[\[|\]\]$/g, '')}
-                  {isNewTopic && <span className="text-primary font-medium">[NEW]</span>}
+                  {isNewTopic && <span className="font-medium text-primary">[NEW]</span>}
                 </>
               ) : (
                 <>
@@ -115,7 +116,7 @@ export function TopicTagEditor({
         <PopoverContent className="w-56 p-2" align="start">
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Select or create topic:</p>
-            
+
             {/* Suggested new topics from AI */}
             {suggestedNewTopics.length > 0 && (
               <div className="space-y-1">
@@ -125,48 +126,50 @@ export function TopicTagEditor({
                     key={`new-${topic}`}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs h-7 text-primary"
+                    className="h-7 w-full justify-start text-xs text-primary"
                     onClick={() => handleSelectTopic(topic, true)}
                   >
-                    <Plus className="h-3 w-3 mr-1.5" />
+                    <Plus className="mr-1.5 h-3 w-3" />
                     {topic}
-                    <Badge variant="outline" className="ml-auto text-[10px] px-1">NEW</Badge>
+                    <Badge variant="outline" className="ml-auto px-1 text-[10px]">
+                      NEW
+                    </Badge>
                   </Button>
                 ))}
               </div>
             )}
 
             {/* Existing topics */}
-            <div className="space-y-1 max-h-[200px] overflow-y-auto">
+            <div className="max-h-[200px] space-y-1 overflow-y-auto">
               {topicPath && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start text-xs h-7 text-muted-foreground"
+                  className="h-7 w-full justify-start text-xs text-muted-foreground"
                   onClick={() => {
                     onTopicChange(null, false);
                     setTopicOpen(false);
                   }}
                 >
-                  <X className="h-3 w-3 mr-1.5" />
+                  <X className="mr-1.5 h-3 w-3" />
                   Remove topic
                 </Button>
               )}
-              
+
               {topics.map((topic) => {
                 const pages = getTopicPages(topic.id);
                 const isExpanded = expandedTopic === topic.id;
-                
+
                 return (
                   <div key={topic.id}>
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="flex-1 justify-start text-xs h-7"
+                        className="h-7 flex-1 justify-start text-xs"
                         onClick={() => handleSelectTopic(topic.name, false)}
                       >
-                        <FolderOpen className="h-3 w-3 mr-1.5 text-primary" />
+                        <FolderOpen className="mr-1.5 h-3 w-3 text-primary" />
                         {topic.name}
                       </Button>
                       {pages.length > 0 && (
@@ -174,30 +177,35 @@ export function TopicTagEditor({
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0"
+                          aria-label={isExpanded ? `Collapse ${topic.name} pages` : `Expand ${topic.name} pages`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setExpandedTopic(isExpanded ? null : topic.id);
                           }}
                         >
-                          <span className={cn(
-                            "text-[10px] text-muted-foreground transition-transform",
-                            isExpanded && "rotate-90"
-                          )}>▶</span>
+                          <span
+                            className={cn(
+                              'text-[10px] text-muted-foreground transition-transform',
+                              isExpanded && 'rotate-90',
+                            )}
+                          >
+                            ▶
+                          </span>
                         </Button>
                       )}
                     </div>
-                    
+
                     {isExpanded && pages.length > 0 && (
-                      <div className="ml-4 pl-2 border-l border-border/50 space-y-0.5">
+                      <div className="ml-4 space-y-0.5 border-l border-border/50 pl-2">
                         {pages.map((page) => (
                           <Button
                             key={page.id}
                             variant="ghost"
                             size="sm"
-                            className="w-full justify-start text-xs h-6"
+                            className="h-6 w-full justify-start text-xs"
                             onClick={() => handleSelectTopic(`${topic.name}/${page.name}`, false)}
                           >
-                            <FileText className="h-3 w-3 mr-1.5 text-info" />
+                            <FileText className="mr-1.5 h-3 w-3 text-info-foreground" />
                             {page.name}
                           </Button>
                         ))}
@@ -209,7 +217,7 @@ export function TopicTagEditor({
             </div>
 
             {/* Create new topic */}
-            <div className="pt-2 border-t border-border/50">
+            <div className="border-t border-border/50 pt-2">
               <div className="flex gap-1">
                 <Input
                   placeholder="New topic name..."
@@ -226,6 +234,7 @@ export function TopicTagEditor({
                   className="h-7 w-7 p-0"
                   onClick={handleCreateNewTopic}
                   disabled={!newTopicName.trim()}
+                  aria-label="Create new topic"
                 >
                   <Check className="h-3.5 w-3.5" />
                 </Button>
@@ -240,20 +249,18 @@ export function TopicTagEditor({
         const tagName = tag.replace(/^#/, '');
         const isNew = !existingTags.includes(tagName.toLowerCase());
         return (
-          <Badge 
-            key={tag} 
-            variant="secondary" 
-            className={cn(
-              "text-xs gap-1 group",
-              isNew && "border-primary/40 border"
-            )}
+          <Badge
+            key={tag}
+            variant="secondary"
+            className={cn('group gap-1 text-xs', isNew && 'border border-primary/40')}
           >
             <Hash className="h-3 w-3" />
             {tagName}
-            {isNew && <span className="text-primary font-medium">[NEW]</span>}
+            {isNew && <span className="font-medium text-primary">[NEW]</span>}
             <button
               onClick={() => handleRemoveTag(tag)}
               className="ml-0.5 opacity-50 hover:opacity-100 group-hover:opacity-100"
+              aria-label={`Remove ${tagName} tag`}
             >
               <X className="h-3 w-3" />
             </button>
@@ -265,10 +272,7 @@ export function TopicTagEditor({
       <Popover open={tagOpen} onOpenChange={setTagOpen}>
         <PopoverTrigger asChild>
           <button type="button" className="inline-flex">
-            <Badge 
-              variant="outline"
-              className="text-xs cursor-pointer hover:bg-muted gap-1 border-dashed"
-            >
+            <Badge variant="outline" className="cursor-pointer gap-1 border-dashed text-xs hover:bg-muted">
               <Hash className="h-3 w-3" />
               <Plus className="h-3 w-3" />
             </Badge>
@@ -277,7 +281,7 @@ export function TopicTagEditor({
         <PopoverContent className="w-48 p-2" align="start">
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Add tags:</p>
-            
+
             {/* AI Suggested new tags */}
             {availableSuggestedTags.length > 0 && (
               <div className="space-y-1">
@@ -287,15 +291,17 @@ export function TopicTagEditor({
                     key={`new-${tag}`}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs h-7 text-primary"
+                    className="h-7 w-full justify-start text-xs text-primary"
                     onClick={() => {
                       handleAddTag(tag, true);
                       setTagOpen(false);
                     }}
                   >
-                    <Hash className="h-3 w-3 mr-1" />
+                    <Hash className="mr-1 h-3 w-3" />
                     {tag.replace(/^#/, '')}
-                    <Badge variant="outline" className="ml-auto text-[10px] px-1">NEW</Badge>
+                    <Badge variant="outline" className="ml-auto px-1 text-[10px]">
+                      NEW
+                    </Badge>
                   </Button>
                 ))}
               </div>
@@ -303,19 +309,19 @@ export function TopicTagEditor({
 
             {/* Existing tags */}
             {availableTags.length > 0 && (
-              <div className="space-y-1 max-h-[150px] overflow-y-auto">
+              <div className="max-h-[150px] space-y-1 overflow-y-auto">
                 {availableTags.slice(0, 10).map((tag) => (
                   <Button
                     key={tag}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs h-7"
+                    className="h-7 w-full justify-start text-xs"
                     onClick={() => {
                       handleAddTag(tag, false);
                       setTagOpen(false);
                     }}
                   >
-                    <Hash className="h-3 w-3 mr-1" />
+                    <Hash className="mr-1 h-3 w-3" />
                     {tag}
                   </Button>
                 ))}
@@ -323,7 +329,7 @@ export function TopicTagEditor({
             )}
 
             {/* Create new tag */}
-            <div className="pt-2 border-t border-border/50">
+            <div className="border-t border-border/50 pt-2">
               <div className="flex gap-1">
                 <Input
                   placeholder="New tag..."
@@ -346,6 +352,7 @@ export function TopicTagEditor({
                     setTagOpen(false);
                   }}
                   disabled={!newTagName.trim()}
+                  aria-label="Create new tag"
                 >
                   <Check className="h-3.5 w-3.5" />
                 </Button>

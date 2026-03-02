@@ -2,12 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Hash, FileText, X, Save, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import RichTextEditor from '@/components/journal/RichTextEditor';
 import { JournalEntry } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
@@ -30,7 +25,7 @@ interface JournalEntryDialogProps {
 const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryDialogProps) => {
   const [content, setContent] = useState('');
   const [chips, setChips] = useState<ParsedChip[]>([]);
-  const { resolveTopicPath } = useKaivooStore();
+  const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
 
   useEffect(() => {
     if (entry) {
@@ -43,7 +38,7 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
     // Strip HTML for parsing tags/topics
     const text = html.replace(/<[^>]*>/g, ' ');
     const parsed: ParsedChip[] = [];
-    
+
     // Match #tags
     const tagRegex = /#(\w+)/g;
     let match;
@@ -52,10 +47,10 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
         type: 'tag',
         value: match[1],
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + match[0].length,
       });
     }
-    
+
     // Match [[Topic]] or [[Topic/Page]] paths
     const topicRegex = /\[\[([^\]]+)\]\]/g;
     while ((match = topicRegex.exec(text)) !== null) {
@@ -63,10 +58,10 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
         type: 'topic',
         value: match[1],
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + match[0].length,
       });
     }
-    
+
     setChips(parsed);
   }, []);
 
@@ -78,12 +73,12 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
   const handleSave = () => {
     if (!entry || !content.trim()) return;
 
-    const uniqueTopicPaths = [...new Set(chips.filter(c => c.type === 'topic').map(c => c.value))];
-    const uniqueTags = [...new Set(chips.filter(c => c.type === 'tag').map(c => c.value.toLowerCase()))];
+    const uniqueTopicPaths = [...new Set(chips.filter((c) => c.type === 'topic').map((c) => c.value))];
+    const uniqueTags = [...new Set(chips.filter((c) => c.type === 'tag').map((c) => c.value.toLowerCase()))];
 
     // Resolve topic paths to IDs, auto-creating if needed. Flatten since each path returns [topicId] or [topicId, pageId]
     const topicIds = uniqueTopicPaths
-      .map(path => resolveTopicPath(path, true))
+      .map((path) => resolveTopicPath(path, true))
       .filter(Boolean)
       .flat() as string[];
 
@@ -100,8 +95,8 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
     onOpenChange(false);
   };
 
-  const uniqueTags = [...new Set(chips.filter(c => c.type === 'tag').map(c => c.value))];
-  const uniqueTopics = [...new Set(chips.filter(c => c.type === 'topic').map(c => c.value))];
+  const uniqueTags = [...new Set(chips.filter((c) => c.type === 'tag').map((c) => c.value))];
+  const uniqueTopics = [...new Set(chips.filter((c) => c.type === 'topic').map((c) => c.value))];
 
   // Check if a topic path exists
   const topicExists = (path: string) => {
@@ -110,7 +105,7 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Edit Entry</span>
@@ -134,7 +129,7 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
             <div className="flex flex-wrap gap-1.5">
               {uniqueTags.map((tag) => (
                 <span key={`tag-${tag}`} className="tag-chip">
-                  <Hash className="w-3 h-3" />
+                  <Hash className="h-3 w-3" />
                   {tag}
                 </span>
               ))}
@@ -142,14 +137,14 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
                 const exists = topicExists(topicPath);
                 const isPage = topicPath.includes('/');
                 return (
-                  <span 
-                    key={`topic-${topicPath}`} 
+                  <span
+                    key={`topic-${topicPath}`}
                     className={`topic-chip ${!exists ? 'opacity-60' : ''}`}
                     title={!exists ? 'Will be created on save' : topicPath}
                   >
-                    {isPage ? <FileText className="w-3 h-3" /> : <FolderOpen className="w-3 h-3" />}
+                    {isPage ? <FileText className="h-3 w-3" /> : <FolderOpen className="h-3 w-3" />}
                     {topicPath}
-                    {!exists && <span className="text-[10px] ml-0.5">+</span>}
+                    {!exists && <span className="ml-0.5 text-[10px]">+</span>}
                   </span>
                 );
               })}
@@ -161,7 +156,7 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
               Cancel
             </Button>
             <Button onClick={handleSave} className="gap-2">
-              <Save className="w-4 h-4" />
+              <Save className="h-4 w-4" />
               Save Changes
             </Button>
           </div>

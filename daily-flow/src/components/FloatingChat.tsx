@@ -50,11 +50,27 @@ function parseCommand(input: string): { type: string; payload: string } | null {
 }
 
 const MOOD_MAP: Record<string, number> = {
-  great: 5, amazing: 5, fantastic: 5, awesome: 5, excellent: 5,
-  good: 4, nice: 4, fine: 4, happy: 4,
-  okay: 3, ok: 3, alright: 3, meh: 3,
-  low: 2, bad: 2, sad: 2, down: 2,
-  rough: 1, terrible: 1, awful: 1, horrible: 1,
+  great: 5,
+  amazing: 5,
+  fantastic: 5,
+  awesome: 5,
+  excellent: 5,
+  good: 4,
+  nice: 4,
+  fine: 4,
+  happy: 4,
+  okay: 3,
+  ok: 3,
+  alright: 3,
+  meh: 3,
+  low: 2,
+  bad: 2,
+  sad: 2,
+  down: 2,
+  rough: 1,
+  terrible: 1,
+  awful: 1,
+  horrible: 1,
 };
 
 const FloatingChat = () => {
@@ -64,7 +80,7 @@ const FloatingChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { addTask, addCapture, addJournalEntry, toggleRoutineCompletion } = useKaivooActions();
-  const routines = useKaivooStore(s => s.routines);
+  const routines = useKaivooStore((s) => s.routines);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,7 +91,7 @@ const FloatingChat = () => {
   }, [isOpen]);
 
   const addMessage = useCallback((role: 'user' | 'assistant', text: string) => {
-    setMessages(prev => [...prev, { id: crypto.randomUUID(), role, text }]);
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role, text }]);
   }, []);
 
   const handleSend = useCallback(async () => {
@@ -100,18 +116,19 @@ const FloatingChat = () => {
         });
         addMessage('assistant', `Done \u2014 created task "${command.payload}" for today.`);
       } else if (command?.type === 'complete_routine') {
-        const match = routines.find(
-          r => r.name.toLowerCase() === command.payload.toLowerCase()
-        ) || routines.find(
-          r => r.name.toLowerCase().includes(command.payload.toLowerCase())
-        );
+        const match =
+          routines.find((r) => r.name.toLowerCase() === command.payload.toLowerCase()) ||
+          routines.find((r) => r.name.toLowerCase().includes(command.payload.toLowerCase()));
 
         if (match) {
           const dateStr = formatStorageDate(new Date());
           toggleRoutineCompletion(match.id, dateStr);
           addMessage('assistant', `Marked "${match.name}" as done.`);
         } else {
-          addMessage('assistant', `Couldn't find a routine matching "${command.payload}". Your routines: ${routines.map(r => r.name).join(', ')}`);
+          addMessage(
+            'assistant',
+            `Couldn't find a routine matching "${command.payload}". Your routines: ${routines.map((r) => r.name).join(', ')}`,
+          );
         }
       } else if (command?.type === 'set_mood') {
         const score = MOOD_MAP[command.payload.toLowerCase()];
@@ -149,10 +166,11 @@ const FloatingChat = () => {
         });
         addMessage('assistant', 'Saved as a capture. You can process it later.');
       }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Something went wrong';
-      addMessage('assistant', msg);
-      toast.error(msg);
+    } catch (e: unknown) {
+      console.error('[FloatingChat]', e);
+      const userMsg = 'Something went wrong. Please try again.';
+      addMessage('assistant', userMsg);
+      toast.error(userMsg);
     }
   }, [input, addMessage, addTask, addCapture, addJournalEntry, toggleRoutineCompletion, routines]);
 
@@ -160,35 +178,31 @@ const FloatingChat = () => {
     <>
       {/* Chat drawer */}
       {isOpen && (
-        <div className="fixed bottom-20 right-6 w-80 max-h-[420px] bg-card border border-border rounded-2xl shadow-lg flex flex-col z-50 animate-fade-in">
+        <div className="fixed bottom-20 right-6 z-50 flex max-h-[420px] w-80 animate-fade-in flex-col rounded-2xl border border-border bg-card shadow-lg">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+          <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
             <span className="text-sm font-medium text-foreground">Kaivoo Chat</span>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[200px]">
+          <div className="min-h-[200px] flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {messages.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-xs text-muted-foreground">
-                  Try: "Remind me to review PR" or "Mark meditation done"
-                </p>
+              <div className="py-8 text-center">
+                <p className="text-xs text-muted-foreground">Try: "Remind me to review PR" or "Mark meditation done"</p>
               </div>
             )}
-            {messages.map(msg => (
+            {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={cn(
-                  'text-sm px-3 py-2 rounded-xl max-w-[85%]',
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-secondary text-foreground'
+                  'max-w-[85%] rounded-xl px-3 py-2 text-sm',
+                  msg.role === 'user' ? 'ml-auto bg-primary text-primary-foreground' : 'bg-secondary text-foreground',
                 )}
               >
                 {msg.text}
@@ -198,20 +212,20 @@ const FloatingChat = () => {
           </div>
 
           {/* Input */}
-          <div className="px-3 py-3 border-t border-border/50">
+          <div className="border-t border-border/50 px-3 py-3">
             <div className="flex gap-2">
               <Input
                 ref={inputRef}
                 placeholder="Quick thought or action..."
                 value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => {
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSend();
                 }}
                 className="h-9 text-sm"
               />
               <Button size="sm" onClick={handleSend} className="h-9 px-3">
-                <Send className="w-3.5 h-3.5" />
+                <Send className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
@@ -220,16 +234,14 @@ const FloatingChat = () => {
 
       {/* Floating button */}
       <button
-        onClick={() => setIsOpen(prev => !prev)}
+        onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
-          'fixed bottom-6 right-6 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all z-50',
-          isOpen
-            ? 'bg-primary text-primary-foreground scale-90'
-            : 'bg-primary text-primary-foreground hover:scale-105'
+          'fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all',
+          isOpen ? 'scale-90 bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground hover:scale-105',
         )}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
       >
-        <MessageCircle className="w-5 h-5" />
+        <MessageCircle className="h-5 w-5" />
       </button>
     </>
   );

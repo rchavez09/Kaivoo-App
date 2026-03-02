@@ -1,3 +1,15 @@
+# Test coverage
+coverage
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+e2e/.auth/
+
+# E2E test credentials
+.env.e2e
 # Logs
 logs
 *.log

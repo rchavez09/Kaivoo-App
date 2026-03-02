@@ -17,7 +17,7 @@ const defaultPreferences: UserPreferences = {
 export function useUserPreferences() {
   const { settings, loading, updateSettings } = useWidgetSettings<UserPreferences>(
     'user-preferences',
-    defaultPreferences
+    defaultPreferences,
   );
 
   const setWeekStartsOn = (day: WeekStartDay) => {

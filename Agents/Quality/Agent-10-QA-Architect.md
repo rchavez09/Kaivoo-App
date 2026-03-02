@@ -2,6 +2,7 @@
 
 **Role:** Senior QA Architect
 **Department:** Quality
+**Model:** Sonnet
 **Date:** February 22, 2026
 **Status:** Defined — Activates Sprint 4+
 **Activation Gate:** Command Space feature-complete (Sprint 2-3 done), pre-launch testing required

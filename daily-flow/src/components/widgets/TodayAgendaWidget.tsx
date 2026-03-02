@@ -1,7 +1,16 @@
 import { useState } from 'react';
-import { 
-  CheckSquare, Circle, CheckCircle2, ChevronRight, Plus, Clock, Archive, Pause,
-  CalendarPlus, Check, Video, MapPin, Calendar, AlertTriangle, Flag
+import {
+  CheckSquare,
+  CheckCircle2,
+  ChevronRight,
+  Plus,
+  CalendarPlus,
+  Check,
+  Video,
+  MapPin,
+  Calendar,
+  AlertTriangle,
+  Flag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,24 +20,21 @@ import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { Task, TaskStatus } from '@/types';
-import { parseDate, isToday as isTodayUtil, isOverdue as isOverdueUtil, formatStorageDate, formatTime as formatTimeUtil, getDurationMinutes, formatDuration as formatDurationUtil } from '@/lib/dateUtils';
-import { startOfDay, endOfDay, isValid } from 'date-fns';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  parseDate,
+  isToday as isTodayUtil,
+  isOverdue as isOverdueUtil,
+  formatStorageDate,
+  formatTime as formatTimeUtil,
+  getDurationMinutes,
+  formatDuration as formatDurationUtil,
+} from '@/lib/dateUtils';
+import { startOfDay, endOfDay, isValid } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { toast } from 'sonner';
-
-const statusConfig: Record<TaskStatus, { icon: React.ReactNode; color: string }> = {
-  backlog: { icon: <Archive className="w-4 h-4" />, color: 'text-muted-foreground' },
-  todo: { icon: <Circle className="w-4 h-4" />, color: 'text-foreground' },
-  doing: { icon: <Clock className="w-4 h-4" />, color: 'text-info' },
-  blocked: { icon: <Pause className="w-4 h-4" />, color: 'text-destructive' },
-  done: { icon: <CheckCircle2 className="w-4 h-4" />, color: 'text-success' },
-};
+import { statusConfig } from '@/lib/task-config';
 
 interface TodayAgendaWidgetProps {
   onTaskClick?: (taskId: string) => void;
@@ -47,7 +53,8 @@ const isDueToday = (task: Task): boolean => {
 };
 
 const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
-  const { tasks, getTodaysMeetings } = useKaivooStore();
+  const tasks = useKaivooStore((s) => s.tasks);
+  const getTodaysMeetings = useKaivooStore((s) => s.getTodaysMeetings);
   const { addTask, updateTask } = useKaivooActions();
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [showInput, setShowInput] = useState(false);
@@ -79,7 +86,7 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
 
   const getProgress = (task: Task) => {
     if (task.subtasks.length === 0) return null;
-    const completed = task.subtasks.filter(s => s.completed).length;
+    const completed = task.subtasks.filter((s) => s.completed).length;
     return Math.round((completed / task.subtasks.length) * 100);
   };
 
@@ -130,70 +137,56 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
   };
 
   // Filter tasks into sections
-  const overdueTasks = tasks.filter(t => isOverdue(t));
-  const dueTodayTasks = tasks.filter(t => isDueToday(t) && t.status !== 'done');
-  const highPriorityTasks = tasks.filter(t => 
-    t.priority === 'high' && 
-    t.status !== 'done' && 
-    !isDueToday(t) && 
-    !isOverdue(t)
+  const overdueTasks = tasks.filter((t) => isOverdue(t));
+  const dueTodayTasks = tasks.filter((t) => isDueToday(t) && t.status !== 'done');
+  const highPriorityTasks = tasks.filter(
+    (t) => t.priority === 'high' && t.status !== 'done' && !isDueToday(t) && !isOverdue(t),
   );
-  
+
   // Tasks completed TODAY based on completedAt timestamp
   const todayStart = startOfDay(new Date());
   const todayEnd = new Date(todayStart);
   todayEnd.setHours(23, 59, 59, 999);
-  
-  const completedTodayTasks = tasks.filter(t => {
+
+  const completedTodayTasks = tasks.filter((t) => {
     if (t.status !== 'done' || !t.completedAt) return false;
     // Handle both Date objects and ISO strings (from localStorage hydration)
     const completedAt = new Date(t.completedAt);
     if (!isValid(completedAt)) return false;
     return completedAt >= todayStart && completedAt <= todayEnd;
   });
-  
+
   // Tasks not in any "today" section (for the picker)
-  const otherTasks = tasks.filter(t => 
-    t.status !== 'done' && 
-    !isDueToday(t) && 
-    !isOverdue(t)
-  );
+  const otherTasks = tasks.filter((t) => t.status !== 'done' && !isDueToday(t) && !isOverdue(t));
 
   const totalItems = dueTodayTasks.length + overdueTasks.length + meetings.length;
 
   // Render a task row
   const renderTaskRow = (task: Task, isOverdueTask = false) => {
     const progress = getProgress(task);
-    
+
     return (
       <div
         key={task.id}
         className={cn(
-          "flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer group",
-          isOverdueTask && "bg-destructive/5"
+          'group -mx-2 flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/50',
+          isOverdueTask && 'bg-destructive/5',
         )}
         onClick={(e) => handleTaskClick(task, e)}
       >
-        <span className={cn('flex-shrink-0', statusConfig[task.status].color)}>
-          {statusConfig[task.status].icon}
-        </span>
-        <div className="flex-1 min-w-0 flex items-center gap-2">
-          <span className={cn(
-            "text-sm truncate",
-            isOverdueTask ? "text-destructive" : "text-foreground"
-          )}>
+        <span className={cn('flex-shrink-0', statusConfig[task.status].color)}>{statusConfig[task.status].icon}</span>
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className={cn('truncate text-sm', isOverdueTask ? 'text-destructive' : 'text-foreground')}>
             {task.title}
           </span>
-          {task.priority === 'high' && (
-            <Flag className="w-3 h-3 text-destructive flex-shrink-0" />
-          )}
+          {task.priority === 'high' && <Flag className="h-3 w-3 flex-shrink-0 text-destructive" />}
           {isOverdueTask && task.dueDate && (
-            <Badge variant="destructive" className="text-[10px] h-4 px-1 font-normal">
+            <Badge variant="destructive" className="h-4 px-1 text-[10px] font-normal">
               {task.dueDate}
             </Badge>
           )}
           {progress !== null && (
-            <span className="text-[10px] text-muted-foreground flex items-center gap-1 flex-shrink-0">
+            <span className="flex flex-shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
               <Progress value={progress} className="h-1 w-8" />
               {progress}%
             </span>
@@ -208,69 +201,66 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
       {/* Header */}
       <div className="widget-header">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-primary" />
+          <Calendar className="h-4 w-4 text-primary" />
           <span className="widget-title">Today's Agenda</span>
-          <span className="text-xs text-muted-foreground font-normal ml-1">
-            {totalItems} items
-          </span>
+          <span className="ml-1 text-xs font-normal text-muted-foreground">{totalItems} items</span>
         </div>
         <div className="flex items-center gap-1">
           {/* Add to Today picker */}
           <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-muted-foreground hover:text-foreground h-8 px-2"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-foreground"
                 title="Add existing tasks to today"
+                aria-label="Add existing tasks to today"
               >
-                <CalendarPlus className="w-4 h-4" />
+                <CalendarPlus className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-3 border-b border-border">
-                <h4 className="font-medium text-sm">Add tasks to Today</h4>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Select tasks to add to your today view
-                </p>
+              <div className="border-b border-border p-3">
+                <h4 className="text-sm font-medium">Add tasks to Today</h4>
+                <p className="mt-0.5 text-xs text-muted-foreground">Select tasks to add to your today view</p>
               </div>
               <ScrollArea className="max-h-64">
-                <div className="p-2 space-y-1">
+                <div className="space-y-1 p-2">
                   {dueTodayTasks.length > 0 && (
                     <div className="mb-2">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-1 font-medium">
+                      <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                         Due Today
                       </p>
-                      {dueTodayTasks.map(task => (
+                      {dueTodayTasks.map((task) => (
                         <button
                           key={task.id}
                           onClick={() => handleRemoveFromToday(task.id)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-secondary/50 transition-colors text-left group"
+                          className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-secondary/50"
                         >
-                          <div className="w-4 h-4 rounded border-2 border-primary bg-primary flex items-center justify-center flex-shrink-0">
-                            <Check className="w-3 h-3 text-primary-foreground" />
+                          <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border-2 border-primary bg-primary">
+                            <Check className="h-3 w-3 text-primary-foreground" />
                           </div>
-                          <span className="truncate flex-1">{task.title}</span>
+                          <span className="flex-1 truncate">{task.title}</span>
                         </button>
                       ))}
                     </div>
                   )}
-                  
+
                   {otherTasks.length > 0 && (
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-1 font-medium">
+                      <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                         Other Tasks
                       </p>
-                      {otherTasks.map(task => (
+                      {otherTasks.map((task) => (
                         <button
                           key={task.id}
                           onClick={() => handleAddToToday(task.id)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-secondary/50 transition-colors text-left group"
+                          className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-secondary/50"
                         >
-                          <div className="w-4 h-4 rounded border-2 border-muted-foreground/30 flex-shrink-0 group-hover:border-primary/50" />
-                          <span className="truncate flex-1">{task.title}</span>
+                          <div className="h-4 w-4 flex-shrink-0 rounded border-2 border-muted-foreground/30 group-hover:border-primary/50" />
+                          <span className="flex-1 truncate">{task.title}</span>
                           {task.dueDate && (
-                            <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal">
+                            <Badge variant="outline" className="h-4 px-1 text-[10px] font-normal">
                               {task.dueDate}
                             </Badge>
                           )}
@@ -278,17 +268,13 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
                       ))}
                     </div>
                   )}
-                  
+
                   {otherTasks.length === 0 && dueTodayTasks.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No tasks available
-                    </p>
+                    <p className="py-4 text-center text-sm text-muted-foreground">No tasks available</p>
                   )}
-                  
+
                   {otherTasks.length === 0 && dueTodayTasks.length > 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">
-                      All tasks are already due today
-                    </p>
+                    <p className="py-2 text-center text-xs text-muted-foreground">All tasks are already due today</p>
                   )}
                 </div>
               </ScrollArea>
@@ -296,13 +282,9 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
           </Popover>
 
           <Link to="/tasks">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-muted-foreground hover:text-foreground h-8 px-2"
-            >
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground">
               <span className="text-xs">View all</span>
-              <ChevronRight className="w-3 h-3 ml-1" />
+              <ChevronRight className="ml-1 h-3 w-3" />
             </Button>
           </Link>
         </div>
@@ -311,21 +293,15 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
       {/* Overdue Tasks Section */}
       {overdueTasks.length > 0 && (
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-destructive/20">
-            <AlertTriangle className="w-4 h-4 text-destructive" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-destructive">
-              Overdue
-            </span>
-            <span className="text-xs text-destructive/70">
-              ({overdueTasks.length})
-            </span>
+          <div className="mb-2 flex items-center gap-2 border-b border-destructive/20 pb-1.5">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-destructive">Overdue</span>
+            <span className="text-xs text-destructive/70">({overdueTasks.length})</span>
           </div>
           <div className="space-y-1">
             {overdueTasks.slice(0, 3).map((task) => renderTaskRow(task, true))}
             {overdueTasks.length > 3 && (
-              <p className="text-xs text-destructive/70 text-center py-1">
-                +{overdueTasks.length - 3} more overdue
-              </p>
+              <p className="py-1 text-center text-xs text-destructive/70">+{overdueTasks.length - 3} more overdue</p>
             )}
           </div>
         </div>
@@ -333,40 +309,32 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
 
       {/* Due Today Section */}
       <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-primary/20">
-          <CheckSquare className="w-4 h-4 text-primary" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-            Due Today
-          </span>
-          <span className="text-xs text-muted-foreground">
-            ({dueTodayTasks.length})
-          </span>
+        <div className="mb-2 flex items-center gap-2 border-b border-primary/20 pb-1.5">
+          <CheckSquare className="h-4 w-4 text-primary" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-primary">Due Today</span>
+          <span className="text-xs text-muted-foreground">({dueTodayTasks.length})</span>
         </div>
-        
+
         <div className="space-y-1">
           {dueTodayTasks.slice(0, 4).map((task) => renderTaskRow(task))}
-          
+
           {completedTodayTasks.slice(0, 1).map((task) => (
             <div
               key={task.id}
-              className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer opacity-50"
+              className="-mx-2 flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 opacity-50 transition-colors hover:bg-secondary/50"
               onClick={(e) => handleTaskClick(task, e)}
             >
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-success" />
-              <span className="text-sm flex-1 line-through text-muted-foreground">{task.title}</span>
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-success-foreground" />
+              <span className="flex-1 text-sm text-muted-foreground line-through">{task.title}</span>
             </div>
           ))}
-          
+
           {dueTodayTasks.length === 0 && completedTodayTasks.length === 0 && (
-            <p className="text-sm text-muted-foreground py-2 px-2">
-              No tasks due today
-            </p>
+            <p className="px-2 py-2 text-sm text-muted-foreground">No tasks due today</p>
           )}
 
           {dueTodayTasks.length > 4 && (
-            <p className="text-xs text-muted-foreground text-center py-1">
-              +{dueTodayTasks.length - 4} more tasks
-            </p>
+            <p className="py-1 text-center text-xs text-muted-foreground">+{dueTodayTasks.length - 4} more tasks</p>
           )}
         </div>
       </div>
@@ -374,19 +342,15 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
       {/* High Priority Section */}
       {highPriorityTasks.length > 0 && (
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-orange-500/20">
-            <Flag className="w-4 h-4 text-orange-500" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">
-              High Priority
-            </span>
-            <span className="text-xs text-muted-foreground">
-              ({highPriorityTasks.length})
-            </span>
+          <div className="mb-2 flex items-center gap-2 border-b border-orange-500/20 pb-1.5">
+            <Flag className="h-4 w-4 text-orange-500" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">High Priority</span>
+            <span className="text-xs text-muted-foreground">({highPriorityTasks.length})</span>
           </div>
           <div className="space-y-1">
             {highPriorityTasks.slice(0, 3).map((task) => renderTaskRow(task))}
             {highPriorityTasks.length > 3 && (
-              <p className="text-xs text-muted-foreground text-center py-1">
+              <p className="py-1 text-center text-xs text-muted-foreground">
                 +{highPriorityTasks.length - 3} more high priority
               </p>
             )}
@@ -395,7 +359,7 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
       )}
 
       {/* Add task input */}
-      <div className="mb-4 pt-2 border-t border-border/50">
+      <div className="mb-4 border-t border-border/50 pt-2">
         {showInput ? (
           <div className="flex items-center gap-2">
             <Input
@@ -417,13 +381,13 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
             </Button>
           </div>
         ) : (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="w-full justify-start text-muted-foreground hover:text-foreground h-8 -mx-2"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-mx-2 h-8 w-full justify-start text-muted-foreground hover:text-foreground"
             onClick={() => setShowInput(true)}
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             <span className="text-sm">Add task</span>
           </Button>
         )}
@@ -431,35 +395,33 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
 
       {/* Meetings Section */}
       <div>
-        <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-info/20">
-          <Video className="w-4 h-4 text-info" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-info">
-            Meetings
-          </span>
-          <span className="text-xs text-muted-foreground">
-            ({meetings.length})
-          </span>
+        <div className="mb-2 flex items-center gap-2 border-b border-info/20 pb-1.5">
+          <Video className="h-4 w-4 text-info-foreground" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-info-foreground">Meetings</span>
+          <span className="text-xs text-muted-foreground">({meetings.length})</span>
         </div>
-        
+
         {meetings.length > 0 ? (
           <div className="space-y-2">
             {meetings.slice(0, 3).map((meeting) => (
               <div
                 key={meeting.id}
-                className="flex items-start gap-3 py-2.5 px-3 -mx-1 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer"
+                className="-mx-1 flex cursor-pointer items-start gap-3 rounded-lg bg-secondary/30 px-3 py-2.5 transition-colors hover:bg-secondary/50"
               >
-                <div className="flex flex-col items-center min-w-[50px]">
+                <div className="flex min-w-[50px] flex-col items-center">
                   <span className="text-xs font-medium text-foreground">{formatTime(meeting.startTime)}</span>
-                  <span className="text-[10px] text-muted-foreground">{formatDuration(meeting.startTime, meeting.endTime)}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {formatDuration(meeting.startTime, meeting.endTime)}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{meeting.title}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{meeting.title}</p>
                   {meeting.location && (
-                    <div className="flex items-center gap-1 mt-0.5">
+                    <div className="mt-0.5 flex items-center gap-1">
                       {meeting.location.toLowerCase().includes('zoom') ? (
-                        <Video className="w-3 h-3 text-muted-foreground" />
+                        <Video className="h-3 w-3 text-muted-foreground" />
                       ) : (
-                        <MapPin className="w-3 h-3 text-muted-foreground" />
+                        <MapPin className="h-3 w-3 text-muted-foreground" />
                       )}
                       <span className="text-xs text-muted-foreground">{meeting.location}</span>
                     </div>
@@ -468,13 +430,11 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
               </div>
             ))}
             {meetings.length > 3 && (
-              <p className="text-xs text-muted-foreground text-center">+{meetings.length - 3} more meetings</p>
+              <p className="text-center text-xs text-muted-foreground">+{meetings.length - 3} more meetings</p>
             )}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground py-2 px-2">
-            No meetings today
-          </p>
+          <p className="px-2 py-2 text-sm text-muted-foreground">No meetings today</p>
         )}
       </div>
     </div>

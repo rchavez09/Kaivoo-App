@@ -143,7 +143,7 @@ These settings live on the Settings page under a **"Concierge"** section.
 
 The following pages will add settings when their Bibles are written:
 
-- **Journal Page** — editor preferences, AI analysis toggles, template settings
+- **Journal Page** — editor preferences, AI analysis toggles, template settings, **journal session gap threshold** (currently hardcoded at 30 min in `JournalCanvas.tsx:GAP_THRESHOLD_MINUTES` — controls when a new timestamped entry section is created vs. appending to the existing one)
 - **Insights Page** — correlation engine settings, date ranges, visible charts
 - **Topics Page** — default topic structure, scraping preferences
 - **Captures** — auto-processing rules, default save locations

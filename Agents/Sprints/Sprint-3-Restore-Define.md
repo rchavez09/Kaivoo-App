@@ -92,7 +92,39 @@ Sprint-Level:
 
 ## Sprint Retrospective
 
-*(To be completed after sprint)*
+**Completed:** February 22, 2026
+**Parcels completed:** 10/10 (P1-P7 + P1B-1 to P1B-3)
+**Merged to main:** `df73da8` | **Tagged:** `post-sprint-3`
+
+### What Was Delivered
+- Widget-based Today dashboard restored (DayBrief, Tasks, Routines, Schedule, Activity)
+- All widgets date-aware with date navigation support
+- WidgetContainer integration: drag-to-reorder, add/remove, vertical/horizontal layout toggle
+- TodayActivityWidget (live completion trace) restored and date-aware
+- ScheduleWidget made self-contained (reads from store)
+- FloatingChat: task creation, routine completion, mood setting, URL capture
+- Feature Use Case Bible (v0.4) + Settings Bible + Bible Index
+- Kaivoo Design System Quick Reference
+
+### Verification
+- `tsc --noEmit`: 0 errors
+- `vite build`: success (2.68s)
+- Agent 7 code audit: CONDITIONAL PASS (6.8/10, no P0s)
+- Agent 11 regression check: CONDITIONAL PASS (42 PASS, 7 PARTIAL, 0 FAIL)
+- User UX review: approved
+
+### P1 Fixes Applied Before Merge
+- Selector-based store access (AppLayout, TrackingWidget) — eliminated app-wide re-renders
+- Stable date memoization (DailyBriefWidget, TodayActivityWidget, ScheduleWidget)
+- `catch (e: unknown)` types in TrackingWidget (5 blocks)
+- Toast notification on widget settings save failure
+- Scroll target IDs for Day Brief chip navigation
+
+### Deferred to Sprint 4
+- P1-3: TrackingWidget file split (636 lines)
+- Agent 11 P1-001: Mood history append vs overwrite
+- P2: Accessibility aria-labels, date-relative labels, FloatingChat error sanitization
+- Task recurrence, search, notifications, PWA (Vision Phase 1 backlog)
 
 ---
 

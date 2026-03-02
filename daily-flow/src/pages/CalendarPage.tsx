@@ -1,304 +1,336 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
-import { Calendar, Plus, ListTodo, Users, Layers, Video, MapPin, Clock, ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft, BookOpen } from 'lucide-react';
+import { Plus, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarUI } from '@/components/ui/calendar';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
-import { format, isSameDay, addDays } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { addDays, addWeeks, format, isSameDay, startOfMonth, startOfWeek, endOfWeek } from 'date-fns';
+import { resolveTaskDay } from '@/lib/dateUtils';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import DayReview from '@/components/DayReview';
+import MeetingDetailsDrawer from '@/components/MeetingDetailsDrawer';
+import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
+import { CalendarViewSwitcher, type CalendarViewMode } from '@/components/calendar/CalendarViewSwitcher';
+import { MonthGrid } from '@/components/calendar/MonthGrid';
+import { DayTimeline } from '@/components/calendar/DayTimeline';
+import { DaySidebar } from '@/components/calendar/DaySidebar';
+import { WeekTimeline } from '@/components/calendar/WeekTimeline';
 
-type CalendarMode = 'tasks' | 'meetings' | 'combined' | 'review';
+const CALENDAR_PREFS_KEY = 'kaivoo-calendar-preferences';
+
+interface CalendarPrefs {
+  viewMode: CalendarViewMode;
+}
+
+const DEFAULT_PREFS: CalendarPrefs = {
+  viewMode: 'month',
+};
 
 const CalendarPage = () => {
-  const [mode, setMode] = useState<CalendarMode>('combined');
+  const [prefs, setPrefs] = useLocalStorage<CalendarPrefs>(CALENDAR_PREFS_KEY, DEFAULT_PREFS);
+  const [viewMode, setViewMode] = useState<CalendarViewMode>(prefs.viewMode);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [showCalendarPanel, setShowCalendarPanel] = useState(true);
-  const {
-    tasks,
-    getMeetingsForDate,
-    getJournalEntriesForDate,
-    routines,
-    getCompletionsForDate,
-    getTasksForDate,
-    getCapturesForDate
-  } = useKaivooStore();
-  const { toggleRoutineCompletion } = useKaivooActions();
+  const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()));
+  const [showReview, setShowReview] = useState(false);
+  const [meetingDrawerOpen, setMeetingDrawerOpen] = useState(false);
+  const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
+  const [taskDrawerOpen, setTaskDrawerOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
-  const selectedMeetings = getMeetingsForDate(selectedDate);
-  const isToday = isSameDay(selectedDate, new Date());
+  // Subscribe to raw arrays for reactivity on add/delete
+  const allMeetings = useKaivooStore((s) => s.meetings);
+  const allTasks = useKaivooStore((s) => s.tasks);
+  const getJournalEntriesForDate = useKaivooStore((s) => s.getJournalEntriesForDate);
+  const routines = useKaivooStore((s) => s.routines);
+  const getCompletionsForDate = useKaivooStore((s) => s.getCompletionsForDate);
+  const getCapturesForDate = useKaivooStore((s) => s.getCapturesForDate);
+  const { addMeeting, toggleRoutineCompletion } = useKaivooActions();
+
+  // Day view data — derived from raw arrays for immediate reactivity
+  const meetings = useMemo(
+    () =>
+      allMeetings
+        .filter((m) => isSameDay(new Date(m.startTime), selectedDate))
+        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()),
+    [allMeetings, selectedDate],
+  );
+  const { pendingTasks, completedTasks } = useMemo(() => {
+    const pending = allTasks.filter((t) => {
+      if (t.status === 'done') return false;
+      const day = resolveTaskDay(t);
+      return day ? isSameDay(day, selectedDate) : false;
+    });
+    const completed = allTasks.filter((t) => {
+      if (t.status !== 'done') return false;
+      const day = resolveTaskDay(t);
+      return day ? isSameDay(day, selectedDate) : false;
+    });
+    return { pendingTasks: pending, completedTasks: completed };
+  }, [allTasks, selectedDate]);
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
-  
-  // Get journal entries and captures for selected date
   const journalEntries = getJournalEntriesForDate(dateStr);
   const captures = getCapturesForDate(dateStr);
   const routineCompletions = getCompletionsForDate(dateStr);
-  const { pending: pendingTasks, completed: completedTasks } = getTasksForDate(selectedDate);
-  
-  // Use tasks from getTasksForDate for proper date-based filtering
-  const selectedTasks = [...pendingTasks, ...completedTasks];
+  const isToday = isSameDay(selectedDate, new Date());
 
-  const formatTime = (date: Date | string) => format(new Date(date), 'h:mm a');
-  const formatDuration = (start: Date | string, end: Date | string) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const mins = (endDate.getTime() - startDate.getTime()) / 60000;
-    if (mins < 60) return `${mins}m`;
-    const hours = Math.floor(mins / 60);
-    const remainingMins = mins % 60;
-    return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
-  };
+  const handleViewModeChange = useCallback(
+    (mode: CalendarViewMode) => {
+      setViewMode(mode);
+      setPrefs((prev) => ({ ...prev, viewMode: mode }));
+      setShowReview(false);
+    },
+    [setPrefs],
+  );
 
-  const modeButtons = [
-    { mode: 'tasks' as CalendarMode, icon: ListTodo, label: 'Tasks' },
-    { mode: 'meetings' as CalendarMode, icon: Users, label: 'Meetings' },
-    { mode: 'combined' as CalendarMode, icon: Layers, label: 'Combined' },
-    { mode: 'review' as CalendarMode, icon: BookOpen, label: 'Day Review' },
-  ];
+  const handleDateSelect = useCallback((date: Date) => {
+    setSelectedDate(date);
+  }, []);
+
+  const handleWeekDateSelect = useCallback(
+    (date: Date) => {
+      setSelectedDate(date);
+      setViewMode('day');
+      setPrefs((prev) => ({ ...prev, viewMode: 'day' }));
+    },
+    [setPrefs],
+  );
+
+  const handleMonthChange = useCallback((month: Date) => {
+    setCurrentMonth(month);
+  }, []);
+
+  const handleMeetingClick = useCallback((id: string) => {
+    setSelectedMeetingId(id);
+    setMeetingDrawerOpen(true);
+  }, []);
+
+  const handleTaskClick = useCallback((id: string) => {
+    setSelectedTaskId(id);
+    setTaskDrawerOpen(true);
+  }, []);
+
+  const handleNewEvent = useCallback(() => {
+    const startTime = new Date(selectedDate);
+    const now = new Date();
+    // Default to next hour from now (or 9 AM if viewing another day)
+    if (isToday) {
+      startTime.setHours(now.getHours() + 1, 0, 0, 0);
+    } else {
+      startTime.setHours(9, 0, 0, 0);
+    }
+    const endTime = new Date(startTime);
+    endTime.setHours(startTime.getHours() + 1);
+
+    void addMeeting({
+      title: 'New Event',
+      startTime,
+      endTime,
+      isExternal: false,
+      source: 'manual',
+    }).then((meeting) => {
+      if (meeting) {
+        setSelectedMeetingId(meeting.id);
+        setMeetingDrawerOpen(true);
+      }
+    });
+  }, [selectedDate, isToday, addMeeting]);
 
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Header */}
         <header className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-1">Calendar</h1>
+            <h1 className="mb-1 text-2xl font-semibold text-foreground">Calendar</h1>
             <p className="text-sm text-muted-foreground">Your schedule and meetings</p>
           </div>
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" />
-            New Event
-          </Button>
+          <div className="flex items-center gap-3">
+            <CalendarViewSwitcher viewMode={viewMode} onViewModeChange={handleViewModeChange} />
+            <Button className="gap-2" onClick={handleNewEvent}>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">New Event</span>
+            </Button>
+          </div>
         </header>
 
-        {/* Mode Toggle */}
-        <div className="flex items-center gap-2 mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowCalendarPanel(!showCalendarPanel)}
-            className="gap-2 mr-2"
-          >
-            {showCalendarPanel ? (
-              <PanelLeftClose className="w-4 h-4" />
-            ) : (
-              <PanelLeft className="w-4 h-4" />
-            )}
-            <span className="hidden sm:inline">{showCalendarPanel ? 'Hide' : 'Show'} Calendar</span>
-          </Button>
-          <div className="h-6 w-px bg-border" />
-          {modeButtons.map(({ mode: m, icon: Icon, label }) => (
-            <Button
-              key={m}
-              variant={mode === m ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setMode(m)}
-              className="gap-2"
-            >
-              <Icon className="w-4 h-4" />
-              <span className="hidden sm:inline">{label}</span>
-            </Button>
-          ))}
-        </div>
+        {/* Month View */}
+        {viewMode === 'month' && (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+            <MonthGrid
+              currentMonth={currentMonth}
+              selectedDate={selectedDate}
+              onMonthChange={handleMonthChange}
+              onDateSelect={handleDateSelect}
+            />
+            <DaySidebar selectedDate={selectedDate} onMeetingClick={handleMeetingClick} onTaskClick={handleTaskClick} />
+          </div>
+        )}
 
-        <div className={cn(
-          "grid gap-6 transition-all duration-300",
-          showCalendarPanel ? "grid-cols-1 lg:grid-cols-[320px_1fr]" : "grid-cols-1"
-        )}>
-          {/* Calendar Picker - Collapsible */}
-          {showCalendarPanel && (
-            <div className="widget-card p-4 h-fit">
-              <CalendarUI
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                className="pointer-events-auto w-full"
-                classNames={{
-                  months: "flex flex-col w-full",
-                  month: "space-y-4 w-full",
-                  caption: "flex justify-center pt-1 relative items-center",
-                  caption_label: "text-sm font-medium",
-                  nav: "space-x-1 flex items-center",
-                  nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input hover:bg-accent hover:text-accent-foreground",
-                  nav_button_previous: "absolute left-1",
-                  nav_button_next: "absolute right-1",
-                  table: "w-full border-collapse",
-                  head_row: "flex w-full",
-                  head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] text-center",
-                  row: "flex w-full mt-2",
-                  cell: "flex-1 aspect-square text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-                  day: "h-full w-full p-0 font-normal hover:bg-accent hover:text-accent-foreground rounded-md flex items-center justify-center text-sm",
-                  day_range_end: "day-range-end",
-                  day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                  day_today: "bg-accent text-accent-foreground",
-                  day_outside: "day-outside text-muted-foreground opacity-50",
-                  day_disabled: "text-muted-foreground opacity-50",
-                  day_hidden: "invisible",
-                }}
-              />
-            </div>
-          )}
-
-          {/* Day View */}
+        {/* Week View */}
+        {viewMode === 'week' && (
           <div className="space-y-4">
-            {/* Selected Date Header */}
-            <div className="widget-card">
-              <div className="flex items-center justify-between mb-4">
+            {/* Week header with navigation */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Previous week"
+                  onClick={() => setSelectedDate(addWeeks(selectedDate, -1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {format(startOfWeek(selectedDate), 'MMM d')} – {format(endOfWeek(selectedDate), 'MMM d, yyyy')}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Next week"
+                  onClick={() => setSelectedDate(addWeeks(selectedDate, 1))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              {!isSameDay(selectedDate, new Date()) && (
+                <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
+                  Today
+                </Button>
+              )}
+            </div>
+
+            <WeekTimeline
+              selectedDate={selectedDate}
+              onDateSelect={handleWeekDateSelect}
+              onMeetingClick={handleMeetingClick}
+              onTaskClick={handleTaskClick}
+            />
+          </div>
+        )}
+
+        {/* Day View */}
+        {viewMode === 'day' && (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+            {/* Mini calendar sidebar */}
+            <div className="space-y-4">
+              <div className="widget-card h-fit p-4">
+                <CalendarUI
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  className="pointer-events-auto w-full"
+                  classNames={{
+                    months: 'flex flex-col w-full',
+                    month: 'space-y-4 w-full',
+                    caption: 'flex justify-center pt-1 relative items-center',
+                    caption_label: 'text-sm font-medium',
+                    nav: 'space-x-1 flex items-center',
+                    nav_button:
+                      'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input hover:bg-accent hover:text-accent-foreground',
+                    nav_button_previous: 'absolute left-1',
+                    nav_button_next: 'absolute right-1',
+                    table: 'w-full border-collapse',
+                    head_row: 'flex w-full',
+                    head_cell: 'text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] text-center',
+                    row: 'flex w-full mt-2',
+                    cell: 'flex-1 aspect-square text-center text-sm p-0 relative focus-within:relative focus-within:z-20',
+                    day: 'h-full w-full p-0 font-normal hover:bg-accent hover:text-accent-foreground rounded-md flex items-center justify-center text-sm',
+                    day_range_end: 'day-range-end',
+                    day_selected:
+                      'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
+                    day_today: 'bg-accent text-accent-foreground',
+                    day_outside: 'day-outside text-muted-foreground opacity-50',
+                    day_disabled: 'text-muted-foreground opacity-50',
+                    day_hidden: 'invisible',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Day content */}
+            <div className="space-y-4">
+              {/* Date header with navigation */}
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" aria-label="Previous day" onClick={() => setSelectedDate(addDays(selectedDate, -1))}>
-                    <ChevronLeft className="w-4 h-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Previous day"
+                    onClick={() => setSelectedDate(addDays(selectedDate, -1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">
-                      {format(selectedDate, 'EEEE, MMMM d')}
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      {isToday ? "Today" : format(selectedDate, 'yyyy')}
-                    </p>
+                    <h2 className="text-lg font-semibold text-foreground">{format(selectedDate, 'EEEE, MMMM d')}</h2>
+                    <p className="text-xs text-muted-foreground">{isToday ? 'Today' : format(selectedDate, 'yyyy')}</p>
                   </div>
-                  <Button variant="ghost" size="icon" aria-label="Next day" onClick={() => setSelectedDate(addDays(selectedDate, 1))}>
-                    <ChevronRight className="w-4 h-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Next day"
+                    onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-                {!isToday && (
-                  <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
-                    Today
+                <div className="flex items-center gap-2">
+                  {!isToday && (
+                    <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
+                      Today
+                    </Button>
+                  )}
+                  <Button
+                    variant={showReview ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowReview(!showReview)}
+                    className="gap-1.5"
+                    aria-pressed={showReview}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span className="hidden sm:inline">Review</span>
                   </Button>
-                )}
+                </div>
               </div>
 
-              {/* Day Review Mode */}
-              {mode === 'review' && (
-                <DayReview
+              {/* Day Review or Timeline */}
+              {showReview ? (
+                <div className="widget-card">
+                  <DayReview
+                    date={selectedDate}
+                    journalEntries={journalEntries}
+                    tasks={pendingTasks}
+                    completedTasks={completedTasks}
+                    routines={routines}
+                    routineCompletions={routineCompletions}
+                    captures={captures}
+                    onToggleRoutine={toggleRoutineCompletion}
+                  />
+                </div>
+              ) : (
+                <DayTimeline
                   date={selectedDate}
-                  journalEntries={journalEntries}
-                  tasks={pendingTasks}
+                  meetings={meetings}
+                  pendingTasks={pendingTasks}
                   completedTasks={completedTasks}
-                  routines={routines}
-                  routineCompletions={routineCompletions}
-                  captures={captures}
-                  onToggleRoutine={toggleRoutineCompletion}
+                  onMeetingClick={handleMeetingClick}
+                  onTaskClick={handleTaskClick}
                 />
-              )}
-
-              {/* Meetings Section */}
-              {(mode === 'meetings' || mode === 'combined') && (
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Users className="w-4 h-4 text-primary" />
-                    <h3 className="text-sm font-medium text-foreground">Meetings</h3>
-                    <span className="text-xs text-muted-foreground">({selectedMeetings.length})</span>
-                  </div>
-                  
-                  {selectedMeetings.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center bg-secondary/30 rounded-lg">
-                      No meetings scheduled
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {selectedMeetings.map((meeting) => (
-                        <div
-                          key={meeting.id}
-                          className="flex items-start gap-3 py-3 px-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
-                        >
-                          <div className="flex flex-col items-center min-w-[60px] text-center">
-                            <span className="text-sm font-medium text-foreground">
-                              {formatTime(meeting.startTime)}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {formatDuration(meeting.startTime, meeting.endTime)}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground">{meeting.title}</p>
-                            {meeting.location && (
-                              <div className="flex items-center gap-1.5 mt-1">
-                                {meeting.location.toLowerCase().includes('zoom') ? (
-                                  <Video className="w-3 h-3 text-muted-foreground" />
-                                ) : (
-                                  <MapPin className="w-3 h-3 text-muted-foreground" />
-                                )}
-                                <span className="text-xs text-muted-foreground">{meeting.location}</span>
-                              </div>
-                            )}
-                            {meeting.attendees && meeting.attendees.length > 0 && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {meeting.attendees.join(', ')}
-                              </p>
-                            )}
-                          </div>
-                          {meeting.isExternal && meeting.source && (
-                            <span className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-full capitalize">
-                              {meeting.source}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Tasks Section */}
-              {(mode === 'tasks' || mode === 'combined') && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <ListTodo className="w-4 h-4 text-accent" />
-                    <h3 className="text-sm font-medium text-foreground">Tasks</h3>
-                    <span className="text-xs text-muted-foreground">
-                      ({pendingTasks.length} pending, {completedTasks.length} completed)
-                    </span>
-                  </div>
-                  
-                  {selectedTasks.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center bg-secondary/30 rounded-lg">
-                      No tasks for this day
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {selectedTasks.slice(0, 5).map((task) => (
-                        <div
-                          key={task.id}
-                          className={cn(
-                            "flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors",
-                            task.status === 'done' 
-                              ? "bg-muted/30 opacity-60" 
-                              : "bg-secondary/30 hover:bg-secondary/50"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-2 h-2 rounded-full shrink-0",
-                            task.priority === 'high' && "bg-destructive",
-                            task.priority === 'medium' && "bg-amber-500",
-                            task.priority === 'low' && "bg-muted-foreground"
-                          )} />
-                          <span className={cn(
-                            "text-sm flex-1",
-                            task.status === 'done' && "line-through text-muted-foreground"
-                          )}>
-                            {task.title}
-                          </span>
-                          {task.dueDate && (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {task.dueDate}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                      {selectedTasks.length > 5 && (
-                        <p className="text-xs text-muted-foreground text-center py-2">
-                          +{selectedTasks.length - 5} more tasks
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
               )}
             </div>
           </div>
-        </div>
+        )}
       </div>
+
+      {/* Meeting Details Drawer */}
+      <MeetingDetailsDrawer
+        meetingId={selectedMeetingId}
+        open={meetingDrawerOpen}
+        onOpenChange={setMeetingDrawerOpen}
+      />
+
+      {/* Task Details Drawer */}
+      <TaskDetailsDrawer taskId={selectedTaskId} open={taskDrawerOpen} onOpenChange={setTaskDrawerOpen} />
     </AppLayout>
   );
 };

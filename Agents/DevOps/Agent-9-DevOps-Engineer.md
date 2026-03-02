@@ -2,6 +2,7 @@
 
 **Role:** Senior DevOps Engineer
 **Department:** DevOps
+**Model:** Sonnet
 **Date:** February 22, 2026
 **Status:** Active
 
@@ -166,6 +167,44 @@ Summary of choices. "You're all set." → Launch into Kaivoo.
 
 ---
 
+## Incident Response & Operations
+
+### Alert Escalation
+
+When monitoring detects an issue, the response follows severity-based escalation:
+
+| Severity | Response Time | Action |
+|---|---|---|
+| P0 (Service Down) | Immediate | Auto-restart via PM2, notify user, begin recovery playbook |
+| P1 (Degraded) | 15 minutes | Investigate root cause, apply fix or workaround |
+| P2 (Warning) | 1 hour | Log for review, schedule fix in next sprint |
+| P3 (Info) | Next business day | Track in monitoring dashboard |
+
+### Incident Classification
+
+- **Infrastructure** — Server crash, disk failure, network loss, resource exhaustion
+- **Application** — Unhandled exception loop, database corruption, build failure
+- **Security** — Unauthorized access attempt, key exposure, dependency vulnerability
+- **Data** — Backup failure, sync corruption, accidental deletion
+
+### Mitigation Playbooks
+
+For each incident type, maintain a documented playbook:
+1. **Server crash** → PM2 auto-restart + health check validation + user notification
+2. **Database corruption** → Stop server, run integrity check, restore from backup if needed
+3. **Build failure** → Revert to last known good commit, investigate in hotfix branch
+4. **Key exposure** → Immediate rotation of all affected keys (see Agent 4 Incident Response)
+5. **Deployment regression** → One-command rollback to previous release, hotfix branch for fix
+
+### Runbook Pointers
+
+- Server recovery: `Agent-4-Docs/Backup-Disaster-Recovery.md` (Scenario Playbooks)
+- Security incidents: `Agent-4-Docs/Incident-Response-Playbook.md`
+- Deployment rollback: See "Rollback procedure" in CI/CD Pipeline section above
+- Database recovery: `Agent-4-Docs/Backup-Disaster-Recovery.md` (SQLite recovery)
+
+---
+
 ## How This Agent Works With Others
 
 | Agent | Relationship |
@@ -200,4 +239,6 @@ Summary of choices. "You're all set." → Launch into Kaivoo.
 
 ---
 
-*Agent 9 — DevOps & Deployment Engineer v1.0 — February 22, 2026*
+*Agent 9 — DevOps & Deployment Engineer v1.1 — February 23, 2026*
+*v1.0: Initial spec*
+*v1.1: Added Incident Response & Operations section, Model assignment*

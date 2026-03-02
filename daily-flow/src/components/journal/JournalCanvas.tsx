@@ -1,0 +1,895 @@
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Highlight from '@tiptap/extension-highlight';
+import { TextStyle } from '@tiptap/extension-text-style';
+import Color from '@tiptap/extension-color';
+import Placeholder from '@tiptap/extension-placeholder';
+import {
+  Bold,
+  Italic,
+  Strikethrough,
+  Highlighter,
+  List,
+  ListOrdered,
+  Heading1,
+  Heading2,
+  Quote,
+  Undo,
+  Redo,
+  Palette,
+  Plus,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { EntryHeaderNode } from './EntryHeaderNode';
+import SplitToNewEntryMenu from './SplitToNewEntryMenu';
+import { useKaivooStore } from '@/stores/useKaivooStore';
+import { useKaivooActions } from '@/hooks/useKaivooActions';
+import { cn } from '@/lib/utils';
+
+// --- Constants ---
+const SAVE_DEBOUNCE_MS = 3000;
+
+const TEXT_COLORS = [
+  { name: 'Default', color: null },
+  { name: 'Gray', color: '#6B7280' },
+  { name: 'Red', color: '#EF4444' },
+  { name: 'Orange', color: '#F97316' },
+  { name: 'Yellow', color: '#EAB308' },
+  { name: 'Green', color: '#22C55E' },
+  { name: 'Blue', color: '#3B82F6' },
+  { name: 'Purple', color: '#A855F7' },
+  { name: 'Pink', color: '#EC4899' },
+];
+
+const HIGHLIGHT_COLORS = [
+  { name: 'None', color: null },
+  { name: 'Yellow', color: '#FEF08A' },
+  { name: 'Green', color: '#BBF7D0' },
+  { name: 'Blue', color: '#BFDBFE' },
+  { name: 'Purple', color: '#E9D5FF' },
+  { name: 'Pink', color: '#FBCFE8' },
+  { name: 'Orange', color: '#FED7AA' },
+];
+
+// --- Types ---
+export interface CanvasSection {
+  entryId: string;
+  timestamp: Date;
+}
+
+interface JournalCanvasProps {
+  selectedDate: Date;
+  onSectionsChange: (sections: CanvasSection[]) => void;
+  onSaveStatusChange: (status: 'saved' | 'saving' | 'unsaved' | 'idle') => void;
+  onActiveEntryChange?: (entryId: string | null) => void;
+}
+
+// --- Helpers ---
+function composeHTML(
+  entries: Array<{ id: string; timestamp: string | Date; content: string | null; label?: string | null }>,
+  collapseState?: Map<string, boolean>,
+): string {
+  if (entries.length === 0) return '';
+  return entries
+    .map((entry) => {
+      const ts = entry.timestamp instanceof Date ? entry.timestamp : new Date(entry.timestamp);
+      const displayLabel = entry.label ? `── ${entry.label} ──` : `── ${format(ts, 'h:mm a')} ──`;
+      const collapsed = collapseState?.get(entry.id) ?? false;
+      const labelAttr = entry.label ? ` data-label="${entry.label}"` : '';
+      const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" data-collapsed="${collapsed}"${labelAttr} contenteditable="false" class="timestamp-divider">${displayLabel}</div>`;
+      return divider + (entry.content || '<p></p>');
+    })
+    .join('');
+}
+
+/** Read current collapse state from ProseMirror doc before rebuild */
+function getEditorCollapseState(editor: {
+  state: {
+    doc: {
+      forEach: (cb: (node: { type: { name: string }; attrs: Record<string, unknown> }, pos: number) => void) => void;
+    };
+  };
+}): Map<string, boolean> {
+  const state = new Map<string, boolean>();
+  editor.state.doc.forEach((node) => {
+    if (node.type.name === 'entryHeader' && node.attrs.entryId) {
+      state.set(node.attrs.entryId as string, node.attrs.collapsed === true);
+    }
+  });
+  return state;
+}
+
+/** Save collapse state to localStorage for session persistence */
+function saveCollapseState(dateStr: string, state: Map<string, boolean>): void {
+  const obj: Record<string, boolean> = {};
+  state.forEach((v, k) => {
+    if (v) obj[k] = true;
+  }); // only store collapsed=true entries
+  if (Object.keys(obj).length > 0) {
+    localStorage.setItem(`collapse-${dateStr}`, JSON.stringify(obj));
+  } else {
+    localStorage.removeItem(`collapse-${dateStr}`);
+  }
+}
+
+/** Load collapse state from localStorage */
+function loadCollapseState(dateStr: string): Map<string, boolean> {
+  const state = new Map<string, boolean>();
+  try {
+    const raw = localStorage.getItem(`collapse-${dateStr}`);
+    if (raw) {
+      const obj = JSON.parse(raw) as Record<string, boolean>;
+      for (const [k, v] of Object.entries(obj)) {
+        state.set(k, v);
+      }
+    }
+  } catch {
+    /* ignore parse errors */
+  }
+  return state;
+}
+
+/** Clean up collapse localStorage keys older than 7 days */
+function cleanOldCollapseKeys(): void {
+  try {
+    const now = Date.now();
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('collapse-')) {
+        const dateStr = key.slice('collapse-'.length);
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime()) && now - date.getTime() > sevenDays) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+function extractSections(html: string): Array<{ entryId: string; content: string; label?: string | null }> {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(`<body>${html}</body>`, 'text/html');
+  const body = doc.body;
+
+  const sections: Array<{ entryId: string; content: string; label?: string | null }> = [];
+  let currentEntryId: string | null = null;
+  let currentLabel: string | null = null;
+  let currentNodes: Node[] = [];
+
+  const flush = () => {
+    if (currentEntryId) {
+      const div = document.createElement('div');
+      currentNodes.forEach((n) => div.appendChild(n.cloneNode(true)));
+      sections.push({ entryId: currentEntryId, content: div.innerHTML || '', label: currentLabel });
+    }
+    currentNodes = [];
+  };
+
+  for (const child of Array.from(body.childNodes)) {
+    if (child.nodeType === 1 && (child as Element).hasAttribute('data-timestamp-divider')) {
+      flush();
+      currentEntryId = (child as Element).getAttribute('data-entry-id');
+      currentLabel = (child as Element).getAttribute('data-label') || null;
+    } else if (currentEntryId !== null) {
+      currentNodes.push(child);
+    }
+  }
+  flush();
+  return sections;
+}
+
+// --- Component ---
+const JournalCanvas = ({
+  selectedDate,
+  onSectionsChange,
+  onSaveStatusChange,
+  onActiveEntryChange,
+}: JournalCanvasProps) => {
+  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+
+  const { addJournalEntry, updateJournalEntry } = useKaivooActions();
+
+  // Subscribe to journalEntries for re-initialization when data arrives
+  const journalEntries = useKaivooStore((s) => s.journalEntries);
+
+  // Track whether initial load populated the canvas
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [hasSelection, setHasSelection] = useState(false);
+
+  // Refs for state that shouldn't cause re-renders
+  const savedContentsRef = useRef<Map<string, string>>(new Map());
+  const sectionsRef = useRef<CanvasSection[]>([]);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isComposingRef = useRef(false);
+  const pendingNewEntryRef = useRef(false);
+  const dateStrRef = useRef(dateStr);
+  const latestHTMLRef = useRef('');
+
+  // Stable callback refs to avoid stale closures
+  const onSectionsChangeRef = useRef(onSectionsChange);
+  onSectionsChangeRef.current = onSectionsChange;
+  const onSaveStatusChangeRef = useRef(onSaveStatusChange);
+  onSaveStatusChangeRef.current = onSaveStatusChange;
+  const onActiveEntryChangeRef = useRef(onActiveEntryChange);
+  onActiveEntryChangeRef.current = onActiveEntryChange;
+  const activeEntryIdRef = useRef<string | null>(null);
+
+  // --- Save logic ---
+  const saveDirtySections = useCallback(
+    async (html: string) => {
+      const sections = extractSections(html);
+      const toSave: Array<{ entryId: string; content: string }> = [];
+
+      for (const section of sections) {
+        const saved = savedContentsRef.current.get(section.entryId);
+        if (saved !== section.content) {
+          toSave.push(section);
+        }
+      }
+
+      if (toSave.length === 0) {
+        onSaveStatusChangeRef.current('saved');
+        return;
+      }
+
+      onSaveStatusChangeRef.current('saving');
+
+      try {
+        await Promise.all(toSave.map(({ entryId, content }) => updateJournalEntry(entryId, { content })));
+        for (const { entryId, content } of toSave) {
+          savedContentsRef.current.set(entryId, content);
+        }
+        onSaveStatusChangeRef.current('saved');
+      } catch (e) {
+        console.error('[JournalCanvas] Auto-save failed:', e);
+        onSaveStatusChangeRef.current('unsaved');
+        toast.error('Auto-save failed', { description: 'Your changes are saved locally.' });
+        // Fallback: save full HTML to localStorage
+        localStorage.setItem(`notes-canvas-draft-${dateStrRef.current}`, html);
+      }
+    },
+    [updateJournalEntry],
+  );
+
+  // --- First-write: create entry when user types in empty canvas ---
+  const handleFirstWrite = useCallback(
+    async (editorHTML: string, editorInstance: ReturnType<typeof useEditor>) => {
+      if (pendingNewEntryRef.current || sectionsRef.current.length > 0) return;
+      pendingNewEntryRef.current = true;
+
+      try {
+        // Get the current content BEFORE the async call (user may still be typing)
+        const typedContent = editorInstance ? editorInstance.getHTML() : editorHTML;
+
+        const newEntry = await addJournalEntry({
+          content: typedContent, // Save content immediately, not empty
+          date: dateStrRef.current,
+          tags: [],
+          topicIds: [],
+        });
+
+        if (newEntry && editorInstance) {
+          isComposingRef.current = true;
+
+          const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
+          // Get the LATEST content (user may have typed more during the await)
+          const latestContent = editorInstance.getHTML();
+          // Rebuild: divider + latest content
+          const html = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>${latestContent}`;
+          editorInstance.commands.setContent(html);
+
+          savedContentsRef.current.set(newEntry.id, typedContent);
+          sectionsRef.current = [{ entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) }];
+          onSectionsChangeRef.current(sectionsRef.current);
+          setInitialLoadDone(true);
+
+          // If the user typed more during the await, save immediately
+          if (latestContent !== typedContent) {
+            void updateJournalEntry(newEntry.id, { content: latestContent });
+            savedContentsRef.current.set(newEntry.id, latestContent);
+          }
+
+          // Restore cursor at end
+          requestAnimationFrame(() => {
+            editorInstance.commands.focus('end');
+            isComposingRef.current = false;
+          });
+        }
+      } catch (e) {
+        console.error('[JournalCanvas] Failed to create first entry:', e);
+      } finally {
+        pendingNewEntryRef.current = false;
+      }
+    },
+    [addJournalEntry, updateJournalEntry],
+  );
+
+  // --- TipTap editor ---
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      Highlight.configure({ multicolor: true }),
+      TextStyle,
+      Color,
+      EntryHeaderNode,
+      Placeholder.configure({
+        placeholder: 'Start writing...',
+        emptyEditorClass: 'is-editor-empty',
+      }),
+    ],
+    content: '',
+    onUpdate: ({ editor: ed }) => {
+      if (isComposingRef.current) return;
+
+      const html = ed.getHTML();
+      latestHTMLRef.current = html;
+
+      // First-write detection
+      if (sectionsRef.current.length === 0 && !pendingNewEntryRef.current) {
+        void handleFirstWrite(html, ed);
+        return;
+      }
+
+      // Rebuild sections if entry count changed (handles deletion/split)
+      const doc = ed.state.doc;
+      const docSections: CanvasSection[] = [];
+      for (let i = 0; i < doc.childCount; i++) {
+        const child = doc.child(i);
+        if (child.type.name === 'entryHeader' && child.attrs.entryId) {
+          docSections.push({
+            entryId: child.attrs.entryId as string,
+            timestamp: new Date(child.attrs.timestamp as string),
+          });
+        }
+      }
+      if (docSections.length !== sectionsRef.current.length) {
+        sectionsRef.current = docSections;
+        onSectionsChangeRef.current(sectionsRef.current);
+        // Clean up savedContents for entries no longer in the doc
+        const activeIds = new Set(docSections.map((s) => s.entryId));
+        for (const key of savedContentsRef.current.keys()) {
+          if (!activeIds.has(key)) savedContentsRef.current.delete(key);
+        }
+      }
+
+      onSaveStatusChangeRef.current('unsaved');
+
+      // Debounced save
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(() => {
+        void saveDirtySections(html);
+      }, SAVE_DEBOUNCE_MS);
+
+      // localStorage draft (immediate)
+      localStorage.setItem(`notes-canvas-draft-${dateStrRef.current}`, html);
+    },
+    onSelectionUpdate: ({ editor: ed }) => {
+      // Detect which entry the cursor is in by scanning top-level nodes
+      let foundEntryId: string | null = null;
+
+      try {
+        // Find the top-level position of the cursor
+        const { $anchor } = ed.state.selection;
+        const topIndex = $anchor.index(0);
+        const doc = ed.state.doc;
+
+        // Scan backward through top-level nodes to find nearest entryHeader
+        for (let i = Math.min(topIndex, doc.childCount - 1); i >= 0; i--) {
+          const child = doc.child(i);
+          if (child.type.name === 'entryHeader' && child.attrs.entryId) {
+            foundEntryId = child.attrs.entryId as string;
+            break;
+          }
+        }
+      } catch {
+        // ProseMirror doc may be in a transient state during content updates
+      }
+
+      if (foundEntryId !== activeEntryIdRef.current) {
+        activeEntryIdRef.current = foundEntryId;
+        onActiveEntryChangeRef.current?.(foundEntryId);
+      }
+
+      // Track text selection for split menu — disable if selection crosses entry headers
+      const sel = ed.state.selection;
+      let crossesEntries = false;
+      if (!sel.empty) {
+        ed.state.doc.nodesBetween(sel.from, sel.to, (node) => {
+          if (node.type.name === 'entryHeader') crossesEntries = true;
+        });
+      }
+      setHasSelection(!sel.empty && !crossesEntries);
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3',
+        role: 'textbox',
+        'aria-label': 'Notes canvas editor',
+      },
+    },
+  });
+
+  // --- New Entry: explicit user action ---
+  const handleNewEntry = useCallback(async () => {
+    if (pendingNewEntryRef.current || !editor) return;
+    pendingNewEntryRef.current = true;
+
+    try {
+      // Flush any pending saves first
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+        if (latestHTMLRef.current && sectionsRef.current.length > 0) {
+          await saveDirtySections(latestHTMLRef.current);
+        }
+      }
+
+      const newEntry = await addJournalEntry({
+        content: '',
+        date: dateStrRef.current,
+        tags: [],
+        topicIds: [],
+      });
+
+      if (newEntry && editor) {
+        isComposingRef.current = true;
+
+        const label = `── ${format(new Date(newEntry.timestamp), 'h:mm a')} ──`;
+        const dividerHTML = `<div data-timestamp-divider="" data-timestamp="${new Date(newEntry.timestamp).toISOString()}" data-entry-id="${newEntry.id}" contenteditable="false" class="timestamp-divider">${label}</div>`;
+
+        // Append divider + empty paragraph to existing content
+        const currentHTML = editor.getHTML();
+        const newHTML = currentHTML + dividerHTML + '<p></p>';
+        editor.commands.setContent(newHTML);
+
+        savedContentsRef.current.set(newEntry.id, '');
+        sectionsRef.current = [
+          ...sectionsRef.current,
+          { entryId: newEntry.id, timestamp: new Date(newEntry.timestamp) },
+        ];
+        onSectionsChangeRef.current(sectionsRef.current);
+
+        requestAnimationFrame(() => {
+          editor.commands.focus('end');
+          isComposingRef.current = false;
+        });
+      }
+    } catch (e) {
+      console.error('[JournalCanvas] Failed to create new entry:', e);
+    } finally {
+      pendingNewEntryRef.current = false;
+    }
+  }, [editor, addJournalEntry, saveDirtySections]);
+
+  // --- Split to New Entry: move selected text to a new entry ---
+  const splitToNewEntry = useCallback(async () => {
+    if (!editor || pendingNewEntryRef.current) return;
+    if (editor.state.selection.empty) return;
+
+    pendingNewEntryRef.current = true;
+    try {
+      // 1. Get selected HTML (ProseMirror slice)
+      const slice = editor.state.selection.content();
+      const tempDiv = document.createElement('div');
+      const fragment = slice.content;
+      // Serialize fragment to HTML via DOMSerializer
+      const { DOMSerializer } = await import('@tiptap/pm/model');
+      const serializer = DOMSerializer.fromSchema(editor.schema);
+      const domFragment = serializer.serializeFragment(fragment);
+      tempDiv.appendChild(domFragment);
+      const selectedHTML = tempDiv.innerHTML;
+
+      // 2. Capture collapse state BEFORE modifying the editor
+      const collapseState = getEditorCollapseState(editor);
+
+      // 3. Delete selected content from editor
+      editor.chain().focus().deleteSelection().run();
+
+      // 3. Save the source entry (content was just modified)
+      const currentHTML = editor.getHTML();
+      latestHTMLRef.current = currentHTML;
+      await saveDirtySections(currentHTML);
+
+      // 4. Create new entry with the extracted content
+      const newEntry = await addJournalEntry({
+        content: selectedHTML,
+        date: dateStrRef.current,
+        tags: [],
+        topicIds: [],
+      });
+
+      if (newEntry && editor) {
+        isComposingRef.current = true;
+
+        // 5. Build entry list from current editor content (NOT from store — avoids race)
+        const fullHTML = editor.getHTML();
+        const currentSections = extractSections(fullHTML);
+        // Build entries from what's currently in the editor
+        const entryList: Array<{ id: string; timestamp: string; content: string; label?: string | null }> =
+          sectionsRef.current.map((s) => {
+            const sec = currentSections.find((cs) => cs.entryId === s.entryId);
+            return {
+              id: s.entryId,
+              timestamp: s.timestamp.toISOString(),
+              content: sec?.content || '',
+              label: sec?.label,
+            };
+          });
+
+        // Always append clipped entry at the end — its timestamp is now(),
+        // so it should appear after all existing entries for correct ordering.
+        entryList.push({
+          id: newEntry.id,
+          timestamp: new Date(newEntry.timestamp).toISOString(),
+          content: selectedHTML,
+        });
+
+        // Rebuild HTML with collapse state preserved
+        const rebuiltHTML = composeHTML(entryList, collapseState);
+        editor.commands.setContent(rebuiltHTML);
+
+        // Update tracking refs
+        savedContentsRef.current.set(newEntry.id, selectedHTML);
+        for (const sec of currentSections) {
+          savedContentsRef.current.set(sec.entryId, sec.content);
+        }
+
+        sectionsRef.current = entryList.map((e) => ({
+          entryId: e.id,
+          timestamp: new Date(e.timestamp),
+        }));
+        onSectionsChangeRef.current(sectionsRef.current);
+
+        // Persist collapse state to localStorage
+        saveCollapseState(dateStrRef.current, collapseState);
+
+        requestAnimationFrame(() => {
+          editor.commands.focus('end');
+          isComposingRef.current = false;
+        });
+      }
+    } catch (e) {
+      console.error('[JournalCanvas] Split to new entry failed:', e);
+    } finally {
+      pendingNewEntryRef.current = false;
+    }
+  }, [editor, addJournalEntry, saveDirtySections]);
+
+  // --- Initialize canvas on date change ---
+  useEffect(() => {
+    if (!editor) return;
+
+    // Flush pending saves for previous date
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+      // Actually save instead of discarding
+      if (latestHTMLRef.current && sectionsRef.current.length > 0) {
+        void saveDirtySections(latestHTMLRef.current);
+      }
+    }
+
+    dateStrRef.current = dateStr;
+    isComposingRef.current = true;
+    pendingNewEntryRef.current = false;
+
+    // Read entries directly from store (not reactive to future store changes)
+    const allEntries = useKaivooStore.getState().journalEntries;
+    const entries = allEntries
+      .filter((e) => e.date === dateStr)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    // Store saved contents
+    savedContentsRef.current.clear();
+    entries.forEach((e) => savedContentsRef.current.set(e.id, e.content || ''));
+
+    // Track sections
+    sectionsRef.current = entries.map((e) => ({
+      entryId: e.id,
+      timestamp: new Date(e.timestamp),
+    }));
+    onSectionsChangeRef.current(sectionsRef.current);
+
+    // Compose and set content — defer to avoid flushSync inside React lifecycle
+    const collapseState = loadCollapseState(dateStr);
+    const html = composeHTML(entries, collapseState);
+    const entryCount = entries.length;
+    cleanOldCollapseKeys();
+    queueMicrotask(() => {
+      editor.commands.setContent(html || '');
+      onSaveStatusChangeRef.current(entryCount > 0 ? 'saved' : 'idle');
+      setInitialLoadDone(entryCount > 0);
+
+      requestAnimationFrame(() => {
+        editor.commands.focus('end');
+        isComposingRef.current = false;
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, dateStr]);
+
+  // --- Re-initialize when store data arrives after mount ---
+  useEffect(() => {
+    // Skip if canvas already has content or editor isn't ready
+    if (!editor || initialLoadDone || pendingNewEntryRef.current) return;
+
+    const entries = journalEntries
+      .filter((e) => e.date === dateStr)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+    if (entries.length === 0) return;
+
+    // Entries arrived — initialize canvas
+    isComposingRef.current = true;
+    savedContentsRef.current.clear();
+    entries.forEach((e) => savedContentsRef.current.set(e.id, e.content || ''));
+    sectionsRef.current = entries.map((e) => ({
+      entryId: e.id,
+      timestamp: new Date(e.timestamp),
+    }));
+    onSectionsChangeRef.current(sectionsRef.current);
+
+    const collapseState = loadCollapseState(dateStr);
+    const html = composeHTML(entries, collapseState);
+    editor.commands.setContent(html);
+    onSaveStatusChangeRef.current('saved');
+    setInitialLoadDone(true);
+
+    requestAnimationFrame(() => {
+      editor.commands.focus('end');
+      isComposingRef.current = false;
+    });
+  }, [editor, dateStr, journalEntries, initialLoadDone]);
+
+  // --- Flush saves on unmount ---
+  const saveDirtySectionsRef = useRef(saveDirtySections);
+  saveDirtySectionsRef.current = saveDirtySections;
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        // Flush pending save immediately instead of discarding
+        if (latestHTMLRef.current && sectionsRef.current.length > 0) {
+          void saveDirtySectionsRef.current(latestHTMLRef.current);
+        }
+      }
+    };
+  }, []);
+
+  if (!editor) return null;
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Toolbar — sticky so it stays visible on scroll */}
+      <div
+        className="sticky top-0 z-10 flex flex-wrap items-center gap-0.5 border-b border-border/50 bg-background px-1 py-1.5"
+        role="toolbar"
+        aria-label="Text formatting"
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          className="h-8 w-8 p-0"
+          aria-label="Undo"
+        >
+          <Undo className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          className="h-8 w-8 p-0"
+          aria-label="Redo"
+        >
+          <Redo className="h-4 w-4" />
+        </Button>
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('heading', { level: 1 })}
+          onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className="h-8 w-8 p-0"
+          aria-label="Heading 1"
+        >
+          <Heading1 className="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('heading', { level: 2 })}
+          onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className="h-8 w-8 p-0"
+          aria-label="Heading 2"
+        >
+          <Heading2 className="h-4 w-4" />
+        </Toggle>
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('bold')}
+          onPressedChange={() => editor.chain().focus().toggleBold().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Bold"
+        >
+          <Bold className="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('italic')}
+          onPressedChange={() => editor.chain().focus().toggleItalic().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Italic"
+        >
+          <Italic className="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('strike')}
+          onPressedChange={() => editor.chain().focus().toggleStrike().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Strikethrough"
+        >
+          <Strikethrough className="h-4 w-4" />
+        </Toggle>
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="Text color">
+              <Palette className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2" align="start">
+            <div className="grid grid-cols-5 gap-1">
+              {TEXT_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  onClick={() =>
+                    c.color ? editor.chain().focus().setColor(c.color).run() : editor.chain().focus().unsetColor().run()
+                  }
+                  className={cn(
+                    'h-6 w-6 rounded border border-border transition-transform hover:scale-110',
+                    !c.color && 'bg-foreground',
+                  )}
+                  style={{ backgroundColor: c.color || undefined }}
+                  aria-label={`${c.name} text color`}
+                />
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="Highlight color">
+              <Highlighter className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2" align="start">
+            <div className="grid grid-cols-4 gap-1">
+              {HIGHLIGHT_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  onClick={() =>
+                    c.color
+                      ? editor.chain().focus().toggleHighlight({ color: c.color }).run()
+                      : editor.chain().focus().unsetHighlight().run()
+                  }
+                  className={cn(
+                    'h-6 w-6 rounded border border-border transition-transform hover:scale-110',
+                    !c.color && 'bg-background line-through',
+                  )}
+                  style={{ backgroundColor: c.color || undefined }}
+                  aria-label={`${c.name} highlight`}
+                />
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('bulletList')}
+          onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Bullet list"
+        >
+          <List className="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('orderedList')}
+          onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Ordered list"
+        >
+          <ListOrdered className="h-4 w-4" />
+        </Toggle>
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Toggle
+          size="sm"
+          pressed={editor.isActive('blockquote')}
+          onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
+          className="h-8 w-8 p-0"
+          aria-label="Blockquote"
+        >
+          <Quote className="h-4 w-4" />
+        </Toggle>
+        <div className="flex-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => void handleNewEntry()}
+          disabled={pendingNewEntryRef.current}
+          aria-label="New entry"
+        >
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">New Entry</span>
+        </Button>
+      </div>
+
+      {/* Split to New Entry — shown when text is selected */}
+      {hasSelection && sectionsRef.current.length > 0 && (
+        <div className="sticky top-[42px] z-10 flex justify-center border-b border-border/30 bg-background/95 py-1 backdrop-blur-sm">
+          <SplitToNewEntryMenu onSplit={() => void splitToNewEntry()} disabled={pendingNewEntryRef.current} />
+        </div>
+      )}
+
+      {/* Editor */}
+      <div className="flex-1 overflow-auto">
+        <EditorContent editor={editor} />
+      </div>
+
+      <style>{`
+        .timestamp-divider {
+          text-align: center;
+          color: hsl(var(--muted-foreground));
+          font-size: 0.75rem;
+          letter-spacing: 0.05em;
+          padding: 0.75rem 0;
+          user-select: none;
+          pointer-events: none;
+          opacity: 0.7;
+        }
+        .entry-header {
+          user-select: none;
+          border-top: 1px solid hsl(var(--border) / 0.5);
+          margin-top: 0.5rem;
+        }
+        .entry-header:first-child {
+          border-top: none;
+          margin-top: 0;
+        }
+        .collapsed-content {
+          display: none !important;
+        }
+        .ProseMirror {
+          min-height: 400px;
+        }
+        .ProseMirror:focus {
+          outline: none;
+        }
+        .ProseMirror p.is-editor-empty:first-child::before {
+          content: attr(data-placeholder);
+          float: left;
+          color: hsl(var(--muted-foreground));
+          opacity: 0.5;
+          pointer-events: none;
+          height: 0;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default JournalCanvas;

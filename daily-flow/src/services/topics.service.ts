@@ -28,31 +28,19 @@ export const dbToTag = (row: Tables<'tags'>): Tag => ({
 
 // Fetch
 export const fetchTopics = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('topics')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at');
+  const { data, error } = await supabase.from('topics').select('*').eq('user_id', userId).order('created_at');
   if (error) throw error;
   return data || [];
 };
 
 export const fetchTopicPages = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('topic_pages')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at');
+  const { data, error } = await supabase.from('topic_pages').select('*').eq('user_id', userId).order('created_at');
   if (error) throw error;
   return data || [];
 };
 
 export const fetchTags = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('tags')
-    .select('*')
-    .eq('user_id', userId)
-    .order('name');
+  const { data, error } = await supabase.from('tags').select('*').eq('user_id', userId).order('name');
   if (error) throw error;
   return data || [];
 };
@@ -70,9 +58,7 @@ export const createTopic = async (userId: string, topic: Omit<Topic, 'id' | 'cre
     .order('created_at', { ascending: true })
     .limit(1);
 
-  existingQuery = parentId
-    ? existingQuery.eq('parent_id', parentId)
-    : existingQuery.is('parent_id', null);
+  existingQuery = parentId ? existingQuery.eq('parent_id', parentId) : existingQuery.is('parent_id', null);
 
   const { data: existing } = await existingQuery.maybeSingle();
   if (existing) return dbToTopic(existing);
@@ -86,6 +72,27 @@ export const createTopic = async (userId: string, topic: Omit<Topic, 'id' | 'cre
       icon: topic.icon,
       parent_id: parentId,
     })
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToTopic(data);
+};
+
+export const updateTopic = async (
+  userId: string,
+  id: string,
+  updates: { name?: string; description?: string; icon?: string },
+) => {
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
+
+  const { data, error } = await supabase
+    .from('topics')
+    .update(dbUpdates)
+    .eq('id', id)
+    .eq('user_id', userId)
     .select()
     .single();
   if (error) throw error;
@@ -125,6 +132,27 @@ export const createTopicPage = async (userId: string, page: Omit<TopicPage, 'id'
     .single();
   if (error) throw error;
   return dbToTopicPage(data);
+};
+
+export const updateTopicPage = async (userId: string, id: string, updates: { name?: string; description?: string }) => {
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+
+  const { data, error } = await supabase
+    .from('topic_pages')
+    .update(dbUpdates)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToTopicPage(data);
+};
+
+export const deleteTopicPage = async (userId: string, id: string) => {
+  const { error } = await supabase.from('topic_pages').delete().eq('id', id).eq('user_id', userId);
+  if (error) throw error;
 };
 
 // Tag CRUD
