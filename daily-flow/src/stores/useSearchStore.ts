@@ -1,20 +1,20 @@
 import { create } from 'zustand';
 import { toast } from 'sonner';
-import { searchAll } from '@/services/search.service';
-import type { SearchResult } from '@/services/search.service';
+import type { SearchResult } from '@/lib/adapters';
 
+type SearchFn = (query: string, limit?: number) => Promise<SearchResult[]>;
 type EntityCategory = 'all' | SearchResult['entityType'];
 
 interface SearchState {
   query: string;
-  results: (SearchResult & { path: string })[];
+  results: SearchResult[];
   isLoading: boolean;
   isOpen: boolean;
   selectedCategory: EntityCategory;
   recentSearches: string[];
 
   setQuery: (query: string) => void;
-  search: (query: string) => Promise<void>;
+  search: (query: string, searchFn: SearchFn) => Promise<void>;
   clearResults: () => void;
   open: () => void;
   close: () => void;
@@ -49,7 +49,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
 
   setQuery: (query) => set({ query }),
 
-  search: async (query) => {
+  search: async (query, searchFn) => {
     const trimmed = query.trim();
     if (!trimmed) {
       set({ results: [], isLoading: false });
@@ -58,7 +58,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
 
     set({ isLoading: true });
     try {
-      const results = await searchAll(trimmed);
+      const results = await searchFn(trimmed);
       // Only update if query hasn't changed while we were loading
       if (get().query.trim() === trimmed) {
         set({ results, isLoading: false });

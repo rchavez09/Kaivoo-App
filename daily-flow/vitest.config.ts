@@ -19,6 +19,7 @@ export default defineConfig({
         "src/integrations/**",
         "src/vite-env.d.ts",
         "src/main.tsx",
+        "src/lib/adapters/types.ts",
       ],
     },
   },

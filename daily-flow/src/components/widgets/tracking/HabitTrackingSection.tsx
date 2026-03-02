@@ -4,8 +4,8 @@ import { Check, Minus, Sun } from 'lucide-react';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useInvalidate } from '@/hooks/queries';
+import { useDatabaseOperations } from '@/hooks/useDatabase';
 import { Habit, TimeBlock } from '@/types';
-import * as HabitsService from '@/services/habits.service';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { iconMap } from './tracking-types';
@@ -26,6 +26,7 @@ interface HabitTrackingSectionProps {
 const HabitTrackingSection = ({ date }: HabitTrackingSectionProps) => {
   const { user } = useAuth();
   const { invalidate } = useInvalidate();
+  const db = useDatabaseOperations();
   const habits = useKaivooStore((s) => s.habits);
   const isHabitCompleted = useKaivooStore((s) => s.isHabitCompleted);
   const getHabitCompletionCount = useKaivooStore((s) => s.getHabitCompletionCount);
@@ -54,7 +55,7 @@ const HabitTrackingSection = ({ date }: HabitTrackingSectionProps) => {
       toggleHabitCompletion(habitId, dateStr);
       if (user) {
         try {
-          await HabitsService.toggleHabitCompletion(user.id, habitId, dateStr, wasCompleted);
+          await db.toggleHabitCompletion(habitId, dateStr, wasCompleted);
           invalidate('habitCompletions', 'routineCompletions');
         } catch {
           toggleHabitCompletion(habitId, dateStr);
@@ -71,7 +72,7 @@ const HabitTrackingSection = ({ date }: HabitTrackingSectionProps) => {
       incrementHabitCount(habitId, dateStr);
       if (user) {
         try {
-          await HabitsService.incrementHabitCount(user.id, habitId, dateStr, currentCount);
+          await db.incrementHabitCount(habitId, dateStr, currentCount);
           invalidate('habitCompletions', 'routineCompletions');
         } catch {
           toast.error('Failed to update habit count.');

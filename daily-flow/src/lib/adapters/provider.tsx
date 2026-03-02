@@ -34,6 +34,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const isLocal = isTauri();
   const [localAdapters, setLocalAdapters] = useState<LocalAdapters | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
   const initRef = useRef(false);
   const dataAdapterRef = useRef<DataAdapter | null>(null);
 
@@ -47,14 +48,13 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
         const { LocalDataAdapter, LocalAuthAdapter, LocalSearchAdapter } = await import('./local');
         const data = await LocalDataAdapter.create();
         dataAdapterRef.current = data;
-        setLocalAdapters({
-          data,
-          auth: new LocalAuthAdapter(),
-          search: new LocalSearchAdapter(),
-        });
+        const auth = await LocalAuthAdapter.create(data.database);
+        const search = new LocalSearchAdapter(data.database);
+        await search.rebuildIndex();
+        setLocalAdapters({ data, auth, search });
       } catch (e) {
         console.error('[AdapterProvider] Failed to initialize LocalAdapter:', e);
-        // Fall back to Supabase if local init fails
+        setInitError(e instanceof Error ? e.message : 'Local database initialization failed');
       }
     })();
 
@@ -81,6 +81,25 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
     const data = user ? new SupabaseDataAdapter(user.id) : null;
     return { data, auth, search, isLocal: false };
   }, [isLocal, localAdapters, user?.id]);
+
+  // Desktop mode: show error screen if local database init failed
+  if (isLocal && initError) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'system-ui' }}>
+        <h2>Failed to initialize local database</h2>
+        <p style={{ color: '#888' }}>{initError}</p>
+        <button
+          onClick={() => {
+            setInitError(null);
+            initRef.current = false;
+          }}
+          style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return <AdapterContext.Provider value={value}>{children}</AdapterContext.Provider>;
 };

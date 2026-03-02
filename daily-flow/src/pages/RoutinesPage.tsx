@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useInvalidate } from '@/hooks/queries';
+import { useDatabaseOperations } from '@/hooks/useDatabase';
 import { Habit, HabitType, TimeBlock, HabitSchedule } from '@/types';
-import * as HabitsService from '@/services/habits.service';
 import TimeBlockSection from '@/components/habits/TimeBlockSection';
 import HabitRow from '@/components/habits/HabitRow';
 import HabitFormDrawer from '@/components/habits/HabitFormDrawer';
@@ -21,6 +21,7 @@ const TIME_BLOCKS: TimeBlock[] = ['morning', 'afternoon', 'evening', 'anytime'];
 const RoutinesPage = () => {
   const { user } = useAuth();
   const { invalidate } = useInvalidate();
+  const db = useDatabaseOperations();
   const habits = useKaivooStore((s) => s.habits);
   const isHabitCompleted = useKaivooStore((s) => s.isHabitCompleted);
   const getHabitCompletionCount = useKaivooStore((s) => s.getHabitCompletionCount);
@@ -69,7 +70,7 @@ const RoutinesPage = () => {
       toggleHabitCompletion(habitId, todayStr);
       if (user) {
         try {
-          await HabitsService.toggleHabitCompletion(user.id, habitId, todayStr, wasCompleted);
+          await db.toggleHabitCompletion(habitId, todayStr, wasCompleted);
           invalidate('habitCompletions', 'routineCompletions');
         } catch {
           toggleHabitCompletion(habitId, todayStr); // rollback
@@ -86,7 +87,7 @@ const RoutinesPage = () => {
       incrementHabitCount(habitId, todayStr);
       if (user) {
         try {
-          await HabitsService.incrementHabitCount(user.id, habitId, todayStr, currentCount);
+          await db.incrementHabitCount(habitId, todayStr, currentCount);
           invalidate('habitCompletions', 'routineCompletions');
         } catch {
           // Simple rollback — will be re-synced on next query
@@ -115,7 +116,7 @@ const RoutinesPage = () => {
       });
       if (user) {
         try {
-          await HabitsService.createHabit(user.id, {
+          await db.createHabit({
             ...data,
             order: activeHabits.length,
           });
@@ -144,7 +145,7 @@ const RoutinesPage = () => {
       const prev = { ...editingHabit };
       updateHabitInStore(editingHabit.id, data);
       try {
-        await HabitsService.updateHabit(user.id, editingHabit.id, data);
+        await db.updateHabit(editingHabit.id, data);
         invalidate('habits', 'routines');
         toast.success('Habit updated!');
       } catch {
@@ -164,7 +165,7 @@ const RoutinesPage = () => {
       removeHabit(habitId);
       setDetailOpen(false);
       try {
-        await HabitsService.deleteHabit(user.id, habitId);
+        await db.deleteHabit(habitId);
         invalidate('habits', 'habitCompletions', 'routines', 'routineCompletions');
         toast.success('Habit deleted.');
       } catch {
@@ -181,7 +182,7 @@ const RoutinesPage = () => {
       updateHabitInStore(habitId, { isArchived: true });
       setDetailOpen(false);
       try {
-        await HabitsService.archiveHabit(user.id, habitId);
+        await db.archiveHabit(habitId);
         invalidate('habits', 'routines');
         toast.success('Habit archived.');
       } catch {

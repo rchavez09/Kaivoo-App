@@ -6,9 +6,9 @@ import { useKaivooStore } from '@/stores/useKaivooStore';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useInvalidate } from '@/hooks/queries';
+import { useDatabaseOperations } from '@/hooks/useDatabase';
 import { toast } from 'sonner';
 import { Habit, HabitType, TimeBlock, HabitSchedule } from '@/types';
-import * as HabitsService from '@/services/habits.service';
 import HabitFormDrawer from '@/components/habits/HabitFormDrawer';
 import { iconMap } from './tracking/tracking-types';
 import { cn } from '@/lib/utils';
@@ -31,6 +31,7 @@ const TrackingWidget = ({ date }: TrackingWidgetProps = {}) => {
 
   const { user } = useAuth();
   const { invalidate } = useInvalidate();
+  const db = useDatabaseOperations();
   const habits = useKaivooStore((s) => s.habits);
   const isHabitCompleted = useKaivooStore((s) => s.isHabitCompleted);
   const getHabitCompletionCount = useKaivooStore((s) => s.getHabitCompletionCount);
@@ -76,7 +77,7 @@ const TrackingWidget = ({ date }: TrackingWidgetProps = {}) => {
       toggleHabitCompletion(habitId, dateStr);
       if (user) {
         try {
-          await HabitsService.toggleHabitCompletion(user.id, habitId, dateStr, wasCompleted);
+          await db.toggleHabitCompletion(habitId, dateStr, wasCompleted);
           invalidate('habitCompletions', 'routineCompletions');
         } catch {
           toggleHabitCompletion(habitId, dateStr);
@@ -93,7 +94,7 @@ const TrackingWidget = ({ date }: TrackingWidgetProps = {}) => {
       incrementHabitCount(habitId, dateStr);
       if (user) {
         try {
-          await HabitsService.incrementHabitCount(user.id, habitId, dateStr, currentCount);
+          await db.incrementHabitCount(habitId, dateStr, currentCount);
           invalidate('habitCompletions', 'routineCompletions');
         } catch {
           toast.error('Failed to update habit count.');
@@ -121,7 +122,7 @@ const TrackingWidget = ({ date }: TrackingWidgetProps = {}) => {
       });
       if (user) {
         try {
-          await HabitsService.createHabit(user.id, {
+          await db.createHabit({
             ...data,
             order: activeHabits.length,
           });
