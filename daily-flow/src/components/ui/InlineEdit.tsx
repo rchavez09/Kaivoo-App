@@ -75,8 +75,18 @@ const InlineEdit = ({ value, onSave, placeholder, className, as = 'p' }: InlineE
     <Tag
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setEditing(true);
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label={`Edit ${as === 'h1' ? 'name' : 'description'}: ${value || placeholder || ''}`}
       className={cn(
         'cursor-pointer hover:bg-secondary/50 rounded px-1 -mx-1 transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         isEmpty && 'italic text-muted-foreground',
         className,
       )}

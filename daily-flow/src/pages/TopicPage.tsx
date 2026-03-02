@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
-import { ChevronLeft, FolderOpen, FileText, Plus, Briefcase } from 'lucide-react';
+import { ChevronLeft, FolderOpen, FileText, Plus, Briefcase, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
@@ -28,7 +29,8 @@ const TopicPage = () => {
   const getJournalEntriesByTopic = useKaivooStore(s => s.getJournalEntriesByTopic);
   const getCapturesByTopic = useKaivooStore(s => s.getCapturesByTopic);
   const getTasksByTopic = useKaivooStore(s => s.getTasksByTopic);
-  const { updateTopic, updateTopicPage, addTopicPage } = useKaivooActions();
+  const navigate = useNavigate();
+  const { updateTopic, updateTopicPage, addTopicPage, deleteTopicPage } = useKaivooActions();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [createPageOpen, setCreatePageOpen] = useState(false);
   const [newPageName, setNewPageName] = useState('');
@@ -82,7 +84,7 @@ const TopicPage = () => {
             <Link to="/topics" className="hover:text-foreground transition-colors">
               Topics
             </Link>
-            <ChevronLeft className="w-4 h-4 rotate-180" />
+            <ChevronLeft className="w-4 h-4 rotate-180" aria-hidden="true" />
             {isPage && topic && (
               <>
                 <Link
@@ -91,7 +93,7 @@ const TopicPage = () => {
                 >
                   {topic.name}
                 </Link>
-                <ChevronLeft className="w-4 h-4 rotate-180" />
+                <ChevronLeft className="w-4 h-4 rotate-180" aria-hidden="true" />
               </>
             )}
             <span className="text-foreground">{displayName}</span>
@@ -148,6 +150,20 @@ const TopicPage = () => {
                 className="text-sm text-muted-foreground"
               />
             </div>
+            {isPage && pageId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => {
+                  void deleteTopicPage(pageId);
+                  toast.success(`Deleted page "${displayName}"`);
+                  navigate(`/topics/${topicId}`);
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </header>
 
@@ -190,13 +206,15 @@ const TopicPage = () => {
                 })}
                 {/* Create new page card */}
                 <div className="flex-shrink-0">
-                  <div
-                    className="w-44 h-28 rounded-lg border border-dashed border-border bg-muted/30 p-4 flex flex-col items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-all duration-200 cursor-pointer"
+                  <button
+                    type="button"
+                    aria-label="Create new page"
+                    className="w-44 h-28 rounded-lg border border-dashed border-border bg-muted/30 p-4 flex flex-col items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     onClick={() => setCreatePageOpen(true)}
                   >
                     <Plus className="w-5 h-5 mb-1" />
                     <span className="text-xs">New Page</span>
-                  </div>
+                  </button>
                 </div>
               </div>
               <ScrollBar orientation="horizontal" />
@@ -253,7 +271,7 @@ const TopicPage = () => {
         )}
 
         {/* Widget Stack - consistent with Today page */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Mentions Widget - Journal Entries + Captures */}
           <TopicCapturesWidget
             entries={journalEntries}

@@ -29,12 +29,10 @@ const Topics = () => {
   const navigate = useNavigate();
   const topics = useKaivooStore(s => s.topics);
   const topicPages = useKaivooStore(s => s.topicPages);
-  const addTopic = useKaivooStore(s => s.addTopic);
-  const addTopicPage = useKaivooStore(s => s.addTopicPage);
   const getJournalEntriesByTopic = useKaivooStore(s => s.getJournalEntriesByTopic);
   const getCapturesByTopic = useKaivooStore(s => s.getCapturesByTopic);
   const getTasksByTopic = useKaivooStore(s => s.getTasksByTopic);
-  const { deleteTopic } = useKaivooActions();
+  const { addTopic, addTopicPage, deleteTopic } = useKaivooActions();
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(['topic-1']));
   const [searchQuery, setSearchQuery] = useState('');
   const [newTopicName, setNewTopicName] = useState('');
@@ -55,7 +53,7 @@ const Topics = () => {
 
   const handleCreateTopic = () => {
     if (newTopicName.trim()) {
-      addTopic({ name: newTopicName.trim() });
+      void addTopic({ name: newTopicName.trim() });
       setNewTopicName('');
       setCreateTopicOpen(false);
     }
@@ -63,7 +61,7 @@ const Topics = () => {
 
   const handleCreatePage = () => {
     if (newPageName.trim() && selectedTopicForPage) {
-      addTopicPage({ topicId: selectedTopicForPage, name: newPageName.trim() });
+      void addTopicPage({ topicId: selectedTopicForPage, name: newPageName.trim() });
       setNewPageName('');
       setSelectedTopicForPage(null);
       setCreatePageOpen(false);
@@ -128,6 +126,7 @@ const Topics = () => {
                   value={newTopicName}
                   onChange={(e) => setNewTopicName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleCreateTopic()}
+                  autoFocus
                 />
                 <Button onClick={handleCreateTopic} className="w-full">
                   Create Topic
@@ -164,7 +163,9 @@ const Topics = () => {
                     <div className="flex items-center gap-2 py-2 px-2 -mx-2 rounded-lg hover:bg-secondary/50 transition-colors group">
                       <button
                         onClick={() => toggleTopic(topic.id)}
-                        className="p-0.5 hover:bg-secondary rounded"
+                        className="p-1 hover:bg-secondary rounded"
+                        aria-expanded={isExpanded}
+                        aria-label={`Toggle ${topic.name}`}
                       >
                         {isExpanded ? (
                           <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -199,7 +200,8 @@ const Topics = () => {
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100"
+                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                            aria-label={`Actions for ${topic.name}`}
                           >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
@@ -217,8 +219,9 @@ const Topics = () => {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
-                              void deleteTopic(topic.id);
-                              toast.success(`Deleted topic "${topic.name}"`);
+                              if (window.confirm(`Delete "${topic.name}" and all its pages? This cannot be undone.`)) {
+                                void deleteTopic(topic.id);
+                              }
                             }}
                             className="text-destructive focus:text-destructive"
                           >
