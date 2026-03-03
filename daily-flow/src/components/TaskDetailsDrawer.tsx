@@ -65,13 +65,11 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
   const topicOptions = useMemo(() => {
     const options: { id: string; name: string; isPage: boolean }[] = [];
     topics.forEach((topic) => {
-      if (topic.id !== 'topic-daily-notes') {
-        options.push({ id: topic.id, name: topic.name, isPage: false });
-        const pages = topicPages.filter((p) => p.topicId === topic.id);
-        pages.forEach((page) => {
-          options.push({ id: page.id, name: `${topic.name}/${page.name}`, isPage: true });
-        });
-      }
+      options.push({ id: topic.id, name: topic.name, isPage: false });
+      const pages = topicPages.filter((p) => p.topicId === topic.id);
+      pages.forEach((page) => {
+        options.push({ id: page.id, name: `${topic.name}/${page.name}`, isPage: true });
+      });
     });
     return options;
   }, [topics, topicPages]);

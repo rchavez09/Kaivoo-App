@@ -1,8 +1,11 @@
 # Sprint 21 — Local-First Storage
 
-**Status:** IN PROGRESS
+**Status:** COMPLETED
 **Branch:** `sprint/21-local-first-storage`
+**PR:** #6 (merged to main)
+**Tag:** `post-sprint-21`
 **Started:** March 2, 2026
+**Completed:** March 2, 2026
 **Compiled by:** Director
 **Approved by:** User (March 2, 2026)
 
@@ -109,34 +112,36 @@ Safe Path: P1, P2 (framework-agnostic adapter wiring, can proceed immediately)
 
 ## Definition of Done — Sprint Level
 
-- [ ] All adapter gaps closed: no service file imported outside `src/lib/adapters/`
-- [ ] `useKaivooQueries` reads through adapter (not services)
-- [ ] Habits flow through `DataAdapter.habits` (not `HabitsService`)
-- [ ] Search flows through `SearchAdapter` (not `search.service`)
-- [ ] SQLite CRUD works for all 15 entities (data persists across restart)
-- [ ] FTS5 search returns ranked results with snippets on desktop
-- [ ] Desktop app launches without Supabase (local auth session)
-- [ ] Adapter unit tests: 70%+ coverage on `src/lib/adapters/`
-- [ ] Local path integration tests pass (tasks, journal, habits, search)
-- [ ] Tauri app icon renders correctly on macOS
-- [ ] All existing web tests pass: `npm run test`
-- [ ] Build succeeds: `npm run build`
-- [ ] TypeScript clean: `npm run typecheck`
-- [ ] Lint clean: `npm run lint` (0 errors)
+- [x] All adapter gaps closed: no service file imported outside `src/lib/adapters/`
+- [x] `useKaivooQueries` reads through adapter (not services)
+- [x] Habits flow through `DataAdapter.habits` (not `HabitsService`)
+- [x] Search flows through `SearchAdapter` (not `search.service`)
+- [x] SQLite CRUD works for all 15 entities (data persists across restart)
+- [x] FTS5 search returns ranked results with snippets on desktop
+- [x] Desktop app launches without Supabase (local auth session)
+- [x] Adapter unit tests: 70%+ coverage on `src/lib/adapters/` (actual: 77.28%)
+- [x] Local path integration tests pass (tasks, journal, habits, search)
+- [x] Tauri app icon renders correctly on macOS
+- [x] All existing web tests pass: `npm run test` (226/226)
+- [x] Build succeeds: `npm run build` (2.36s)
+- [x] TypeScript clean: `npm run typecheck`
+- [x] Lint clean: `npm run lint` (0 errors)
 
 ---
 
 ## Quality Gates
 
 ```
-□ Deterministic checks: npm run lint && npm run typecheck && npm run test && npm run build
-□ Agent 7 code audit (all parcels reviewed, no unresolved P0)
-□ Agent 11 feature integrity check (web app works identically through SupabaseAdapter — zero regressions)
-□ 3-agent design review: N/A for this sprint (no UI changes)
-□ E2E: npm run test:e2e passes against Netlify deploy preview (web path verification)
-□ Sandbox: User reviews deploy preview (web app must work identically)
-□ Sprint retrospective added before merge
+☑ Deterministic checks: npm run lint && npm run typecheck && npm run test && npm run build (226/226 tests, build 2.36s)
+☐ Agent 7 code audit — PARTIAL: inline review found 2 P0s (fixed) + 9 carry-overs, but no formal audit document produced
+☐ Agent 11 feature integrity — PARTIAL: retro states PASS (zero regressions, 6 checks), but no standalone verdict document
+☑ 3-agent design review: N/A for this sprint (no UI changes)
+☐ E2E: SKIPPED — no test:e2e run against deploy preview
+☐ Sandbox: SKIPPED — no documented user review of deploy preview
+☑ Sprint retrospective added before merge
 ```
+
+**Post-Sprint Note (Sprint 22 Director):** Formal Phase 4 gate process was not executed for Sprint 21. Code review and integrity checks happened inline during execution but without the standalone documents and formal sign-off the protocol requires. Agent 7 carry-over items (9 issues) are tracked in Sprint 22 Track 1. A formal adapter audit is being run at Sprint 22 start to catch anything the informal review missed.
 
 ---
 

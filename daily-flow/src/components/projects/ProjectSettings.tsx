@@ -18,8 +18,6 @@ interface ProjectSettingsProps {
 }
 
 const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: ProjectSettingsProps) => {
-  const filteredTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
-
   return (
     <div className="widget-card mt-8">
       <div className="widget-header">
@@ -39,7 +37,7 @@ const ProjectSettings = ({ project, color, topics, onUpdate, onDeleteClick }: Pr
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">None</SelectItem>
-              {filteredTopics.map((t) => (
+              {topics.map((t) => (
                 <SelectItem key={t.id} value={t.id}>
                   {t.name}
                 </SelectItem>

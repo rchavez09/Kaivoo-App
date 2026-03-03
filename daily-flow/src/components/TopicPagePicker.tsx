@@ -43,8 +43,7 @@ const TopicPagePicker = ({ onSelect, onClose, position }: TopicPagePickerProps) 
     }
   };
 
-  // Filter out Daily Notes from the picker
-  const selectableTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
+  const selectableTopics = topics;
 
   return (
     <div

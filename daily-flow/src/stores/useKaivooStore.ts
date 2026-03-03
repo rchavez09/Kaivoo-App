@@ -203,12 +203,6 @@ const getTodayString = getTodayStorageDate;
 
 // Initial mock data
 const initialTopics: Topic[] = [
-  {
-    id: 'topic-daily-notes',
-    name: 'Daily Notes',
-    description: 'Your daily journal entries by date',
-    createdAt: new Date(),
-  },
   { id: 'topic-1', name: 'NUWAVE', description: 'Main project', createdAt: new Date() },
   { id: 'topic-2', name: 'Personal', description: 'Personal notes and goals', createdAt: new Date() },
 ];
@@ -488,10 +482,23 @@ export const useKaivooStore = create<KaivooStore>()(
       },
 
       deleteTopic: (id) => {
-        set((state) => ({
-          topics: state.topics.filter((t) => t.id !== id),
-          topicPages: state.topicPages.filter((p) => p.topicId !== id),
-        }));
+        set((state) => {
+          // Collect all descendant topic IDs (recursive cascade)
+          const idsToDelete = new Set<string>([id]);
+          let size = 0;
+          while (idsToDelete.size > size) {
+            size = idsToDelete.size;
+            for (const topic of state.topics) {
+              if (topic.parentId && idsToDelete.has(topic.parentId)) {
+                idsToDelete.add(topic.id);
+              }
+            }
+          }
+          return {
+            topics: state.topics.filter((t) => !idsToDelete.has(t.id)),
+            topicPages: state.topicPages.filter((p) => !idsToDelete.has(p.topicId)),
+          };
+        });
       },
 
       addTopicPage: (pageData) => {

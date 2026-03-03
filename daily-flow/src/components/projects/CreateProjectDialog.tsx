@@ -69,8 +69,6 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
     onOpenChange(false);
   };
 
-  const filteredTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
@@ -137,7 +135,7 @@ const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogProps) =
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {filteredTopics.map((t) => (
+                  {topics.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.name}
                     </SelectItem>

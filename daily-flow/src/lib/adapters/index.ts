@@ -64,4 +64,4 @@ export type {
   FileWatchEvent,
 } from './types';
 
-export { AdapterProvider, useAdapters, useDataAdapter } from './provider';
+export { AdapterProvider, useAdapters, useDataAdapter, useVault } from './provider';

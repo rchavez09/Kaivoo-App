@@ -108,8 +108,6 @@ const Projects = () => {
     return result;
   }, [projects, activeTab, searchQuery, topicFilter, sortBy, taskStatsMap]);
 
-  const filteredTopics = topics.filter((t) => t.id !== 'topic-daily-notes');
-
   return (
     <AppLayout>
       <div className="mx-auto max-w-4xl px-6 py-8">
@@ -176,14 +174,14 @@ const Projects = () => {
               className="pl-9"
             />
           </div>
-          {filteredTopics.length > 0 && (
+          {topics.length > 0 && (
             <Select value={topicFilter} onValueChange={setTopicFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="All topics" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All topics</SelectItem>
-                {filteredTopics.map((t) => (
+                {topics.map((t) => (
                   <SelectItem key={t.id} value={t.id}>
                     {t.name}
                   </SelectItem>
