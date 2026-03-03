@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 4.5
+**Version:** 4.6
 **Last Updated:** March 2, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -373,7 +373,7 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 | Milestone | Status | Priority |
 |---|---|---|
-| Topics as Knowledge OS — local-first file browser, smart folder hierarchy, single source of truth for all content and files | PLANNED | Must-have |
+| Topics as Knowledge OS — vault file browser (Topics/Projects/Journal/Library/Inbox), Obsidian-compatible markdown export, topic nesting with recursive tree, dual-adapter architecture (LocalVaultAdapter + VirtualVaultAdapter) | **DONE** | Sprint 22 |
 | Desktop packaging (Tauri 2.0) — macOS scaffold complete, .dmg builds. Windows/Linux CI in Sprint 22. | **DONE** | Sprint 20 |
 | Data layer abstraction — DataAdapter pattern (4 interfaces, 15 entity sub-adapters). SupabaseAdapter + LocalAdapter. Runtime switching via `isTauri()`. | **DONE** | Sprint 20 |
 | Local-first storage — SQLite CRUD persistence, FTS5 search, local auth session. Data persists to disk without Supabase. | **DONE** | Sprint 21 |
@@ -488,8 +488,12 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (completing pre-ship features)
-**Active sprint:** Sprint 21 (Local-First Storage) — SQLite persistence, adapter completion, FTS5, local auth
-**Last completed:** Sprint 20 (Local-First Foundation) — DataAdapter pattern, Tauri 2.0 scaffold, SQLite schema, E2E expansion
+**Active sprint:** None (Sprint 22 just completed)
+**Last completed:** Sprint 22 (Knowledge Vault) — vault file browser, markdown export, adapter stabilization, topic nesting
+
+**Sprint 22 delivered:** Knowledge Vault with dual-adapter architecture (LocalVaultAdapter for Tauri desktop, VirtualVaultAdapter for web). File browser at `/vault` with 5 root folders (Topics/Projects/Journal/Library/Inbox), tree navigation, search, breadcrumbs, entity deep-linking. Obsidian-compatible markdown export with YAML frontmatter for 5 entity types. Topic parentId nesting with recursive tree rendering. Adapter stabilization: `local.ts` split into 6 modules, SearchIndexer for per-CRUD FTS5 indexing, entity_type discriminator, empty-set guards. 265 tests (39 new). Agent 7 found 6 P0 issues (path traversal, YAML injection, cascade delete, caching, routing, idempotent migration) — all fixed. 3-agent design review passed. See `Sprints/Sprint-22-Knowledge-Vault.md`.
+
+**Sprint 21 delivered:** Local-first storage — SQLite CRUD persistence for all 13 entities, FTS5 search with `search_all` function, local auth session management. See `Sprints/Sprint-21-Local-First-Storage.md`.
 
 **Sprint 20 delivered:** DataAdapter abstraction layer (4 top-level interfaces, 15 entity sub-adapters), runtime switching via `isTauri()`. LocalDataAdapter with static factory pattern + SQLite schema for all 13 entities. SupabaseDataAdapter wrapping existing queries. AdapterProvider React context with Suspense boundary. Tauri 2.0 scaffold (Cargo.toml, plugins: sql/fs/shell, capabilities, RGBA icon generation). 18 Playwright E2E tests. Sprint Protocol v1.8 (living sprint file + E2E gate). See `Sprints/Sprint-20-Local-First-Foundation.md`.
 
@@ -556,7 +560,7 @@ These run in parallel with sprint work, not blocking it.
 - ~~Phase A feature scope~~ → **No AI in Phase A**. AI features (concierge, BYO keys) deferred to Phase B. Phase A ships: journal, tasks, calendar, captures, widgets, themes, data export.
 
 **Key decisions resolved (Sprint 21 — March 2, 2026):**
-- ~~Phase A sprint sequencing~~ → **Sprint 21: Local-First Storage** (SQLite persistence, adapter completion, FTS5, local auth). Sprint 22: Vault file browser. Sprint 23: Setup wizard + AI settings. Sprint 24+: Calendar, email, licensing, launch.
+- ~~Phase A sprint sequencing~~ → Sprint 21: Local-First Storage (DONE). Sprint 22: Knowledge Vault (DONE). Sprint 23: Setup wizard + AI settings. Sprint 24+: Calendar, email, licensing, launch.
 
 **Key decisions ahead:**
 - **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
@@ -645,7 +649,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v4.5 — March 2, 2026*
+*Vision v4.6 — March 2, 2026*
+*v4.6: Sprint 22 (Knowledge Vault) complete. Vault file browser with 5-folder structure (Topics/Projects/Journal/Library/Inbox), dual-adapter architecture, Obsidian-compatible markdown export, topic nesting, adapter stabilization (local.ts split, SearchIndexer, entity_type discriminator). 265 tests. 6 P0 security/correctness fixes. See `Sprints/Sprint-22-Knowledge-Vault.md`.*
 *v4.5: CEO Strategic Brief — Phase A pricing revised ($99 standard / $49 founding member). Volume-over-margin strategy. AI features deferred to Phase B. Sprint 21 (Local-First Storage) started — SQLite persistence, adapter completion, FTS5 search, local auth. Sprint sequencing resolved through Sprint 24+. Revenue projections updated for new pricing. See `Research/Agent-5-Docs/CEO-Strategic-Brief-Phase-A-Pricing.md`.*
 *v4.4: Sprint 20 completion — Tauri 2.0 selected, DataAdapter pattern implemented, SQLite schema designed, 18 E2E tests, lint cleanup. See `Sprints/Sprint-20-Local-First-Foundation.md`.*
 *v4.3: CEO Session #4 — Local-First Knowledge OS. Topics elevated to single source of truth for all content and files (Topics > Projects > Tasks/Files hierarchy). Desktop packaging (Electron/Tauri) promoted to Phase A must-have. Data layer abstraction: LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B, swappable backend, no codebase split. File attachments + image embedding promoted to must-have. Hashtags as virtual filters not folders. Convention-with-flexibility folder structure (opinionated default, permissive by nature). Obsidian import (file copy, not headline). Entry-to-file export. Setup wizard includes vault folder selection.*
