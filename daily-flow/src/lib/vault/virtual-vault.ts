@@ -14,6 +14,7 @@ import {
   ROOT_FOLDERS,
   getJournalFolderPath,
   getTopicFolderPath,
+  getProjectFolderPath,
   getCaptureFilePath,
   sanitizeName,
 } from './types';
@@ -169,8 +170,8 @@ function buildTree(
   }
   const journalNode = buildJournalTree(journalByFolder);
 
-  // ─── Projects tree: Projects/{topicName}/{pageName|projectName} ───
-  const projectsChildren: VaultNode[] = [];
+  // ─── Topics tree: Topics/{topicName}/{pageName} ───
+  const topicsChildren: VaultNode[] = [];
 
   for (const topic of topics) {
     const topicPath = getTopicFolderPath(topic.name);
@@ -187,18 +188,7 @@ function buildTree(
       });
     }
 
-    // Linked projects as subfolders
-    for (const project of projects.filter((p) => p.topicId === topic.id)) {
-      children.push({
-        name: sanitizeName(project.name),
-        path: `${topicPath}/${sanitizeName(project.name)}`,
-        isDirectory: true,
-        children: [],
-        entityRef: { type: 'project', id: project.id },
-      });
-    }
-
-    projectsChildren.push({
+    topicsChildren.push({
       name: sanitizeName(topic.name),
       path: topicPath,
       isDirectory: true,
@@ -207,11 +197,14 @@ function buildTree(
     });
   }
 
-  // Standalone projects (no topic link)
-  for (const project of projects.filter((p) => !p.topicId)) {
+  // ─── Projects tree: Projects/{projectName} ───
+  const projectsChildren: VaultNode[] = [];
+
+  for (const project of projects) {
+    const projectPath = getProjectFolderPath(project.name);
     projectsChildren.push({
       name: sanitizeName(project.name),
-      path: `${VAULT_FOLDERS.PROJECTS}/${sanitizeName(project.name)}`,
+      path: projectPath,
       isDirectory: true,
       children: [],
       entityRef: { type: 'project', id: project.id },
@@ -232,13 +225,19 @@ function buildTree(
     path: '',
     isDirectory: true,
     children: [
-      journalNode,
+      {
+        name: VAULT_FOLDERS.TOPICS,
+        path: VAULT_FOLDERS.TOPICS,
+        isDirectory: true,
+        children: topicsChildren,
+      },
       {
         name: VAULT_FOLDERS.PROJECTS,
         path: VAULT_FOLDERS.PROJECTS,
         isDirectory: true,
         children: projectsChildren,
       },
+      journalNode,
       {
         name: VAULT_FOLDERS.LIBRARY,
         path: VAULT_FOLDERS.LIBRARY,

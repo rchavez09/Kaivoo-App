@@ -21,6 +21,7 @@ import {
   Inbox,
   Library,
   Briefcase,
+  Hash,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -40,10 +41,12 @@ import { VAULT_FOLDERS } from '@/lib/vault/types';
 /** Get icon for a root-level vault folder */
 function getFolderIcon(name: string) {
   switch (name) {
-    case VAULT_FOLDERS.JOURNAL:
-      return BookOpen;
+    case VAULT_FOLDERS.TOPICS:
+      return Hash;
     case VAULT_FOLDERS.PROJECTS:
       return Briefcase;
+    case VAULT_FOLDERS.JOURNAL:
+      return BookOpen;
     case VAULT_FOLDERS.LIBRARY:
       return Library;
     case VAULT_FOLDERS.INBOX:
@@ -192,7 +195,7 @@ const Vault = () => {
   const [tree, setTree] = useState<VaultNode | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(
-    new Set([VAULT_FOLDERS.JOURNAL, VAULT_FOLDERS.PROJECTS, VAULT_FOLDERS.LIBRARY, VAULT_FOLDERS.INBOX]),
+    new Set([VAULT_FOLDERS.TOPICS, VAULT_FOLDERS.PROJECTS, VAULT_FOLDERS.JOURNAL, VAULT_FOLDERS.LIBRARY, VAULT_FOLDERS.INBOX]),
   );
   const [currentPath, setCurrentPath] = useState('');
   const [searchQuery, setSearchQuery] = useState('');

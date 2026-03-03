@@ -62,15 +62,17 @@ export interface VaultAdapter {
 // ═══════════════════════════════════════════════════════
 
 export const VAULT_FOLDERS = {
-  JOURNAL: 'Journal',
+  TOPICS: 'Topics',
   PROJECTS: 'Projects',
+  JOURNAL: 'Journal',
   LIBRARY: 'Library',
   INBOX: 'Inbox',
 } as const;
 
 export const ROOT_FOLDERS = [
-  VAULT_FOLDERS.JOURNAL,
+  VAULT_FOLDERS.TOPICS,
   VAULT_FOLDERS.PROJECTS,
+  VAULT_FOLDERS.JOURNAL,
   VAULT_FOLDERS.LIBRARY,
   VAULT_FOLDERS.INBOX,
 ] as const;
@@ -103,14 +105,19 @@ export function getJournalFilePath(date: string): string {
   return `${getJournalFolderPath(date)}/${date}.md`;
 }
 
-/** Topic folder path: Projects/{topicName} */
+/** Topic folder path: Topics/{topicName} */
 export function getTopicFolderPath(topicName: string): string {
-  return `${VAULT_FOLDERS.PROJECTS}/${sanitizeName(topicName)}`;
+  return `${VAULT_FOLDERS.TOPICS}/${sanitizeName(topicName)}`;
 }
 
-/** Topic page folder path: Projects/{topicName}/{pageName} */
+/** Topic page folder path: Topics/{topicName}/{pageName} */
 export function getTopicPageFolderPath(topicName: string, pageName: string): string {
-  return `${VAULT_FOLDERS.PROJECTS}/${sanitizeName(topicName)}/${sanitizeName(pageName)}`;
+  return `${VAULT_FOLDERS.TOPICS}/${sanitizeName(topicName)}/${sanitizeName(pageName)}`;
+}
+
+/** Project folder path: Projects/{projectName} */
+export function getProjectFolderPath(projectName: string): string {
+  return `${VAULT_FOLDERS.PROJECTS}/${sanitizeName(projectName)}`;
 }
 
 /** Capture file path: Inbox/capture-{date}-{shortId}.md */

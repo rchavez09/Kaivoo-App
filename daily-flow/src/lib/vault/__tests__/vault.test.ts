@@ -81,20 +81,20 @@ describe('getJournalFilePath', () => {
 });
 
 describe('getTopicFolderPath', () => {
-  it('maps topic name to Projects/{name}', () => {
-    expect(getTopicFolderPath('NUWAVE')).toBe('Projects/NUWAVE');
-    expect(getTopicFolderPath('Personal')).toBe('Projects/Personal');
+  it('maps topic name to Topics/{name}', () => {
+    expect(getTopicFolderPath('NUWAVE')).toBe('Topics/NUWAVE');
+    expect(getTopicFolderPath('Personal')).toBe('Topics/Personal');
   });
 
   it('sanitizes unsafe characters', () => {
-    expect(getTopicFolderPath('My Project: v2')).toBe('Projects/My Project v2');
+    expect(getTopicFolderPath('My Project: v2')).toBe('Topics/My Project v2');
   });
 });
 
 describe('getTopicPageFolderPath', () => {
   it('nests page under topic', () => {
-    expect(getTopicPageFolderPath('NUWAVE', 'Branding')).toBe('Projects/NUWAVE/Branding');
-    expect(getTopicPageFolderPath('Personal', 'Fitness')).toBe('Projects/Personal/Fitness');
+    expect(getTopicPageFolderPath('NUWAVE', 'Branding')).toBe('Topics/NUWAVE/Branding');
+    expect(getTopicPageFolderPath('Personal', 'Fitness')).toBe('Topics/Personal/Fitness');
   });
 });
 
@@ -320,26 +320,27 @@ function createMockDataAdapter(overrides?: {
 }
 
 describe('VirtualVaultAdapter', () => {
-  it('returns empty tree with 4 root folders when no data adapter', async () => {
+  it('returns empty tree with 5 root folders when no data adapter', async () => {
     const vault = new VirtualVaultAdapter(null);
     const tree = await vault.getTree();
 
     expect(tree.name).toBe('Vault');
     expect(tree.isDirectory).toBe(true);
-    expect(tree.children).toHaveLength(4);
+    expect(tree.children).toHaveLength(5);
     expect(tree.children!.map((c) => c.name)).toEqual([
-      VAULT_FOLDERS.JOURNAL,
+      VAULT_FOLDERS.TOPICS,
       VAULT_FOLDERS.PROJECTS,
+      VAULT_FOLDERS.JOURNAL,
       VAULT_FOLDERS.LIBRARY,
       VAULT_FOLDERS.INBOX,
     ]);
   });
 
-  it('returns empty tree with 4 root folders when data adapter has no entities', async () => {
+  it('returns empty tree with 5 root folders when data adapter has no entities', async () => {
     const vault = new VirtualVaultAdapter(createMockDataAdapter());
     const tree = await vault.getTree();
 
-    expect(tree.children).toHaveLength(4);
+    expect(tree.children).toHaveLength(5);
     const journal = tree.children!.find((c) => c.name === VAULT_FOLDERS.JOURNAL)!;
     expect(journal.children).toHaveLength(0);
   });
@@ -396,7 +397,7 @@ describe('VirtualVaultAdapter', () => {
     expect(feb.children).toHaveLength(1);
   });
 
-  it('maps topics to Projects/ folders with child pages', async () => {
+  it('maps topics to Topics/ folders with child pages', async () => {
     const topics: Topic[] = [
       { id: 't1', name: 'NUWAVE', createdAt: new Date() },
       { id: 't2', name: 'Personal', createdAt: new Date() },
@@ -409,10 +410,10 @@ describe('VirtualVaultAdapter', () => {
     const vault = new VirtualVaultAdapter(createMockDataAdapter({ topics, topicPages }));
     const tree = await vault.getTree();
 
-    const projectsNode = tree.children!.find((c) => c.name === VAULT_FOLDERS.PROJECTS)!;
-    expect(projectsNode.children).toHaveLength(2);
+    const topicsNode = tree.children!.find((c) => c.name === VAULT_FOLDERS.TOPICS)!;
+    expect(topicsNode.children).toHaveLength(2);
 
-    const nuwave = projectsNode.children!.find((c) => c.name === 'NUWAVE')!;
+    const nuwave = topicsNode.children!.find((c) => c.name === 'NUWAVE')!;
     expect(nuwave.entityRef).toEqual({ type: 'topic', id: 't1' });
     expect(nuwave.children).toHaveLength(2);
     expect(nuwave.children![0].name).toBe('Branding');
@@ -461,7 +462,7 @@ describe('VirtualVaultAdapter', () => {
     expect(projectsNode.children![0].entityRef).toEqual({ type: 'project', id: 'proj1' });
   });
 
-  it('nests topic-linked projects under their topic folder', async () => {
+  it('places topic-linked projects under Projects/ (flat)', async () => {
     const topics: Topic[] = [{ id: 't1', name: 'NUWAVE', createdAt: new Date() }];
     const projects: Project[] = [
       {
@@ -477,14 +478,16 @@ describe('VirtualVaultAdapter', () => {
     const vault = new VirtualVaultAdapter(createMockDataAdapter({ topics, projects }));
     const tree = await vault.getTree();
 
-    const projectsNode = tree.children!.find((c) => c.name === VAULT_FOLDERS.PROJECTS)!;
-    expect(projectsNode.children).toHaveLength(1); // Only NUWAVE (project nested inside)
+    // Topic goes under Topics/
+    const topicsNode = tree.children!.find((c) => c.name === VAULT_FOLDERS.TOPICS)!;
+    expect(topicsNode.children).toHaveLength(1);
+    expect(topicsNode.children![0].name).toBe('NUWAVE');
 
-    const nuwave = projectsNode.children![0];
-    expect(nuwave.name).toBe('NUWAVE');
-    expect(nuwave.children).toHaveLength(1);
-    expect(nuwave.children![0].name).toBe('Rebrand');
-    expect(nuwave.children![0].entityRef).toEqual({ type: 'project', id: 'proj1' });
+    // Project goes under Projects/ (flat, regardless of topicId)
+    const projectsNode = tree.children!.find((c) => c.name === VAULT_FOLDERS.PROJECTS)!;
+    expect(projectsNode.children).toHaveLength(1);
+    expect(projectsNode.children![0].name).toBe('Rebrand');
+    expect(projectsNode.children![0].entityRef).toEqual({ type: 'project', id: 'proj1' });
   });
 
   it('listFolder returns children of a path', async () => {
@@ -493,24 +496,25 @@ describe('VirtualVaultAdapter', () => {
 
     const rootChildren = await vault.listFolder('');
     expect(rootChildren.map((c) => c.name)).toEqual([
-      VAULT_FOLDERS.JOURNAL,
+      VAULT_FOLDERS.TOPICS,
       VAULT_FOLDERS.PROJECTS,
+      VAULT_FOLDERS.JOURNAL,
       VAULT_FOLDERS.LIBRARY,
       VAULT_FOLDERS.INBOX,
     ]);
 
-    const projectsChildren = await vault.listFolder(VAULT_FOLDERS.PROJECTS);
-    expect(projectsChildren).toHaveLength(1);
-    expect(projectsChildren[0].name).toBe('NUWAVE');
+    const topicsChildren = await vault.listFolder(VAULT_FOLDERS.TOPICS);
+    expect(topicsChildren).toHaveLength(1);
+    expect(topicsChildren[0].name).toBe('NUWAVE');
   });
 
   it('exists returns true for existing paths, false for missing', async () => {
     const topics: Topic[] = [{ id: 't1', name: 'NUWAVE', createdAt: new Date() }];
     const vault = new VirtualVaultAdapter(createMockDataAdapter({ topics }));
 
-    expect(await vault.exists(VAULT_FOLDERS.PROJECTS)).toBe(true);
-    expect(await vault.exists('Projects/NUWAVE')).toBe(true);
-    expect(await vault.exists('Projects/NonExistent')).toBe(false);
+    expect(await vault.exists(VAULT_FOLDERS.TOPICS)).toBe(true);
+    expect(await vault.exists('Topics/NUWAVE')).toBe(true);
+    expect(await vault.exists('Topics/NonExistent')).toBe(false);
   });
 
   it('readFile generates markdown from cached entity data', async () => {
@@ -548,7 +552,7 @@ describe('VirtualVaultAdapter', () => {
 
     // No data → empty tree
     let tree = await vault.getTree();
-    expect(tree.children!.find((c) => c.name === VAULT_FOLDERS.PROJECTS)!.children).toHaveLength(0);
+    expect(tree.children!.find((c) => c.name === VAULT_FOLDERS.TOPICS)!.children).toHaveLength(0);
 
     // Set data adapter with topics
     const topics: Topic[] = [{ id: 't1', name: 'Work', createdAt: new Date() }];
@@ -556,6 +560,6 @@ describe('VirtualVaultAdapter', () => {
 
     // Now tree should include the topic
     tree = await vault.getTree();
-    expect(tree.children!.find((c) => c.name === VAULT_FOLDERS.PROJECTS)!.children).toHaveLength(1);
+    expect(tree.children!.find((c) => c.name === VAULT_FOLDERS.TOPICS)!.children).toHaveLength(1);
   });
 });
