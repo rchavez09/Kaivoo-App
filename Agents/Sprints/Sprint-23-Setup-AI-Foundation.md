@@ -2,7 +2,10 @@
 
 **Theme:** First-launch setup wizard, Obsidian import, AI provider settings, basic chat concierge, Desktop CI/CD, and Sprint 22 quality debt cleanup.
 **Branch:** `sprint/23-setup-ai-foundation`
-**Status:** IMPLEMENTATION COMPLETE — PENDING QUALITY GATES
+**Status:** DONE — MERGED TO MAIN
+**Completed:** March 3, 2026
+**PR:** #8 — merged to `main`
+**Tag:** `post-sprint-23`
 **Started:** March 2, 2026
 **Compiled by:** Director
 
@@ -122,19 +125,19 @@ Track 4 (P11-P12) ── independent, parallel ──
 
 ## Sprint-Level Definition of Done
 
-- [ ] `cd daily-flow && npm run lint && npm run typecheck && npm run test && npm run build` — all pass
-- [ ] First-launch wizard works end-to-end (folder selection → structure created → Obsidian import → concierge hatching → guided tour)
-- [ ] AI settings page: at least one provider configurable with working connection test
-- [ ] Basic AI chat returns streamed responses using configured provider
-- [ ] All Sprint 22 Agent 7 P1 debt resolved
-- [ ] Vault browser has WAI-ARIA tree roles + keyboard navigation
-- [ ] `window.confirm()` eliminated from codebase
-- [ ] Desktop CI/CD builds on at least macOS (Windows/Linux best-effort)
-- [ ] Agent 7 code audit — 0 unresolved P0
-- [ ] Agent 11 feature integrity — DoD verified
-- [ ] 3-agent design review — all PASS
-- [ ] E2E test against deploy preview
-- [ ] Sandbox review by user (Phase 5)
+- [x] `cd daily-flow && npm run lint && npm run typecheck && npm run test && npm run build` — all pass
+- [x] First-launch wizard works end-to-end (folder selection → structure created → Obsidian import → concierge hatching → guided tour)
+- [x] AI settings page: at least one provider configurable with working connection test
+- [x] Basic AI chat returns streamed responses using configured provider
+- [x] All Sprint 22 Agent 7 P1 debt resolved
+- [x] Vault browser has WAI-ARIA tree roles + keyboard navigation
+- [x] `window.confirm()` eliminated from codebase
+- [x] Desktop CI/CD builds on at least macOS (Windows/Linux best-effort)
+- [x] Agent 7 code audit — 0 unresolved P0
+- [x] Agent 11 feature integrity — DoD verified
+- [x] 3-agent design review — all PASS
+- [x] E2E test against deploy preview
+- [x] Sandbox review by user (Phase 5)
 
 ---
 
@@ -158,28 +161,89 @@ Track 4 (P11-P12) ── independent, parallel ──
 
 | Metric | Before | Target | Actual |
 |---|---|---|---|
-| Tests passing | 265 | 280+ | — |
-| Setup wizard exists | No | Yes (multi-step, first-launch) | — |
-| Obsidian import works | No | Yes (file copy + topic mapping) | — |
-| AI settings page exists | No | Yes (3 providers, key validation) | — |
-| AI chat works | No | Yes (streaming, persistent) | — |
-| Desktop CI/CD | None | GitHub Actions + 3-platform builds | — |
-| Agent 7 P1 debt | 10 items | 0 items | — |
-| WAI-ARIA vault tree | No | Yes (keyboard navigable) | — |
+| Tests passing | 265 | 280+ | 265 (no new test files this sprint — focus was UI + edge function) |
+| Setup wizard exists | No | Yes (multi-step, first-launch) | Yes — 5-step wizard with platform-aware filtering |
+| Obsidian import works | No | Yes (file copy + topic mapping) | Yes — recursive .md scan + hashtag extraction |
+| AI settings page exists | No | Yes (3 providers, key validation) | Yes — 3 providers, test connection, depth, concierge name/tone |
+| AI chat works | No | Yes (streaming, persistent) | Yes — SSE streaming via edge function, localStorage persistence |
+| Desktop CI/CD | None | GitHub Actions + 3-platform builds | Yes — 3-platform matrix, Rust cache, unsigned by default |
+| Agent 7 P1 debt | 10 items | 0 items | 0 items |
+| WAI-ARIA vault tree | No | Yes (keyboard navigable) | Yes — tree/treeitem/group roles + arrow key nav |
 
 ---
 
 ## Quality Gates
 
 ```
-[ ] Deterministic checks: lint, typecheck, test, build
-[ ] Agent 7 code audit: 0 P0
-[ ] Agent 11 feature integrity: DoD verified
-[ ] 3-agent design review: all PASS (Visual Design + Accessibility & Theming + UX Completeness)
-[ ] E2E test against deploy preview URL
-[ ] Sandbox review by user (Phase 5 — Director provides testing checklist)
+[x] Deterministic checks: lint (0 errors), typecheck (clean), test (265/265), build (2.45s, 3479 modules)
+[x] Agent 7 code audit: 2 P0s + 6 P1s found → all fixed (security hardening, AbortController, sessionStorage for API key)
+[x] Agent 11 feature integrity: PASS — 24/24 DoD items verified, 0 regressions
+[x] 3-agent design review: all PASS (Visual Design + Accessibility & Theming + UX Completeness) — 2 P1s fixed (aria-labels)
+[x] E2E test against deploy preview URL: deploy-preview-8 — HTML shell, JS/CSS bundles, SPA routing all 200 OK
+[x] Sandbox review by user (Phase 5) — 3 issues found and fixed (see retrospective)
 ```
 
 ---
 
-*Sprint 23 — Setup & AI Foundation — March 2, 2026*
+## Sprint Retrospective
+
+**Completed:** March 3, 2026
+**Parcels:** 12/12 DONE (4 tracks, all delivered)
+**PR:** #8 — 6 commits, 30 files changed (+2,909 / -123 lines)
+
+### What Was Delivered
+
+- **Track 1 (Quality Debt):** All 9 Agent 7 P1 findings from Sprint 22 resolved. WAI-ARIA tree roles with keyboard navigation for vault browser. AlertDialog replaces all `window.confirm()`. Vault loading skeleton + journal deep-linking.
+- **Track 2 (Setup Wizard):** 5-step first-launch wizard with platform-aware filtering (desktop shows vault folder picker + Obsidian import; web skips them). Obsidian import does recursive `.md` scan with hashtag extraction. Concierge hatching (name + tone). Guided tour with Kaivoo logo branding.
+- **Track 3 (AI Foundation):** AI Provider settings page (3 providers, 8 models, masked API key, depth preference, concierge name/tone editor, test connection). Concierge chat with SSE streaming via Supabase edge function proxy, conversation persistence, AbortController cleanup.
+- **Track 4 (Desktop CI/CD):** GitHub Actions workflow with 3-platform matrix (macOS universal, Ubuntu, Windows), Rust caching, 30-day artifact retention. Code signing env vars wired.
+
+### Verification Results
+
+| Gate | Result |
+|---|---|
+| Lint | 0 errors |
+| Typecheck | Clean |
+| Tests | 265/265 pass |
+| Build | 2.45s, 3,479 modules |
+| Agent 7 | 2 P0s + 6 P1s → all fixed |
+| Agent 11 | PASS (24/24 DoD items) |
+| Design Review | 3 agents PASS (2 P1s fixed) |
+| E2E | Deploy preview assets all 200 OK |
+| Sandbox | User approved (3 issues found and fixed) |
+
+### Sandbox Findings
+
+User testing on deploy preview caught 3 issues:
+
+1. **GuidedTour used generic Lucide icons instead of Kaivoo logo** — Added `kaivoo-logo.png` import and display above step indicators.
+2. **ConciergeChat X close button overlapped with Plus (new conversation) button** — Sheet's built-in X at `absolute right-4 top-4` clashed with the Plus button in the header. Fixed with `pr-12` on SheetHeader.
+3. **Edge function returned 401 on test connection** — Root cause: deployed with `verify_jwt: true`, but client sends the anon key (not a JWT). Supabase gateway rejected before function executed. Redeployed v3 with `verify_jwt: false` — function is a stateless proxy requiring caller's own API key, so JWT gate was redundant.
+
+After fixing these, user found two more issues:
+4. **No UI to change concierge name** — `saveSoulConfig()` didn't exist and no editor was wired into Settings. Added concierge name + tone editor to AI Provider settings page.
+5. **Chat input permanently disabled after configuring API key** — `isConfigured` was computed once via `useMemo([], [])` on mount. If user set their API key after the chat component mounted, the input stayed disabled. Fixed by replacing stale `useMemo` with per-render computation.
+
+### Key Learnings
+
+- **`useMemo` with empty deps for storage reads is a trap.** If the value can change externally (user configures something in Settings), the memoized value goes stale. Per-render reads from sessionStorage/localStorage are cheap — no need to memoize.
+- **`verify_jwt` on edge functions requires actual JWTs, not anon keys.** The Supabase JS client's `functions.invoke()` and raw `fetch()` with the publishable key both send the anon key by default. For functions that don't access Supabase data (stateless proxies), `verify_jwt: false` with application-level validation is the right call.
+- **Ship the editor, not just the reader.** Sprint delivered `getSoulConfig()` but forgot `saveSoulConfig()` and the UI to call it. If users can't configure something from the UI, it doesn't exist.
+- **Sheet component's built-in X button needs layout awareness.** Any custom header content must account for the `absolute right-4 top-4` close button to avoid overlap.
+
+### Deferred Items
+
+| Item | Target |
+|---|---|
+| File attachments + image embedding | Sprint 24 |
+| Google Calendar integration | Sprint 24 |
+| Gmail integration | Sprint 24-25 |
+| Concierge agent routing + skills | Phase B |
+| Bundle size optimization (482KB JS) | Sprint 24 |
+| `local-entities-core.ts` / `local-entities-ext.ts` file size | Sprint 24 |
+| Vault organization: move, sort, manual reorder | Sprint 24+ |
+| Wikilinks + backlinks | Sprint 24+ |
+
+---
+
+*Sprint 23 — Setup & AI Foundation — March 2-3, 2026*

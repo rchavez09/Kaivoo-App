@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 4.6
-**Last Updated:** March 2, 2026
+**Version:** 4.7
+**Last Updated:** March 3, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -378,11 +378,11 @@ Every 1st-party module passes through the same packaging checks that marketplace
 | Data layer abstraction — DataAdapter pattern (4 interfaces, 15 entity sub-adapters). SupabaseAdapter + LocalAdapter. Runtime switching via `isTauri()`. | **DONE** | Sprint 20 |
 | Local-first storage — SQLite CRUD persistence, FTS5 search, local auth session. Data persists to disk without Supabase. | **DONE** | Sprint 21 |
 | File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
-| AI settings page + BYO API key wizard — choose provider, enter keys, test connection | PLANNED | Must-have |
-| AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | PLANNED | Must-have |
+| AI settings page + BYO API key wizard — choose provider, enter keys, test connection | **DONE** (Sprint 23) | Must-have |
+| AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | **DONE** (Sprint 23 — in-app chat; Telegram deferred to Phase B) | Must-have |
 | Google Calendar integration — OAuth, two-way sync | PLANNED | Must-have |
 | Gmail integration — read, send, organize email within the app | PLANNED | Must-have |
-| Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | PLANNED | Must-have |
+| Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | **DONE** (Sprint 23) | Must-have |
 | License key system — activation, tier validation, commercial distribution | PLANNED | Must-have |
 | Landing page & marketing site | PLANNED | Must-have |
 | Stripe integration — one-time payment flow | PLANNED | Must-have |
@@ -560,7 +560,7 @@ These run in parallel with sprint work, not blocking it.
 - ~~Phase A feature scope~~ → **No AI in Phase A**. AI features (concierge, BYO keys) deferred to Phase B. Phase A ships: journal, tasks, calendar, captures, widgets, themes, data export.
 
 **Key decisions resolved (Sprint 21 — March 2, 2026):**
-- ~~Phase A sprint sequencing~~ → Sprint 21: Local-First Storage (DONE). Sprint 22: Knowledge Vault (DONE). Sprint 23: Setup wizard + AI settings. Sprint 24+: Calendar, email, licensing, launch.
+- ~~Phase A sprint sequencing~~ → Sprint 21: Local-First Storage (DONE). Sprint 22: Knowledge Vault (DONE). Sprint 23: Setup & AI Foundation (DONE). Sprint 24+: Calendar, email, licensing, launch.
 
 **Key decisions ahead:**
 - **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
