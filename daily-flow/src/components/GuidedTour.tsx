@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import kaivooLogo from '@/assets/kaivoo-logo.png';
 
 interface TourStep {
   title: string;
@@ -84,6 +85,11 @@ const GuidedTour = () => {
         aria-label={`Guided tour: step ${step + 1} of ${TOUR_STEPS.length}`}
         className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-lg"
       >
+        {/* Branding */}
+        <div className="mb-5 flex justify-center">
+          <img src={kaivooLogo} alt="Kaivoo" className="h-10 w-10" />
+        </div>
+
         {/* Step indicator */}
         <div className="mb-6 flex items-center justify-center gap-2">
           {TOUR_STEPS.map((_, i) => (

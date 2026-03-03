@@ -179,7 +179,7 @@ const ConciergeChat = () => {
     <>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent className="flex w-96 flex-col p-0" side="right">
-          <SheetHeader className="border-b border-border px-4 py-3">
+          <SheetHeader className="border-b border-border px-4 pr-12 py-3">
             {view === 'list' ? (
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-base">Conversations</SheetTitle>
