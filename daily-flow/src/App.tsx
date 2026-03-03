@@ -52,16 +52,23 @@ const SetupGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const ProtectedPage = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute>
-    <SetupGuard>
-      <DataLoader>
-        <ErrorBoundary>{children}</ErrorBoundary>
-        <GuidedTour />
-      </DataLoader>
-    </SetupGuard>
-  </ProtectedRoute>
-);
+const ProtectedPage = ({ children }: { children: React.ReactNode }) => {
+  const showTour = localStorage.getItem('kaivoo-show-tour') === 'true';
+  return (
+    <ProtectedRoute>
+      <SetupGuard>
+        <DataLoader>
+          <ErrorBoundary>{children}</ErrorBoundary>
+          {showTour && (
+            <Suspense fallback={null}>
+              <GuidedTour />
+            </Suspense>
+          )}
+        </DataLoader>
+      </SetupGuard>
+    </ProtectedRoute>
+  );
+};
 
 const App = () => (
   <ErrorBoundary>

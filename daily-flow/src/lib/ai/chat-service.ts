@@ -11,6 +11,7 @@ import { getAISettings, getSoulConfig, buildSystemPrompt } from './settings';
 
 const CONVERSATIONS_KEY = 'kaivoo-conversations';
 const MAX_CONVERSATIONS = 50;
+const MAX_MESSAGES_PER_CONVERSATION = 200;
 
 // ─── Conversation Persistence ───
 
@@ -32,10 +33,11 @@ export function saveConversation(conversation: Conversation): void {
   } else {
     conversations.unshift(conversation);
   }
-  localStorage.setItem(
-    CONVERSATIONS_KEY,
-    JSON.stringify(conversations.slice(0, MAX_CONVERSATIONS)),
-  );
+  const trimmed = conversations.slice(0, MAX_CONVERSATIONS).map((c) => ({
+    ...c,
+    messages: c.messages.slice(-MAX_MESSAGES_PER_CONVERSATION),
+  }));
+  localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(trimmed));
 }
 
 export function deleteConversation(id: string): void {
@@ -87,6 +89,7 @@ export async function testConnection(
 export async function* streamChat(
   messages: ConversationMessage[],
   onTitleSuggestion?: (title: string) => void,
+  signal?: AbortSignal,
 ): AsyncGenerator<string> {
   const settings = getAISettings();
   if (!settings.apiKey && settings.provider !== 'ollama') {
@@ -114,6 +117,7 @@ export async function* streamChat(
         messages: apiMessages,
         systemPrompt,
       }),
+      signal,
     },
   );
 

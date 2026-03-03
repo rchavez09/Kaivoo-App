@@ -6,7 +6,7 @@
  * Uses soul file for system prompt personality.
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,6 +38,7 @@ const ConciergeChat = () => {
   const [streamedContent, setStreamedContent] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Load conversations on mount
   useEffect(() => {
@@ -80,6 +81,13 @@ const ConciergeChat = () => {
     [conversation.id, handleNewConversation],
   );
 
+  // Abort streaming on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || streaming) return;
@@ -112,11 +120,14 @@ const ConciergeChat = () => {
     setStreaming(true);
     setStreamedContent('');
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       let fullContent = '';
       const stream = streamChat(updatedMessages, (title) => {
         updatedConv.title = title;
-      });
+      }, controller.signal);
 
       for await (const chunk of stream) {
         fullContent += chunk;
@@ -142,6 +153,7 @@ const ConciergeChat = () => {
       setConversations(getConversations());
       setStreamedContent('');
     } catch (e) {
+      if (e instanceof DOMException && e.name === 'AbortError') return;
       const message = e instanceof Error ? e.message : 'Chat failed';
       toast.error('Chat error', { description: message });
 
@@ -149,14 +161,19 @@ const ConciergeChat = () => {
       saveConversation(updatedConv);
       setConversations(getConversations());
     } finally {
+      abortRef.current = null;
       setStreaming(false);
     }
   }, [input, streaming, conversation]);
 
-  const soul = getSoulConfig();
-  const conciergeName = soul?.name || 'Concierge';
-  const settings = getAISettings();
-  const isConfigured = settings.apiKey.length > 0 || settings.provider === 'ollama';
+  const { conciergeName, isConfigured } = useMemo(() => {
+    const soul = getSoulConfig();
+    const s = getAISettings();
+    return {
+      conciergeName: soul?.name || 'Concierge',
+      isConfigured: s.apiKey.length > 0 || s.provider === 'ollama',
+    };
+  }, []);
 
   return (
     <>
@@ -229,6 +246,7 @@ const ConciergeChat = () => {
                       <button
                         type="button"
                         onClick={() => handleDeleteConversation(conv.id)}
+                        aria-label={`Delete conversation: ${conv.title}`}
                         className="shrink-0 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -302,6 +320,7 @@ const ConciergeChat = () => {
                 <div className="flex gap-2">
                   <Textarea
                     ref={textareaRef}
+                    aria-label={`Message ${conciergeName}`}
                     placeholder={isConfigured ? 'Message...' : 'Configure AI provider first'}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}

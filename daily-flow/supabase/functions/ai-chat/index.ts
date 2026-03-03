@@ -1,10 +1,16 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
+const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") || "*";
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+const VALID_PROVIDERS = ["openai", "anthropic", "ollama"] as const;
+const MAX_MESSAGES = 100;
+const MAX_MESSAGE_LENGTH = 50_000;
 
 interface ChatRequest {
   test?: boolean;
@@ -24,6 +30,41 @@ Deno.serve(async (req) => {
   try {
     const body = (await req.json()) as ChatRequest;
     const { test, provider, apiKey, model, ollamaBaseUrl } = body;
+
+    // Validate provider
+    if (!VALID_PROVIDERS.includes(provider)) {
+      return jsonResponse({ error: "Invalid provider" }, 400);
+    }
+
+    // Validate Ollama URL — prevent SSRF
+    if (provider === "ollama" && ollamaBaseUrl) {
+      try {
+        const parsed = new URL(ollamaBaseUrl);
+        if (!["localhost", "127.0.0.1", "::1"].includes(parsed.hostname)) {
+          return jsonResponse(
+            { error: "Ollama URL must target localhost" },
+            400,
+          );
+        }
+      } catch {
+        return jsonResponse({ error: "Invalid Ollama URL" }, 400);
+      }
+    }
+
+    // Validate messages size
+    if (body.messages) {
+      if (body.messages.length > MAX_MESSAGES) {
+        return jsonResponse(
+          { error: `Too many messages (max ${MAX_MESSAGES})` },
+          400,
+        );
+      }
+      for (const msg of body.messages) {
+        if (msg.content.length > MAX_MESSAGE_LENGTH) {
+          return jsonResponse({ error: "Message content too long" }, 400);
+        }
+      }
+    }
 
     if (test) {
       return await handleTest(provider, apiKey, model, ollamaBaseUrl);
@@ -157,6 +198,7 @@ async function handleChat(
         model,
         messages: [{ role: "system", content: systemPrompt }, ...messages],
         stream: true,
+        max_tokens: 4096,
       }),
     });
   } else if (provider === "anthropic") {

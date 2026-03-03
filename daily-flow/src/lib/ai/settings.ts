@@ -8,6 +8,7 @@
 import type { AISettings, SoulConfig, AIDepth } from './types';
 
 const SETTINGS_KEY = 'kaivoo-ai-settings';
+const API_KEY_KEY = 'kaivoo-ai-key';
 const SOUL_KEY = 'kaivoo-concierge';
 
 const DEFAULT_SETTINGS: AISettings = {
@@ -21,9 +22,12 @@ const DEFAULT_SETTINGS: AISettings = {
 export function getAISettings(): AISettings {
   try {
     const stored = localStorage.getItem(SETTINGS_KEY);
-    if (stored) {
-      return { ...DEFAULT_SETTINGS, ...(JSON.parse(stored) as Partial<AISettings>) };
-    }
+    const base = stored
+      ? { ...DEFAULT_SETTINGS, ...(JSON.parse(stored) as Partial<AISettings>) }
+      : { ...DEFAULT_SETTINGS };
+    // API key stored separately in sessionStorage for security
+    const apiKey = sessionStorage.getItem(API_KEY_KEY) ?? '';
+    return { ...base, apiKey };
   } catch {
     // Ignore parse errors
   }
@@ -31,7 +35,10 @@ export function getAISettings(): AISettings {
 }
 
 export function saveAISettings(settings: AISettings): void {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  // Store API key in sessionStorage (clears on tab close) — never in localStorage
+  const { apiKey, ...safeSettings } = settings;
+  sessionStorage.setItem(API_KEY_KEY, apiKey);
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...safeSettings, apiKey: '' }));
 
   // Desktop: also write to .kaivoo/settings.json (fire-and-forget, no API key)
   if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
