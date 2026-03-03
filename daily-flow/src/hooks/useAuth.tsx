@@ -45,6 +45,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+
+      // Sync setup_complete flag from server → localStorage.
+      // Covers the case where the user completed setup on a different origin
+      // (e.g., a deploy preview URL) and localStorage was lost.
+      if (session?.user?.user_metadata?.setup_complete) {
+        localStorage.setItem('kaivoo-setup-complete', 'true');
+      }
+
       setLoading(false);
     });
 

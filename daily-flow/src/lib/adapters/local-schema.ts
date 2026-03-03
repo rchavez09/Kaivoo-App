@@ -181,4 +181,32 @@ ALTER TABLE routines ADD COLUMN entity_type TEXT DEFAULT 'routine';
 
 CREATE INDEX IF NOT EXISTS idx_routines_entity_type ON routines(entity_type);
 CREATE INDEX IF NOT EXISTS idx_routine_comp_routine ON routine_completions(routine_id);
+
+CREATE TABLE IF NOT EXISTS ai_memories (
+  id TEXT PRIMARY KEY,
+  content TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'fact',
+  source TEXT NOT NULL DEFAULT 'extraction',
+  active INTEGER DEFAULT 1,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS ai_conversation_summaries (
+  id TEXT PRIMARY KEY,
+  conversation_id TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  key_facts TEXT DEFAULT '[]',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_memories_category ON ai_memories(category);
+CREATE INDEX IF NOT EXISTS idx_ai_memories_active ON ai_memories(active);
+CREATE INDEX IF NOT EXISTS idx_ai_conv_summaries_conv ON ai_conversation_summaries(conversation_id);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS ai_memories_fts USING fts5(
+  content,
+  category UNINDEXED,
+  tokenize='porter unicode61'
+);
 `;

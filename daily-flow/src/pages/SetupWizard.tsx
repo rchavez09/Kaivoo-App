@@ -23,6 +23,7 @@ import {
 import { toast } from 'sonner';
 import { importObsidianVault } from '@/lib/vault/obsidian-import';
 import type { ImportProgress, ImportResult } from '@/lib/vault/obsidian-import';
+import { supabase } from '@/integrations/supabase/client';
 
 // ─── Types ───
 
@@ -77,6 +78,12 @@ const SetupWizard = () => {
   const handleComplete = useCallback(() => {
     localStorage.setItem('kaivoo-setup-complete', 'true');
     localStorage.setItem('kaivoo-show-tour', 'true');
+
+    // Persist setup_complete to Supabase user metadata (server-side backup).
+    // Survives origin changes (deploy previews) and localStorage clears.
+    if (!desktop) {
+      void supabase.auth.updateUser({ data: { setup_complete: true } });
+    }
 
     // Store concierge config (web fallback + cache)
     localStorage.setItem(

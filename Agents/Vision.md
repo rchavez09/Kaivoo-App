@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 4.7
+**Version:** 5.0
 **Last Updated:** March 3, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -36,7 +36,7 @@ These are non-negotiable. Every feature, sprint, and decision must align with th
 
 2. **AI serves you, not the other way around.** You choose which AI to use. You provide your own keys. AI agents are transparent markdown files you can read and edit. No black boxes.
 
-3. **Day-centric design.** The "today" view is the home screen. Everything radiates from "what am I doing today?" — journal, tasks, routines, meetings, captures.
+3. **Day execution.** The "today" view is the home screen — not just for planning, but for *doing*. Today is where notes become actions and actions become delegated AI work. Everything radiates from "what am I doing right now, what does my AI know about me, and what can it help me with?"
 
 4. **Edit where you see it.** If you can see data, you can edit it in place. No hunting through menus. Progressive disclosure over hidden complexity.
 
@@ -104,13 +104,16 @@ The soul file is readable and editable by the user (Core Principle #2 — no bla
 The concierge has two capability tiers, cleanly separated by product:
 
 **Productivity Concierge (Product 1 — Phase A):**
-- Find notes, summarize content
-- Add/complete tasks, add calendar events
-- Add context to existing data
+- **Full tool-use agent** — anything the user can do in the UI, the concierge can do via conversation
+- Create tasks, journal entries, calendar events, captures, notes
+- Complete tasks, log routines and habits, update settings
+- Search across all data — notes, journal, tasks, captures, vault files
+- Read specific files, entries, and documents on demand
 - Trainable personality (hatching, soul file, tone preferences)
-- Long-term memory stored in files, recall-only (no autonomous actions)
-- BYO API keys — Claude, ChatGPT, Llama, any provider the user wants
-- **It helps you manage your day. It does not build things.**
+- Persistent memory via soul file — learns and remembers across conversations
+- BYO API keys — Claude, ChatGPT, Gemini, Mistral, Groq, Ollama, any provider
+- Security guardrails: confirmation for destructive actions, audit trail, undo, no autonomous bulk operations
+- **It helps you execute your day. It does not build software.**
 
 **Orchestrator Concierge (Product 2 — Phase B):**
 - Everything above, plus...
@@ -287,58 +290,77 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 ## Business Model
 
-### Two-Phase Revenue Strategy
+### Three-Tier Revenue Strategy
 
-#### Phase A: One-Time Purchase (Revenue Now)
+The app is local-first and yours forever. The subscription is for convenience and infrastructure — not for gatekeeping features. Users choose how much they want managed for them.
 
-| Tier | Price | What They Get | Target |
-|---|---|---|---|
-| **Standard** | $99 one-time | Full productivity app, widget system, theme customization, data export, 1 year of updates, single device | AI power users, productivity optimizers, self-hosters |
-| **Founding Member** | $49 one-time | Everything in Standard + permanent discount on Phase B subscription tiers | All buyers before Phase B launches (no cap) |
+#### Tier 1: Kaivoo Core (One-Time Purchase)
 
-**What's included in Phase A:** Journal, tasks, calendar, captures, daily view, widget system, theme customization, data export (markdown/JSON), 1 year of updates, single device.
+| | |
+|---|---|
+| **Price** | $49 one-time (Founding Member) / $99 one-time (Standard) |
+| **What you get** | The full app. Local-first. Journal, tasks, calendar, captures, vault, routines, today view, concierge chat. BYO API keys. Soul file. Data export. Desktop app. **You own everything. Forever.** |
+| **Target** | AI power users, self-hosters, privacy-conscious users, Obsidian/Notion migrants |
 
-**What's NOT in Phase A (deferred to Phase B):** AI features, multi-device sync, marketplace, collaboration.
+**Founding Member pricing ($49)** closes when Tier 2 launches. No cap. Every founding member gets permanent discount on future subscription tiers.
 
-**License:** Proprietary EULA. Personal or internal business use only. No redistribution, resale, sublicensing, or derivative products for sale. Source access (if provided) is for customization only. License key required for activation.
+**What's included:** Journal, tasks, projects, calendar, captures, vault/knowledge OS, routines & habits, today view, widget system, theme customization, data export (markdown/JSON), AI concierge with BYO keys, soul file (persistent AI memory you own and edit), desktop app (macOS/Windows/Linux).
 
-**Pricing strategy:** Volume over margin. $49 is impulse pricing — no week of deliberation. Every Phase A buyer is a warm lead for Phase B subscriptions. "Pay once, own forever" resonates with subscription-fatigued market.
+**License:** Proprietary EULA. Personal or internal business use only. No redistribution, resale, sublicensing, or derivative products for sale. License key required for activation.
 
-**Revenue milestone:** 2,000+ founding member sales = ~$100K. This funds Phase B development and validates demand.
+**Strategy:** Volume over margin. $49 is impulse pricing. BYO-key means zero AI API costs — Kaivoo carries 70-80% gross margins. Every Core buyer is a warm lead for Tier 2. "Pay once, own forever" resonates with a subscription-fatigued market.
 
-#### Phase B: One Workflow Cloud Subscription (ARR)
+**Revenue milestone:** 2,000+ founding member sales = ~$100K. This funds Tier 2 development and validates demand.
 
-| Tier | Price | What They Get | Target |
-|---|---|---|---|
-| **One Workflow Solo** | TBD (research needed) | Managed hosting, managed AI, full feature access, email/calendar/messaging integration | Solopreneurs, freelancers |
-| **One Workflow Team** | TBD (research needed) | Solo tier + shared workspaces, task assignment, role-based access (admin/manager/member) | Small teams (2-25) |
-| **Business Widgets** | TBD (addon pricing) | Marketing tools, sales dashboards, document management, CRM — per-widget or bundled | Teams needing business-grade tools |
+#### Tier 2: Kaivoo Pro (Subscription — ARR)
 
-**Pricing note:** Subscription pricing requires research on AI token costs per user, competitive pricing teardowns (HubSpot, Monday, Notion), and addon model analysis. Agent 5 + Agent 8 to deliver before Phase B pricing is finalized.
+| | |
+|---|---|
+| **Price** | $8-12/mo (or ~$99/yr) — final pricing pending research |
+| **What you get** | Everything in Core + managed AI (we provide the keys, you don't think about it), multi-device sync, cloud backup, Google Calendar integration, Gmail integration, priority updates, future integrations. **We handle the infrastructure.** |
+| **Target** | Users who want convenience over DIY. Productivity optimizers. Solopreneurs. |
+
+**Why this works:** You're not charging for features. You're charging for "we handle it." That's the JetBrains model. That's the Obsidian Sync model. The app is yours. The service is a subscription. Forced SaaS is dead — elective SaaS (sync, managed AI, integrations that require server-side infrastructure) is the future.
 
 **The HubSpot play:** Cut their pricing at the core. Target the SMBs that are confused by HubSpot's 47 tiers and using a tenth of its features. Simple pricing. Clear capabilities. AI that actually helps instead of adding complexity.
 
+#### Tier 3: Kaivoo for Builders (Premium Subscription — Future)
+
+| | |
+|---|---|
+| **Price** | $29-49/mo — pricing pending market validation |
+| **What you get** | Everything in Pro + Orchestrator modules, MCP connectors, agent system, sprint management, build-review-test pipeline, multi-model routing. **Your AI team.** |
+| **Target** | Solo developers, technical founders, agencies building with AI |
+
+**When:** Not at launch. Tier 3 ships when Tier 2 has enough users to validate demand for more autonomy. Research runs in parallel.
+
+**Pricing note:** Tier 2 and 3 subscription pricing requires research on AI token costs per user, competitive pricing teardowns (HubSpot, Monday, Notion), and addon model analysis. Agent 5 + Agent 8 to deliver before subscription tiers launch.
+
 ### Revenue Target: $1M ARR
 
-| Scenario | Phase A One-Time | Phase B Subscriptions (TBD pricing) | Timeline |
+| Scenario | Tier 1 One-Time | Tier 2+3 Subscriptions | Timeline |
 |---|---|---|---|
 | Conservative | 2,000 founding members ($98K) | + subscription ARR (pricing TBD) | 24-30 months |
 | Moderate | 3,500 founding members ($172K) | + subscription ARR (pricing TBD) | 18-24 months |
 | Aggressive | 5,000+ founding members ($245K+) | + subscription ARR (pricing TBD) | 12-18 months |
 
-*Phase A projections based on $49 founding member pricing. Phase B subscription pricing requires research on AI token costs, competitive pricing, and addon model. Agent 5 + Agent 8 to deliver when Phase B feature scope is finalized.*
+*Tier 1 projections based on $49 founding member pricing. Subscription pricing requires research on AI token costs, competitive pricing, and addon model. Agent 5 + Agent 8 to deliver when Tier 2 feature scope is finalized.*
 
-### Widget & Module Add-Ons (Phase B+)
+**Unit economics advantage:** BYO-key model means Kaivoo carries zero AI inference costs. Tier 1 buyers cost almost nothing to support (no cloud, no API costs). Tier 2 subscribers generate ARR with structurally high margins (70-80%) compared to AI-heavy SaaS products.
+
+### Widget & Module Add-Ons (Future)
 
 | Widget/Module | Price Model | What They Get |
 |---|---|---|
-| **Command Space** | Included | Core foundation — journal, todos, calendar, captures, daily view, AI concierge |
+| **Command Space** | Included (Tier 1) | Core foundation — journal, todos, calendar, captures, daily view, AI concierge |
+| **Managed AI + Sync** | Tier 2 subscription | Cloud backup, multi-device sync, managed API keys |
 | **Marketing Tools** | Addon (TBD) | Content creation, social media, campaign planning, brand guidelines |
 | **Sales Dashboard** | Addon (TBD) | Pipeline tracking, contact management, lightweight CRM |
 | **Document Management** | Addon (TBD) | Upload, organize, share, version business documents |
+| **Orchestrator** | Tier 3 subscription | Sprint management, agent system, MCP connectors, build pipeline |
 | **Skills Store** | Marketplace pricing | Community-built integrations and skills |
 
-*Widget pricing TBD — per-seat, per-widget, or bundled tiers. Research required on token costs and competitive positioning.*
+*Widget/addon pricing TBD — per-seat, per-widget, or bundled tiers. Research required on token costs and competitive positioning.*
 
 ---
 
@@ -380,14 +402,15 @@ Every 1st-party module passes through the same packaging checks that marketplace
 | File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | **DONE** (Sprint 23) | Must-have |
 | AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | **DONE** (Sprint 23 — in-app chat; Telegram deferred to Phase B) | Must-have |
-| Google Calendar integration — OAuth, two-way sync | PLANNED | Must-have |
-| Gmail integration — read, send, organize email within the app | PLANNED | Must-have |
+| Soul file — persistent AI memory (SQLite `ai_memories` table, fact extraction pipeline, user-editable memory UI, app context injection, conversation summaries). The concierge learns, remembers, and sees your data. | PLANNED | Must-have |
 | Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | **DONE** (Sprint 23) | Must-have |
 | License key system — activation, tier validation, commercial distribution | PLANNED | Must-have |
 | Landing page & marketing site | PLANNED | Must-have |
 | Stripe integration — one-time payment flow | PLANNED | Must-have |
 | EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED | Must-have |
 | Product Hunt launch | PLANNED | Must-have |
+| Google Calendar integration — OAuth, two-way sync (investigate MCP for faster delivery) | PLANNED | Post-launch fast-follow |
+| Gmail integration — read, send, organize email within the app (investigate MCP for faster delivery) | PLANNED | Post-launch fast-follow |
 | White-label config layer — logo, colors, app name as settings (not hardcoded) | PLANNED | Should-have |
 | Outlook integration — email + calendar (fast-follow after Google) | PLANNED | Should-have |
 | PWA (installable, offline read) | PLANNED | Should-have |
@@ -487,9 +510,11 @@ These run in parallel with sprint work, not blocking it.
 
 ## Current Position
 
-**We are in:** Phase A — Productivity App (completing pre-ship features)
-**Active sprint:** None (Sprint 22 just completed)
-**Last completed:** Sprint 22 (Knowledge Vault) — vault file browser, markdown export, adapter stabilization, topic nesting
+**We are in:** Phase A — Productivity App (final pre-launch sprints)
+**Active sprint:** None (Sprint 23 just completed)
+**Last completed:** Sprint 23 (Setup & AI Foundation) — setup wizard, concierge hatching, BYO API key settings, chat concierge, desktop CI/CD
+
+**Sprint 23 delivered:** Setup & AI Foundation — 4-track sprint. Track 1: Sprint 22 quality debt (9 Agent 7 P1 findings, WAI-ARIA tree roles, AlertDialog, loading skeleton). Track 2: Setup wizard (first-launch detection, vault folder picker, Obsidian import, concierge hatching, guided tour). Track 3: AI foundation (provider settings for OpenAI/Anthropic/Ollama, BYO API key config, chat concierge with SSE streaming, conversation persistence, soul config system prompt). Track 4: Desktop CI/CD (GitHub Actions 3-platform matrix, Rust caching, code signing env vars). 12/12 parcels done. See `Sprints/Sprint-23-Setup-AI-Foundation.md`.
 
 **Sprint 22 delivered:** Knowledge Vault with dual-adapter architecture (LocalVaultAdapter for Tauri desktop, VirtualVaultAdapter for web). File browser at `/vault` with 5 root folders (Topics/Projects/Journal/Library/Inbox), tree navigation, search, breadcrumbs, entity deep-linking. Obsidian-compatible markdown export with YAML frontmatter for 5 entity types. Topic parentId nesting with recursive tree rendering. Adapter stabilization: `local.ts` split into 6 modules, SearchIndexer for per-CRUD FTS5 indexing, entity_type discriminator, empty-set guards. 265 tests (39 new). Agent 7 found 6 P0 issues (path traversal, YAML injection, cascade delete, caching, routing, idempotent migration) — all fixed. 3-agent design review passed. See `Sprints/Sprint-22-Knowledge-Vault.md`.
 
@@ -562,6 +587,15 @@ These run in parallel with sprint work, not blocking it.
 **Key decisions resolved (Sprint 21 — March 2, 2026):**
 - ~~Phase A sprint sequencing~~ → Sprint 21: Local-First Storage (DONE). Sprint 22: Knowledge Vault (DONE). Sprint 23: Setup & AI Foundation (DONE). Sprint 24+: Calendar, email, licensing, launch.
 
+**Key decisions resolved (CEO Session #5 — March 3, 2026):**
+- ~~SaaS vs. local-first vs. infrastructure~~ → **Three-tier model** — Tier 1: $49 one-time local-first app (BYO keys), Tier 2: subscription for managed AI/sync/integrations, Tier 3: premium subscription for builders/orchestrator. Local-first is the wedge. Subscription is elective convenience, not forced.
+- ~~Phase A pricing~~ → **Revised to three tiers** — replaces two-phase strategy. $49 Core / $99 Standard / subscription Pro / subscription Builders. Founding member $49 closes when Tier 2 launches.
+- ~~"Day-centric" vs. "day execution" positioning~~ → **Day execution** — "Today is where notes become actions and actions become delegated AI work." Sharper than "day-centric" and uncontested. Sunsama owns "daily planning." Kaivoo owns "day execution."
+- ~~ChatGPT memory crisis as positioning pillar~~ → **Toned down** — position soul file as "own your AI's memory" rather than anchoring on a specific catastrophe claim. The user frustration is real but the narrative should stand on its own merit, not require an enemy to fail.
+- ~~Soul file architecture~~ → **Phase 1: SQLite fact store + enhanced system prompt assembly + user-editable memory UI. Phase 2: extraction pipeline (cheap model auto-extracts facts after conversations). Phase 3: embeddings + MCP.** Start simple, upgrade when needed.
+- ~~Gmail/Calendar at launch~~ → **Deferred to post-launch fast-follow** — investigate MCP for faster delivery. Launch story is "AI concierge that knows you" not "email client."
+- ~~Phase A feature scope~~ → **Ship what's built + soul file + licensing + landing page + legal.** Everything else is fast-follow. We're close — finish, don't strip.
+
 **Key decisions ahead:**
 - **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
 - **Desktop auto-update** — How do users get updates for the desktop app? Agent 9.
@@ -622,17 +656,21 @@ The north star business goal is **$1M in annual revenue** — through one-time s
 
 ## The Competitive Edge
 
-Why One Workflow wins where others don't:
+Why Kaivoo wins where others don't:
 
-1. **Guided AI, not open-ended AI.** Claude and ChatGPT are power tools with no instruction manual. They hand you infinite capability and zero direction. One Workflow gives users specific tools with clear outcomes. No prompt engineering. No decision paralysis.
+1. **Own your AI's memory.** ChatGPT's memory is opaque, unreliable, and not yours. Kaivoo's soul file is a readable, editable, exportable record that you own. No surprises. No silent resets. No vendor holding your AI relationship hostage.
 
-2. **Replace the stack, don't add to it.** Notion + Google Calendar + journal app + CRM spreadsheet + AI chat = 5 tabs, 5 logins, 5 subscriptions. One Workflow = one place.
+2. **Day execution, not day planning.** Sunsama helps you plan your day. Kaivoo helps you *execute* it. Today is where notes become actions and actions become delegated AI work. The Autonomy Ladder isn't a roadmap feature — it's the product philosophy.
 
-3. **HubSpot for humans.** HubSpot is 47 tiers of confusion built for enterprises. One Workflow is clear, simple, and built for the solopreneur and small team that uses a tenth of HubSpot's features and pays too much for it.
+3. **Guided AI, not open-ended AI.** Claude and ChatGPT are power tools with no instruction manual. They hand you infinite capability and zero direction. Kaivoo gives users specific tools with clear outcomes. No prompt engineering. No decision paralysis.
 
-4. **AI that teaches you what it can do.** The concierge doesn't wait for instructions — it suggests actions based on your data. Every suggestion is a discovery moment. Users don't need to know what's possible because the AI shows them.
+4. **Replace the stack, don't add to it.** Notion + Google Calendar + journal app + CRM spreadsheet + AI chat = 5 tabs, 5 logins, 5 subscriptions. Kaivoo = one place.
 
-5. **Grows with you.** Start personal, go professional. The same tool that manages your journal and habits also runs your team's projects and client work. No migration. No second tool. One workflow.
+5. **BYO everything.** Bring your own API keys. Bring your own models. Your data stays local. Your AI costs are transparent. No markup, no lock-in, no cloud dependency for core functionality. Or let us handle it — your choice.
+
+6. **AI that teaches you what it can do.** The concierge doesn't wait for instructions — it suggests actions based on your data. Every suggestion is a discovery moment. Users don't need to know what's possible because the AI shows them.
+
+7. **Grows with you.** Start personal, go professional. The same tool that manages your journal and habits also runs your team's projects and client work. No migration. No second tool. One workflow.
 
 ---
 
@@ -649,7 +687,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v4.6 — March 2, 2026*
+*Vision v5.0 — March 3, 2026*
+*v5.0: CEO Session #5 — Strategic pivot to three-tier revenue model (Core $49 one-time / Pro subscription / Builders subscription). "Day execution" replaces "day-centric" as core positioning. Soul file elevated to Phase A must-have (persistent AI memory the user owns). ChatGPT memory crisis narrative toned down — "own your AI's memory" framing. Gmail/Calendar deferred to post-launch fast-follow (investigate MCP). BYO-key economics validated by market research (TypingMind, JetBrains precedents). Competitive edge section rewritten around ownership, execution, and BYO-everything. Sprint 23 (Setup & AI Foundation) complete.*
 *v4.6: Sprint 22 (Knowledge Vault) complete. Vault file browser with 5-folder structure (Topics/Projects/Journal/Library/Inbox), dual-adapter architecture, Obsidian-compatible markdown export, topic nesting, adapter stabilization (local.ts split, SearchIndexer, entity_type discriminator). 265 tests. 6 P0 security/correctness fixes. See `Sprints/Sprint-22-Knowledge-Vault.md`.*
 *v4.5: CEO Strategic Brief — Phase A pricing revised ($99 standard / $49 founding member). Volume-over-margin strategy. AI features deferred to Phase B. Sprint 21 (Local-First Storage) started — SQLite persistence, adapter completion, FTS5 search, local auth. Sprint sequencing resolved through Sprint 24+. Revenue projections updated for new pricing. See `Research/Agent-5-Docs/CEO-Strategic-Brief-Phase-A-Pricing.md`.*
 *v4.4: Sprint 20 completion — Tauri 2.0 selected, DataAdapter pattern implemented, SQLite schema designed, 18 E2E tests, lint cleanup. See `Sprints/Sprint-20-Local-First-Foundation.md`.*
