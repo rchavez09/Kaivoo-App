@@ -78,7 +78,12 @@ const GuidedTour = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-lg">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Guided tour: step ${step + 1} of ${TOUR_STEPS.length}`}
+        className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-lg"
+      >
         {/* Step indicator */}
         <div className="mb-6 flex items-center justify-center gap-2">
           {TOUR_STEPS.map((_, i) => (

@@ -113,6 +113,7 @@ export default function AIProviderSettings() {
               <button
                 type="button"
                 onClick={() => setShowKey((v) => !v)}
+                aria-label={showKey ? 'Hide API key' : 'Show API key'}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
