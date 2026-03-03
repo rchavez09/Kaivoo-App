@@ -24,6 +24,8 @@ const RoutinesPage = lazy(() => import('./pages/RoutinesPage'));
 const Projects = lazy(() => import('./pages/Projects'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
+const SetupWizard = lazy(() => import('./pages/SetupWizard'));
+const GuidedTour = lazy(() => import('./components/GuidedTour'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const PageLoader = () => (
@@ -42,16 +44,23 @@ const queryClient = new QueryClient({
   },
 });
 
-const ProtectedWithData = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute>
-    <DataLoader>{children}</DataLoader>
-  </ProtectedRoute>
-);
+/** Redirect to /setup if first-launch setup hasn't been completed. */
+const SetupGuard = ({ children }: { children: React.ReactNode }) => {
+  if (!localStorage.getItem('kaivoo-setup-complete')) {
+    return <Navigate to="/setup" replace />;
+  }
+  return <>{children}</>;
+};
 
 const ProtectedPage = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedWithData>
-    <ErrorBoundary>{children}</ErrorBoundary>
-  </ProtectedWithData>
+  <ProtectedRoute>
+    <SetupGuard>
+      <DataLoader>
+        <ErrorBoundary>{children}</ErrorBoundary>
+        <GuidedTour />
+      </DataLoader>
+    </SetupGuard>
+  </ProtectedRoute>
 );
 
 const App = () => (
@@ -169,6 +178,14 @@ const App = () => (
                       <ProtectedPage>
                         <SettingsPage />
                       </ProtectedPage>
+                    }
+                  />
+                  <Route
+                    path="/setup"
+                    element={
+                      <ProtectedRoute>
+                        <SetupWizard />
+                      </ProtectedRoute>
                     }
                   />
                   <Route path="*" element={<NotFound />} />

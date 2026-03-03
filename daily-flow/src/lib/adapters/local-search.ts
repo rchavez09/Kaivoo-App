@@ -8,7 +8,7 @@
 
 import type { SearchAdapter, SearchResult } from './types';
 import type { TauriDatabase, SearchIndexer } from './local-types';
-import { parseJSON } from './local-types';
+import { parseJSON, rethrow } from './local-types';
 
 /** Map entity types to their navigation routes (mirrors search.service.ts) */
 function getEntityPath(entityType: string, entityId: string, metadata: Record<string, unknown>): string {
@@ -115,7 +115,7 @@ export class LocalSearchAdapter implements SearchAdapter, SearchIndexer {
         FROM routines WHERE entity_type = 'habit' AND is_archived = 0
       `);
     } catch (e) {
-      throw new Error(`[Search.rebuildIndex] ${e instanceof Error ? e.message : String(e)}`);
+      rethrow('Search', 'rebuildIndex', e);
     }
   }
 
@@ -156,7 +156,7 @@ export class LocalSearchAdapter implements SearchAdapter, SearchIndexer {
         };
       });
     } catch (e) {
-      throw new Error(`[Search.searchAll] ${e instanceof Error ? e.message : String(e)}`);
+      rethrow('Search', 'searchAll', e);
     }
   }
 
@@ -169,7 +169,7 @@ export class LocalSearchAdapter implements SearchAdapter, SearchIndexer {
         [entityType, entityId, title, body, metadata],
       );
     } catch (e) {
-      throw new Error(`[Search.upsert] ${e instanceof Error ? e.message : String(e)}`);
+      rethrow('Search', 'upsert', e);
     }
   }
 
@@ -178,7 +178,7 @@ export class LocalSearchAdapter implements SearchAdapter, SearchIndexer {
     try {
       await this.db.execute('DELETE FROM search_fts WHERE entity_type = $1 AND entity_id = $2', [entityType, entityId]);
     } catch (e) {
-      throw new Error(`[Search.remove] ${e instanceof Error ? e.message : String(e)}`);
+      rethrow('Search', 'remove', e);
     }
   }
 }

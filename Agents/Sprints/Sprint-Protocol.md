@@ -1,7 +1,7 @@
 # Sprint Protocol — Kaivoo Agent Coordination System
 
-**Version:** 1.8
-**Last Updated:** March 1, 2026
+**Version:** 1.9
+**Last Updated:** March 2, 2026
 
 ---
 
@@ -49,14 +49,18 @@ LIFECYCLE:
      → Smoke tests + journey tests derived from sprint DoD + Feature Bible
      → Produces pass/fail report with screenshots on failure
   9. SANDBOX REVIEW: User reviews the deploy preview URL from any device
+     → Director provides a specific testing checklist (screens, flows, devices)
      → No localhost required — test from phone, laptop, anywhere
      → User approves UX or requests changes
      → This is a blocking gate — do NOT merge without user approval
-  10. Sprint retrospective section added to sprint file
-  11. Merge PR to main on GitHub
+  10. Merge PR to main on GitHub
       → Netlify auto-deploys to production (no manual deploy step)
-  12. Tag main: git tag post-sprint-N
-  13. If sprint is rejected → PR is closed, branch is abandoned, main is untouched
+  11. Tag main: git tag post-sprint-N
+  12. Sprint retrospective added to sprint file on main (post-merge commit)
+     → Reflects the FULL sprint including sandbox findings
+     → Committed directly to main, not a separate PR
+  13. Director updates Vision.md to reflect progress
+  14. If sprint is rejected → PR is closed, branch is abandoned, main is untouched
 
 RULES:
   - NEVER commit sprint work directly to main
@@ -89,8 +93,11 @@ Before any sprint branch PR merges to main, ALL of the following must pass:
 □ Sprint file is current: all parcels have final status, quality gates checked off, metrics recorded
 □ E2E TEST: npm run test:e2e passes against the Netlify deploy preview URL (PLAYWRIGHT_BASE_URL)
 □ SANDBOX: User has reviewed the Netlify deploy preview URL and approved UX (can test from any device)
-□ Sprint retrospective section added to sprint file (MANDATORY — do NOT merge without it)
-□ All sprint files committed to the sprint branch (sprint file + retrospective included in the PR diff)
+□ All sprint files committed to the sprint branch (sprint file included in the PR diff)
+
+POST-MERGE (done on main after merge):
+□ Sprint retrospective added to sprint file (committed directly to main)
+□ Vision.md updated to reflect sprint progress
 ```
 
 ### Deployment Pipeline
@@ -257,7 +264,7 @@ Common document types:
   - The sprint file should always reflect reality, not be backfilled later
 - Mid-sprint documents feed the NEXT sprint, not the current one
 
-### Phase 4: Verification & Completion
+### Phase 4: Verification
 
 **Trigger:** All parcels meet Definition of Done, or sprint is timeboxed.
 
@@ -288,24 +295,39 @@ Common document types:
 9. **E2E TEST:** Run `npm run test:e2e` against the Netlify deploy preview URL
    - Set `PLAYWRIGHT_BASE_URL` to the deploy preview URL
    - Smoke tests must PASS. Journey tests (if written) run against sprint DoD + Feature Bible
-   - Must PASS before user sandbox review
-10. **SANDBOX REVIEW:** User reviews the Netlify deploy preview URL
-    - Accessible from any device — phone, laptop, coffee shop, anywhere
-    - User approves UX or requests changes
-    - This is a **blocking gate** — do NOT proceed without user approval
-11. **MANDATORY: Add `## Sprint Retrospective` section to the sprint file BEFORE merging.**
-    This is a blocking requirement — no merge without a retrospective. Include:
-    - Completed date
-    - Parcels completed (X/Y)
-    - What was delivered (brief summary)
-    - Verification results (build, typecheck, tests, agent gates)
-    - Deferred items
-    - Key learnings
-12. Merge PR to main on GitHub (Netlify auto-deploys to production)
-13. Tag main: `git tag post-sprint-N`
-14. Director updates `Vision.md` to reflect progress
+   - Must PASS before proceeding to Phase 5
 
-### Phase 5: Archival
+### Phase 5: User Acceptance & Merge
+
+**Trigger:** All Phase 4 gates pass (deterministic checks, agent gates, design review, E2E).
+
+**Actions:**
+1. **SANDBOX REVIEW:** Director presents the user with a **Sandbox Testing Checklist** derived from the sprint's Definition of Done and parcels. The checklist includes:
+   - Specific screens/pages to visit
+   - Specific user flows to walk through (mapped from sprint DoD)
+   - What to look for: new features, regressions, visual quality, dark mode
+   - Device recommendations (phone, desktop, or both)
+   - The Netlify deploy preview URL
+   - User reviews from any device — phone, laptop, coffee shop, anywhere
+   - This is a **blocking gate** — do NOT proceed without user approval
+2. User approves UX or requests changes
+   - If changes requested → fix on sprint branch, push, re-run Phase 4 gates as needed
+   - Cycle until user approves
+3. **MERGE PR** to main on GitHub (Netlify auto-deploys to production)
+4. **TAG MAIN:** `git tag post-sprint-N`
+5. **DIRECTOR UPDATES `Vision.md`** to reflect progress
+6. **SPRINT RETROSPECTIVE:** Add `## Sprint Retrospective` section to the sprint file.
+   This is written AFTER merge, reflecting the FULL sprint lifecycle including sandbox findings.
+   Committed directly to main (not a separate PR). Include:
+   - Completed date
+   - Parcels completed (X/Y)
+   - What was delivered (brief summary)
+   - Verification results (build, typecheck, tests, agent gates)
+   - Sandbox findings (what the user caught, if anything)
+   - Deferred items
+   - Key learnings
+
+### Phase 6: Archival
 
 **Trigger:** Next sprint planning begins.
 
@@ -380,10 +402,15 @@ Director compiles Next-Sprint-Planning.md
 (Parcels, assignments, dependencies)
          |
          v
-User approves -> Sprint-{N}-{Theme}.md created
+User approves → Sprint-{N}-{Theme}.md created
          |
          v
 Agents execute their parcels
+         |
+         v
+═══════════════════════════════════
+  PHASE 4: VERIFICATION
+═══════════════════════════════════
          |
          v
 Deterministic checks (lint, typecheck, test, build)
@@ -411,21 +438,29 @@ Open PR to main → CI runs + Netlify deploy preview generated
 E2E TEST: npm run test:e2e against deploy preview URL
          |
          v
+═══════════════════════════════════
+  PHASE 5: USER ACCEPTANCE & MERGE
+═══════════════════════════════════
+         |
+         v
 SANDBOX REVIEW: User reviews deploy preview URL (any device)
+(Director provides specific testing checklist)
          |
          v
-Sprint retrospective added to sprint file
-         |
-         v
-Merge PR to main → Netlify auto-deploys to production
+User approves → Merge PR to main
+(Netlify auto-deploys to production)
          |
          v
 Tag main (post-sprint-N) + Vision.md updated
+         |
+         v
+Sprint retrospective added to sprint file on main
+(Reflects full sprint including sandbox findings)
 ```
 
 ---
 
-*Sprint Protocol v1.8 — March 1, 2026*
+*Sprint Protocol v1.9 — March 2, 2026*
 *v1.0: Initial protocol*
 *v1.1: Added Section 1B (Version Control & Sandbox Strategy), added Agent 11 to Quality department*
 *v1.2: Explicit sandbox review step in lifecycle + pre-merge checklist. Deterministic checks before agent gates.*
@@ -435,3 +470,4 @@ Tag main (post-sprint-N) + Vision.md updated
 *v1.6: Removed pre-implementation design gate (Gate 1). Design review now happens right before sandbox preview in Phase 4. Cleaner flow: build → code review → integrity check → design review → sandbox.*
 *v1.7: Deployment pipeline overhaul. GitHub → Netlify auto-deploy (netlify.toml config). Sandbox replaced localhost with Netlify deploy preview URLs (test from any device). Added E2E testing gate (AI-powered browser testing against preview URL). Added Deployment Pipeline section. Strengthened safety/rollback guarantees. Manual Netlify deploys eliminated.*
 *v1.8: Sprint file as living document. Phase 3 now requires updating parcel status during execution (not after). Added "Sprint File Checkpoint" step in Phase 4 before PR — sprint file must be current and included in the PR diff. E2E gate updated to use Playwright (`npm run test:e2e` with `PLAYWRIGHT_BASE_URL`). Driven by Sprint 19 retro: code shipped but sprint file was never updated.*
+*v1.9: Phase restructure — split old Phase 4 into Phase 4 (Verification, ends at E2E) and Phase 5 (User Acceptance & Merge). Retrospective moves AFTER merge to reflect full sprint including sandbox findings. Sandbox review now requires a structured testing checklist from the Director (specific screens, flows, devices — not just "go look at it"). Added `/sprint-verify` skill for automated gate enforcement. Driven by Sprint 22 retro: retrospective written before sandbox caused premature "done" signal, Phase 4 testing was skipped.*

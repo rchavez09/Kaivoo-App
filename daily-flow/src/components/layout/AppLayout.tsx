@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useSearchStore } from '@/stores/useSearchStore';
 import { useShortcuts } from '@/hooks/useShortcuts';
-import FloatingChat from '@/components/FloatingChat';
+import ConciergeChat from '@/components/ai/ConciergeChat';
 import QuickAddNoteDialog from '@/components/projects/QuickAddNoteDialog';
 const SearchCommand = lazy(() => import('@/components/search/SearchCommand'));
 
@@ -57,7 +57,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       <Suspense fallback={null}>
         <SearchCommand />
       </Suspense>
-      <FloatingChat />
+      <ConciergeChat />
       <QuickAddNoteDialog open={quickNoteOpen} onOpenChange={setQuickNoteOpen} defaultProjectId={params.projectId} />
     </TooltipProvider>
   );

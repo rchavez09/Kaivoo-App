@@ -64,7 +64,8 @@ npm run typecheck    # TypeScript type check (tsc --noEmit)
 4. **Sprint files** are never deleted — they are historical records
 5. **Agent documents** are archived (`ARCHIVED-` prefix), never deleted
 6. **The Director** orchestrates all sprint planning through `Vision.md` and `Sprint-Protocol.md`
-7. **Sprint work** happens on dedicated branches (`sprint/N-theme`), never directly on `main` — see Sprint Protocol v1.7
-8. **Before merging to main**, Agent 7 (code) AND Agent 11 (feature integrity) AND all 3 design agents AND E2E tester must pass
-9. **Production deploys** happen automatically when PRs merge to `main` via Netlify — no manual deploys
-10. **Sandbox testing** uses Netlify deploy preview URLs (accessible from any device), not localhost
+7. **Sprint work** happens on dedicated branches (`sprint/N-theme`), never directly on `main` — see Sprint Protocol v1.9
+8. **Before merging to main**, Phase 4 gates (Agent 7 + Agent 11 + design agents + E2E) AND Phase 5 sandbox approval must pass. Use `/sprint-verify` to enforce the gate sequence.
+9. **Sprint retrospective** is written AFTER merge (not before) — reflects the full sprint including sandbox findings
+10. **Production deploys** happen automatically when PRs merge to `main` via Netlify — no manual deploys
+11. **Sandbox testing** uses Netlify deploy preview URLs (accessible from any device), not localhost

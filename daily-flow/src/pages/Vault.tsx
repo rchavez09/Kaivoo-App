@@ -6,7 +6,7 @@
  * navigation, and entity linking (click a file → navigate to entity).
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import {
@@ -24,6 +24,7 @@ import {
   Hash,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -61,16 +62,22 @@ function getEntityRoute(node: VaultNode): string | null {
   if (!node.entityRef) return null;
   const { type, id, parentId } = node.entityRef;
   switch (type) {
-    case 'journal':
-      return '/notes';
-    case 'capture':
-      return '/notes';
+    case 'journal': {
+      const dateMatch = node.name.match(/^(\d{4}-\d{2}-\d{2})/);
+      return dateMatch ? `/notes?date=${dateMatch[1]}` : '/notes';
+    }
+    case 'capture': {
+      const captureDateMatch = node.name.match(/^capture-(\d{4}-\d{2}-\d{2})/);
+      return captureDateMatch ? `/notes?date=${captureDateMatch[1]}` : '/notes';
+    }
     case 'topic':
       return `/topics/${id}`;
     case 'topic_page':
       return parentId ? `/topics/${parentId}/pages/${id}` : `/topics/${id}`;
     case 'project':
       return `/projects/${id}`;
+    case 'project_note':
+      return parentId ? `/projects/${parentId}` : '/projects';
     default:
       return null;
   }
@@ -103,9 +110,14 @@ interface TreeNodeProps {
   onToggle: (path: string) => void;
   onNavigate: (node: VaultNode) => void;
   searchQuery: string;
+  level: number;
+  posinset: number;
+  setsize: number;
+  focusedPath: string;
+  onFocusChange: (path: string) => void;
 }
 
-function TreeNode({ node, depth, expanded, onToggle, onNavigate, searchQuery }: TreeNodeProps) {
+function TreeNode({ node, depth, expanded, onToggle, onNavigate, searchQuery, level, posinset, setsize, focusedPath, onFocusChange }: TreeNodeProps) {
   const isExpanded = expanded.has(node.path);
   const hasChildren = node.isDirectory && (node.children?.length ?? 0) > 0;
 
@@ -117,9 +129,51 @@ function TreeNode({ node, depth, expanded, onToggle, onNavigate, searchQuery }: 
   const isRootFolder = depth === 0;
   const FolderIcon = isRootFolder ? getFolderIcon(node.name) : isExpanded ? FolderOpen : Folder;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const tree = e.currentTarget.closest('[role="tree"]');
+    if (!tree) return;
+    const items = Array.from(tree.querySelectorAll<HTMLElement>('[data-tree-item]'));
+    const idx = items.indexOf(e.currentTarget);
+    if (idx === -1) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        items[idx + 1]?.focus();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        items[idx - 1]?.focus();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        if (node.isDirectory && !isExpanded) {
+          onToggle(node.path);
+        } else if (isExpanded) {
+          items[idx + 1]?.focus();
+        }
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (node.isDirectory && isExpanded) {
+          onToggle(node.path);
+        }
+        break;
+      case 'Home':
+        e.preventDefault();
+        items[0]?.focus();
+        break;
+      case 'End':
+        e.preventDefault();
+        items[items.length - 1]?.focus();
+        break;
+    }
+  };
+
   return (
     <div>
       <button
+        role="treeitem"
         onClick={() => {
           if (node.isDirectory) {
             onToggle(node.path);
@@ -127,10 +181,17 @@ function TreeNode({ node, depth, expanded, onToggle, onNavigate, searchQuery }: 
             onNavigate(node);
           }
         }}
+        onKeyDown={handleKeyDown}
+        onFocus={() => onFocusChange(node.path)}
         className="group -mx-2 flex w-[calc(100%+16px)] items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
+        tabIndex={node.path === focusedPath ? 0 : -1}
         aria-expanded={node.isDirectory ? isExpanded : undefined}
+        aria-level={level}
+        aria-setsize={setsize}
+        aria-posinset={posinset}
         aria-label={node.isDirectory ? `${isExpanded ? 'Collapse' : 'Expand'} ${node.name} folder` : node.name}
+        data-tree-item
       >
         {/* Expand/collapse chevron */}
         {node.isDirectory ? (
@@ -162,23 +223,28 @@ function TreeNode({ node, depth, expanded, onToggle, onNavigate, searchQuery }: 
         {/* File count for folders */}
         {node.isDirectory && (node.children?.length ?? 0) > 0 && (
           <span className="ml-auto text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-            {node.children!.length}
+            {node.children?.length}
           </span>
         )}
       </button>
 
       {/* Children */}
       {node.isDirectory && isExpanded && visibleChildren.length > 0 && (
-        <div>
-          {visibleChildren.map((child) => (
+        <div role="group">
+          {visibleChildren.map((child, index) => (
             <TreeNode
               key={child.path}
               node={child}
               depth={depth + 1}
+              level={level + 1}
+              posinset={index + 1}
+              setsize={visibleChildren.length}
               expanded={expanded}
               onToggle={onToggle}
               onNavigate={onNavigate}
               searchQuery={searchQuery}
+              focusedPath={focusedPath}
+              onFocusChange={onFocusChange}
             />
           ))}
         </div>
@@ -199,6 +265,8 @@ const Vault = () => {
   );
   const [currentPath, setCurrentPath] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [focusedPath, setFocusedPath] = useState('');
 
   // Load tree from vault adapter
   useEffect(() => {
@@ -209,13 +277,23 @@ const Vault = () => {
 
     let cancelled = false;
     setLoading(true);
+    setError(null);
 
-    vaultAdapter.getTree().then((t) => {
-      if (!cancelled) {
-        setTree(t);
-        setLoading(false);
-      }
-    });
+    vaultAdapter
+      .getTree()
+      .then((t) => {
+        if (!cancelled) {
+          setTree(t);
+          setLoading(false);
+        }
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          console.error('[Vault] Failed to load tree:', e);
+          setError(e instanceof Error ? e.message : 'Failed to load vault');
+          setLoading(false);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -264,9 +342,9 @@ const Vault = () => {
   // Build breadcrumb segments from currentPath
   const breadcrumbSegments = currentPath ? currentPath.split('/') : [];
 
-  // Stats
-  const totalFiles = tree ? countFiles(tree) : 0;
-  const totalFolders = tree ? countFolders(tree) - 1 : 0; // exclude root
+  // Stats (memoized to avoid re-traversing the tree on every render)
+  const totalFiles = useMemo(() => (tree ? countFiles(tree) : 0), [tree]);
+  const totalFolders = useMemo(() => (tree ? countFolders(tree) - 1 : 0), [tree]); // exclude root
 
   // Find current subtree for breadcrumb navigation
   const currentNode =
@@ -281,6 +359,22 @@ const Vault = () => {
           return node;
         })()
       : tree;
+
+  // Set initial focused path when tree loads
+  useEffect(() => {
+    if (currentNode?.children?.length && !focusedPath) {
+      setFocusedPath(currentNode.children[0].path);
+    }
+  }, [currentNode, focusedPath]);
+
+  // Visible root children (filtered by search)
+  const visibleRootChildren = useMemo(() => {
+    if (!currentNode?.children) return [];
+    if (searchQuery) {
+      return currentNode.children.filter((c) => matchesSearch(c, searchQuery.toLowerCase()));
+    }
+    return currentNode.children;
+  }, [currentNode, searchQuery]);
 
   return (
     <AppLayout>
@@ -351,8 +445,19 @@ const Vault = () => {
         {/* File Tree */}
         <div className="widget-card">
           {loading ? (
+            <div className="space-y-3 p-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className={`h-4 rounded ${i % 2 === 0 ? 'w-32' : 'w-48'}`} />
+                </div>
+              ))}
+            </div>
+          ) : error ? (
             <div className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">Loading vault...</p>
+              <HardDrive className="mx-auto mb-4 h-12 w-12 text-destructive/30" />
+              <h3 className="mb-2 text-lg font-medium text-foreground">Failed to load vault</h3>
+              <p className="mx-auto max-w-sm text-sm text-muted-foreground">{error}</p>
             </div>
           ) : !tree || !currentNode ? (
             <div className="py-12 text-center">
@@ -362,20 +467,22 @@ const Vault = () => {
                 Sign in to access your Knowledge Vault.
               </p>
             </div>
-          ) : (currentNode.children?.length ?? 0) > 0 ? (
-            <div className="space-y-0.5">
-              {(searchQuery
-                ? (currentNode.children ?? []).filter((c) => matchesSearch(c, searchQuery.toLowerCase()))
-                : currentNode.children ?? []
-              ).map((child) => (
+          ) : visibleRootChildren.length > 0 ? (
+            <div role="tree" aria-label="Vault files" className="space-y-0.5">
+              {visibleRootChildren.map((child, index) => (
                 <TreeNode
                   key={child.path}
                   node={child}
                   depth={0}
+                  level={1}
+                  posinset={index + 1}
+                  setsize={visibleRootChildren.length}
                   expanded={expanded}
                   onToggle={toggleNode}
                   onNavigate={handleNodeClick}
                   searchQuery={searchQuery.toLowerCase()}
+                  focusedPath={focusedPath}
+                  onFocusChange={setFocusedPath}
                 />
               ))}
             </div>

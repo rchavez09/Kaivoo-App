@@ -11,8 +11,13 @@ import { ROOT_FOLDERS } from './types';
 export class LocalVaultAdapter implements VaultAdapter {
   private constructor(private rootPath: string) {}
 
-  /** Factory: resolve the vault root from Tauri app data directory. */
+  /** Factory: resolve the vault root. Checks for user-selected path from setup wizard,
+   *  falling back to the Tauri app data directory. */
   static async create(): Promise<LocalVaultAdapter> {
+    const customPath = localStorage.getItem('kaivoo-vault-path');
+    if (customPath) {
+      return new LocalVaultAdapter(customPath);
+    }
     const { appDataDir } = await import('@tauri-apps/api/path');
     const root = await appDataDir();
     return new LocalVaultAdapter(`${root}/vault`);

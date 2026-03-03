@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
-import { format } from 'date-fns';
+import { useSearchParams } from 'react-router-dom';
+import { format, parseISO, isValid } from 'date-fns';
 import { BookOpen, Check, Loader2 } from 'lucide-react';
 import AppLayout from '@/components/layout/AppLayout';
 import JournalCanvas from '@/components/journal/JournalCanvas';
@@ -26,8 +27,18 @@ interface AIExtraction {
 }
 
 const JournalPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   // --- Core state ---
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // URL-driven date: /notes?date=2026-02-20 or defaults to today
+  const selectedDate = useMemo(() => {
+    const param = searchParams.get('date');
+    if (param) {
+      const parsed = parseISO(param);
+      if (isValid(parsed)) return parsed;
+    }
+    return new Date();
+  }, [searchParams]);
   const [sections, setSections] = useState<CanvasSection[]>([]);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'idle'>('idle');
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
@@ -155,10 +166,16 @@ const JournalPage = () => {
 
   // --- Date navigation ---
   const handleDateSelect = useCallback((date: Date) => {
-    setSelectedDate(date);
+    const iso = date.toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
+    if (iso === today) {
+      setSearchParams({});
+    } else {
+      setSearchParams({ date: iso });
+    }
     setActiveSectionId(null);
     setActiveEntryId(null);
-  }, []);
+  }, [setSearchParams]);
 
   // --- Save status display ---
   const statusDisplay = useMemo(() => {
