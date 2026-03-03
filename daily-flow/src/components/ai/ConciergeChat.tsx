@@ -6,7 +6,7 @@
  * Uses soul file for system prompt personality.
  */
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -166,14 +166,10 @@ const ConciergeChat = () => {
     }
   }, [input, streaming, conversation]);
 
-  const { conciergeName, isConfigured } = useMemo(() => {
-    const soul = getSoulConfig();
-    const s = getAISettings();
-    return {
-      conciergeName: soul?.name || 'Concierge',
-      isConfigured: s.apiKey.length > 0 || s.provider === 'ollama',
-    };
-  }, []);
+  const soul = getSoulConfig();
+  const currentSettings = getAISettings();
+  const conciergeName = soul?.name || 'Concierge';
+  const isConfigured = currentSettings.apiKey.length > 0 || currentSettings.provider === 'ollama';
 
   return (
     <>

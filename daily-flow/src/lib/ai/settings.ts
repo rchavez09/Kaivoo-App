@@ -79,6 +79,10 @@ export function getSoulConfig(): SoulConfig | null {
   return null;
 }
 
+export function saveSoulConfig(config: SoulConfig): void {
+  localStorage.setItem(SOUL_KEY, JSON.stringify(config));
+}
+
 export function buildSystemPrompt(soul: SoulConfig | null, depth: AIDepth): string {
   const name = soul?.name || 'Kaivoo Assistant';
   const tone = soul?.tone || 'casual';

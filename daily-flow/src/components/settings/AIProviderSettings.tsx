@@ -18,9 +18,15 @@ import {
 import { Eye, EyeOff, Loader2, CheckCircle2, XCircle, Zap, Sparkles, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 import { AI_PROVIDERS, getProviderConfig } from '@/lib/ai/providers';
-import { getAISettings, saveAISettings } from '@/lib/ai/settings';
+import { getAISettings, saveAISettings, getSoulConfig, saveSoulConfig } from '@/lib/ai/settings';
 import { testConnection } from '@/lib/ai/chat-service';
-import type { AISettings, AIDepth, AIProviderType } from '@/lib/ai/types';
+import type { AISettings, AIDepth, AIProviderType, SoulConfig } from '@/lib/ai/types';
+
+const TONE_OPTIONS: Array<{ value: SoulConfig['tone']; label: string; description: string }> = [
+  { value: 'professional', label: 'Professional', description: 'Clear & direct' },
+  { value: 'casual', label: 'Casual', description: 'Friendly & relaxed' },
+  { value: 'playful', label: 'Playful', description: 'Fun & energetic' },
+];
 
 const DEPTH_OPTIONS: Array<{ value: AIDepth; label: string; description: string; icon: typeof Zap }> = [
   { value: 'light', label: 'Light', description: 'Brief responses', icon: Zap },
@@ -33,6 +39,7 @@ export default function AIProviderSettings() {
   const [showKey, setShowKey] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [soul, setSoul] = useState<SoulConfig>(() => getSoulConfig() ?? { name: '', tone: 'casual' });
 
   const provider = getProviderConfig(settings.provider);
 
@@ -75,6 +82,14 @@ export default function AIProviderSettings() {
       setTesting(false);
     }
   }, [settings]);
+
+  const updateSoul = useCallback((patch: Partial<SoulConfig>) => {
+    setSoul((prev) => {
+      const next = { ...prev, ...patch };
+      saveSoulConfig(next);
+      return next;
+    });
+  }, []);
 
   const canTest = settings.provider === 'ollama' || settings.apiKey.length > 5;
 
@@ -220,6 +235,43 @@ export default function AIProviderSettings() {
             <p>{testResult.message}</p>
           </div>
         )}
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-border" />
+
+      {/* Concierge Personality */}
+      <div>
+        <label className="mb-2 block text-sm font-medium text-foreground">Concierge Name</label>
+        <Input
+          value={soul.name}
+          onChange={(e) => updateSoul({ name: e.target.value })}
+          placeholder="Kaivoo Assistant"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          The name your AI concierge introduces itself as.
+        </p>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-foreground">Concierge Tone</label>
+        <div className="grid grid-cols-3 gap-2">
+          {TONE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => updateSoul({ tone: opt.value })}
+              className={`rounded-xl border p-3 text-center transition-colors ${
+                soul.tone === opt.value
+                  ? 'border-primary bg-primary/5 text-foreground'
+                  : 'border-border bg-card text-muted-foreground hover:border-primary/50'
+              }`}
+            >
+              <p className="text-sm font-medium">{opt.label}</p>
+              <p className="text-xs text-muted-foreground">{opt.description}</p>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
