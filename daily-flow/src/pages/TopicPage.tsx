@@ -6,6 +6,16 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import InlineEdit from '@/components/ui/InlineEdit';
@@ -29,6 +39,7 @@ const TopicPage = () => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [createPageOpen, setCreatePageOpen] = useState(false);
   const [newPageName, setNewPageName] = useState('');
+  const [deletePageOpen, setDeletePageOpen] = useState(false);
 
   // Get the current topic or page
   const topic = topics.find((t) => t.id === topicId);
@@ -166,13 +177,7 @@ const TopicPage = () => {
                 size="sm"
                 className="text-muted-foreground hover:text-destructive"
                 aria-label={`Delete page ${displayName}`}
-                onClick={() => {
-                  if (window.confirm(`Delete "${displayName}"? This cannot be undone.`)) {
-                    void deleteTopicPage(pageId);
-                    toast.success(`Deleted page "${displayName}"`);
-                    navigate(`/topics/${topicId}`);
-                  }
-                }}
+                onClick={() => setDeletePageOpen(true)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -381,6 +386,33 @@ const TopicPage = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Page Confirmation */}
+        <AlertDialog open={deletePageOpen} onOpenChange={setDeletePageOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete &ldquo;{displayName}&rdquo;?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete this page. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (pageId) {
+                    void deleteTopicPage(pageId);
+                    toast.success(`Deleted page "${displayName}"`);
+                    navigate(`/topics/${topicId}`);
+                  }
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );

@@ -28,6 +28,14 @@ export const parseJSON = <T>(val: string | null | undefined, fallback: T): T => 
   }
 };
 
+// ─── Error Helpers ───
+
+/** Re-throw with entity/method context for debuggability. */
+export function rethrow(entity: string, method: string, e: unknown): never {
+  const msg = e instanceof Error ? e.message : typeof e === 'string' ? e : 'Unknown error';
+  throw new Error(`[${entity}.${method}] ${msg}`);
+}
+
 // ─── Search Indexer ───
 
 /** Incremental FTS5 index updater — injected into entity adapters by LocalDataAdapter. */

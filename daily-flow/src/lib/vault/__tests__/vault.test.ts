@@ -538,6 +538,7 @@ describe('VirtualVaultAdapter', () => {
     expect(md).toContain('Hello world');
 
     // Verify fetchAll was called only once (via getTree cache), not twice
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockAdapter.journalEntries.fetchAll).toHaveBeenCalledTimes(1);
   });
 

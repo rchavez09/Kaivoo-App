@@ -23,6 +23,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import type { Topic } from '@/types';
@@ -43,6 +53,8 @@ const Topics = () => {
   const [selectedTopicForPage, setSelectedTopicForPage] = useState<string | null>(null);
   const [createTopicOpen, setCreateTopicOpen] = useState(false);
   const [createPageOpen, setCreatePageOpen] = useState(false);
+  const [deleteTopicId, setDeleteTopicId] = useState<string | null>(null);
+  const deleteTopicName = topics.find((t) => t.id === deleteTopicId)?.name ?? '';
 
   // Build topic tree: root topics + their children
   const rootTopics = useMemo(() => topics.filter((t) => !t.parentId), [topics]);
@@ -203,11 +215,7 @@ const Topics = () => {
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => {
-                  if (window.confirm(`Delete "${topic.name}" and all its pages? This cannot be undone.`)) {
-                    void deleteTopic(topic.id);
-                  }
-                }}
+                onClick={() => setDeleteTopicId(topic.id)}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -345,6 +353,30 @@ const Topics = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Topic Confirmation */}
+        <AlertDialog open={!!deleteTopicId} onOpenChange={(open) => { if (!open) setDeleteTopicId(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete &ldquo;{deleteTopicName}&rdquo;?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete this topic and all its pages. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (deleteTopicId) void deleteTopic(deleteTopicId);
+                  setDeleteTopicId(null);
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );

@@ -26,6 +26,8 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     rollupOptions: {
+      // Optional Tauri plugins — not installed for web builds
+      external: ['@tauri-apps/plugin-dialog'],
       output: {
         manualChunks: {
           'vendor-core': [

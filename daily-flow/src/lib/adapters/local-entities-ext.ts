@@ -43,12 +43,7 @@ import type {
 } from '@/types';
 
 import type { TauriDatabase, SearchIndexer } from './local-types';
-import { uuid, now, parseJSON } from './local-types';
-
-/** Re-throw with entity/method context for debuggability. */
-function rethrow(entity: string, method: string, e: unknown): never {
-  throw new Error(`[${entity}.${method}] ${e instanceof Error ? e.message : String(e)}`);
-}
+import { uuid, now, parseJSON, rethrow } from './local-types';
 
 // ─── Routines ───
 
