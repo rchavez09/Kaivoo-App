@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { ChevronLeft, FolderOpen, FileText, Plus, Briefcase, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAdapters } from '@/lib/adapters/provider';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -37,6 +38,7 @@ const TopicPage = () => {
   const getCapturesByTopic = useKaivooStore((s) => s.getCapturesByTopic);
   const getTasksByTopic = useKaivooStore((s) => s.getTasksByTopic);
   const navigate = useNavigate();
+  const { attachments } = useAdapters();
   const { updateTopic, updateTopicPage, addTopicPage, deleteTopicPage } = useKaivooActions();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [createPageOpen, setCreatePageOpen] = useState(false);
@@ -93,6 +95,16 @@ const TopicPage = () => {
       }, 1500);
     },
     [isPage, pageId, topicId, updateTopic, updateTopicPage],
+  );
+
+  // Upload image via attachment adapter and return the public URL
+  const handleImageUpload = useCallback(
+    async (file: File): Promise<string> => {
+      if (!contentId) throw new Error('No entity ID');
+      const info = await attachments.uploadFile(contentId, file);
+      return info.url;
+    },
+    [contentId, attachments],
   );
 
   // Flush pending save on unmount or navigation
@@ -332,6 +344,7 @@ const TopicPage = () => {
             content={editorContent}
             onChange={handleContentChange}
             placeholder={isPage ? 'Write page content...' : 'Write topic content...'}
+            onImageUpload={handleImageUpload}
           />
         </section>
 

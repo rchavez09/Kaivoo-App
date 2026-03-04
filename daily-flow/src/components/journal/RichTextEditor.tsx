@@ -55,6 +55,8 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   editable?: boolean;
+  /** Upload an image file and return its public URL. When provided, images are uploaded to storage instead of embedded as base64. */
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
 const RichTextEditor = ({
@@ -63,6 +65,7 @@ const RichTextEditor = ({
   placeholder = 'Start writing...',
   className,
   editable = true,
+  onImageUpload,
 }: RichTextEditorProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const insertImageRef = useRef<(file: File) => void>(() => {});
@@ -127,23 +130,29 @@ const RichTextEditor = ({
 
   const insertImageFromFile = useCallback(
     (file: File) => {
-      const MAX_IMAGE_SIZE = 200 * 1024; // 200 KB
-      if (file.size > MAX_IMAGE_SIZE) {
-        // Images over 200KB would bloat the content field — use the Attachments section instead
-        toast.error(
-          `Image too large (${(file.size / 1024).toFixed(0)} KB). Max is 200 KB — use the Attachments section for larger files.`,
-        );
-        return;
+      if (!editor) return;
+      if (onImageUpload) {
+        // Upload to storage and insert by URL
+        void (async () => {
+          try {
+            const url = await onImageUpload(file);
+            editor.chain().focus().setImage({ src: url }).run();
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : 'Image upload failed');
+          }
+        })();
+      } else {
+        // Fallback: embed as base64 (no upload callback provided)
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            editor.chain().focus().setImage({ src: reader.result }).run();
+          }
+        };
+        reader.readAsDataURL(file);
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string' && editor) {
-          editor.chain().focus().setImage({ src: reader.result }).run();
-        }
-      };
-      reader.readAsDataURL(file);
     },
-    [editor],
+    [editor, onImageUpload],
   );
   insertImageRef.current = insertImageFromFile;
 
