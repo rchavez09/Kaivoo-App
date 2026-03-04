@@ -7,8 +7,6 @@
 
 import type { AttachmentAdapter, AttachmentInfo } from './types';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
 /** Strip path separators, traversal sequences, and leading dots from filenames. */
 function sanitizeFilename(name: string): string {
   // Remove path separators and null bytes
@@ -33,10 +31,6 @@ export class LocalAttachmentAdapter implements AttachmentAdapter {
   }
 
   async uploadFile(entityId: string, file: File): Promise<AttachmentInfo> {
-    if (file.size > MAX_FILE_SIZE) {
-      throw new Error(`File too large: ${file.name} (${Math.round(file.size / 1024 / 1024)}MB). Max 10MB.`);
-    }
-
     const { mkdir, writeFile, exists } = await import('@tauri-apps/plugin-fs');
     const dir = this.entityDir(entityId);
 

@@ -1,12 +1,12 @@
 /**
- * FileList — Sprint 25 P15
+ * FileList — Sprint 25 P15, Sprint 26 cleanup
  *
- * Displays a list of attached files with type icons, size, delete button,
- * and inline image previews.
+ * Displays attached files as a compact list: editable name, size, open link, delete.
+ * No image preview thumbnails — keeps the UI clean and consistent for all file types.
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { FileText, Image, FileSpreadsheet, File, Trash2, ExternalLink, Loader2 } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { FileText, Image, FileSpreadsheet, File, Trash2, ExternalLink, Loader2, Pencil, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AttachmentInfo } from '@/lib/adapters/types';
 
@@ -21,10 +21,6 @@ function getFileIcon(mimeType: string) {
   if (mimeType === 'application/pdf' || mimeType.startsWith('text/')) return FileText;
   if (mimeType.includes('spreadsheet') || mimeType === 'text/csv') return FileSpreadsheet;
   return File;
-}
-
-function isImageType(mimeType: string): boolean {
-  return mimeType.startsWith('image/') && mimeType !== 'image/svg+xml';
 }
 
 interface FileListProps {
@@ -45,8 +41,10 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
   const [url, setUrl] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(file.name);
+  const inputRef = useRef<HTMLInputElement>(null);
   const Icon = getFileIcon(file.mimeType);
-  const isImage = isImageType(file.mimeType);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,12 +53,21 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
         if (!cancelled) setUrl(u);
       })
       .catch(() => {
-        // URL unavailable — open/preview will be hidden
+        // URL unavailable — link will be hidden
       });
     return () => {
       cancelled = true;
     };
   }, [file.name, getUrl]);
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
+      // Select just the base name, not the extension
+      const dotIndex = editName.lastIndexOf('.');
+      inputRef.current.setSelectionRange(0, dotIndex > 0 ? dotIndex : editName.length);
+    }
+  }, [editing, editName]);
 
   const handleDelete = useCallback(async () => {
     setDeleting(true);
@@ -72,24 +79,61 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
     }
   }, [file.name, onDelete]);
 
-  return (
-    <div className="group rounded-lg border border-border bg-[hsl(var(--surface-elevated))] p-3">
-      {/* Image preview */}
-      {isImage && url && (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block">
-          <img src={url} alt={file.name} loading="lazy" className="max-h-40 w-full rounded-md object-contain" />
-        </a>
-      )}
+  const cancelEdit = () => {
+    setEditName(file.name);
+    setEditing(false);
+  };
 
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+  return (
+    <div className="group flex items-center gap-2 rounded-md border border-border bg-[hsl(var(--surface-elevated))] px-3 py-2">
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+
+      {editing ? (
+        <div className="flex min-w-0 flex-1 items-center gap-1">
+          <input
+            ref={inputRef}
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') cancelEdit();
+              if (e.key === 'Enter') cancelEdit(); // rename not wired to backend yet — just cancel
+            }}
+            className="min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
+          />
+          <button onClick={cancelEdit} className="rounded p-0.5 text-muted-foreground hover:text-foreground">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
+          {url ? (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block truncate text-sm font-medium text-foreground underline decoration-muted-foreground/40 underline-offset-2 hover:decoration-foreground"
+            >
+              {file.name}
+            </a>
+          ) : (
+            <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
+          )}
           <p className="text-[11px] text-muted-foreground">{formatFileSize(file.size)}</p>
         </div>
+      )}
 
-        {/* Actions */}
-        <div className="flex shrink-0 items-center gap-1">
+      {/* Actions */}
+      {!editing && (
+        <div className="flex shrink-0 items-center gap-0.5">
+          <button
+            aria-label={`Rename ${file.name}`}
+            className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-secondary/50 hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
+            onClick={() => setEditing(true)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+
           {url && (
             <a
               href={url}
@@ -131,7 +175,7 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
             </button>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -148,7 +192,7 @@ const FileList = ({ files, onDelete, getUrl, isLoading, className }: FileListPro
   if (files.length === 0) return null;
 
   return (
-    <div className={cn('grid gap-2', className)}>
+    <div className={cn('grid gap-1.5', className)}>
       {files.map((file) => (
         <FileItem key={file.name} file={file} onDelete={onDelete} getUrl={getUrl} />
       ))}

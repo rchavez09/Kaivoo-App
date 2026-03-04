@@ -9,8 +9,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AttachmentAdapter, AttachmentInfo } from './types';
 
 const BUCKET = 'attachments';
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
 export class SupabaseAttachmentAdapter implements AttachmentAdapter {
   constructor(
     private supabase: SupabaseClient,
@@ -23,10 +21,6 @@ export class SupabaseAttachmentAdapter implements AttachmentAdapter {
   }
 
   async uploadFile(entityId: string, file: File): Promise<AttachmentInfo> {
-    if (file.size > MAX_FILE_SIZE) {
-      throw new Error(`File too large: ${file.name} (${Math.round(file.size / 1024 / 1024)}MB). Max 10MB.`);
-    }
-
     // Deduplicate filename
     let filename = file.name;
     const { data: existing } = await this.supabase.storage.from(BUCKET).list(this.storagePath(entityId));
