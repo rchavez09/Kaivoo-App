@@ -14,6 +14,7 @@ export type AIProviderType =
   | 'groq'
   | 'mistral'
   | 'deepseek'
+  | 'openrouter'
   | 'ollama'
   | 'openai-compatible';
 

@@ -107,7 +107,13 @@ export const useKaivooActions = () => {
                   ...t,
                   subtasks: [
                     ...t.subtasks,
-                    { id: subtask.id, title: subtask.title, completed: subtask.completed, tags: [] },
+                    {
+                      id: subtask.id,
+                      title: subtask.title,
+                      completed: subtask.completed,
+                      tags: [],
+                      sortOrder: subtask.sortOrder ?? t.subtasks.length,
+                    },
                   ],
                 }
               : t,
@@ -178,6 +184,25 @@ export const useKaivooActions = () => {
         }
         toast.error('Failed to delete subtask.');
         console.error('[deleteSubtask]', e);
+      }
+    }
+  };
+
+  const reorderSubtasks = async (taskId: string, subtaskIds: string[]) => {
+    const task = getStore().tasks.find((t) => t.id === taskId);
+    const prevSubtasks = task?.subtasks ? [...task.subtasks] : [];
+    getStore().reorderSubtasks(taskId, subtaskIds);
+    if (user) {
+      try {
+        await db.reorderSubtasks(taskId, subtaskIds);
+        invalidate('tasks');
+      } catch (e) {
+        // Rollback to previous order
+        useKaivooStore.setState((s) => ({
+          tasks: s.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: prevSubtasks } : t)),
+        }));
+        toast.error('Failed to reorder subtasks.');
+        console.error('[reorderSubtasks]', e);
       }
     }
   };
@@ -597,6 +622,7 @@ export const useKaivooActions = () => {
     toggleSubtask,
     updateSubtask,
     deleteSubtask,
+    reorderSubtasks,
     addMeeting,
     updateMeeting,
     deleteMeeting,

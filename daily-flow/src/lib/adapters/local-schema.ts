@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS subtasks (
   completed INTEGER DEFAULT 0,
   completed_at TEXT,
   tags TEXT DEFAULT '[]',
+  sort_order INTEGER DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -208,5 +209,17 @@ CREATE VIRTUAL TABLE IF NOT EXISTS ai_memories_fts USING fts5(
   content,
   category UNINDEXED,
   tokenize='porter unicode61'
+);
+
+ALTER TABLE subtasks ADD COLUMN sort_order INTEGER DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS license (
+  id TEXT PRIMARY KEY DEFAULT 'active',
+  license_key TEXT NOT NULL,
+  tier TEXT NOT NULL DEFAULT 'founding',
+  email_hash TEXT,
+  issued_at TEXT,
+  activated_at TEXT DEFAULT (datetime('now')),
+  payload_json TEXT
 );
 `;

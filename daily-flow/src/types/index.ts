@@ -41,6 +41,7 @@ export interface Subtask {
   completed: boolean;
   completedAt?: Date;
   tags: string[];
+  sortOrder: number;
 }
 
 export type TaskStatus = 'backlog' | 'todo' | 'doing' | 'blocked' | 'done';

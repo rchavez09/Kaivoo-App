@@ -10,18 +10,37 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SupabaseDataAdapter, SupabaseAuthAdapter, SupabaseSearchAdapter } from './supabase';
-import type { DataAdapter, AuthAdapter, SearchAdapter } from './types';
+import { SupabaseAttachmentAdapter } from './supabase-attachments';
+import { supabase } from '@/integrations/supabase/client';
+import type { DataAdapter, AuthAdapter, SearchAdapter, AttachmentAdapter, AttachmentInfo } from './types';
 import type { VaultAdapter } from '../vault/types';
 import { VirtualVaultAdapter } from '../vault/virtual-vault';
 
 // Runtime detection: are we inside the Tauri desktop shell?
 const isTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
+// Shared no-op attachment adapter (used when no storage backend is available)
+const noOpAttachments: AttachmentAdapter = {
+  async uploadFile(): Promise<AttachmentInfo> {
+    throw new Error('Attachment storage not available');
+  },
+  async deleteFile(): Promise<void> {
+    throw new Error('Attachment storage not available');
+  },
+  async getFileUrl(): Promise<string> {
+    throw new Error('Attachment storage not available');
+  },
+  async listFiles(): Promise<AttachmentInfo[]> {
+    return [];
+  },
+};
+
 interface AdapterContextValue {
   data: DataAdapter | null;
   auth: AuthAdapter;
   search: SearchAdapter;
   vault: VaultAdapter | null;
+  attachments: AttachmentAdapter;
   isLocal: boolean;
 }
 
@@ -32,6 +51,7 @@ interface LocalAdapters {
   auth: AuthAdapter;
   search: SearchAdapter;
   vault: VaultAdapter;
+  attachments: AttachmentAdapter;
 }
 
 export const AdapterProvider = ({ children }: { children: ReactNode }) => {
@@ -39,6 +59,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
   const isLocal = isTauri();
   const [localAdapters, setLocalAdapters] = useState<LocalAdapters | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const initRef = useRef(false);
   const dataAdapterRef = useRef<DataAdapter | null>(null);
 
@@ -49,19 +70,18 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
 
     (async () => {
       try {
-        const [{ LocalDataAdapter, LocalAuthAdapter }, { LocalVaultAdapter }] = await Promise.all([
-          import('./local'),
-          import('../vault/local-vault'),
-        ]);
+        const [{ LocalDataAdapter, LocalAuthAdapter, LocalAttachmentAdapter }, { LocalVaultAdapter }] =
+          await Promise.all([import('./local'), import('../vault/local-vault')]);
         const data = await LocalDataAdapter.create();
         dataAdapterRef.current = data;
         const auth = await LocalAuthAdapter.create(data.database);
         const vault = await LocalVaultAdapter.create();
+        const attachments = new LocalAttachmentAdapter(vault.root);
         await Promise.all([data.searchAdapter.rebuildIndex(), vault.initialize()]);
-        setLocalAdapters({ data, auth, search: data.searchAdapter, vault });
+        setLocalAdapters({ data, auth, search: data.searchAdapter, vault, attachments });
       } catch (e) {
         console.error('[AdapterProvider] Failed to initialize LocalAdapter:', e);
-        setInitError(e instanceof Error ? e.message : 'Local database initialization failed');
+        setInitError(e instanceof Error ? e.message : String(e));
       }
     })();
 
@@ -69,7 +89,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
       // Cleanup on unmount — use ref to avoid stale closure
       void dataAdapterRef.current?.dispose();
     };
-  }, [isLocal]);
+  }, [isLocal, retryCount]);
 
   // Stable Supabase singletons — don't depend on user, so memoize once
   const supabaseAuth = useMemo(() => new SupabaseAuthAdapter(), []);
@@ -84,14 +104,22 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
         auth: localAdapters.auth,
         search: localAdapters.search,
         vault: localAdapters.vault,
+        attachments: localAdapters.attachments,
         isLocal: true,
       };
+    }
+
+    if (isLocal) {
+      // Desktop mode but local adapters still loading — return null data to prevent
+      // React Query from firing against Supabase during the async init window.
+      return { data: null, auth: supabaseAuth, search: supabaseSearch, vault: null, attachments: noOpAttachments, isLocal: true };
     }
 
     // Web mode: only SupabaseDataAdapter depends on user.id
     const data = user ? new SupabaseDataAdapter(user.id) : null;
     virtualVault.setDataAdapter(data);
-    return { data, auth: supabaseAuth, search: supabaseSearch, vault: virtualVault, isLocal: false };
+    const attachments: AttachmentAdapter = user ? new SupabaseAttachmentAdapter(supabase, user.id) : noOpAttachments;
+    return { data, auth: supabaseAuth, search: supabaseSearch, vault: virtualVault, attachments, isLocal: false };
   }, [isLocal, localAdapters, user?.id, supabaseAuth, supabaseSearch, virtualVault]);
 
   // Desktop mode: show error screen if local database init failed
@@ -99,11 +127,12 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'system-ui' }}>
         <h2>Failed to initialize local database</h2>
-        <p style={{ color: '#888' }}>{initError}</p>
+        <p style={{ color: '#888', whiteSpace: 'pre-wrap', maxWidth: '600px', margin: '1rem auto' }}>{initError}</p>
         <button
           onClick={() => {
             setInitError(null);
             initRef.current = false;
+            setRetryCount((c) => c + 1);
           }}
           style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}
         >

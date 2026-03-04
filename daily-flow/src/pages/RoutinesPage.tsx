@@ -23,6 +23,7 @@ const RoutinesPage = () => {
   const { invalidate } = useInvalidate();
   const db = useDatabaseOperations();
   const habits = useKaivooStore((s) => s.habits);
+  const habitCompletions = useKaivooStore((s) => s.habitCompletions);
   const isHabitCompleted = useKaivooStore((s) => s.isHabitCompleted);
   const getHabitCompletionCount = useKaivooStore((s) => s.getHabitCompletionCount);
   const toggleHabitCompletion = useKaivooStore((s) => s.toggleHabitCompletion);
@@ -59,7 +60,7 @@ const RoutinesPage = () => {
   // Progress
   const completedCount = useMemo(
     () => activeHabits.filter((h) => isHabitCompleted(h.id, todayStr)).length,
-    [activeHabits, todayStr, isHabitCompleted],
+    [activeHabits, todayStr, isHabitCompleted, habitCompletions],
   );
   const progressPercent = activeHabits.length > 0 ? Math.round((completedCount / activeHabits.length) * 100) : 0;
 

@@ -1,7 +1,7 @@
 # Sprint Protocol — Kaivoo Agent Coordination System
 
-**Version:** 1.9
-**Last Updated:** March 2, 2026
+**Version:** 2.0
+**Last Updated:** March 3, 2026
 
 ---
 
@@ -48,13 +48,24 @@ LIFECYCLE:
   8. E2E TESTING: npm run test:e2e against deploy preview URL (PLAYWRIGHT_BASE_URL)
      → Smoke tests + journey tests derived from sprint DoD + Feature Bible
      → Produces pass/fail report with screenshots on failure
-  9. SANDBOX REVIEW: User reviews the deploy preview URL from any device
-     → Director provides a specific testing checklist (screens, flows, devices)
-     → No localhost required — test from phone, laptop, anywhere
-     → User approves UX or requests changes
+  9. SANDBOX REVIEW (two-track — Director selects applicable tracks per sprint):
+
+     TRACK A — WEB (always applies):
+       → User reviews Netlify deploy preview URL from any device
+       → Director provides a testing checklist (screens, flows, devices)
+       → Test from phone, laptop, anywhere — no localhost required
+
+     TRACK B — DESKTOP (applies when sprint includes Tauri/desktop work):
+       → User builds and runs locally: cd daily-flow && npm run tauri dev
+       → Or builds installer: npm run tauri build (right-click → Open to bypass unsigned warning)
+       → Director provides a desktop-specific checklist (native features, file system, updater, etc.)
+       → Unsigned builds are acceptable for sandbox — signing is a distribution concern, not a testing concern
+
+     → User approves BOTH applicable tracks or requests changes
      → This is a blocking gate — do NOT merge without user approval
   10. Merge PR to main on GitHub
-      → Netlify auto-deploys to production (no manual deploy step)
+      → Netlify auto-deploys web to production (no manual deploy step)
+      → Desktop releases are separate: push a version tag (v*) → release workflow builds + publishes to GitHub Releases
   11. Tag main: git tag post-sprint-N
   12. Sprint retrospective added to sprint file on main (post-merge commit)
      → Reflects the FULL sprint including sandbox findings
@@ -92,12 +103,15 @@ Before any sprint branch PR merges to main, ALL of the following must pass:
 □ 3-agent design review completed (for UI sprints): Visual Design + Accessibility & Theming + UX Completeness — all PASS, no unresolved P0 issues. Design review happens RIGHT BEFORE sandbox.
 □ Sprint file is current: all parcels have final status, quality gates checked off, metrics recorded
 □ E2E TEST: npm run test:e2e passes against the Netlify deploy preview URL (PLAYWRIGHT_BASE_URL)
-□ SANDBOX: User has reviewed the Netlify deploy preview URL and approved UX (can test from any device)
+□ SANDBOX Track A (Web): User has reviewed Netlify deploy preview URL and approved UX (any device)
+□ SANDBOX Track B (Desktop — if applicable): User has built locally (tauri dev or tauri build) and approved native features
 □ All sprint files committed to the sprint branch (sprint file included in the PR diff)
 
 POST-MERGE (done on main after merge):
-□ Sprint retrospective added to sprint file (committed directly to main)
+□ Pre-release setup complete (desktop sprints only — secrets, keypairs, external services)
+□ Version tag pushed to trigger desktop release (desktop sprints only — v* tag)
 □ Vision.md updated to reflect sprint progress
+□ Sprint retrospective added to sprint file (committed directly to main)
 ```
 
 ### Deployment Pipeline
@@ -111,11 +125,22 @@ GitHub repo (rchavez09/Kaivoo-App)
      │                        Preview URL: deploy-preview-{N}--{site}.netlify.app
      │                        Accessible from any device (phone, laptop, etc.)
      │
-     └── PR merged to main → Netlify auto-deploys to production
-                              No manual deployment step required
+     ├── PR merged to main → Netlify auto-deploys WEB to production
+     │                        No manual deployment step required
+     │
+     └── Tag pushed (v*) → release.yml builds desktop apps (macOS, Windows, Linux)
+                            Signed binaries + latest.json uploaded to GitHub Releases
+                            Auto-updater picks up new version on next launch
 
-Config: netlify.toml (repo root) — base=daily-flow, publish=dist, Node 20
-Env vars: Set in Netlify dashboard (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY)
+WEB PIPELINE:
+  Config: netlify.toml (repo root) — base=daily-flow, publish=dist, Node 20
+  Env vars: Set in Netlify dashboard (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY)
+
+DESKTOP PIPELINE:
+  Config: .github/workflows/release.yml — triggered by v* tag push
+  Signing: Apple (APPLE_* secrets) + Azure Trusted Signing (AZURE_* secrets)
+  Updater: Ed25519 signed manifest (TAURI_SIGNING_PRIVATE_KEY)
+  Output: GitHub Releases (macOS .dmg, Windows .exe/.nsis, Linux .AppImage/.deb)
 ```
 
 ### Recovery Protocol
@@ -302,21 +327,36 @@ Common document types:
 **Trigger:** All Phase 4 gates pass (deterministic checks, agent gates, design review, E2E).
 
 **Actions:**
-1. **SANDBOX REVIEW:** Director presents the user with a **Sandbox Testing Checklist** derived from the sprint's Definition of Done and parcels. The checklist includes:
+1. **SANDBOX REVIEW (two-track):** Director presents the user with a **Sandbox Testing Checklist** derived from the sprint's Definition of Done and parcels. Director selects which tracks apply based on the sprint's deliverables.
+
+   **Track A — Web** (always applies):
+   - The Netlify deploy preview URL
    - Specific screens/pages to visit
    - Specific user flows to walk through (mapped from sprint DoD)
    - What to look for: new features, regressions, visual quality, dark mode
    - Device recommendations (phone, desktop, or both)
-   - The Netlify deploy preview URL
    - User reviews from any device — phone, laptop, coffee shop, anywhere
-   - This is a **blocking gate** — do NOT proceed without user approval
+
+   **Track B — Desktop** (applies when sprint includes Tauri/desktop work):
+   - Build instructions: `cd daily-flow && npm run tauri dev` (or `npm run tauri build` for installer)
+   - Desktop-specific features to test: native menus, file system access, auto-updater, local SQLite, etc.
+   - What to look for: features that behave differently on desktop vs. web
+   - Unsigned builds are fine for sandbox — right-click → Open bypasses Gatekeeper on macOS
+   - Signing is a **distribution** concern, not a testing concern — don't block sandbox on signing setup
+
+   - This is a **blocking gate** — do NOT proceed without user approval on ALL applicable tracks
 2. User approves UX or requests changes
    - If changes requested → fix on sprint branch, push, re-run Phase 4 gates as needed
    - Cycle until user approves
-3. **MERGE PR** to main on GitHub (Netlify auto-deploys to production)
+3. **MERGE PR** to main on GitHub (Netlify auto-deploys web to production)
 4. **TAG MAIN:** `git tag post-sprint-N`
-5. **DIRECTOR UPDATES `Vision.md`** to reflect progress
-6. **SPRINT RETROSPECTIVE:** Add `## Sprint Retrospective` section to the sprint file.
+5. **PRE-RELEASE SETUP (desktop sprints only):** If the sprint includes desktop/Tauri work that requires a public release, complete the pre-release checklist before pushing a version tag. This covers configuration that can't happen until after merge (secrets, external service setup, account verification). The Director includes a sprint-specific pre-release checklist in the sprint file. Items may be:
+   - **Blocking release:** Must be done before `v*` tag push (e.g., signing keys, updater keypair)
+   - **Blocking specific features:** Release can proceed but feature won't work until done (e.g., Stripe config, Edge Function deploy)
+   - **Blocked externally:** Waiting on third parties (e.g., Apple/Azure account verification) — release proceeds without, follow up when unblocked
+   Once blocking items are resolved → push version tag (`git tag v1.0.0 && git push origin v1.0.0`) to trigger the release workflow.
+6. **DIRECTOR UPDATES `Vision.md`** to reflect progress
+7. **SPRINT RETROSPECTIVE:** Add `## Sprint Retrospective` section to the sprint file.
    This is written AFTER merge, reflecting the FULL sprint lifecycle including sandbox findings.
    Committed directly to main (not a separate PR). Include:
    - Completed date
@@ -443,19 +483,31 @@ E2E TEST: npm run test:e2e against deploy preview URL
 ═══════════════════════════════════
          |
          v
-SANDBOX REVIEW: User reviews deploy preview URL (any device)
-(Director provides specific testing checklist)
+SANDBOX REVIEW (two-track):
+  Track A (Web): User reviews deploy preview URL (any device)
+  Track B (Desktop): User builds locally (tauri dev/build), tests native features
+  (Director provides specific testing checklist per track)
          |
          v
-User approves → Merge PR to main
-(Netlify auto-deploys to production)
+User approves all applicable tracks → Merge PR to main
+(Netlify auto-deploys web to production)
          |
          v
-Tag main (post-sprint-N) + Vision.md updated
+Tag main (post-sprint-N)
+         |
+         v
+[Desktop sprints only]
+Pre-release setup: keypairs, secrets, external service config
+         |
+         v
+Push version tag (v*) → release workflow builds desktop apps
+         |
+         v
+Vision.md updated
          |
          v
 Sprint retrospective added to sprint file on main
-(Reflects full sprint including sandbox findings)
+(Reflects full sprint including sandbox + release findings)
 ```
 
 ---
@@ -471,3 +523,4 @@ Sprint retrospective added to sprint file on main
 *v1.7: Deployment pipeline overhaul. GitHub → Netlify auto-deploy (netlify.toml config). Sandbox replaced localhost with Netlify deploy preview URLs (test from any device). Added E2E testing gate (AI-powered browser testing against preview URL). Added Deployment Pipeline section. Strengthened safety/rollback guarantees. Manual Netlify deploys eliminated.*
 *v1.8: Sprint file as living document. Phase 3 now requires updating parcel status during execution (not after). Added "Sprint File Checkpoint" step in Phase 4 before PR — sprint file must be current and included in the PR diff. E2E gate updated to use Playwright (`npm run test:e2e` with `PLAYWRIGHT_BASE_URL`). Driven by Sprint 19 retro: code shipped but sprint file was never updated.*
 *v1.9: Phase restructure — split old Phase 4 into Phase 4 (Verification, ends at E2E) and Phase 5 (User Acceptance & Merge). Retrospective moves AFTER merge to reflect full sprint including sandbox findings. Sandbox review now requires a structured testing checklist from the Director (specific screens, flows, devices — not just "go look at it"). Added `/sprint-verify` skill for automated gate enforcement. Driven by Sprint 22 retro: retrospective written before sandbox caused premature "done" signal, Phase 4 testing was skipped.*
+*v2.0: Two-track sandbox testing. Phase 5 now supports Track A (Web — Netlify deploy preview) and Track B (Desktop — local Tauri build). Director selects applicable tracks per sprint. Desktop pipeline added (release.yml → GitHub Releases via v* tag). Pre-merge checklist updated. Unsigned desktop builds acceptable for sandbox testing. Driven by Sprint 25: first desktop-focused sprint exposed that web-only sandbox process couldn't cover Tauri features.*

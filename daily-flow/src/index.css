@@ -245,6 +245,7 @@
     @apply border-border;
   }
 
+  html,
   body {
     @apply bg-background font-sans text-foreground antialiased;
     font-feature-settings: 'calt', 'tnum', 'case';

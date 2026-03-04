@@ -73,6 +73,21 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     placeholder: 'sk-...',
   },
   {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    models: [
+      { id: 'openai/gpt-4o', name: 'GPT-4o' },
+      { id: 'anthropic/claude-sonnet-4-6', name: 'Claude Sonnet 4.6' },
+      { id: 'anthropic/claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5' },
+      { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash' },
+      { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B' },
+      { id: 'mistralai/mistral-large-latest', name: 'Mistral Large' },
+      { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat' },
+    ],
+    requiresApiKey: true,
+    placeholder: 'sk-or-...',
+  },
+  {
     id: 'ollama',
     name: 'Ollama (Local)',
     models: [

@@ -1,0 +1,124 @@
+# Release Workflow — Sprint 25 P12
+#
+# Triggered by pushing a git tag (v*).
+# Builds signed desktop binaries for macOS, Windows, and Linux.
+# Publishes artifacts + updater manifest to GitHub Releases.
+#
+# Required GitHub Secrets:
+#   TAURI_SIGNING_PRIVATE_KEY — Ed25519 updater signing key
+#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD — Password for the signing key (if set)
+#   APPLE_CERTIFICATE — Base64-encoded .p12 certificate
+#   APPLE_CERTIFICATE_PASSWORD — Password for the .p12
+#   APPLE_SIGNING_IDENTITY — e.g., "Developer ID Application: Your Name (TEAM_ID)"
+#   APPLE_ID — Apple ID email for notarization
+#   APPLE_PASSWORD — App-specific password for notarization
+#   APPLE_TEAM_ID — Apple Developer Team ID
+#   AZURE_TENANT_ID — Azure AD tenant for Windows signing
+#   AZURE_CLIENT_ID — Azure service principal client ID
+#   AZURE_CLIENT_SECRET — Azure service principal secret
+#   SIGNING_ACCOUNT — Azure Trusted Signing account name
+#   CERTIFICATE_PROFILE — Azure Trusted Signing certificate profile
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: --target universal-apple-darwin
+          - platform: windows-latest
+            args: ''
+          - platform: ubuntu-22.04
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: daily-flow/package-lock.json
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        working-directory: daily-flow
+        run: npm ci
+
+      - name: Import Apple certificate
+        if: matrix.platform == 'macos-latest'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+          security create-keychain -p actions build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p actions build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions build.keychain
+          rm certificate.p12
+
+      - name: Build and publish with tauri-action
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # macOS notarization
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: daily-flow
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Kaivoo ${{ github.ref_name }}'
+          releaseBody: 'See the release notes for details.'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      # Windows code signing via Azure Trusted Signing (post-build)
+      - name: Sign Windows binaries
+        if: matrix.platform == 'windows-latest'
+        uses: azure/trusted-signing-action@v0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: https://wus2.codesigning.azure.net/
+          trusted-signing-account-name: ${{ secrets.SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.CERTIFICATE_PROFILE }}
+          files-folder: daily-flow/src-tauri/target/release/bundle/nsis/
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256

@@ -26,6 +26,7 @@ import { projectStatusConfig, getProjectColor } from '@/lib/project-config';
 import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
 import ProjectTaskList from '@/components/projects/ProjectTaskList';
 import ProjectNotesList from '@/components/projects/ProjectNotesList';
+import ProjectAttachments from '@/components/projects/ProjectAttachments';
 import ProjectSettings from '@/components/projects/ProjectSettings';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
@@ -328,6 +329,9 @@ const ProjectDetail = () => {
 
         {/* Notes */}
         <ProjectNotesList projectId={project.id} />
+
+        {/* Attachments */}
+        <ProjectAttachments projectId={project.id} />
 
         {/* Settings */}
         <ProjectSettings

@@ -26,6 +26,7 @@ const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
 const SetupWizard = lazy(() => import('./pages/SetupWizard'));
 const GuidedTour = lazy(() => import('./components/GuidedTour'));
+const PurchaseSuccessPage = lazy(() => import('./pages/PurchaseSuccessPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const PageLoader = () => (
@@ -195,6 +196,7 @@ const App = () => (
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="/purchase/success" element={<PurchaseSuccessPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

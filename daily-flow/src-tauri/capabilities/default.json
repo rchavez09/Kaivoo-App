@@ -7,47 +7,52 @@
     "core:default",
     "shell:allow-open",
     "sql:default",
+    "sql:allow-execute",
+    "sql:allow-select",
     {
       "identifier": "fs:allow-read-text-file",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/com.kaivoo.desktop/**" }
+        { "path": "$APPDATA/**" }
       ]
     },
     {
       "identifier": "fs:allow-write-text-file",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/com.kaivoo.desktop/**" }
+        { "path": "$APPDATA/**" }
       ]
     },
     {
       "identifier": "fs:allow-exists",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/com.kaivoo.desktop/**" }
+        { "path": "$APPDATA/**" }
       ]
     },
     {
       "identifier": "fs:allow-mkdir",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/com.kaivoo.desktop/**" }
+        { "path": "$APPDATA/**" }
       ]
     },
     {
       "identifier": "fs:allow-read-dir",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/com.kaivoo.desktop/**" }
+        { "path": "$APPDATA/**" }
       ]
     },
     {
       "identifier": "fs:allow-remove",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/com.kaivoo.desktop/**" }
+        { "path": "$APPDATA/**" }
       ]
-    }
+    },
+    "updater:default",
+    "process:allow-restart",
+    "dialog:allow-open"
   ]
 }

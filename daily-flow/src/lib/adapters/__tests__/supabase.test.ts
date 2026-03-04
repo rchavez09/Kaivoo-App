@@ -303,6 +303,7 @@ describe('SupabaseDataAdapter', () => {
         completed: false,
         completedAt: undefined,
         tags: ['a'],
+        sortOrder: 0,
       });
     });
 
