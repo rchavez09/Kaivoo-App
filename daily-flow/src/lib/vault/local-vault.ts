@@ -21,7 +21,16 @@ export class LocalVaultAdapter implements VaultAdapter {
   static async create(): Promise<LocalVaultAdapter> {
     const customPath = localStorage.getItem('kaivoo-vault-path');
     if (customPath) {
-      return new LocalVaultAdapter(customPath);
+      try {
+        // Validate the custom path is within FS scope (dialog-selected paths
+        // only persist for one session, so a stored iCloud path may fail on relaunch)
+        const { exists } = await import('@tauri-apps/plugin-fs');
+        await exists(customPath);
+        return new LocalVaultAdapter(customPath);
+      } catch {
+        // Path outside FS scope — clear stale entry and fall through to default
+        localStorage.removeItem('kaivoo-vault-path');
+      }
     }
     const { appDataDir } = await import('@tauri-apps/api/path');
     const root = await appDataDir();

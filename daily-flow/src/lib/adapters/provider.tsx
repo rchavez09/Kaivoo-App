@@ -59,6 +59,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
   const isLocal = isTauri();
   const [localAdapters, setLocalAdapters] = useState<LocalAdapters | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const initRef = useRef(false);
   const dataAdapterRef = useRef<DataAdapter | null>(null);
 
@@ -80,7 +81,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
         setLocalAdapters({ data, auth, search: data.searchAdapter, vault, attachments });
       } catch (e) {
         console.error('[AdapterProvider] Failed to initialize LocalAdapter:', e);
-        setInitError(e instanceof Error ? e.message : 'Local database initialization failed');
+        setInitError(e instanceof Error ? e.message : String(e));
       }
     })();
 
@@ -88,7 +89,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
       // Cleanup on unmount — use ref to avoid stale closure
       void dataAdapterRef.current?.dispose();
     };
-  }, [isLocal]);
+  }, [isLocal, retryCount]);
 
   // Stable Supabase singletons — don't depend on user, so memoize once
   const supabaseAuth = useMemo(() => new SupabaseAuthAdapter(), []);
@@ -126,11 +127,12 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'system-ui' }}>
         <h2>Failed to initialize local database</h2>
-        <p style={{ color: '#888' }}>{initError}</p>
+        <p style={{ color: '#888', whiteSpace: 'pre-wrap', maxWidth: '600px', margin: '1rem auto' }}>{initError}</p>
         <button
           onClick={() => {
             setInitError(null);
             initRef.current = false;
+            setRetryCount((c) => c + 1);
           }}
           style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}
         >
