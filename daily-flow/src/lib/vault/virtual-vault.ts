@@ -154,7 +154,6 @@ function buildTree(
   topicPages: TopicPage[],
   projects: Project[],
 ): VaultNode {
-
   // ─── Journal tree: Journal/YYYY/MM - MonthName/date.md ───
   const journalByFolder = new Map<string, VaultNode[]>();
   for (const entry of journals) {

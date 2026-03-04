@@ -269,7 +269,13 @@ const Topics = () => {
             </p>
           </div>
 
-          <Dialog open={createTopicOpen} onOpenChange={(open) => { setCreateTopicOpen(open); if (!open) setNewTopicParentId(undefined); }}>
+          <Dialog
+            open={createTopicOpen}
+            onOpenChange={(open) => {
+              setCreateTopicOpen(open);
+              if (!open) setNewTopicParentId(undefined);
+            }}
+          >
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -316,9 +322,7 @@ const Topics = () => {
         {/* Topic Tree */}
         <div className="widget-card">
           {filteredRootTopics.length > 0 ? (
-            <div className="space-y-1">
-              {filteredRootTopics.map((topic) => renderTopic(topic, 0))}
-            </div>
+            <div className="space-y-1">{filteredRootTopics.map((topic) => renderTopic(topic, 0))}</div>
           ) : (
             <div className="py-12 text-center">
               <FolderOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
@@ -355,7 +359,12 @@ const Topics = () => {
         </Dialog>
 
         {/* Delete Topic Confirmation */}
-        <AlertDialog open={!!deleteTopicId} onOpenChange={(open) => { if (!open) setDeleteTopicId(null); }}>
+        <AlertDialog
+          open={!!deleteTopicId}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTopicId(null);
+          }}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete &ldquo;{deleteTopicName}&rdquo;?</AlertDialogTitle>

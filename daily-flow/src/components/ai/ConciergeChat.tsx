@@ -1,23 +1,23 @@
 /**
- * Concierge Chat — Sprint 23 P10
+ * Concierge Chat — Sprint 23 P10, Sprint 24 P14
  *
  * Floating chat button + slide-out Sheet panel with LLM-backed
  * streaming chat. Persists conversations to localStorage.
  * Uses soul file for system prompt personality.
+ *
+ * Sprint 24: Added tool-use loop (tool_call → execute → follow-up),
+ * 6-layer prompt assembly, and tool execution status UI.
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 import { getAISettings, getSoulConfig } from '@/lib/ai/settings';
 import {
   streamChat,
@@ -26,7 +26,20 @@ import {
   deleteConversation,
   createConversation,
 } from '@/lib/ai/chat-service';
-import type { Conversation, ConversationMessage } from '@/lib/ai/types';
+import type { Conversation, ConversationMessage, ToolCall } from '@/lib/ai/types';
+import { assembleSystemPrompt } from '@/lib/ai/prompt-assembler';
+import type { AppContext } from '@/lib/ai/prompt-assembler';
+import { ALL_TOOLS } from '@/lib/ai/tools';
+import { executeTool, resetToolCallCount } from '@/lib/ai/tools';
+import type { ExecutorActions } from '@/lib/ai/tools';
+import { getMemories, getSummaries } from '@/lib/ai/memory-service';
+import { extractMemories } from '@/lib/ai/extraction';
+import { summarizeConversation } from '@/lib/ai/summarizer';
+import { useKaivooStore } from '@/stores/useKaivooStore';
+import { useKaivooActions } from '@/hooks/useKaivooActions';
+import { useAIActionLog } from '@/hooks/useAIActionLog';
+
+const MAX_TOOL_ROUNDS = 5;
 
 const ConciergeChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,9 +49,15 @@ const ConciergeChat = () => {
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [streamedContent, setStreamedContent] = useState('');
+  const [toolStatus, setToolStatus] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Hooks for tool execution
+  const navigate = useNavigate();
+  const actions = useKaivooActions();
+  const { logAction } = useAIActionLog();
 
   // Load conversations on mount
   useEffect(() => {
@@ -48,7 +67,7 @@ const ConciergeChat = () => {
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversation.messages, streamedContent]);
+  }, [conversation.messages, streamedContent, toolStatus]);
 
   // Focus textarea when opening
   useEffect(() => {
@@ -62,12 +81,14 @@ const ConciergeChat = () => {
     setConversation(newConv);
     setView('chat');
     setStreamedContent('');
+    setToolStatus(null);
   }, []);
 
   const handleSelectConversation = useCallback((conv: Conversation) => {
     setConversation(conv);
     setView('chat');
     setStreamedContent('');
+    setToolStatus(null);
   }, []);
 
   const handleDeleteConversation = useCallback(
@@ -87,6 +108,55 @@ const ConciergeChat = () => {
       abortRef.current?.abort();
     };
   }, []);
+
+  // Build app context from current store state
+  const buildAppContext = useCallback((): AppContext => {
+    const store = useKaivooStore.getState();
+    const today = format(new Date(), 'yyyy-MM-dd');
+
+    const tasksDueToday = store.tasks
+      .filter((t) => t.dueDate === today)
+      .map((t) => ({ title: t.title, priority: t.priority, status: t.status }));
+
+    const todaysMeetings = store
+      .getMeetingsForDate(new Date())
+      .map((m) => ({ title: m.title, startTime: m.startTime.toISOString(), endTime: m.endTime.toISOString() }));
+
+    const journalEntriesToday = store.getJournalEntriesForDate(today).length;
+
+    const activeProjects = store.projects
+      .filter((p) => p.status === 'active')
+      .map((p) => ({ name: p.name, status: p.status }));
+
+    const routinesTotal = store.routines.length + store.habits.length;
+    const routinesCompletedToday =
+      store.routines.filter((r) => store.isRoutineCompleted(r.id, today)).length +
+      store.habits.filter((h) => store.isHabitCompleted(h.id, today)).length;
+
+    return {
+      tasksDueToday,
+      todaysMeetings,
+      journalEntriesToday,
+      activeProjects,
+      routinesCompletedToday,
+      routinesTotal,
+    };
+  }, []);
+
+  // Build executor actions from hooks
+  const buildExecutorActions = useCallback(
+    (): ExecutorActions => ({
+      addTask: actions.addTask,
+      updateTask: actions.updateTask,
+      addMeeting: actions.addMeeting,
+      addJournalEntry: actions.addJournalEntry,
+      addCapture: actions.addCapture,
+      addTopicPage: actions.addTopicPage,
+      toggleRoutineCompletion: actions.toggleRoutineCompletion,
+      logAction,
+    }),
+    [actions, logAction],
+  );
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
@@ -109,42 +179,118 @@ const ConciergeChat = () => {
       timestamp: new Date().toISOString(),
     };
 
-    const updatedMessages = [...conversation.messages, userMessage];
+    let workingMessages = [...conversation.messages, userMessage];
     const updatedConv: Conversation = {
       ...conversation,
-      messages: updatedMessages,
+      messages: workingMessages,
       updatedAt: new Date().toISOString(),
     };
     setConversation(updatedConv);
 
     setStreaming(true);
     setStreamedContent('');
+    setToolStatus(null);
+    resetToolCallCount();
 
     const controller = new AbortController();
     abortRef.current = controller;
 
     try {
-      let fullContent = '';
-      const stream = streamChat(updatedMessages, (title) => {
-        updatedConv.title = title;
-      }, controller.signal);
+      // Build the enriched system prompt
+      const soul = getSoulConfig();
+      const memories = await getMemories();
+      const activeMemories = memories.filter((m) => m.active);
+      const appContext = buildAppContext();
 
-      for await (const chunk of stream) {
-        fullContent += chunk;
-        setStreamedContent(fullContent);
+      const summaries = await getSummaries();
+
+      const systemPrompt = assembleSystemPrompt({
+        soul,
+        depth: settings.depth,
+        memories: activeMemories,
+        summaries,
+        appContext,
+        hasTools: true,
+      });
+
+      let titleSuggestion: string | undefined;
+      const executorActions = buildExecutorActions();
+
+      // Tool execution loop — LLM may request tools, we execute and re-send
+      for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+        let fullContent = '';
+        const toolCalls: ToolCall[] = [];
+
+        const stream = streamChat(workingMessages, {
+          systemPrompt,
+          tools: ALL_TOOLS,
+          onTitleSuggestion: (title) => {
+            titleSuggestion = title;
+          },
+          signal: controller.signal,
+        });
+
+        for await (const event of stream) {
+          if (event.type === 'text') {
+            fullContent += event.text;
+            setStreamedContent(fullContent);
+          } else if (event.type === 'tool_call') {
+            toolCalls.push(event.toolCall);
+          }
+        }
+
+        // No tool calls — we're done, finalize assistant message
+        if (toolCalls.length === 0) {
+          const assistantMessage: ConversationMessage = {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: fullContent,
+            timestamp: new Date().toISOString(),
+          };
+
+          workingMessages = [...workingMessages, assistantMessage];
+          break;
+        }
+
+        // Tool calls received — execute them
+        const assistantMessage: ConversationMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: fullContent,
+          timestamp: new Date().toISOString(),
+          toolCalls,
+        };
+        workingMessages = [...workingMessages, assistantMessage];
+
+        // Execute each tool call and add results as tool messages
+        for (const tc of toolCalls) {
+          setToolStatus(`Running: ${tc.name.replace(/_/g, ' ')}...`);
+          const result = await executeTool(tc, executorActions, text);
+
+          const toolMessage: ConversationMessage = {
+            id: crypto.randomUUID(),
+            role: 'tool',
+            content: JSON.stringify({ success: result.success, data: result.data, message: result.message }),
+            timestamp: new Date().toISOString(),
+            toolCallId: tc.id,
+          };
+          workingMessages = [...workingMessages, toolMessage];
+        }
+
+        setToolStatus(null);
+        setStreamedContent('');
+
+        // Loop continues — re-invoke LLM with tool results
       }
 
-      // Finalize the assistant message
-      const assistantMessage: ConversationMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: fullContent,
-        timestamp: new Date().toISOString(),
-      };
+      // Apply title suggestion
+      if (titleSuggestion) {
+        updatedConv.title = titleSuggestion;
+      }
 
       const finalConv: Conversation = {
         ...updatedConv,
-        messages: [...updatedMessages, assistantMessage],
+        messages: workingMessages,
         updatedAt: new Date().toISOString(),
       };
 
@@ -152,30 +298,63 @@ const ConciergeChat = () => {
       saveConversation(finalConv);
       setConversations(getConversations());
       setStreamedContent('');
+      setToolStatus(null);
+
+      // Post-conversation: extract memories + summarize (fire-and-forget)
+      void (async () => {
+        const [newMemories] = await Promise.all([
+          extractMemories(workingMessages),
+          summarizeConversation(finalConv.id, workingMessages),
+        ]);
+        if (newMemories.length > 0) {
+          const name = soul?.name || 'Concierge';
+          toast.success(`${name} remembered ${newMemories.length} new thing${newMemories.length !== 1 ? 's' : ''}`, {
+            description: newMemories.map((m) => m.content).join('; '),
+            action: {
+              label: 'View memories',
+              onClick: () => {
+                setIsOpen(false);
+                navigate('/settings');
+              },
+            },
+          });
+        }
+      })();
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') return;
       const message = e instanceof Error ? e.message : 'Chat failed';
       toast.error('Chat error', { description: message });
 
-      // Save the conversation with the user message even if streaming failed
-      saveConversation(updatedConv);
+      // Save and display the conversation with messages even if streaming failed
+      // (preserves assistant messages and tool results from completed rounds)
+      const failedConv: Conversation = {
+        ...updatedConv,
+        messages: workingMessages,
+        updatedAt: new Date().toISOString(),
+      };
+      setConversation(failedConv);
+      saveConversation(failedConv);
       setConversations(getConversations());
     } finally {
       abortRef.current = null;
       setStreaming(false);
+      setToolStatus(null);
     }
-  }, [input, streaming, conversation]);
+  }, [input, streaming, conversation, buildAppContext, buildExecutorActions, navigate]);
 
   const soul = getSoulConfig();
   const currentSettings = getAISettings();
   const conciergeName = soul?.name || 'Concierge';
   const isConfigured = currentSettings.apiKey.length > 0 || currentSettings.provider === 'ollama';
 
+  // Only show user and assistant messages in the UI (hide tool messages)
+  const visibleMessages = conversation.messages.filter((m) => m.role !== 'tool');
+
   return (
     <>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent className="flex w-96 flex-col p-0" side="right">
-          <SheetHeader className="border-b border-border px-4 pr-12 py-3">
+          <SheetHeader className="border-b border-border px-4 py-3 pr-12">
             {view === 'list' ? (
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-base">Conversations</SheetTitle>
@@ -196,9 +375,7 @@ const ConciergeChat = () => {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <SheetTitle className="flex-1 truncate text-base">
-                  {conversation.title}
-                </SheetTitle>
+                <SheetTitle className="flex-1 truncate text-base">{conversation.title}</SheetTitle>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleNewConversation}>
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -227,14 +404,8 @@ const ConciergeChat = () => {
                         conv.id === conversation.id && 'bg-accent/50',
                       )}
                     >
-                      <button
-                        type="button"
-                        className="flex-1 text-left"
-                        onClick={() => handleSelectConversation(conv)}
-                      >
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {conv.title}
-                        </p>
+                      <button type="button" className="flex-1 text-left" onClick={() => handleSelectConversation(conv)}>
+                        <p className="truncate text-sm font-medium text-foreground">{conv.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {conv.messages.length} message{conv.messages.length !== 1 ? 's' : ''}
                         </p>
@@ -259,9 +430,7 @@ const ConciergeChat = () => {
                 {!isConfigured && conversation.messages.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Settings className="mb-3 h-8 w-8 text-muted-foreground" />
-                    <p className="mb-1 text-sm font-medium text-foreground">
-                      Set up your AI provider
-                    </p>
+                    <p className="mb-1 text-sm font-medium text-foreground">Set up your AI provider</p>
                     <p className="mb-4 text-xs text-muted-foreground">
                       Go to Settings → AI Provider to configure your API key.
                     </p>
@@ -271,33 +440,52 @@ const ConciergeChat = () => {
                 {isConfigured && conversation.messages.length === 0 && !streaming && (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Bot className="mb-3 h-8 w-8 text-primary" />
-                    <p className="mb-1 text-sm font-medium text-foreground">
-                      Hi! I&apos;m {conciergeName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Ask me anything about your notes, tasks, or ideas.
-                    </p>
+                    <p className="mb-1 text-sm font-medium text-foreground">Hi! I&apos;m {conciergeName}</p>
+                    <p className="text-xs text-muted-foreground">Ask me anything about your notes, tasks, or ideas.</p>
                   </div>
                 )}
 
                 {/* Messages */}
                 <div className="space-y-3">
-                  {conversation.messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={cn(
-                        'max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm',
-                        msg.role === 'user'
-                          ? 'ml-auto bg-primary text-primary-foreground'
-                          : 'bg-secondary text-foreground',
+                  {visibleMessages.map((msg) => (
+                    <div key={msg.id}>
+                      <div
+                        className={cn(
+                          'max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm',
+                          msg.role === 'user'
+                            ? 'ml-auto bg-primary text-primary-foreground'
+                            : 'bg-secondary text-foreground',
+                        )}
+                      >
+                        {msg.content}
+                      </div>
+                      {/* Show tool call badges for assistant messages with tool calls */}
+                      {msg.toolCalls && msg.toolCalls.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {msg.toolCalls.map((tc) => (
+                            <span
+                              key={tc.id}
+                              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
+                            >
+                              <Wrench className="h-2.5 w-2.5" />
+                              {tc.name.replace(/_/g, ' ')}
+                            </span>
+                          ))}
+                        </div>
                       )}
-                    >
-                      {msg.content}
                     </div>
                   ))}
 
+                  {/* Tool execution status */}
+                  {toolStatus && (
+                    <div className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+                      <Wrench className="h-3 w-3 animate-pulse" />
+                      {toolStatus}
+                    </div>
+                  )}
+
                   {/* Streaming content */}
-                  {streaming && (
+                  {streaming && !toolStatus && (
                     <div className="max-w-[85%] whitespace-pre-wrap rounded-xl bg-secondary px-3 py-2 text-sm text-foreground">
                       {streamedContent || (
                         <span className="flex items-center gap-2 text-muted-foreground">
@@ -350,9 +538,7 @@ const ConciergeChat = () => {
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
           'fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all',
-          isOpen
-            ? 'scale-90 bg-primary text-primary-foreground'
-            : 'bg-primary text-primary-foreground hover:scale-105',
+          isOpen ? 'scale-90 bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground hover:scale-105',
         )}
         aria-label={isOpen ? 'Close concierge' : 'Open concierge'}
       >

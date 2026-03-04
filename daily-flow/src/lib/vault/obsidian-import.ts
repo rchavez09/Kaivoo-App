@@ -45,9 +45,7 @@ export function extractFrontmatterTags(content: string): string[] {
   // tags:\n  - tag1\n  - tag2
   const listMatch = fm.match(/^tags:\s*\n((?:\s+-\s+\S+\n?)*)/m);
   if (listMatch) {
-    return (
-      listMatch[1].match(/-\s+(\S+)/g)?.map((m) => m.replace(/^-\s+/, '').toLowerCase()) || []
-    );
+    return listMatch[1].match(/-\s+(\S+)/g)?.map((m) => m.replace(/^-\s+/, '').toLowerCase()) || [];
   }
 
   return [];

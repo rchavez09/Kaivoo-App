@@ -13,17 +13,30 @@
  *  - local-search.ts     — LocalSearchAdapter (FTS5)
  */
 
-import type {
-  DataAdapter,
-  FileAdapter,
-  FileEntry,
-} from './types';
+import type { DataAdapter, FileAdapter, FileEntry } from './types';
 
 import type { TauriDatabase } from './local-types';
 import { SCHEMA_SQL } from './local-schema';
 
-import { LocalTaskAdapter, LocalSubtaskAdapter, LocalJournalAdapter, LocalCaptureAdapter, LocalTopicAdapter, LocalTopicPageAdapter, LocalTagAdapter } from './local-entities-core';
-import { LocalRoutineAdapter, LocalRoutineGroupAdapter, LocalRoutineCompletionAdapter, LocalHabitAdapter, LocalHabitCompletionAdapter, LocalMeetingAdapter, LocalProjectAdapter, LocalProjectNoteAdapter } from './local-entities-ext';
+import {
+  LocalTaskAdapter,
+  LocalSubtaskAdapter,
+  LocalJournalAdapter,
+  LocalCaptureAdapter,
+  LocalTopicAdapter,
+  LocalTopicPageAdapter,
+  LocalTagAdapter,
+} from './local-entities-core';
+import {
+  LocalRoutineAdapter,
+  LocalRoutineGroupAdapter,
+  LocalRoutineCompletionAdapter,
+  LocalHabitAdapter,
+  LocalHabitCompletionAdapter,
+  LocalMeetingAdapter,
+  LocalProjectAdapter,
+  LocalProjectNoteAdapter,
+} from './local-entities-ext';
 import { LocalSearchAdapter } from './local-search';
 
 // Re-export public adapters for dynamic import in provider.tsx
@@ -52,7 +65,10 @@ export class LocalDataAdapter implements DataAdapter {
   readonly projectNotes;
   readonly searchAdapter: LocalSearchAdapter;
 
-  private constructor(private db: TauriDatabase, search: LocalSearchAdapter) {
+  private constructor(
+    private db: TauriDatabase,
+    search: LocalSearchAdapter,
+  ) {
     this.searchAdapter = search;
     this.tasks = new LocalTaskAdapter(db, search);
     this.subtasks = new LocalSubtaskAdapter(db, search);

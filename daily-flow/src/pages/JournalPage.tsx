@@ -165,17 +165,20 @@ const JournalPage = () => {
   }, []);
 
   // --- Date navigation ---
-  const handleDateSelect = useCallback((date: Date) => {
-    const iso = date.toISOString().slice(0, 10);
-    const today = new Date().toISOString().slice(0, 10);
-    if (iso === today) {
-      setSearchParams({});
-    } else {
-      setSearchParams({ date: iso });
-    }
-    setActiveSectionId(null);
-    setActiveEntryId(null);
-  }, [setSearchParams]);
+  const handleDateSelect = useCallback(
+    (date: Date) => {
+      const iso = date.toISOString().slice(0, 10);
+      const today = new Date().toISOString().slice(0, 10);
+      if (iso === today) {
+        setSearchParams({});
+      } else {
+        setSearchParams({ date: iso });
+      }
+      setActiveSectionId(null);
+      setActiveEntryId(null);
+    },
+    [setSearchParams],
+  );
 
   // --- Save status display ---
   const statusDisplay = useMemo(() => {

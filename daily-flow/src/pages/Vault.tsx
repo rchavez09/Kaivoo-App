@@ -117,7 +117,19 @@ interface TreeNodeProps {
   onFocusChange: (path: string) => void;
 }
 
-function TreeNode({ node, depth, expanded, onToggle, onNavigate, searchQuery, level, posinset, setsize, focusedPath, onFocusChange }: TreeNodeProps) {
+function TreeNode({
+  node,
+  depth,
+  expanded,
+  onToggle,
+  onNavigate,
+  searchQuery,
+  level,
+  posinset,
+  setsize,
+  focusedPath,
+  onFocusChange,
+}: TreeNodeProps) {
   const isExpanded = expanded.has(node.path);
   const hasChildren = node.isDirectory && (node.children?.length ?? 0) > 0;
 
@@ -261,7 +273,13 @@ const Vault = () => {
   const [tree, setTree] = useState<VaultNode | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(
-    new Set([VAULT_FOLDERS.TOPICS, VAULT_FOLDERS.PROJECTS, VAULT_FOLDERS.JOURNAL, VAULT_FOLDERS.LIBRARY, VAULT_FOLDERS.INBOX]),
+    new Set([
+      VAULT_FOLDERS.TOPICS,
+      VAULT_FOLDERS.PROJECTS,
+      VAULT_FOLDERS.JOURNAL,
+      VAULT_FOLDERS.LIBRARY,
+      VAULT_FOLDERS.INBOX,
+    ]),
   );
   const [currentPath, setCurrentPath] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -398,10 +416,7 @@ const Vault = () => {
           <Breadcrumb className="mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink
-                  className="cursor-pointer"
-                  onClick={() => setCurrentPath('')}
-                >
+                <BreadcrumbLink className="cursor-pointer" onClick={() => setCurrentPath('')}>
                   Vault
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -415,10 +430,7 @@ const Vault = () => {
                       {isLast ? (
                         <BreadcrumbPage>{segment}</BreadcrumbPage>
                       ) : (
-                        <BreadcrumbLink
-                          className="cursor-pointer"
-                          onClick={() => setCurrentPath(segmentPath)}
-                        >
+                        <BreadcrumbLink className="cursor-pointer" onClick={() => setCurrentPath(segmentPath)}>
                           {segment}
                         </BreadcrumbLink>
                       )}
@@ -463,9 +475,7 @@ const Vault = () => {
             <div className="py-12 text-center">
               <HardDrive className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
               <h3 className="mb-2 text-lg font-medium text-foreground">Vault not available</h3>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-                Sign in to access your Knowledge Vault.
-              </p>
+              <p className="mx-auto max-w-sm text-sm text-muted-foreground">Sign in to access your Knowledge Vault.</p>
             </div>
           ) : visibleRootChildren.length > 0 ? (
             <div role="tree" aria-label="Vault files" className="space-y-0.5">

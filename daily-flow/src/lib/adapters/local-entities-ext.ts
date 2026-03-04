@@ -51,7 +51,9 @@ export class LocalRoutineAdapter implements RoutineAdapter {
   constructor(private db: TauriDatabase) {}
   async fetchAll(): Promise<RoutineItem[]> {
     try {
-      const rows = await this.db.select<Array<Record<string, unknown>>>('SELECT * FROM routines WHERE entity_type = \'routine\' ORDER BY "order"');
+      const rows = await this.db.select<Array<Record<string, unknown>>>(
+        'SELECT * FROM routines WHERE entity_type = \'routine\' ORDER BY "order"',
+      );
       return rows.map((r) => ({
         id: r.id as string,
         name: r.name as string,
@@ -66,13 +68,10 @@ export class LocalRoutineAdapter implements RoutineAdapter {
   async create(input: CreateRoutineInput): Promise<RoutineItem> {
     try {
       const id = uuid();
-      await this.db.execute('INSERT INTO routines (id, name, icon, "order", group_id, entity_type) VALUES ($1,$2,$3,$4,$5,\'routine\')', [
-        id,
-        input.name,
-        input.icon ?? null,
-        input.order ?? 0,
-        input.groupId ?? null,
-      ]);
+      await this.db.execute(
+        'INSERT INTO routines (id, name, icon, "order", group_id, entity_type) VALUES ($1,$2,$3,$4,$5,\'routine\')',
+        [id, input.name, input.icon ?? null, input.order ?? 0, input.groupId ?? null],
+      );
       return { id, name: input.name, icon: input.icon, order: input.order ?? 0, groupId: input.groupId };
     } catch (e) {
       rethrow('Routine', 'create', e);
@@ -205,10 +204,7 @@ export class LocalRoutineCompletionAdapter implements RoutineCompletionAdapter {
   async toggle(routineId: string, date: string, isCompleted: boolean): Promise<void> {
     try {
       if (isCompleted) {
-        await this.db.execute('DELETE FROM routine_completions WHERE routine_id = $1 AND date = $2', [
-          routineId,
-          date,
-        ]);
+        await this.db.execute('DELETE FROM routine_completions WHERE routine_id = $1 AND date = $2', [routineId, date]);
       } else {
         await this.db.execute('INSERT INTO routine_completions (id, routine_id, date) VALUES ($1,$2,$3)', [
           uuid(),
@@ -225,7 +221,10 @@ export class LocalRoutineCompletionAdapter implements RoutineCompletionAdapter {
 // ─── Habits ───
 
 export class LocalHabitAdapter implements HabitAdapter {
-  constructor(private db: TauriDatabase, private indexer?: SearchIndexer) {}
+  constructor(
+    private db: TauriDatabase,
+    private indexer?: SearchIndexer,
+  ) {}
   async fetchAll(): Promise<Habit[]> {
     try {
       const rows = await this.db.select<Array<Record<string, unknown>>>(
@@ -273,7 +272,12 @@ export class LocalHabitAdapter implements HabitAdapter {
           ts,
         ],
       );
-      if (this.indexer) try { await this.indexer.upsert('habit', id, input.name, '', '{}'); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.upsert('habit', id, input.name, '', '{}');
+        } catch {
+          /* non-fatal */
+        }
       return {
         id,
         name: input.name,
@@ -321,10 +325,16 @@ export class LocalHabitAdapter implements HabitAdapter {
       vals.push(id);
       await this.db.execute(`UPDATE routines SET ${sets.join(', ')} WHERE id = $${i}`, vals);
       if (this.indexer && (input.name !== undefined || input.isArchived !== undefined)) {
-        const [r] = await this.db.select<Array<Record<string, unknown>>>('SELECT name, is_archived FROM routines WHERE id = $1', [id]);
+        const [r] = await this.db.select<Array<Record<string, unknown>>>(
+          'SELECT name, is_archived FROM routines WHERE id = $1',
+          [id],
+        );
         if (r) {
-          if (r.is_archived as number) { await this.indexer.remove('habit', id); }
-          else { await this.indexer.upsert('habit', id, r.name as string, '', '{}'); }
+          if (r.is_archived as number) {
+            await this.indexer.remove('habit', id);
+          } else {
+            await this.indexer.upsert('habit', id, r.name as string, '', '{}');
+          }
         }
       }
     } catch (e) {
@@ -335,7 +345,12 @@ export class LocalHabitAdapter implements HabitAdapter {
     try {
       await this.db.execute('DELETE FROM routine_completions WHERE routine_id = $1', [id]);
       await this.db.execute('DELETE FROM routines WHERE id = $1', [id]);
-      if (this.indexer) try { await this.indexer.remove('habit', id); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.remove('habit', id);
+        } catch {
+          /* non-fatal */
+        }
     } catch (e) {
       rethrow('Habit', 'delete', e);
     }
@@ -343,7 +358,12 @@ export class LocalHabitAdapter implements HabitAdapter {
   async archive(id: string): Promise<void> {
     try {
       await this.db.execute('UPDATE routines SET is_archived = 1, updated_at = $1 WHERE id = $2', [now(), id]);
-      if (this.indexer) try { await this.indexer.remove('habit', id); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.remove('habit', id);
+        } catch {
+          /* non-fatal */
+        }
     } catch (e) {
       rethrow('Habit', 'archive', e);
     }
@@ -397,10 +417,11 @@ export class LocalHabitCompletionAdapter implements HabitCompletionAdapter {
         await this.db.execute('DELETE FROM routine_completions WHERE routine_id = $1 AND date = $2', [habitId, date]);
       } else {
         // P5c: insert with count = 1 (not NULL)
-        await this.db.execute(
-          'INSERT INTO routine_completions (id, routine_id, date, count) VALUES ($1,$2,$3,1)',
-          [uuid(), habitId, date],
-        );
+        await this.db.execute('INSERT INTO routine_completions (id, routine_id, date, count) VALUES ($1,$2,$3,1)', [
+          uuid(),
+          habitId,
+          date,
+        ]);
       }
     } catch (e) {
       rethrow('HabitCompletion', 'toggle', e);
@@ -433,7 +454,10 @@ export class LocalHabitCompletionAdapter implements HabitCompletionAdapter {
 // ─── Meetings ───
 
 export class LocalMeetingAdapter implements MeetingAdapter {
-  constructor(private db: TauriDatabase, private indexer?: SearchIndexer) {}
+  constructor(
+    private db: TauriDatabase,
+    private indexer?: SearchIndexer,
+  ) {}
   async fetchAll(): Promise<Meeting[]> {
     try {
       const rows = await this.db.select<Array<Record<string, unknown>>>(
@@ -471,7 +495,12 @@ export class LocalMeetingAdapter implements MeetingAdapter {
           input.source ?? 'manual',
         ],
       );
-      if (this.indexer) try { await this.indexer.upsert('meeting', id, input.title, input.description ?? '', '{}'); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.upsert('meeting', id, input.title, input.description ?? '', '{}');
+        } catch {
+          /* non-fatal */
+        }
       return { id, ...input };
     } catch (e) {
       rethrow('Meeting', 'create', e);
@@ -498,7 +527,10 @@ export class LocalMeetingAdapter implements MeetingAdapter {
       vals.push(id);
       await this.db.execute(`UPDATE meetings SET ${sets.join(', ')} WHERE id = $${i}`, vals);
       if (this.indexer && (input.title !== undefined || input.description !== undefined)) {
-        const [r] = await this.db.select<Array<Record<string, unknown>>>('SELECT title, description FROM meetings WHERE id = $1', [id]);
+        const [r] = await this.db.select<Array<Record<string, unknown>>>(
+          'SELECT title, description FROM meetings WHERE id = $1',
+          [id],
+        );
         if (r) await this.indexer.upsert('meeting', id, r.title as string, (r.description as string) ?? '', '{}');
       }
     } catch (e) {
@@ -508,7 +540,12 @@ export class LocalMeetingAdapter implements MeetingAdapter {
   async delete(id: string): Promise<void> {
     try {
       await this.db.execute('DELETE FROM meetings WHERE id = $1', [id]);
-      if (this.indexer) try { await this.indexer.remove('meeting', id); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.remove('meeting', id);
+        } catch {
+          /* non-fatal */
+        }
     } catch (e) {
       rethrow('Meeting', 'delete', e);
     }
@@ -518,7 +555,10 @@ export class LocalMeetingAdapter implements MeetingAdapter {
 // ─── Projects ───
 
 export class LocalProjectAdapter implements ProjectAdapter {
-  constructor(private db: TauriDatabase, private indexer?: SearchIndexer) {}
+  constructor(
+    private db: TauriDatabase,
+    private indexer?: SearchIndexer,
+  ) {}
   async fetchAll(): Promise<Project[]> {
     try {
       const rows = await this.db.select<Array<Record<string, unknown>>>(
@@ -560,7 +600,12 @@ export class LocalProjectAdapter implements ProjectAdapter {
           ts,
         ],
       );
-      if (this.indexer) try { await this.indexer.upsert('project', id, input.name, input.description ?? '', '{}'); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.upsert('project', id, input.name, input.description ?? '', '{}');
+        } catch {
+          /* non-fatal */
+        }
       return { id, ...input, createdAt: new Date(ts), updatedAt: new Date(ts) };
     } catch (e) {
       rethrow('Project', 'create', e);
@@ -587,7 +632,10 @@ export class LocalProjectAdapter implements ProjectAdapter {
       vals.push(id);
       await this.db.execute(`UPDATE projects SET ${sets.join(', ')} WHERE id = $${i}`, vals);
       if (this.indexer && (input.name !== undefined || input.description !== undefined)) {
-        const [r] = await this.db.select<Array<Record<string, unknown>>>('SELECT name, description FROM projects WHERE id = $1', [id]);
+        const [r] = await this.db.select<Array<Record<string, unknown>>>(
+          'SELECT name, description FROM projects WHERE id = $1',
+          [id],
+        );
         if (r) await this.indexer.upsert('project', id, r.name as string, (r.description as string) ?? '', '{}');
       }
     } catch (e) {
@@ -597,7 +645,12 @@ export class LocalProjectAdapter implements ProjectAdapter {
   async delete(id: string): Promise<void> {
     try {
       await this.db.execute('DELETE FROM projects WHERE id = $1', [id]);
-      if (this.indexer) try { await this.indexer.remove('project', id); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.remove('project', id);
+        } catch {
+          /* non-fatal */
+        }
     } catch (e) {
       rethrow('Project', 'delete', e);
     }
@@ -607,7 +660,10 @@ export class LocalProjectAdapter implements ProjectAdapter {
 // ─── Project Notes ───
 
 export class LocalProjectNoteAdapter implements ProjectNoteAdapter {
-  constructor(private db: TauriDatabase, private indexer?: SearchIndexer) {}
+  constructor(
+    private db: TauriDatabase,
+    private indexer?: SearchIndexer,
+  ) {}
   async fetchAll(): Promise<ProjectNote[]> {
     try {
       const rows = await this.db.select<Array<Record<string, unknown>>>(
@@ -632,7 +688,18 @@ export class LocalProjectNoteAdapter implements ProjectNoteAdapter {
         'INSERT INTO project_notes (id, project_id, content, created_at, updated_at) VALUES ($1,$2,$3,$4,$4)',
         [id, input.projectId, input.content, ts],
       );
-      if (this.indexer) try { await this.indexer.upsert('project_note', id, input.content.substring(0, 100), input.content, JSON.stringify({ projectId: input.projectId })); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.upsert(
+            'project_note',
+            id,
+            input.content.substring(0, 100),
+            input.content,
+            JSON.stringify({ projectId: input.projectId }),
+          );
+        } catch {
+          /* non-fatal */
+        }
       return { id, ...input, createdAt: new Date(ts), updatedAt: new Date(ts) };
     } catch (e) {
       rethrow('ProjectNote', 'create', e);
@@ -647,8 +714,18 @@ export class LocalProjectNoteAdapter implements ProjectNoteAdapter {
         id,
       ]);
       if (this.indexer) {
-        const [r] = await this.db.select<Array<Record<string, unknown>>>('SELECT project_id FROM project_notes WHERE id = $1', [id]);
-        if (r) await this.indexer.upsert('project_note', id, input.content.substring(0, 100), input.content, JSON.stringify({ projectId: r.project_id }));
+        const [r] = await this.db.select<Array<Record<string, unknown>>>(
+          'SELECT project_id FROM project_notes WHERE id = $1',
+          [id],
+        );
+        if (r)
+          await this.indexer.upsert(
+            'project_note',
+            id,
+            input.content.substring(0, 100),
+            input.content,
+            JSON.stringify({ projectId: r.project_id }),
+          );
       }
     } catch (e) {
       rethrow('ProjectNote', 'update', e);
@@ -657,7 +734,12 @@ export class LocalProjectNoteAdapter implements ProjectNoteAdapter {
   async delete(id: string): Promise<void> {
     try {
       await this.db.execute('DELETE FROM project_notes WHERE id = $1', [id]);
-      if (this.indexer) try { await this.indexer.remove('project_note', id); } catch { /* non-fatal */ }
+      if (this.indexer)
+        try {
+          await this.indexer.remove('project_note', id);
+        } catch {
+          /* non-fatal */
+        }
     } catch (e) {
       rethrow('ProjectNote', 'delete', e);
     }
