@@ -4,6 +4,7 @@ import Highlight from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
 import {
   Bold,
   Italic,
@@ -17,12 +18,14 @@ import {
   Undo,
   Redo,
   Palette,
+  ImagePlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { toast } from 'sonner';
+import { useCallback, useEffect, useRef } from 'react';
 
 const TEXT_COLORS = [
   { name: 'Default', color: null },
@@ -52,6 +55,8 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   editable?: boolean;
+  /** Upload an image file and return its public URL. When provided, images are uploaded to storage instead of embedded as base64. */
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
 const RichTextEditor = ({
@@ -60,7 +65,11 @@ const RichTextEditor = ({
   placeholder = 'Start writing...',
   className,
   editable = true,
+  onImageUpload,
 }: RichTextEditorProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const insertImageRef = useRef<(file: File) => void>(() => {});
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -77,6 +86,10 @@ const RichTextEditor = ({
         placeholder,
         emptyEditorClass: 'is-editor-empty',
       }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+      }),
     ],
     content,
     editable,
@@ -87,8 +100,93 @@ const RichTextEditor = ({
       attributes: {
         class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3',
       },
+      handlePaste: (_view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            event.preventDefault();
+            const file = item.getAsFile();
+            if (file) insertImageRef.current(file);
+            return true;
+          }
+        }
+        return false;
+      },
+      handleDrop: (_view, event) => {
+        const files = event.dataTransfer?.files;
+        if (!files?.length) return false;
+        for (const file of files) {
+          if (file.type.startsWith('image/')) {
+            event.preventDefault();
+            insertImageRef.current(file);
+            return true;
+          }
+        }
+        return false;
+      },
     },
   });
+
+  const insertImageFromFile = useCallback(
+    (file: File) => {
+      if (!editor) return;
+      if (onImageUpload) {
+        // Upload to storage, verify the image loads, then insert
+        const toastId = toast.loading(`Uploading ${file.name}…`);
+        void (async () => {
+          let uploadedUrl: string | null = null;
+          try {
+            uploadedUrl = await onImageUpload(file);
+
+            // Verify the image is accessible before inserting
+            const img = new window.Image();
+            await new Promise<void>((resolve, reject) => {
+              img.onload = () => resolve();
+              img.onerror = () => reject(new Error('Image not accessible'));
+              img.src = uploadedUrl!;
+            });
+
+            editor.chain().focus().setImage({ src: uploadedUrl, alt: file.name }).run();
+            toast.dismiss(toastId);
+          } catch (e) {
+            toast.dismiss(toastId);
+            // Upload succeeded but image URL not accessible — insert as a clickable link
+            if (e instanceof Error && e.message === 'Image not accessible' && uploadedUrl) {
+              editor
+                .chain()
+                .focus()
+                .insertContent(`<a href="${uploadedUrl}" target="_blank" rel="noopener">${file.name}</a>`)
+                .run();
+              toast.warning('Image uploaded but preview unavailable — inserted as link');
+            } else {
+              toast.error(e instanceof Error ? e.message : 'Image upload failed');
+            }
+          }
+        })();
+      } else {
+        // Fallback: embed as base64 (no upload callback provided)
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            editor.chain().focus().setImage({ src: reader.result }).run();
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    [editor, onImageUpload],
+  );
+  insertImageRef.current = insertImageFromFile;
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) insertImageFromFile(file);
+      e.target.value = '';
+    },
+    [insertImageFromFile],
+  );
 
   // Update content when prop changes externally
   useEffect(() => {
@@ -268,6 +366,20 @@ const RichTextEditor = ({
         >
           <Quote className="h-4 w-4" />
         </Toggle>
+
+        <div className="mx-1 h-5 w-px bg-border" />
+
+        {/* Image insert */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          className="h-8 w-8 p-0"
+          aria-label="Insert image"
+        >
+          <ImagePlus className="h-4 w-4" />
+        </Button>
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileInputChange} />
       </div>
 
       {/* Editor content */}
@@ -296,6 +408,12 @@ const RichTextEditor = ({
           opacity: 0.5;
           pointer-events: none;
           height: 0;
+        }
+        .ProseMirror img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 0.375rem;
+          margin: 0.5rem 0;
         }
       `}</style>
     </div>

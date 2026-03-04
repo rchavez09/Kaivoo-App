@@ -213,6 +213,9 @@ CREATE VIRTUAL TABLE IF NOT EXISTS ai_memories_fts USING fts5(
 
 ALTER TABLE subtasks ADD COLUMN sort_order INTEGER DEFAULT 0;
 
+ALTER TABLE topics ADD COLUMN content TEXT;
+ALTER TABLE topic_pages ADD COLUMN content TEXT;
+
 CREATE TABLE IF NOT EXISTS license (
   id TEXT PRIMARY KEY DEFAULT 'active',
   license_key TEXT NOT NULL,

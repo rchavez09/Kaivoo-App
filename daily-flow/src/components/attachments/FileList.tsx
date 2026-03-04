@@ -1,8 +1,8 @@
 /**
- * FileList — Sprint 25 P15
+ * FileList — Sprint 25 P15, Sprint 26 cleanup
  *
- * Displays a list of attached files with type icons, size, delete button,
- * and inline image previews.
+ * Displays attached files as a compact list: editable name, size, open link, delete.
+ * No image preview thumbnails — keeps the UI clean and consistent for all file types.
  */
 
 import { useState, useCallback, useEffect } from 'react';
@@ -21,10 +21,6 @@ function getFileIcon(mimeType: string) {
   if (mimeType === 'application/pdf' || mimeType.startsWith('text/')) return FileText;
   if (mimeType.includes('spreadsheet') || mimeType === 'text/csv') return FileSpreadsheet;
   return File;
-}
-
-function isImageType(mimeType: string): boolean {
-  return mimeType.startsWith('image/') && mimeType !== 'image/svg+xml';
 }
 
 interface FileListProps {
@@ -46,7 +42,6 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const Icon = getFileIcon(file.mimeType);
-  const isImage = isImageType(file.mimeType);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,7 +50,7 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
         if (!cancelled) setUrl(u);
       })
       .catch(() => {
-        // URL unavailable — open/preview will be hidden
+        // URL unavailable — link will be hidden
       });
     return () => {
       cancelled = true;
@@ -73,64 +68,70 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
   }, [file.name, onDelete]);
 
   return (
-    <div className="group rounded-lg border border-border bg-[hsl(var(--surface-elevated))] p-3">
-      {/* Image preview */}
-      {isImage && url && (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block">
-          <img src={url} alt={file.name} loading="lazy" className="max-h-40 w-full rounded-md object-contain" />
-        </a>
-      )}
+    <div className="group flex items-center gap-2 overflow-hidden rounded-md border border-border bg-[hsl(var(--surface-elevated))] px-3 py-2">
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
-          <p className="text-[11px] text-muted-foreground">{formatFileSize(file.size)}</p>
-        </div>
+      <div className="min-w-0 flex-1 overflow-hidden">
+        {url ? (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block truncate text-sm font-medium text-foreground underline decoration-muted-foreground/40 underline-offset-2 hover:decoration-foreground"
+            title={file.name}
+          >
+            {file.name}
+          </a>
+        ) : (
+          <p className="truncate text-sm font-medium text-foreground" title={file.name}>
+            {file.name}
+          </p>
+        )}
+        <p className="text-[11px] text-muted-foreground">{formatFileSize(file.size)}</p>
+      </div>
 
-        {/* Actions */}
-        <div className="flex shrink-0 items-center gap-1">
-          {url && (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Open ${file.name}`}
-              className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-secondary/50 hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          )}
+      {/* Actions */}
+      <div className="flex shrink-0 items-center gap-0.5">
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open ${file.name}`}
+            className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-secondary/50 hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        )}
 
-          {confirmDelete ? (
-            <div className="flex items-center gap-1">
-              <button
-                className={cn(
-                  'rounded-md px-2 py-1 text-[11px] font-medium text-destructive-foreground',
-                  'bg-destructive hover:bg-destructive/90',
-                )}
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Delete'}
-              </button>
-              <button
-                className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-secondary/50"
-                onClick={() => setConfirmDelete(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
+        {confirmDelete ? (
+          <div className="flex items-center gap-1">
             <button
-              aria-label={`Delete ${file.name}`}
-              className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-destructive/10 hover:text-destructive md:opacity-0 md:group-hover:opacity-100"
-              onClick={() => setConfirmDelete(true)}
+              className={cn(
+                'rounded-md px-2 py-1 text-[11px] font-medium text-destructive-foreground',
+                'bg-destructive hover:bg-destructive/90',
+              )}
+              onClick={handleDelete}
+              disabled={deleting}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Delete'}
             </button>
-          )}
-        </div>
+            <button
+              className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-secondary/50"
+              onClick={() => setConfirmDelete(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            aria-label={`Delete ${file.name}`}
+            className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-destructive/10 hover:text-destructive md:opacity-0 md:group-hover:opacity-100"
+            onClick={() => setConfirmDelete(true)}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -148,7 +149,7 @@ const FileList = ({ files, onDelete, getUrl, isLoading, className }: FileListPro
   if (files.length === 0) return null;
 
   return (
-    <div className={cn('grid gap-2', className)}>
+    <div className={cn('grid gap-1.5', className)}>
       {files.map((file) => (
         <FileItem key={file.name} file={file} onDelete={onDelete} getUrl={getUrl} />
       ))}

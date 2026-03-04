@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import RichTextEditor from '@/components/journal/RichTextEditor';
 import { JournalEntry } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
+import { useAdapters } from '@/lib/adapters/provider';
 import { toast } from 'sonner';
 
 interface ParsedChip {
@@ -26,6 +27,16 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
   const [content, setContent] = useState('');
   const [chips, setChips] = useState<ParsedChip[]>([]);
   const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
+  const { attachments } = useAdapters();
+
+  const handleImageUpload = useCallback(
+    async (file: File): Promise<string> => {
+      if (!entry?.id) throw new Error('No entry ID');
+      const info = await attachments.uploadFile(entry.id, file);
+      return attachments.getFileUrl(entry.id, info.name);
+    },
+    [entry?.id, attachments],
+  );
 
   useEffect(() => {
     if (entry) {
@@ -123,6 +134,7 @@ const JournalEntryDialog = ({ entry, open, onOpenChange, onSave }: JournalEntryD
             onChange={handleContentChange}
             placeholder="Write your thoughts... Use #tags or [[Topic/Page]]"
             className="min-h-[200px]"
+            onImageUpload={entry ? handleImageUpload : undefined}
           />
 
           {(uniqueTags.length > 0 || uniqueTopics.length > 0) && (

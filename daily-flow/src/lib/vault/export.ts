@@ -81,6 +81,28 @@ export function captureToMarkdown(capture: Capture, topicNames?: Map<string, str
   return `${frontmatter}\n\n${capture.content}\n`;
 }
 
+/** Strip HTML tags to produce plain-ish markdown (simple converter). */
+function htmlToPlainMarkdown(html: string): string {
+  return html
+    .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '# $1\n')
+    .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '## $1\n')
+    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '### $1\n')
+    .replace(/<strong>([\s\S]*?)<\/strong>/gi, '**$1**')
+    .replace(/<b>([\s\S]*?)<\/b>/gi, '**$1**')
+    .replace(/<em>([\s\S]*?)<\/em>/gi, '*$1*')
+    .replace(/<i>([\s\S]*?)<\/i>/gi, '*$1*')
+    .replace(/<s>([\s\S]*?)<\/s>/gi, '~~$1~~')
+    .replace(/<del>([\s\S]*?)<\/del>/gi, '~~$1~~')
+    .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, '> $1')
+    .replace(/<li>([\s\S]*?)<\/li>/gi, '- $1\n')
+    .replace(/<img[^>]+src="([^"]*)"[^>]*>/gi, '![]($1)')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<p>([\s\S]*?)<\/p>/gi, '$1\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /** Convert a topic to a README.md for its folder. */
 export function topicToMarkdown(topic: Topic): string {
   const frontmatter = buildFrontmatter({
@@ -90,8 +112,9 @@ export function topicToMarkdown(topic: Topic): string {
   const icon = topic.icon ? `${topic.icon} ` : '';
   const title = `# ${icon}${topic.name}`;
   const desc = topic.description ? `\n\n${topic.description}` : '';
+  const content = topic.content ? `\n\n${htmlToPlainMarkdown(topic.content)}` : '';
 
-  return `${frontmatter}\n\n${title}${desc}\n`;
+  return `${frontmatter}\n\n${title}${desc}${content}\n`;
 }
 
 /** Convert a topic page to a .md file. */
@@ -101,7 +124,8 @@ export function topicPageToMarkdown(page: TopicPage): string {
   });
 
   const desc = page.description ? `\n\n${page.description}` : '';
-  return `${frontmatter}\n\n# ${page.name}${desc}\n`;
+  const content = page.content ? `\n\n${htmlToPlainMarkdown(page.content)}` : '';
+  return `${frontmatter}\n\n# ${page.name}${desc}${content}\n`;
 }
 
 /** Convert a project note to a .md file. */

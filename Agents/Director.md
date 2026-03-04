@@ -5,7 +5,7 @@
 **Reports to:** The CEO (`Agents/CEO.md`)
 **Model:** Opus
 **Date:** February 23, 2026
-**Version:** 1.6
+**Version:** 1.7
 **Status:** Active
 
 ---
@@ -89,7 +89,7 @@ Map the work to departments and agents:
 | **Engineering** (Agent 2, 3, 4, 12) | All code changes, architecture decisions, security, database operations |
 | **DevOps** (Agent 9) | Deployment, CI/CD, Docker, packaging, infrastructure, monitoring |
 | **Quality** (Agent 7, 10) | Code review (every parcel), test strategy, test infrastructure, CI test suite |
-| **Marketing** | Launch prep, content, positioning (when agents exist) |
+| **Marketing** (Content Strategist, Sales Page Copywriter, Growth Strategist) | SEO strategy & content briefs (Content Strategist), landing pages & sales copy (Copywriter), launch playbooks & funnel design & CRO (Growth Strategist) |
 
 ### Step 4: Compile the Sprint
 Write `Next-Sprint-Planning.md` with:
@@ -144,7 +144,11 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 | Agent 5 | Research Analyst | Technology scouting, competitive analysis, evidence-based recommendations |
 
 ### Marketing
-*(Agents to be defined — Agent 8 will inform requirements)*
+| Agent | Role | Specialty |
+|---|---|---|
+| Content Strategist & SEO | Organic Discovery Architect | Keyword research, content briefs, SEO strategy, competitive content analysis, comparison pages, content calendar |
+| Sales Page Copywriter | Direct Response Conversion Specialist | Sales page copy, landing pages, CTAs, value stacks, price anchoring, conversion-focused writing |
+| Growth Strategist | Go-to-Market & Conversion Architect | Launch playbooks, funnel design, CRO, community seeding, channel strategy, pricing experiments, referral mechanics |
 
 ---
 
@@ -172,9 +176,10 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 
 ---
 
-*Director v1.6 — March 1, 2026*
+*Director v1.7 — March 4, 2026*
 *v1.2: Added Product (Agent 8), DevOps (Agent 9), and Quality (Agent 7 + Agent 10) departments*
 *v1.3: Agent 1 + Agent 6 merged into Design Agent. Updated department directory and involvement table.*
 *v1.4: Added Agent 12 (Data Engineer) to Engineering department.*
 *v1.5: Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Sprint 12.*
 *v1.6: Repositioned as COO/operational orchestrator. CEO role established above. Added invocation prefix and CEO relationship.*
+*v1.7: Expanded Marketing department — added Content Strategist & SEO and Growth Strategist agents alongside existing Sales Page Copywriter.*

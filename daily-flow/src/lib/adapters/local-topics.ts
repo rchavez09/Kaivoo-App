@@ -32,6 +32,7 @@ export class LocalTopicAdapter implements TopicAdapter {
         id: r.id as string,
         name: r.name as string,
         description: r.description as string | undefined,
+        content: r.content as string | undefined,
         icon: r.icon as string | undefined,
         parentId: r.parent_id as string | undefined,
         createdAt: new Date(r.created_at as string),
@@ -45,8 +46,16 @@ export class LocalTopicAdapter implements TopicAdapter {
       const id = uuid();
       const ts = now();
       await this.db.execute(
-        'INSERT INTO topics (id, name, description, icon, parent_id, created_at) VALUES ($1,$2,$3,$4,$5,$6)',
-        [id, input.name, input.description ?? null, input.icon ?? null, input.parentId ?? null, ts],
+        'INSERT INTO topics (id, name, description, content, icon, parent_id, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+        [
+          id,
+          input.name,
+          input.description ?? null,
+          input.content ?? null,
+          input.icon ?? null,
+          input.parentId ?? null,
+          ts,
+        ],
       );
       if (this.indexer)
         try {
@@ -69,6 +78,7 @@ export class LocalTopicAdapter implements TopicAdapter {
     };
     if (input.name !== undefined) add('name', input.name);
     if (input.description !== undefined) add('description', input.description);
+    if (input.content !== undefined) add('content', input.content);
     if (input.icon !== undefined) add('icon', input.icon);
     // P5b: guard against empty update — just re-fetch current state
     if (sets.length === 0) {
@@ -79,6 +89,7 @@ export class LocalTopicAdapter implements TopicAdapter {
           id: r.id as string,
           name: r.name as string,
           description: r.description as string | undefined,
+          content: r.content as string | undefined,
           icon: r.icon as string | undefined,
           parentId: r.parent_id as string | undefined,
           createdAt: new Date(r.created_at as string),
@@ -103,6 +114,7 @@ export class LocalTopicAdapter implements TopicAdapter {
         id: r.id as string,
         name: r.name as string,
         description: r.description as string | undefined,
+        content: r.content as string | undefined,
         icon: r.icon as string | undefined,
         parentId: r.parent_id as string | undefined,
         createdAt: new Date(r.created_at as string),
@@ -143,6 +155,7 @@ export class LocalTopicPageAdapter implements TopicPageAdapter {
         topicId: r.topic_id as string,
         name: r.name as string,
         description: r.description as string | undefined,
+        content: r.content as string | undefined,
         createdAt: new Date(r.created_at as string),
       }));
     } catch (e) {
@@ -154,8 +167,8 @@ export class LocalTopicPageAdapter implements TopicPageAdapter {
       const id = uuid();
       const ts = now();
       await this.db.execute(
-        'INSERT INTO topic_pages (id, topic_id, name, description, created_at) VALUES ($1,$2,$3,$4,$5)',
-        [id, input.topicId, input.name, input.description ?? null, ts],
+        'INSERT INTO topic_pages (id, topic_id, name, description, content, created_at) VALUES ($1,$2,$3,$4,$5,$6)',
+        [id, input.topicId, input.name, input.description ?? null, input.content ?? null, ts],
       );
       if (this.indexer)
         try {
@@ -184,6 +197,7 @@ export class LocalTopicPageAdapter implements TopicPageAdapter {
     };
     if (input.name !== undefined) add('name', input.name);
     if (input.description !== undefined) add('description', input.description);
+    if (input.content !== undefined) add('content', input.content);
     // P5b: guard against empty update — just re-fetch current state
     if (sets.length === 0) {
       try {
@@ -196,6 +210,7 @@ export class LocalTopicPageAdapter implements TopicPageAdapter {
           topicId: r.topic_id as string,
           name: r.name as string,
           description: r.description as string | undefined,
+          content: r.content as string | undefined,
           createdAt: new Date(r.created_at as string),
         };
       } catch (e) {
@@ -227,6 +242,7 @@ export class LocalTopicPageAdapter implements TopicPageAdapter {
         topicId: r.topic_id as string,
         name: r.name as string,
         description: r.description as string | undefined,
+        content: r.content as string | undefined,
         createdAt: new Date(r.created_at as string),
       };
     } catch (e) {

@@ -7,6 +7,7 @@ export const dbToTopic = (row: Tables<'topics'>): Topic => ({
   id: row.id,
   name: row.name,
   description: row.description,
+  content: (row as Record<string, unknown>).content as string | undefined,
   icon: row.icon,
   parentId: row.parent_id,
   createdAt: new Date(row.created_at),
@@ -17,6 +18,7 @@ export const dbToTopicPage = (row: Tables<'topic_pages'>): TopicPage => ({
   topicId: row.topic_id,
   name: row.name,
   description: row.description,
+  content: (row as Record<string, unknown>).content as string | undefined,
   createdAt: new Date(row.created_at),
 });
 
@@ -69,9 +71,10 @@ export const createTopic = async (userId: string, topic: Omit<Topic, 'id' | 'cre
       user_id: userId,
       name: normalizedName,
       description: topic.description,
+      content: topic.content,
       icon: topic.icon,
       parent_id: parentId,
-    })
+    } as Record<string, unknown>)
     .select()
     .single();
   if (error) throw error;
@@ -81,11 +84,12 @@ export const createTopic = async (userId: string, topic: Omit<Topic, 'id' | 'cre
 export const updateTopic = async (
   userId: string,
   id: string,
-  updates: { name?: string; description?: string; icon?: string },
+  updates: { name?: string; description?: string; content?: string; icon?: string },
 ) => {
   const dbUpdates: Record<string, unknown> = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.content !== undefined) dbUpdates.content = updates.content;
   if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
 
   const { data, error } = await supabase
@@ -127,17 +131,23 @@ export const createTopicPage = async (userId: string, page: Omit<TopicPage, 'id'
       topic_id: page.topicId,
       name: normalizedName,
       description: page.description,
-    })
+      content: page.content,
+    } as Record<string, unknown>)
     .select()
     .single();
   if (error) throw error;
   return dbToTopicPage(data);
 };
 
-export const updateTopicPage = async (userId: string, id: string, updates: { name?: string; description?: string }) => {
+export const updateTopicPage = async (
+  userId: string,
+  id: string,
+  updates: { name?: string; description?: string; content?: string },
+) => {
   const dbUpdates: Record<string, unknown> = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.content !== undefined) dbUpdates.content = updates.content;
 
   const { data, error } = await supabase
     .from('topic_pages')
