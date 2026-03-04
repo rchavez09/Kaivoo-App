@@ -14,8 +14,7 @@ import type { AIMemory, AIConversationSummary, MemoryCategory, MemorySource } fr
 const MEMORIES_KEY = 'kaivoo-ai-memories';
 const SUMMARIES_KEY = 'kaivoo-ai-summaries';
 
-const isTauri = (): boolean =>
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const isTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 // ─── In-memory cache (loaded once, kept in sync) ───
 
@@ -66,11 +65,7 @@ export async function getMemories(activeOnly = true): Promise<AIMemory[]> {
   return activeOnly ? memoriesCache.filter((m) => m.active) : memoriesCache;
 }
 
-export async function addMemory(
-  content: string,
-  category: MemoryCategory,
-  source: MemorySource,
-): Promise<AIMemory> {
+export async function addMemory(content: string, category: MemoryCategory, source: MemorySource): Promise<AIMemory> {
   const memory: AIMemory = {
     id: crypto.randomUUID(),
     content,
@@ -110,21 +105,17 @@ export async function updateMemory(id: string, content: string, category?: Memor
   if (isTauri()) {
     const db = await getDb();
     if (category) {
-      await db.execute(
-        'UPDATE ai_memories SET content = $1, category = $2, updated_at = $3 WHERE id = $4',
-        [content, category, now, id],
-      );
+      await db.execute('UPDATE ai_memories SET content = $1, category = $2, updated_at = $3 WHERE id = $4', [
+        content,
+        category,
+        now,
+        id,
+      ]);
     } else {
-      await db.execute(
-        'UPDATE ai_memories SET content = $1, updated_at = $2 WHERE id = $3',
-        [content, now, id],
-      );
+      await db.execute('UPDATE ai_memories SET content = $1, updated_at = $2 WHERE id = $3', [content, now, id]);
     }
     // Rebuild FTS for this row
-    await db.execute(
-      `DELETE FROM ai_memories_fts WHERE rowid = (SELECT rowid FROM ai_memories WHERE id = $1)`,
-      [id],
-    );
+    await db.execute(`DELETE FROM ai_memories_fts WHERE rowid = (SELECT rowid FROM ai_memories WHERE id = $1)`, [id]);
     await db.execute(
       `INSERT INTO ai_memories_fts (rowid, content, category)
        SELECT rowid, content, category FROM ai_memories WHERE id = $1`,
@@ -144,10 +135,7 @@ export async function updateMemory(id: string, content: string, category?: Memor
 export async function deleteMemory(id: string): Promise<void> {
   if (isTauri()) {
     const db = await getDb();
-    await db.execute(
-      `DELETE FROM ai_memories_fts WHERE rowid = (SELECT rowid FROM ai_memories WHERE id = $1)`,
-      [id],
-    );
+    await db.execute(`DELETE FROM ai_memories_fts WHERE rowid = (SELECT rowid FROM ai_memories WHERE id = $1)`, [id]);
     await db.execute('DELETE FROM ai_memories WHERE id = $1', [id]);
   }
 
@@ -162,11 +150,7 @@ export async function toggleMemoryActive(id: string, active: boolean): Promise<v
 
   if (isTauri()) {
     const db = await getDb();
-    await db.execute('UPDATE ai_memories SET active = $1, updated_at = $2 WHERE id = $3', [
-      active ? 1 : 0,
-      now,
-      id,
-    ]);
+    await db.execute('UPDATE ai_memories SET active = $1, updated_at = $2 WHERE id = $3', [active ? 1 : 0, now, id]);
   }
 
   if (memoriesCache) {
@@ -266,7 +250,7 @@ function rowToMemory(row: Record<string, unknown>): AIMemory {
 function rowToSummary(row: Record<string, unknown>): AIConversationSummary {
   let keyFacts: string[] = [];
   try {
-    keyFacts = typeof row.key_facts === 'string' ? JSON.parse(row.key_facts) : (row.key_facts as string[]) ?? [];
+    keyFacts = typeof row.key_facts === 'string' ? JSON.parse(row.key_facts) : ((row.key_facts as string[]) ?? []);
   } catch {
     // Ignore parse errors
   }

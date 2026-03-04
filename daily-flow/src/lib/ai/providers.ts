@@ -87,9 +87,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
   {
     id: 'openai-compatible',
     name: 'OpenAI-Compatible (Custom)',
-    models: [
-      { id: 'custom', name: 'Custom Model' },
-    ],
+    models: [{ id: 'custom', name: 'Custom Model' }],
     requiresApiKey: true,
     placeholder: 'sk-...',
     baseUrl: '',

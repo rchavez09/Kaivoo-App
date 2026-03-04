@@ -7,16 +7,7 @@
 
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Sun,
-  BookOpen,
-  CheckSquare,
-  HardDrive,
-  Settings,
-  ChevronRight,
-  ChevronLeft,
-  Sparkles,
-} from 'lucide-react';
+import { Sun, BookOpen, CheckSquare, HardDrive, Settings, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 
@@ -29,40 +20,33 @@ interface TourStep {
 const TOUR_STEPS: TourStep[] = [
   {
     title: 'Today',
-    description:
-      'Your daily command center. See your tasks, journal entries, and quick captures — all in one place.',
+    description: 'Your daily command center. See your tasks, journal entries, and quick captures — all in one place.',
     icon: Sun,
   },
   {
     title: 'Notes',
-    description:
-      'Your daily journal canvas. Write freely, then extract tasks and captures with AI.',
+    description: 'Your daily journal canvas. Write freely, then extract tasks and captures with AI.',
     icon: BookOpen,
   },
   {
     title: 'Tasks',
-    description:
-      'Track everything you need to do. Organize by topic, set priorities, and manage subtasks.',
+    description: 'Track everything you need to do. Organize by topic, set priorities, and manage subtasks.',
     icon: CheckSquare,
   },
   {
     title: 'Vault',
-    description:
-      'Browse all your files. Your notes, captures, and topics are stored as markdown files you own.',
+    description: 'Browse all your files. Your notes, captures, and topics are stored as markdown files you own.',
     icon: HardDrive,
   },
   {
     title: 'Settings',
-    description:
-      'Configure your AI provider, customize your concierge, and manage your account.',
+    description: 'Configure your AI provider, customize your concierge, and manage your account.',
     icon: Settings,
   },
 ];
 
 const GuidedTour = () => {
-  const [visible, setVisible] = useState(
-    () => localStorage.getItem('kaivoo-show-tour') === 'true',
-  );
+  const [visible, setVisible] = useState(() => localStorage.getItem('kaivoo-show-tour') === 'true');
   const [step, setStep] = useState(0);
 
   const handleDismiss = useCallback(() => {
@@ -95,9 +79,7 @@ const GuidedTour = () => {
           {TOUR_STEPS.map((_, i) => (
             <div
               key={i}
-              className={`h-1.5 w-6 rounded-full transition-colors ${
-                i <= step ? 'bg-primary' : 'bg-muted'
-              }`}
+              className={`h-1.5 w-6 rounded-full transition-colors ${i <= step ? 'bg-primary' : 'bg-muted'}`}
             />
           ))}
         </div>

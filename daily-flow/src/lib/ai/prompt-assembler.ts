@@ -156,12 +156,12 @@ function buildBehavioralLayer(depth: AIDepth, hasTools: boolean): string {
     depthRule[depth] || depthRule.medium,
     'If the user asks you to remember something, acknowledge it and confirm you will remember.',
     'When referencing user data (tasks, journal, calendar), be specific — cite titles and dates.',
-    'Never fabricate data the user hasn\'t told you or that isn\'t in the app context above.',
+    "Never fabricate data the user hasn't told you or that isn't in the app context above.",
   ];
 
   if (hasTools) {
     rules.push(
-      'You have access to tools that can create, read, update, and complete items in the user\'s Kaivoo workspace.',
+      "You have access to tools that can create, read, update, and complete items in the user's Kaivoo workspace.",
       'Use tools when the user asks you to take action (create tasks, log routines, search notes, etc.).',
       'For ambiguous references, search first to confirm the correct item before modifying it.',
       'For destructive actions (delete, bulk changes), confirm with the user before proceeding.',

@@ -49,13 +49,8 @@ function buildFrontmatter(fields: Record<string, string | number | undefined>): 
 // ═══════════════════════════════════════════════════════
 
 /** Convert a journal entry to an Obsidian-compatible .md file. */
-export function journalToMarkdown(
-  entry: JournalEntry,
-  topicNames?: Map<string, string>,
-): string {
-  const topics = entry.topicIds
-    .map((id) => topicNames?.get(id) ?? id)
-    .filter(Boolean);
+export function journalToMarkdown(entry: JournalEntry, topicNames?: Map<string, string>): string {
+  const topics = entry.topicIds.map((id) => topicNames?.get(id) ?? id).filter(Boolean);
 
   const frontmatter = buildFrontmatter({
     date: entry.date,
@@ -66,21 +61,14 @@ export function journalToMarkdown(
     modified: formatDate(entry.updatedAt),
   });
 
-  const title = entry.label
-    ? `# ${entry.label}`
-    : `# Journal — ${entry.date}`;
+  const title = entry.label ? `# ${entry.label}` : `# Journal — ${entry.date}`;
 
   return `${frontmatter}\n\n${title}\n\n${entry.content}\n`;
 }
 
 /** Convert a capture to an Obsidian-compatible .md file. */
-export function captureToMarkdown(
-  capture: Capture,
-  topicNames?: Map<string, string>,
-): string {
-  const topics = capture.topicIds
-    .map((id) => topicNames?.get(id) ?? id)
-    .filter(Boolean);
+export function captureToMarkdown(capture: Capture, topicNames?: Map<string, string>): string {
+  const topics = capture.topicIds.map((id) => topicNames?.get(id) ?? id).filter(Boolean);
 
   const frontmatter = buildFrontmatter({
     date: capture.date,

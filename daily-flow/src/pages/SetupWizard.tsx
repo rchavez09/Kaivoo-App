@@ -10,16 +10,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Sparkles,
-  FolderOpen,
-  Download,
-  Bot,
-  Check,
-  ChevronRight,
-  ChevronLeft,
-  Loader2,
-} from 'lucide-react';
+import { Sparkles, FolderOpen, Download, Bot, Check, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { importObsidianVault } from '@/lib/vault/obsidian-import';
 import type { ImportProgress, ImportResult } from '@/lib/vault/obsidian-import';
@@ -43,8 +34,7 @@ const DEFAULT_STATE: WizardState = {
   conciergeTone: 'casual',
 };
 
-const isDesktop = (): boolean =>
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const isDesktop = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 // ─── Wizard Component ───
 
@@ -56,10 +46,7 @@ const SetupWizard = () => {
 
   // Desktop: vault + import steps. Web: skip both.
   const activeSteps = useMemo<WizardStep[]>(
-    () =>
-      desktop
-        ? ['welcome', 'vault', 'import', 'concierge', 'complete']
-        : ['welcome', 'concierge', 'complete'],
+    () => (desktop ? ['welcome', 'vault', 'import', 'concierge', 'complete'] : ['welcome', 'concierge', 'complete']),
     [desktop],
   );
 
@@ -148,18 +135,10 @@ const SetupWizard = () => {
       {/* Step content */}
       <div className="w-full max-w-lg">
         {step === 'welcome' && <WelcomeStep onNext={goNext} />}
-        {step === 'vault' && (
-          <VaultStep state={state} setState={setState} onNext={goNext} onBack={goBack} />
-        )}
-        {step === 'import' && (
-          <ImportStep setState={setState} onNext={goNext} onBack={goBack} />
-        )}
-        {step === 'concierge' && (
-          <ConciergeStep state={state} setState={setState} onNext={goNext} onBack={goBack} />
-        )}
-        {step === 'complete' && (
-          <CompleteStep state={state} onComplete={handleComplete} onBack={goBack} />
-        )}
+        {step === 'vault' && <VaultStep state={state} setState={setState} onNext={goNext} onBack={goBack} />}
+        {step === 'import' && <ImportStep setState={setState} onNext={goNext} onBack={goBack} />}
+        {step === 'concierge' && <ConciergeStep state={state} setState={setState} onNext={goNext} onBack={goBack} />}
+        {step === 'complete' && <CompleteStep state={state} onComplete={handleComplete} onBack={goBack} />}
       </div>
     </div>
   );
@@ -248,8 +227,8 @@ function VaultStep({
       </div>
       <h2 className="mb-2 text-2xl font-semibold text-foreground">Your Vault</h2>
       <p className="mb-6 text-muted-foreground">
-        Kaivoo stores your notes, captures, and topics in a local vault folder.
-        You can open these files in any markdown editor.
+        Kaivoo stores your notes, captures, and topics in a local vault folder. You can open these files in any markdown
+        editor.
       </p>
 
       <div className="mb-6 rounded-xl border border-border bg-card p-4 text-left">
@@ -262,9 +241,7 @@ function VaultStep({
             Browse
           </Button>
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Folders: Topics, Journal, Library, Inbox
-        </p>
+        <p className="mt-3 text-xs text-muted-foreground">Folders: Topics, Journal, Library, Inbox</p>
       </div>
 
       <div className="flex justify-between">
@@ -318,11 +295,7 @@ function ImportStep({
         kaivooPath = `${await appDataDir()}vault`;
       }
 
-      const importResult = await importObsidianVault(
-        selected as string,
-        kaivooPath,
-        setProgress,
-      );
+      const importResult = await importObsidianVault(selected as string, kaivooPath, setProgress);
 
       setResult(importResult);
       setState((prev) => ({ ...prev, importObsidian: true }));
@@ -355,9 +328,7 @@ function ImportStep({
                 ? 'Scanning for markdown files...'
                 : `${progress.current} of ${progress.total} files`}
             </p>
-            {progress.currentFile && (
-              <p className="truncate text-xs text-muted-foreground">{progress.currentFile}</p>
-            )}
+            {progress.currentFile && <p className="truncate text-xs text-muted-foreground">{progress.currentFile}</p>}
           </div>
         )}
       </div>
@@ -376,11 +347,7 @@ function ImportStep({
           <p>
             {result.filesImported} file{result.filesImported !== 1 ? 's' : ''} imported
           </p>
-          {result.skipped > 0 && (
-            <p>
-              {result.skipped} skipped (already exist)
-            </p>
-          )}
+          {result.skipped > 0 && <p>{result.skipped} skipped (already exist)</p>}
           {result.foldersCreated > 0 && (
             <p>
               {result.foldersCreated} folder{result.foldersCreated !== 1 ? 's' : ''} created
@@ -425,9 +392,7 @@ function ImportStep({
           <Download className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <div>
             <p className="font-medium text-foreground">Yes, import my vault</p>
-            <p className="text-xs text-muted-foreground">
-              Copy .md files into Kaivoo (non-destructive)
-            </p>
+            <p className="text-xs text-muted-foreground">Copy .md files into Kaivoo (non-destructive)</p>
           </div>
         </button>
         <button
@@ -441,9 +406,7 @@ function ImportStep({
           <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
           <div>
             <p className="font-medium text-foreground">Start fresh</p>
-            <p className="text-xs text-muted-foreground">
-              I&apos;ll create my notes from scratch
-            </p>
+            <p className="text-xs text-muted-foreground">I&apos;ll create my notes from scratch</p>
           </div>
         </button>
       </div>
@@ -552,12 +515,8 @@ function CompleteStep({
         <Check className="h-10 w-10 text-primary" />
       </div>
       <h2 className="mb-3 text-2xl font-semibold text-foreground">You&apos;re All Set!</h2>
-      <p className="mb-2 text-muted-foreground">
-        {state.conciergeName} is ready to help you organize your world.
-      </p>
-      <p className="mb-8 text-sm text-muted-foreground">
-        You can always adjust settings later from the Settings page.
-      </p>
+      <p className="mb-2 text-muted-foreground">{state.conciergeName} is ready to help you organize your world.</p>
+      <p className="mb-8 text-sm text-muted-foreground">You can always adjust settings later from the Settings page.</p>
       <Button size="lg" onClick={onComplete} className="gap-2">
         <Sparkles className="h-4 w-4" />
         Start Using Kaivoo

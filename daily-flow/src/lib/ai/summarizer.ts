@@ -20,10 +20,7 @@ No markdown, no explanation.`;
  * Generate and save a conversation summary.
  * Skips if conversation is too short or no API key.
  */
-export async function summarizeConversation(
-  conversationId: string,
-  messages: ConversationMessage[],
-): Promise<void> {
+export async function summarizeConversation(conversationId: string, messages: ConversationMessage[]): Promise<void> {
   // Only summarize conversations with at least 3 messages
   if (messages.filter((m) => m.role !== 'tool').length < 3) return;
 
@@ -36,25 +33,22 @@ export async function summarizeConversation(
       .map((m) => `${m.role}: ${m.content.slice(0, 300)}`)
       .join('\n');
 
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          provider: settings.provider,
-          apiKey: settings.apiKey,
-          model: settings.model,
-          ollamaBaseUrl: settings.ollamaBaseUrl,
-          customBaseUrl: settings.customBaseUrl,
-          messages: [{ role: 'user', content: `Conversation transcript:\n${transcript}` }],
-          systemPrompt: SUMMARY_PROMPT,
-        }),
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        'Content-Type': 'application/json',
       },
-    );
+      body: JSON.stringify({
+        provider: settings.provider,
+        apiKey: settings.apiKey,
+        model: settings.model,
+        ollamaBaseUrl: settings.ollamaBaseUrl,
+        customBaseUrl: settings.customBaseUrl,
+        messages: [{ role: 'user', content: `Conversation transcript:\n${transcript}` }],
+        systemPrompt: SUMMARY_PROMPT,
+      }),
+    });
 
     if (!response.ok || !response.body) return;
 

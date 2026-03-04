@@ -26,7 +26,10 @@ export const CREATE_TASK: ToolSchema = {
     properties: {
       title: { type: 'string', description: 'The task title' },
       description: { type: 'string', description: 'Optional detailed description' },
-      due_date: { type: 'string', description: 'Due date in YYYY-MM-DD format. Use "today" for today, "tomorrow" for tomorrow.' },
+      due_date: {
+        type: 'string',
+        description: 'Due date in YYYY-MM-DD format. Use "today" for today, "tomorrow" for tomorrow.',
+      },
       priority: { type: 'string', description: 'Task priority', enum: ['low', 'medium', 'high', 'urgent'] },
       project_name: { type: 'string', description: 'Name of an existing project to assign this task to' },
     },
@@ -51,7 +54,8 @@ export const CREATE_JOURNAL_ENTRY: ToolSchema = {
 
 export const CREATE_CALENDAR_EVENT: ToolSchema = {
   name: 'create_calendar_event',
-  description: 'Create a calendar event or meeting. Use when the user mentions a meeting, appointment, or time-specific event.',
+  description:
+    'Create a calendar event or meeting. Use when the user mentions a meeting, appointment, or time-specific event.',
   parameters: {
     type: 'object',
     properties: {
@@ -97,12 +101,17 @@ export const CREATE_NOTE: ToolSchema = {
 
 export const SEARCH: ToolSchema = {
   name: 'search',
-  description: 'Search across all entities (tasks, journal, notes, captures, projects). Use when the user asks to find or look up something.',
+  description:
+    'Search across all entities (tasks, journal, notes, captures, projects). Use when the user asks to find or look up something.',
   parameters: {
     type: 'object',
     properties: {
       query: { type: 'string', description: 'Search query text' },
-      entity_type: { type: 'string', description: 'Limit search to a specific type', enum: ['task', 'journal', 'capture', 'note', 'project'] },
+      entity_type: {
+        type: 'string',
+        description: 'Limit search to a specific type',
+        enum: ['task', 'journal', 'capture', 'note', 'project'],
+      },
     },
     required: ['query'],
   },
@@ -110,7 +119,8 @@ export const SEARCH: ToolSchema = {
 
 export const GET_TASKS: ToolSchema = {
   name: 'get_tasks',
-  description: 'Get tasks with optional filters. Use when the user asks about their tasks, todos, or what they need to do.',
+  description:
+    'Get tasks with optional filters. Use when the user asks about their tasks, todos, or what they need to do.',
   parameters: {
     type: 'object',
     properties: {
@@ -146,7 +156,8 @@ export const GET_CALENDAR: ToolSchema = {
 
 export const GET_ROUTINES: ToolSchema = {
   name: 'get_routines',
-  description: 'Get routines and habits with completion status. Use when the user asks about their routines, habits, or daily checklist.',
+  description:
+    'Get routines and habits with completion status. Use when the user asks about their routines, habits, or daily checklist.',
   parameters: {
     type: 'object',
     properties: {
@@ -184,7 +195,11 @@ export const GET_PROJECTS: ToolSchema = {
   parameters: {
     type: 'object',
     properties: {
-      status: { type: 'string', description: 'Filter by project status', enum: ['planning', 'active', 'paused', 'completed', 'all'] },
+      status: {
+        type: 'string',
+        description: 'Filter by project status',
+        enum: ['planning', 'active', 'paused', 'completed', 'all'],
+      },
     },
   },
 };
@@ -197,7 +212,10 @@ export const COMPLETE_TASK: ToolSchema = {
   parameters: {
     type: 'object',
     properties: {
-      task_title: { type: 'string', description: 'Title or partial title of the task to complete. Will search for the best match.' },
+      task_title: {
+        type: 'string',
+        description: 'Title or partial title of the task to complete. Will search for the best match.',
+      },
     },
     required: ['task_title'],
   },
@@ -221,7 +239,8 @@ export const UPDATE_TASK: ToolSchema = {
 
 export const LOG_ROUTINE: ToolSchema = {
   name: 'log_routine',
-  description: 'Check off / log a routine completion. Use when the user says they did a routine or want to mark it done.',
+  description:
+    'Check off / log a routine completion. Use when the user says they did a routine or want to mark it done.',
   parameters: {
     type: 'object',
     properties: {
@@ -249,12 +268,21 @@ export const LOG_HABIT: ToolSchema = {
 
 export const REMEMBER_USER_FACT: ToolSchema = {
   name: 'remember_user_fact',
-  description: 'Save something to long-term memory about the user. Use when the user says "remember this", "keep in mind", "note that I...", or explicitly asks you to remember a preference, fact, or detail about themselves.',
+  description:
+    'Save something to long-term memory about the user. Use when the user says "remember this", "keep in mind", "note that I...", or explicitly asks you to remember a preference, fact, or detail about themselves.',
   parameters: {
     type: 'object',
     properties: {
-      content: { type: 'string', description: 'The fact, preference, or detail to remember. Write from the user\'s perspective, e.g. "Prefers dark mode" or "Has a dog named Max".' },
-      category: { type: 'string', description: 'Category of the memory', enum: ['preference', 'fact', 'goal', 'relationship', 'pattern'] },
+      content: {
+        type: 'string',
+        description:
+          'The fact, preference, or detail to remember. Write from the user\'s perspective, e.g. "Prefers dark mode" or "Has a dog named Max".',
+      },
+      category: {
+        type: 'string',
+        description: 'Category of the memory',
+        enum: ['preference', 'fact', 'goal', 'relationship', 'pattern'],
+      },
     },
     required: ['content', 'category'],
   },

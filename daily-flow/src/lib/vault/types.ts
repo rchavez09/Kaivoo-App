@@ -78,8 +78,18 @@ export const ROOT_FOLDERS = [
 ] as const;
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ] as const;
 
 // ═══════════════════════════════════════════════════════
@@ -89,7 +99,12 @@ const MONTH_NAMES = [
 /** Sanitize a name for use as a folder/file name */
 export function sanitizeName(name: string): string {
   // eslint-disable-next-line no-control-regex
-  return name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').replace(/\s+/g, ' ').trim() || 'Untitled';
+  return (
+    name
+      .replace(/[<>:"/\\|?*\x00-\x1f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim() || 'Untitled'
+  );
 }
 
 /** Journal folder path for a date: Journal/2026/03 - March */

@@ -34,9 +34,7 @@ Example: [{"content": "Prefers dark mode", "category": "preference"}]`;
  * Extract memories from a conversation. Returns newly saved memories.
  * Skips extraction if the conversation is too short or no API key is configured.
  */
-export async function extractMemories(
-  messages: ConversationMessage[],
-): Promise<AIMemory[]> {
+export async function extractMemories(messages: ConversationMessage[]): Promise<AIMemory[]> {
   // Only extract from conversations with at least 2 user messages
   const userMessages = messages.filter((m) => m.role === 'user');
   if (userMessages.length < 2) return [];
@@ -51,25 +49,22 @@ export async function extractMemories(
       .map((m) => `${m.role}: ${m.content.slice(0, 500)}`)
       .join('\n');
 
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          provider: settings.provider,
-          apiKey: settings.apiKey,
-          model: settings.model,
-          ollamaBaseUrl: settings.ollamaBaseUrl,
-          customBaseUrl: settings.customBaseUrl,
-          messages: [{ role: 'user', content: `Conversation transcript:\n${transcript}` }],
-          systemPrompt: EXTRACTION_PROMPT,
-        }),
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        'Content-Type': 'application/json',
       },
-    );
+      body: JSON.stringify({
+        provider: settings.provider,
+        apiKey: settings.apiKey,
+        model: settings.model,
+        ollamaBaseUrl: settings.ollamaBaseUrl,
+        customBaseUrl: settings.customBaseUrl,
+        messages: [{ role: 'user', content: `Conversation transcript:\n${transcript}` }],
+        systemPrompt: EXTRACTION_PROMPT,
+      }),
+    });
 
     if (!response.ok || !response.body) return [];
 

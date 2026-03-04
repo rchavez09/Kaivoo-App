@@ -24,13 +24,7 @@ const ENC_SALT = 'kaivoo-device-key-v1';
 
 async function deriveKey(): Promise<CryptoKey> {
   const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(ENC_SALT),
-    'PBKDF2',
-    false,
-    ['deriveKey'],
-  );
+  const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(ENC_SALT), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
     { name: 'PBKDF2', salt: encoder.encode('kaivoo'), iterations: 100_000, hash: 'SHA-256' },
     keyMaterial,

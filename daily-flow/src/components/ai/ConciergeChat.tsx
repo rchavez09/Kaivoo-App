@@ -13,12 +13,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -121,7 +116,8 @@ const ConciergeChat = () => {
       .filter((t) => t.dueDate === today)
       .map((t) => ({ title: t.title, priority: t.priority, status: t.status }));
 
-    const todaysMeetings = store.getMeetingsForDate(new Date())
+    const todaysMeetings = store
+      .getMeetingsForDate(new Date())
       .map((m) => ({ title: m.title, startTime: m.startTime.toISOString(), endTime: m.endTime.toISOString() }));
 
     const journalEntriesToday = store.getJournalEntriesForDate(today).length;
@@ -146,16 +142,19 @@ const ConciergeChat = () => {
   }, []);
 
   // Build executor actions from hooks
-  const buildExecutorActions = useCallback((): ExecutorActions => ({
-    addTask: actions.addTask,
-    updateTask: actions.updateTask,
-    addMeeting: actions.addMeeting,
-    addJournalEntry: actions.addJournalEntry,
-    addCapture: actions.addCapture,
-    addTopicPage: actions.addTopicPage,
-    toggleRoutineCompletion: actions.toggleRoutineCompletion,
-    logAction,
-  }), [actions, logAction]);
+  const buildExecutorActions = useCallback(
+    (): ExecutorActions => ({
+      addTask: actions.addTask,
+      updateTask: actions.updateTask,
+      addMeeting: actions.addMeeting,
+      addJournalEntry: actions.addJournalEntry,
+      addCapture: actions.addCapture,
+      addTopicPage: actions.addTopicPage,
+      toggleRoutineCompletion: actions.toggleRoutineCompletion,
+      logAction,
+    }),
+    [actions, logAction],
+  );
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
@@ -223,7 +222,9 @@ const ConciergeChat = () => {
         const stream = streamChat(workingMessages, {
           systemPrompt,
           tools: ALL_TOOLS,
-          onTitleSuggestion: (title) => { titleSuggestion = title; },
+          onTitleSuggestion: (title) => {
+            titleSuggestion = title;
+          },
           signal: controller.signal,
         });
 
@@ -342,7 +343,7 @@ const ConciergeChat = () => {
     <>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent className="flex w-96 flex-col p-0" side="right">
-          <SheetHeader className="border-b border-border px-4 pr-12 py-3">
+          <SheetHeader className="border-b border-border px-4 py-3 pr-12">
             {view === 'list' ? (
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-base">Conversations</SheetTitle>
@@ -363,9 +364,7 @@ const ConciergeChat = () => {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <SheetTitle className="flex-1 truncate text-base">
-                  {conversation.title}
-                </SheetTitle>
+                <SheetTitle className="flex-1 truncate text-base">{conversation.title}</SheetTitle>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleNewConversation}>
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -394,14 +393,8 @@ const ConciergeChat = () => {
                         conv.id === conversation.id && 'bg-accent/50',
                       )}
                     >
-                      <button
-                        type="button"
-                        className="flex-1 text-left"
-                        onClick={() => handleSelectConversation(conv)}
-                      >
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {conv.title}
-                        </p>
+                      <button type="button" className="flex-1 text-left" onClick={() => handleSelectConversation(conv)}>
+                        <p className="truncate text-sm font-medium text-foreground">{conv.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {conv.messages.length} message{conv.messages.length !== 1 ? 's' : ''}
                         </p>
@@ -426,9 +419,7 @@ const ConciergeChat = () => {
                 {!isConfigured && conversation.messages.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Settings className="mb-3 h-8 w-8 text-muted-foreground" />
-                    <p className="mb-1 text-sm font-medium text-foreground">
-                      Set up your AI provider
-                    </p>
+                    <p className="mb-1 text-sm font-medium text-foreground">Set up your AI provider</p>
                     <p className="mb-4 text-xs text-muted-foreground">
                       Go to Settings → AI Provider to configure your API key.
                     </p>
@@ -438,12 +429,8 @@ const ConciergeChat = () => {
                 {isConfigured && conversation.messages.length === 0 && !streaming && (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Bot className="mb-3 h-8 w-8 text-primary" />
-                    <p className="mb-1 text-sm font-medium text-foreground">
-                      Hi! I&apos;m {conciergeName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Ask me anything about your notes, tasks, or ideas.
-                    </p>
+                    <p className="mb-1 text-sm font-medium text-foreground">Hi! I&apos;m {conciergeName}</p>
+                    <p className="text-xs text-muted-foreground">Ask me anything about your notes, tasks, or ideas.</p>
                   </div>
                 )}
 
@@ -540,9 +527,7 @@ const ConciergeChat = () => {
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
           'fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all',
-          isOpen
-            ? 'scale-90 bg-primary text-primary-foreground'
-            : 'bg-primary text-primary-foreground hover:scale-105',
+          isOpen ? 'scale-90 bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground hover:scale-105',
         )}
         aria-label={isOpen ? 'Close concierge' : 'Open concierge'}
       >

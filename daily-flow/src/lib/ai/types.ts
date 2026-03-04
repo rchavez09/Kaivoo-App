@@ -7,7 +7,15 @@
 
 // ─── Provider Types ───
 
-export type AIProviderType = 'openai' | 'anthropic' | 'google' | 'groq' | 'mistral' | 'deepseek' | 'ollama' | 'openai-compatible';
+export type AIProviderType =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'groq'
+  | 'mistral'
+  | 'deepseek'
+  | 'ollama'
+  | 'openai-compatible';
 
 export type AIDepth = 'light' | 'medium' | 'heavy';
 

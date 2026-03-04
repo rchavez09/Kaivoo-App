@@ -20,9 +20,7 @@ const MAX_MESSAGES_PER_CONVERSATION = 200;
 
 // ─── Stream Event Types ───
 
-export type StreamEvent =
-  | { type: 'text'; text: string }
-  | { type: 'tool_call'; toolCall: ToolCall };
+export type StreamEvent = { type: 'text'; text: string } | { type: 'tool_call'; toolCall: ToolCall };
 
 // ─── Conversation Persistence ───
 
@@ -68,22 +66,17 @@ export function createConversation(): Conversation {
 
 // ─── Test Connection ───
 
-export async function testConnection(
-  settings: AISettings,
-): Promise<{ ok: boolean; message: string }> {
+export async function testConnection(settings: AISettings): Promise<{ ok: boolean; message: string }> {
   try {
-    const { data, error } = await supabase.functions.invoke<{ ok: boolean; message: string }>(
-      'ai-chat',
-      {
-        body: {
-          test: true,
-          provider: settings.provider,
-          apiKey: settings.apiKey,
-          model: settings.model,
-          ollamaBaseUrl: settings.ollamaBaseUrl,
-        },
+    const { data, error } = await supabase.functions.invoke<{ ok: boolean; message: string }>('ai-chat', {
+      body: {
+        test: true,
+        provider: settings.provider,
+        apiKey: settings.apiKey,
+        model: settings.model,
+        ollamaBaseUrl: settings.ollamaBaseUrl,
       },
-    );
+    });
 
     if (error) {
       return { ok: false, message: `Connection error: ${error.message}` };
@@ -132,27 +125,24 @@ export async function* streamChat(
     return { role: m.role, content: m.content };
   });
 
-  const response = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        provider: settings.provider,
-        apiKey: settings.apiKey,
-        model: settings.model,
-        ollamaBaseUrl: settings.ollamaBaseUrl,
-        customBaseUrl: settings.customBaseUrl,
-        messages: apiMessages,
-        systemPrompt: options.systemPrompt,
-        tools: options.tools,
-      }),
-      signal: options.signal,
+  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({
+      provider: settings.provider,
+      apiKey: settings.apiKey,
+      model: settings.model,
+      ollamaBaseUrl: settings.ollamaBaseUrl,
+      customBaseUrl: settings.customBaseUrl,
+      messages: apiMessages,
+      systemPrompt: options.systemPrompt,
+      tools: options.tools,
+    }),
+    signal: options.signal,
+  });
 
   if (!response.ok) {
     const errorText = await response.text();

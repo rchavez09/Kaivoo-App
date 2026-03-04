@@ -33,7 +33,9 @@ export interface ExecutorActions {
   addTask: (data: Omit<Task, 'id' | 'createdAt'>) => Promise<Task | undefined>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   addMeeting: (data: Omit<Meeting, 'id'>) => Promise<Meeting | undefined>;
-  addJournalEntry: (data: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt' | 'timestamp'>) => Promise<JournalEntry | undefined>;
+  addJournalEntry: (
+    data: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt' | 'timestamp'>,
+  ) => Promise<JournalEntry | undefined>;
   addCapture: (data: Omit<Capture, 'id' | 'createdAt'>) => Promise<Capture | undefined>;
   addTopicPage: (data: { topicId: string; name: string }) => Promise<{ id: string } | undefined>;
   toggleRoutineCompletion: (routineId: string, date?: string) => Promise<void>;
@@ -141,7 +143,11 @@ export async function executeTool(
         });
         if (task) {
           await actions.logAction?.('task_created', { taskId: task.id, title: task.title }, userMessage);
-          return { success: true, data: { id: task.id, title: task.title, dueDate }, message: `Created task "${task.title}" due ${dueDate}${project ? ` in project ${project.name}` : ''}.` };
+          return {
+            success: true,
+            data: { id: task.id, title: task.title, dueDate },
+            message: `Created task "${task.title}" due ${dueDate}${project ? ` in project ${project.name}` : ''}.`,
+          };
         }
         return { success: false, message: 'Failed to create task.' };
       }
@@ -159,7 +165,11 @@ export async function executeTool(
         });
         if (entry) {
           await actions.logAction?.('journal_created', { entryId: entry.id }, userMessage);
-          return { success: true, data: { id: entry.id }, message: `Created journal entry for ${date}${label ? ` titled "${label}"` : ''}.` };
+          return {
+            success: true,
+            data: { id: entry.id },
+            message: `Created journal entry for ${date}${label ? ` titled "${label}"` : ''}.`,
+          };
         }
         return { success: false, message: 'Failed to create journal entry.' };
       }
@@ -167,11 +177,13 @@ export async function executeTool(
       case 'create_calendar_event': {
         const date = resolveDate(args.date as string);
         const startTime = args.start_time as string;
-        const endTime = (args.end_time as string) || (() => {
-          const [h, m] = startTime.split(':').map(Number);
-          const endH = Math.min(h + 1, 23);
-          return `${String(endH).padStart(2, '0')}:${String(endH === 23 && h === 23 ? 59 : m).padStart(2, '0')}`;
-        })();
+        const endTime =
+          (args.end_time as string) ||
+          (() => {
+            const [h, m] = startTime.split(':').map(Number);
+            const endH = Math.min(h + 1, 23);
+            return `${String(endH).padStart(2, '0')}:${String(endH === 23 && h === 23 ? 59 : m).padStart(2, '0')}`;
+          })();
         const startISO = `${date}T${startTime}:00`;
         const endISO = `${date}T${endTime}:00`;
         const meeting = await actions.addMeeting({
@@ -186,7 +198,11 @@ export async function executeTool(
         });
         if (meeting) {
           await actions.logAction?.('meeting_created', { meetingId: meeting.id, title: meeting.title }, userMessage);
-          return { success: true, data: { id: meeting.id }, message: `Created event "${meeting.title}" on ${date} at ${startTime}–${endTime}.` };
+          return {
+            success: true,
+            data: { id: meeting.id },
+            message: `Created event "${meeting.title}" on ${date} at ${startTime}–${endTime}.`,
+          };
         }
         return { success: false, message: 'Failed to create calendar event.' };
       }
@@ -214,13 +230,20 @@ export async function executeTool(
           const topic = findTopic(topicName);
           topicId = topic?.id;
           if (!topicId) {
-            return { success: false, message: `Could not find topic "${topicName}". Please check the name and try again.` };
+            return {
+              success: false,
+              message: `Could not find topic "${topicName}". Please check the name and try again.`,
+            };
           }
         }
         if (topicId) {
           const page = await actions.addTopicPage({ topicId, name: args.title as string });
           if (page) {
-            return { success: true, data: { id: page.id }, message: `Created note "${args.title as string}" in topic.` };
+            return {
+              success: true,
+              data: { id: page.id },
+              message: `Created note "${args.title as string}" in topic.`,
+            };
           }
         }
         return { success: false, message: 'Failed to create note. A topic is required.' };
@@ -267,9 +290,10 @@ export async function executeTool(
         return {
           success: true,
           data: limited,
-          message: limited.length > 0
-            ? `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${queryStr}".`
-            : `No results found for "${queryStr}".`,
+          message:
+            limited.length > 0
+              ? `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${queryStr}".`
+              : `No results found for "${queryStr}".`,
         };
       }
 
@@ -321,9 +345,10 @@ export async function executeTool(
         return {
           success: true,
           data: summary,
-          message: entries.length > 0
-            ? `Found ${entries.length} journal entr${entries.length !== 1 ? 'ies' : 'y'} for ${date}.`
-            : `No journal entries for ${date}.`,
+          message:
+            entries.length > 0
+              ? `Found ${entries.length} journal entr${entries.length !== 1 ? 'ies' : 'y'} for ${date}.`
+              : `No journal entries for ${date}.`,
         };
       }
 
@@ -341,9 +366,10 @@ export async function executeTool(
         return {
           success: true,
           data: summary,
-          message: meetings.length > 0
-            ? `${meetings.length} event${meetings.length !== 1 ? 's' : ''} on ${date}.`
-            : `No events on ${date}.`,
+          message:
+            meetings.length > 0
+              ? `${meetings.length} event${meetings.length !== 1 ? 's' : ''} on ${date}.`
+              : `No events on ${date}.`,
         };
       }
 
@@ -394,7 +420,9 @@ export async function executeTool(
       case 'get_captures': {
         const store = useKaivooStore.getState();
         const limit = (args.limit as number) || 10;
-        const sorted = [...store.captures].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const sorted = [...store.captures].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
         const results = sorted.slice(0, limit).map((c) => ({
           content: c.content.slice(0, 200),
           date: c.date,

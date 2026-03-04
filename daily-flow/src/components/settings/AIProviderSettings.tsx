@@ -9,17 +9,18 @@ import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, EyeOff, Loader2, CheckCircle2, XCircle, Zap, Sparkles, Brain, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AI_PROVIDERS, getProviderConfig } from '@/lib/ai/providers';
-import { getAISettings, saveAISettings, getSoulConfig, saveSoulConfig, getRememberApiKey, setRememberApiKey } from '@/lib/ai/settings';
+import {
+  getAISettings,
+  saveAISettings,
+  getSoulConfig,
+  saveSoulConfig,
+  getRememberApiKey,
+  setRememberApiKey,
+} from '@/lib/ai/settings';
 import { testConnection } from '@/lib/ai/chat-service';
 import { getMemories, deleteMemory, toggleMemoryActive } from '@/lib/ai/memory-service';
 import type { AISettings, AIDepth, AIProviderType, SoulConfig, AIMemory } from '@/lib/ai/types';
@@ -241,12 +242,7 @@ export default function AIProviderSettings() {
             <p className="text-sm font-medium text-foreground">Test Connection</p>
             <p className="text-xs text-muted-foreground">Verify your API key and model access</p>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => void handleTest()}
-            disabled={!canTest || testing}
-          >
+          <Button size="sm" variant="outline" onClick={() => void handleTest()} disabled={!canTest || testing}>
             {testing ? (
               <>
                 <Loader2 className="mr-2 h-3 w-3 animate-spin" />
@@ -286,9 +282,7 @@ export default function AIProviderSettings() {
           onChange={(e) => updateSoul({ name: e.target.value })}
           placeholder="Kaivoo Assistant"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
-          The name your AI concierge introduces itself as.
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">The name your AI concierge introduces itself as.</p>
       </div>
 
       <div>
@@ -385,7 +379,7 @@ export default function AIProviderSettings() {
                   memory.active ? 'border-border bg-card' : 'border-border/50 bg-muted/30 opacity-60'
                 }`}
               >
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm text-foreground">{memory.content}</p>
                   <p className="mt-1 text-[10px] text-muted-foreground">
                     {memory.category} · {memory.source} · {new Date(memory.createdAt).toLocaleDateString()}
@@ -395,7 +389,9 @@ export default function AIProviderSettings() {
                   <button
                     type="button"
                     onClick={() => {
-                      void toggleMemoryActive(memory.id, !memory.active).then(() => getMemories(false)).then(setMemories);
+                      void toggleMemoryActive(memory.id, !memory.active)
+                        .then(() => getMemories(false))
+                        .then(setMemories);
                     }}
                     className="rounded p-1 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
                     title={memory.active ? 'Disable memory' : 'Enable memory'}
@@ -405,7 +401,12 @@ export default function AIProviderSettings() {
                   <button
                     type="button"
                     onClick={() => {
-                      void deleteMemory(memory.id).then(() => getMemories(false)).then((m) => { setMemories(m); toast.success('Memory deleted'); });
+                      void deleteMemory(memory.id)
+                        .then(() => getMemories(false))
+                        .then((m) => {
+                          setMemories(m);
+                          toast.success('Memory deleted');
+                        });
                     }}
                     className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     title="Delete memory"
