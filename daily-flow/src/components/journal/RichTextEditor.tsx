@@ -132,13 +132,36 @@ const RichTextEditor = ({
     (file: File) => {
       if (!editor) return;
       if (onImageUpload) {
-        // Upload to storage and insert by URL
+        // Upload to storage, verify the image loads, then insert
+        const toastId = toast.loading(`Uploading ${file.name}…`);
         void (async () => {
+          let uploadedUrl: string | null = null;
           try {
-            const url = await onImageUpload(file);
-            editor.chain().focus().setImage({ src: url }).run();
+            uploadedUrl = await onImageUpload(file);
+
+            // Verify the image is accessible before inserting
+            const img = new window.Image();
+            await new Promise<void>((resolve, reject) => {
+              img.onload = () => resolve();
+              img.onerror = () => reject(new Error('Image not accessible'));
+              img.src = uploadedUrl!;
+            });
+
+            editor.chain().focus().setImage({ src: uploadedUrl, alt: file.name }).run();
+            toast.dismiss(toastId);
           } catch (e) {
-            toast.error(e instanceof Error ? e.message : 'Image upload failed');
+            toast.dismiss(toastId);
+            // Upload succeeded but image URL not accessible — insert as a clickable link
+            if (e instanceof Error && e.message === 'Image not accessible' && uploadedUrl) {
+              editor
+                .chain()
+                .focus()
+                .insertContent(`<a href="${uploadedUrl}" target="_blank" rel="noopener">${file.name}</a>`)
+                .run();
+              toast.warning('Image uploaded but preview unavailable — inserted as link');
+            } else {
+              toast.error(e instanceof Error ? e.message : 'Image upload failed');
+            }
           }
         })();
       } else {
