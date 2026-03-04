@@ -105,17 +105,21 @@ export async function extractMemories(messages: ConversationMessage[]): Promise<
     const facts = JSON.parse(jsonMatch[0]) as ExtractedFact[];
     if (!Array.isArray(facts) || facts.length === 0) return [];
 
-    // Deduplicate against existing memories
+    // Deduplicate against existing memories (substring match, not just exact)
     const existing = await getMemories();
-    const existingContents = new Set(existing.map((m) => m.content.toLowerCase()));
+    const existingLower = existing.map((m) => m.content.toLowerCase());
 
     const newMemories: AIMemory[] = [];
     for (const fact of facts.slice(0, 5)) {
       if (!fact.content || !fact.category) continue;
-      if (existingContents.has(fact.content.toLowerCase())) continue;
+      const factLower = fact.content.toLowerCase();
+      const isDuplicate = existingLower.some((e) => e.includes(factLower) || factLower.includes(e));
+      if (isDuplicate) continue;
 
       const memory = await addMemory(fact.content, fact.category, 'extraction');
       newMemories.push(memory);
+      // Add to existing list so subsequent facts in this batch also dedup against each other
+      existingLower.push(factLower);
     }
 
     return newMemories;

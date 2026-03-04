@@ -15,7 +15,7 @@
 import type { ToolCall, MemoryCategory } from '../types';
 import type { Task, Meeting, JournalEntry, Capture, Project, RoutineItem, Habit } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
-import { addMemory } from '../memory-service';
+import { addMemory, getMemories } from '../memory-service';
 import { format, addDays, parse } from 'date-fns';
 
 // ─── Types ───
@@ -525,6 +525,18 @@ export async function executeTool(
       case 'remember_user_fact': {
         const content = args.content as string;
         const category = (args.category as MemoryCategory) || 'fact';
+
+        // Dedup: check if a similar memory already exists (substring match)
+        const existing = await getMemories();
+        const contentLower = content.toLowerCase();
+        const isDuplicate = existing.some((m) => {
+          const existingLower = m.content.toLowerCase();
+          return existingLower.includes(contentLower) || contentLower.includes(existingLower);
+        });
+        if (isDuplicate) {
+          return { success: true, message: `I already have that in my memory.` };
+        }
+
         const memory = await addMemory(content, category, 'explicit');
         if (memory) {
           await actions.logAction?.('memory_saved', { memoryId: memory.id, content, category }, userMessage);

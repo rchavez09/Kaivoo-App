@@ -219,6 +219,63 @@ async function handleTest(
   }
 }
 
+// ─── Anthropic Message Transformation ───
+
+/**
+ * Convert OpenAI-format messages to Anthropic format.
+ * Key differences:
+ *  - Assistant messages with tool_calls → content array with tool_use blocks
+ *  - Tool result messages (role:"tool") → user messages with tool_result blocks
+ *  - Consecutive tool results grouped into a single user message
+ */
+// deno-lint-ignore no-explicit-any
+function transformMessagesForAnthropic(messages: ChatMessage[]): any[] {
+  // deno-lint-ignore no-explicit-any
+  const result: any[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+
+    if (msg.role === "assistant" && msg.tool_calls?.length) {
+      // Assistant message with tool calls → content array
+      // deno-lint-ignore no-explicit-any
+      const content: any[] = [];
+      if (msg.content) {
+        content.push({ type: "text", text: msg.content });
+      }
+      for (const tc of msg.tool_calls) {
+        content.push({
+          type: "tool_use",
+          id: tc.id,
+          name: tc.name,
+          input: tc.arguments || {},
+        });
+      }
+      result.push({ role: "assistant", content });
+    } else if (msg.role === "tool") {
+      // Collect consecutive tool results into one user message
+      // deno-lint-ignore no-explicit-any
+      const toolResults: any[] = [];
+      let j = i;
+      while (j < messages.length && messages[j].role === "tool") {
+        toolResults.push({
+          type: "tool_result",
+          tool_use_id: messages[j].tool_call_id,
+          content: messages[j].content,
+        });
+        j++;
+      }
+      result.push({ role: "user", content: toolResults });
+      i = j - 1; // Skip processed messages
+    } else {
+      // Regular user/assistant message
+      result.push({ role: msg.role, content: msg.content });
+    }
+  }
+
+  return result;
+}
+
 // ─── Streaming Chat ───
 
 async function handleChat(body: ChatRequest): Promise<Response> {
@@ -263,11 +320,15 @@ async function handleChat(body: ChatRequest): Promise<Response> {
       body: JSON.stringify(requestBody),
     });
   } else if (provider === "anthropic") {
+    // Transform messages from OpenAI format to Anthropic format
+    // (critical for tool-use round-trips where role:"tool" must become tool_result)
+    const anthropicMessages = transformMessagesForAnthropic(messages);
+
     // deno-lint-ignore no-explicit-any
     const requestBody: any = {
       model,
       system: systemPrompt,
-      messages,
+      messages: anthropicMessages,
       max_tokens: 4096,
       stream: true,
     };

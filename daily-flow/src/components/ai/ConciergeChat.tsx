@@ -10,6 +10,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -54,6 +55,7 @@ const ConciergeChat = () => {
   const abortRef = useRef<AbortController | null>(null);
 
   // Hooks for tool execution
+  const navigate = useNavigate();
   const actions = useKaivooActions();
   const { logAction } = useAIActionLog();
 
@@ -308,6 +310,13 @@ const ConciergeChat = () => {
           const name = soul?.name || 'Concierge';
           toast.success(`${name} remembered ${newMemories.length} new thing${newMemories.length !== 1 ? 's' : ''}`, {
             description: newMemories.map((m) => m.content).join('; '),
+            action: {
+              label: 'View memories',
+              onClick: () => {
+                setIsOpen(false);
+                navigate('/settings');
+              },
+            },
           });
         }
       })();
@@ -316,12 +325,14 @@ const ConciergeChat = () => {
       const message = e instanceof Error ? e.message : 'Chat failed';
       toast.error('Chat error', { description: message });
 
-      // Save the conversation with messages even if streaming failed
+      // Save and display the conversation with messages even if streaming failed
+      // (preserves assistant messages and tool results from completed rounds)
       const failedConv: Conversation = {
         ...updatedConv,
         messages: workingMessages,
         updatedAt: new Date().toISOString(),
       };
+      setConversation(failedConv);
       saveConversation(failedConv);
       setConversations(getConversations());
     } finally {
@@ -329,7 +340,7 @@ const ConciergeChat = () => {
       setStreaming(false);
       setToolStatus(null);
     }
-  }, [input, streaming, conversation, buildAppContext, buildExecutorActions]);
+  }, [input, streaming, conversation, buildAppContext, buildExecutorActions, navigate]);
 
   const soul = getSoulConfig();
   const currentSettings = getAISettings();

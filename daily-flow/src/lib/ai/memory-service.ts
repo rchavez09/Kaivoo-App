@@ -47,7 +47,7 @@ async function getDb() {
 
 export async function getMemories(activeOnly = true): Promise<AIMemory[]> {
   if (memoriesCache) {
-    return activeOnly ? memoriesCache.filter((m) => m.active) : memoriesCache;
+    return activeOnly ? memoriesCache.filter((m) => m.active) : [...memoriesCache];
   }
 
   if (isTauri()) {
@@ -62,7 +62,7 @@ export async function getMemories(activeOnly = true): Promise<AIMemory[]> {
     memoriesCache = loadFromStorage<AIMemory>(MEMORIES_KEY);
   }
 
-  return activeOnly ? memoriesCache.filter((m) => m.active) : memoriesCache;
+  return activeOnly ? memoriesCache.filter((m) => m.active) : [...memoriesCache];
 }
 
 export async function addMemory(content: string, category: MemoryCategory, source: MemorySource): Promise<AIMemory> {

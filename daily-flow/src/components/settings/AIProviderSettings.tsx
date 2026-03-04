@@ -5,7 +5,7 @@
  * model picker, depth preference, and connection test.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -46,6 +46,9 @@ export default function AIProviderSettings() {
   const [remember, setRemember] = useState(getRememberApiKey);
   const [memories, setMemories] = useState<AIMemory[]>([]);
 
+  // Per-provider key cache — remembers keys when switching providers within a session
+  const providerKeysRef = useRef<Record<string, string>>({});
+
   useEffect(() => {
     void getMemories(false).then(setMemories);
   }, []);
@@ -65,10 +68,16 @@ export default function AIProviderSettings() {
     (value: string) => {
       const config = getProviderConfig(value);
       if (!config) return;
+      // Save current key for current provider before switching
+      if (settings.apiKey) {
+        providerKeysRef.current[settings.provider] = settings.apiKey;
+      }
+      // Restore saved key for new provider (or empty string)
+      const savedKey = providerKeysRef.current[value] || '';
       update({
         provider: value as AIProviderType,
         model: config.models[0]?.id || '',
-        apiKey: value === settings.provider ? settings.apiKey : '',
+        apiKey: savedKey,
       });
     },
     [update, settings.provider, settings.apiKey],
