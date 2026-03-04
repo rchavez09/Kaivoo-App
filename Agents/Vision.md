@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 5.3
+**Version:** 5.4
 **Last Updated:** March 4, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -399,8 +399,8 @@ The app is local-first and yours forever. The subscription is for convenience an
 | Desktop packaging (Tauri 2.0) — macOS scaffold complete, .dmg builds. Windows/Linux CI in Sprint 22. | **DONE** | Sprint 20 |
 | Data layer abstraction — DataAdapter pattern (4 interfaces, 15 entity sub-adapters). SupabaseAdapter + LocalAdapter. Runtime switching via `isTauri()`. | **DONE** | Sprint 20 |
 | Local-first storage — SQLite CRUD persistence, FTS5 search, local auth session. Data persists to disk without Supabase. | **DONE** | Sprint 21 |
-| File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | **PARTIAL** (Sprint 25 — project attachments only. Topic/journal attachments + inline images in Sprint 26) | Must-have |
-| Topic content editing — rich text body on topics and topic pages, Tiptap editor, auto-save | **IN PROGRESS** (Sprint 26) | Must-have |
+| File attachments + image embedding — files in project/topic/journal folders, images uploaded to storage and embedded inline in rich text editor, `.attachments/` storage (desktop), Supabase Storage bucket (web) | **DONE** (Sprint 25 projects, Sprint 26 topics + journal + inline images) | Must-have |
+| Topic content editing — rich text body on topics and topic pages, Tiptap editor, auto-save, content column in DB | **DONE** (Sprint 26) | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | **DONE** (Sprint 23) | Must-have |
 | AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | **DONE** (Sprint 23 — in-app chat; Telegram deferred to Phase B) | Must-have |
 | Soul file — persistent AI memory (SQLite `ai_memories` table, fact extraction pipeline, user-editable memory UI, app context injection, conversation summaries). The concierge learns, remembers, and sees your data. | **DONE** (Sprint 24) | Must-have |
@@ -512,10 +512,8 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (final pre-launch sprints)
-**Active sprint:** Sprint 26 (Feature Completion) — closing gaps found in code-vs-Vision audit
-**Last completed:** Sprint 25 (Ship Prep & Desktop Polish) — Ed25519 license key system, Stripe Checkout integration, auto-updater (tauri-plugin-updater), release workflow (3-platform CI/CD), file attachments (project-only), subtask reorder, OpenRouter provider, bundle optimization (497KB→381KB), desktop sandbox fixes (Tauri permissions, adapter race condition, vault scope validation, habit completion reactivity)
-
-**Sprint 26 scope:** Attachments on topics + journal entries, inline images in rich text, topic content editing (DB migration + Tiptap editor), desktop data export, vault markdown export UI, FloatingChat cleanup. 9 parcels across 3 tracks. See `Sprints/Sprint-26-Feature-Completion.md`.
+**Active sprint:** None (planning Sprint 27)
+**Last completed:** Sprint 26 (Feature Completion) — Attachments everywhere (topics, journal entries, projects), inline images in rich text (storage-backed upload), topic content editing (Tiptap editor + auto-save + DB migration), desktop data export (JSON + markdown), vault markdown export UI, FloatingChat cleanup. 9/9 parcels done. See `Sprints/Sprint-26-Feature-Completion.md`.
 
 **Sprint 24 delivered:** Soul File & Concierge Intelligence — soul file personality (name, tone, backstory, communication prefs, working style), AI memory system (localStorage + SQLite CRUD, substring dedup, category/source tracking), 18-tool concierge with multi-round tool-use loops (create/read/update tasks, journal, calendar, notes, captures, projects, routines, habits, memory), 6-layer system prompt assembly (soul + memories + summaries + app context + tools), provider-agnostic SSE streaming via Supabase Edge Function (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Ollama, OpenAI-compatible), Anthropic message transformation for tool-use round-trips, memory extraction pipeline (LLM-based fact extraction with batch dedup), conversation summaries, per-provider API key caching, WCAG AA accessibility (aria-checked radio groups, non-color selection indicators, token-based contrast). 265 tests. See `Sprints/Sprint-24-Soul-File-Concierge.md`.
 
@@ -692,7 +690,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v5.3 — March 4, 2026*
+*Vision v5.4 — March 4, 2026*
+*v5.4: Sprint 26 (Feature Completion) complete. 9/9 parcels done. File attachments now work on topics, journal entries, and projects (was project-only). Inline images upload to Supabase Storage bucket (was base64). Topic content editing shipped (Tiptap rich text + content DB column + auto-save). Desktop JSON + markdown export working. FloatingChat removed (ConciergeChat is sole chat). File attachments and topic content editing milestones marked DONE. See `Sprints/Sprint-26-Feature-Completion.md`.*
 *v5.3: Sprint 26 (Feature Completion) started. Code-vs-Vision audit found 5 gaps: attachments project-only, no topic content editing, desktop export broken, vault markdown export orphaned, FloatingChat legacy overlap. File attachments milestone corrected from DONE to PARTIAL. Topic content editing added as new milestone. Launch prep bumped to Sprint 27.*
 *v5.2: Sprint 25 (Ship Prep & Desktop Polish) complete. Ed25519 license key system with offline verification, Stripe Checkout ($49/$99), auto-updater foundation (tauri-plugin-updater + release workflow), file attachments with drag-and-drop, subtask reorder (dnd-kit), OpenRouter provider, bundle optimization (497KB→381KB), 8 desktop sandbox fixes (Tauri permissions, adapter race condition, vault scope, habit completion reactivity). 17/17 parcels done. See `Sprints/Sprint-25-Ship-Prep.md`.*
 *v5.1: Sprint 24 (Soul File & Concierge Intelligence) complete. Soul file personality system, AI memory CRUD with dedup pipeline, 18-tool concierge with tool-use loops, 6-layer prompt assembly, provider-agnostic streaming (8 providers), Anthropic message transformation, memory extraction, conversation summaries, WCAG AA accessibility fixes. Soul file milestone marked DONE. See `Sprints/Sprint-24-Soul-File-Concierge.md`.*

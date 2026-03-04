@@ -183,5 +183,67 @@ Recommended execution order:
 
 ---
 
+## Sprint Retrospective
+
+**Completed:** March 4, 2026
+**Parcels:** 9/9 done
+**PR:** #11 — merged to main
+**Tag:** `post-sprint-26`
+
+### What Was Delivered
+
+**Track 1 — Attachments Everywhere:**
+- `EntityAttachments.tsx` generic wrapper reused across topics, journal entries, projects
+- `useAttachments(entityId)` hook + both adapters (local + Supabase) are entity-agnostic
+- Inline images in rich text editor — `onImageUpload` callback uploads to Supabase Storage bucket (web) or `.attachments/` filesystem (desktop), inserts by URL instead of base64
+- Image upload verification: loading toast during upload, verifies image loads before inserting, falls back to clickable link if URL fails
+
+**Track 2 — Topic Content Editing:**
+- `content TEXT` column added to `topics` and `topic_pages` (SQLite migration + Supabase migration applied)
+- Both adapters updated to read/write content on all CRUD operations
+- Tiptap rich text editor wired into TopicPage with 2s debounced auto-save
+- Save-on-unmount flush via `pendingSaveRef` to prevent data loss on navigation
+- Vault markdown export updated to include topic content (HTML→markdown conversion)
+
+**Track 3 — Export & Cleanup:**
+- Desktop JSON export rewritten to use DataAdapter (works on both platforms)
+- "Export to Markdown" button added — exports journals, captures, topics as Obsidian-compatible markdown to vault
+- `FloatingChat.tsx` deleted, ConciergeChat is sole chat interface
+
+### Verification Results
+
+- **Deterministic checks:** lint warnings only (pre-existing), typecheck clean, 265/265 tests pass, build 2.5s
+- **Agent 7 code audit:** B+ (77/100). No P0s. 2 P1s found and fixed (save-on-unmount flush, image size cap). 4 P2s noted.
+- **Agent 11 feature integrity:** PASS — no regressions
+- **3-agent design review:** PASS after fixes. 1 P0 (alert→toast), 5 P1s fixed.
+- **E2E test:** Not run (no Playwright tests written for Sprint 26 features — deferred)
+
+### Sandbox Findings
+
+User caught 4 issues during sandbox testing:
+1. **Topic save error** — `content` column didn't exist in Supabase yet. Applied migration via MCP.
+2. **"Bucket not found" on all attachments** — Supabase Storage bucket not created. Created `attachments` bucket with RLS policies.
+3. **200KB image restriction questioned** — User asked "why restrict at all?" Rewrote image insertion to upload to storage bucket (no size limit), removing the base64 approach entirely.
+4. **FileList UI issues** — Broken image previews, long filenames overflowing, non-functional rename button. Cleaned up: removed image previews and rename, added overflow truncation, added image upload verification with loading toast.
+
+### Deferred to Next Sprint
+
+| Item | Why |
+|---|---|
+| Image resize handles in editor | Requires `@tiptap/extension-image-resize` or custom node view — cosmetic, not blocking |
+| Attachment file rename | Neither adapter has a rename API — low priority |
+| Attachment UI polish (remaining) | User noted "still some work to do" — next sprint |
+| E2E tests for attachment + editor features | No Playwright tests exist for these flows |
+
+### Key Learnings
+
+1. **Supabase infrastructure must be provisioned before sandbox.** The `content` column migration and storage bucket were both missing at sandbox time. These should be applied as part of Phase 3 execution, not discovered during sandbox.
+2. **Base64 image embedding is wrong for a storage-backed app.** The initial approach (embed images as base64 in the content TEXT column) was always going to bloat the database. The `onImageUpload` callback pattern is the correct architecture — parent components own the upload mechanism, editor stays generic.
+3. **File list UI should start simple.** Image preview thumbnails, rename features, and complex interactions should be earned through user feedback, not assumed. The compact file-name-as-link approach is cleaner.
+4. **Sandbox testing catches real issues that automated gates miss.** All 4 sandbox findings were infrastructure/UX issues that lint/typecheck/tests can't detect.
+
+---
+
 *Sprint 26 — Feature Completion — Created March 4, 2026 by Director*
+*Retrospective added March 4, 2026 — post-merge*
 *Launch prep (Edge Functions, Stripe, landing page, legal) moves to Sprint 27.*
