@@ -1,25 +1,25 @@
 # Next Sprint Planning
 
 **Updated:** March 4, 2026
-**Last completed:** Sprint 25 (Ship Prep & Desktop Polish)
-**Current sprint:** Sprint 26 (Feature Completion) — IN PROGRESS
-**Source:** Vision v5.2, Code-vs-Vision audit (March 4), Sprint 25 retrospective
+**Last completed:** Sprint 26 (Feature Completion)
+**Current sprint:** Sprint 27 (Desktop Verification) — PLANNING
+**Source:** Sprint 26 post-mortem, Sprint Protocol v2.0
 
 ---
 
-## Sprint 26: Feature Completion — ACTIVE
+## Sprint 27: Desktop Verification — ACTIVE
 
-See `Sprint-26-Feature-Completion.md` for full plan.
+See `Sprint-27-Desktop-Verification.md` for full plan.
 
-**Theme:** Close the gaps between what the Vision claims and what the code delivers.
-**Parcels:** 9 across 3 tracks (Attachments Everywhere, Topic Content Editing, Export & Cleanup)
+**Theme:** Verify all Sprint 26 features work on desktop (Tauri + local SQLite). Sprint 26 skipped Track B sandbox testing — this sprint closes that gap.
+**Parcels:** 5 (build verification, topic content, attachments, export, fixes)
 
 ---
 
-## Sprint 27: Launch Ready (Next)
+## Sprint 28: Launch Ready (Next)
 
 **Theme:** Close the last mile — deploy backend services, build the storefront, draft legal. Everything between "code complete" and "accepting money."
-**Timeline:** After Sprint 26 merges.
+**Timeline:** After Sprint 27 merges.
 **Scope philosophy:** No new features. Pure deployment, configuration, storefront, and legal. The product code is done. This sprint makes it purchasable.
 
 ### Track 1: Revenue Pipeline (P0)
@@ -52,7 +52,7 @@ Everything needed to go from "user clicks Buy" to "user has a working license in
 
 ---
 
-## Sprint 28: Harden & Launch
+## Sprint 29: Harden & Launch
 
 - Product Hunt launch execution
 - Security hardening (Stripe webhook timestamp, CORS, rate limiting)
@@ -66,7 +66,7 @@ Everything needed to go from "user clicks Buy" to "user has a working license in
 
 ---
 
-## Post-Launch Fast-Follow (Sprint 29+)
+## Post-Launch Fast-Follow (Sprint 30+)
 
 | Item | Notes |
 |---|---|
@@ -105,4 +105,4 @@ Everything needed to go from "user clicks Buy" to "user has a working license in
 
 ---
 
-*Next Sprint Planning — Updated March 4, 2026 — Sprint 26 (Feature Completion) active, Sprint 27 (Launch Ready) staged, Sprint 28+ outlined*
+*Next Sprint Planning — Updated March 4, 2026 — Sprint 27 (Desktop Verification) active, Sprint 28 (Launch Ready) staged, Sprint 29+ outlined*

@@ -102,7 +102,7 @@ const TopicPage = () => {
     async (file: File): Promise<string> => {
       if (!contentId) throw new Error('No entity ID');
       const info = await attachments.uploadFile(contentId, file);
-      return info.url;
+      return attachments.getFileUrl(contentId, info.name);
     },
     [contentId, attachments],
   );
