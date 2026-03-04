@@ -293,9 +293,9 @@ Track 5 (P19-P20: BYO-Key) ── independent of Tracks 2-4
 [x] Deterministic checks: lint (0 errors), typecheck (clean), test (265 pass), build (success), format (clean)
 [x] Agent 7 code audit: 0 unresolved P0 — findings fixed in commit 4165ccb
 [x] Agent 11 feature integrity: PASS — existing features preserved (265/265 tests pass)
-[ ] 3-agent design review: all PASS (for UI parcels: P15, P18, P20) — PENDING
-[ ] E2E test against deploy preview URL — PENDING (blocked by CI, now unblocked)
-[ ] Sandbox review by user (Phase 5) — PENDING
+[x] 3-agent design review: Visual PASS, UX PASS, Accessibility PASS after P0 fixes (opacity-60 contrast, aria-checked, non-color indicators)
+[x] Sandbox review by user (Phase 5): Round 1 findings fixed (tool execution, memory dedup, API key persistence, toast action, disable button). Round 2 APPROVED.
+[x] PR #9 merged to main — squash merge as a69b60e. Tagged post-sprint-24.
 ```
 
 ---
@@ -310,6 +310,38 @@ Track 5 (P19-P20: BYO-Key) ── independent of Tracks 2-4
 | Token budget exceeded by system prompt | Measure token count per layer. Hard cap at ~2K tokens for context. Prioritize recent memories, truncate oldest. |
 | API key encryption on web is weak | Agent 4 reviews approach. Encrypted localStorage with PBKDF2-derived key is the minimum bar. "Remember this device" checkbox gives user control. |
 | Sprint is too large (20 parcels) | Tracks 4-5 are P1 and can be descoped if Track 1-3 run long. Core deliverable is: bugs fixed + soul file works + concierge acts. |
+
+---
+
+## Sprint Retrospective
+
+### What went well
+- **20-parcel sprint delivered in one session.** The largest sprint to date shipped soul file, memory system, 18-tool concierge, provider-agnostic streaming, and accessibility fixes without descoping.
+- **Sandbox testing caught real bugs.** User testing on the deploy preview found 7 issues that automated gates missed — tool execution failing for Anthropic, memory disable not working, duplicate memories, API key lost on provider switch. All fixed before merge.
+- **3-agent design review added accessibility value.** Caught 3 P0s (opacity-60 contrast failure, missing aria-checked, color-only selection state) that would have shipped without the gate.
+- **Sprint Protocol Phase 4→5 flow worked smoothly.** Deterministic checks → code audit → feature integrity → design review → sandbox → fix → re-verify → merge. Clear gates, no ambiguity.
+
+### What didn't go well
+- **Anthropic message format mismatch was a design gap.** The edge function assumed all providers use OpenAI message format. Anthropic's `tool_result` block structure was missed in initial implementation — should have been caught in design review, not sandbox testing.
+- **E2E tests couldn't run against deploy preview.** Playwright tests exist but require Supabase auth credentials and are oriented toward the full app, not isolated AI features. The E2E gate was effectively skipped.
+- **Edge function deployment is decoupled from Netlify.** Frontend fixes deploy automatically via Netlify, but Supabase Edge Functions require separate deployment. This gap means tool execution fixes aren't verifiable on the deploy preview.
+
+### Lessons learned
+- **Provider-specific message formats need a transformation layer from day one.** Don't assume OpenAI format is universal. Build provider adapters that normalize both requests and responses.
+- **Sandbox testing is the most valuable gate for UX.** Automated tests validate logic; human testing validates experience. The sandbox round caught interaction-level bugs (duplicate memories from concurrent extraction paths, state not updating on toggle) that unit tests wouldn't find.
+- **Memory dedup must be substring-based, not exact-match.** "User's name is Ricky" and "My name is Ricky" are semantically identical. The extraction pipeline and tool executor both needed this.
+
+### By the numbers
+- **Commits on branch:** 6 (initial + 2 audit fixes + 2 sandbox fixes + 1 design review fix)
+- **Files changed:** ~15 (new + modified)
+- **Tests:** 265/265 passing (no new test files this sprint — AI features are integration-heavy, hard to unit test without mocking LLM)
+- **Sandbox rounds:** 2 (Round 1: 7 findings, Round 2: approved)
+- **Design review P0s fixed:** 3
+
+### Deferred items
+- **Supabase Edge Function deployment pipeline** — needs `supabase functions deploy` integration or CI step. Deferred to future sprint when cloud sync is prioritized.
+- **E2E tests for AI features** — need mock LLM responses or recorded fixtures to test tool-use loops, memory extraction, and streaming without real API calls.
+- **P1 design findings** (label htmlFor, icon-only button aria-labels, memory touch targets, auto-save indicator) — logged for next sprint or quality debt sweep.
 
 ---
 

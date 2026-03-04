@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 5.0
+**Version:** 5.1
 **Last Updated:** March 3, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -402,7 +402,7 @@ The app is local-first and yours forever. The subscription is for convenience an
 | File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | **DONE** (Sprint 23) | Must-have |
 | AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | **DONE** (Sprint 23 — in-app chat; Telegram deferred to Phase B) | Must-have |
-| Soul file — persistent AI memory (SQLite `ai_memories` table, fact extraction pipeline, user-editable memory UI, app context injection, conversation summaries). The concierge learns, remembers, and sees your data. | PLANNED | Must-have |
+| Soul file — persistent AI memory (SQLite `ai_memories` table, fact extraction pipeline, user-editable memory UI, app context injection, conversation summaries). The concierge learns, remembers, and sees your data. | **DONE** (Sprint 24) | Must-have |
 | Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | **DONE** (Sprint 23) | Must-have |
 | License key system — activation, tier validation, commercial distribution | PLANNED | Must-have |
 | Landing page & marketing site | PLANNED | Must-have |
@@ -511,8 +511,10 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (final pre-launch sprints)
-**Active sprint:** None (Sprint 23 just completed)
-**Last completed:** Sprint 23 (Setup & AI Foundation) — setup wizard, concierge hatching, BYO API key settings, chat concierge, desktop CI/CD
+**Active sprint:** None (Sprint 24 just completed)
+**Last completed:** Sprint 24 (Soul File & Concierge Intelligence) — soul file personality system, AI memory CRUD with dedup, 18-tool concierge with tool-use loops, 6-layer prompt assembly, provider-agnostic streaming (8 providers), Anthropic message transformation, memory extraction pipeline, conversation summaries, WCAG AA accessibility fixes
+
+**Sprint 24 delivered:** Soul File & Concierge Intelligence — soul file personality (name, tone, backstory, communication prefs, working style), AI memory system (localStorage + SQLite CRUD, substring dedup, category/source tracking), 18-tool concierge with multi-round tool-use loops (create/read/update tasks, journal, calendar, notes, captures, projects, routines, habits, memory), 6-layer system prompt assembly (soul + memories + summaries + app context + tools), provider-agnostic SSE streaming via Supabase Edge Function (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Ollama, OpenAI-compatible), Anthropic message transformation for tool-use round-trips, memory extraction pipeline (LLM-based fact extraction with batch dedup), conversation summaries, per-provider API key caching, WCAG AA accessibility (aria-checked radio groups, non-color selection indicators, token-based contrast). 265 tests. See `Sprints/Sprint-24-Soul-File-Concierge.md`.
 
 **Sprint 23 delivered:** Setup & AI Foundation — 4-track sprint. Track 1: Sprint 22 quality debt (9 Agent 7 P1 findings, WAI-ARIA tree roles, AlertDialog, loading skeleton). Track 2: Setup wizard (first-launch detection, vault folder picker, Obsidian import, concierge hatching, guided tour). Track 3: AI foundation (provider settings for OpenAI/Anthropic/Ollama, BYO API key config, chat concierge with SSE streaming, conversation persistence, soul config system prompt). Track 4: Desktop CI/CD (GitHub Actions 3-platform matrix, Rust caching, code signing env vars). 12/12 parcels done. See `Sprints/Sprint-23-Setup-AI-Foundation.md`.
 
@@ -687,7 +689,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v5.0 — March 3, 2026*
+*Vision v5.1 — March 3, 2026*
+*v5.1: Sprint 24 (Soul File & Concierge Intelligence) complete. Soul file personality system, AI memory CRUD with dedup pipeline, 18-tool concierge with tool-use loops, 6-layer prompt assembly, provider-agnostic streaming (8 providers), Anthropic message transformation, memory extraction, conversation summaries, WCAG AA accessibility fixes. Soul file milestone marked DONE. See `Sprints/Sprint-24-Soul-File-Concierge.md`.*
 *v5.0: CEO Session #5 — Strategic pivot to three-tier revenue model (Core $49 one-time / Pro subscription / Builders subscription). "Day execution" replaces "day-centric" as core positioning. Soul file elevated to Phase A must-have (persistent AI memory the user owns). ChatGPT memory crisis narrative toned down — "own your AI's memory" framing. Gmail/Calendar deferred to post-launch fast-follow (investigate MCP). BYO-key economics validated by market research (TypingMind, JetBrains precedents). Competitive edge section rewritten around ownership, execution, and BYO-everything. Sprint 23 (Setup & AI Foundation) complete.*
 *v4.6: Sprint 22 (Knowledge Vault) complete. Vault file browser with 5-folder structure (Topics/Projects/Journal/Library/Inbox), dual-adapter architecture, Obsidian-compatible markdown export, topic nesting, adapter stabilization (local.ts split, SearchIndexer, entity_type discriminator). 265 tests. 6 P0 security/correctness fixes. See `Sprints/Sprint-22-Knowledge-Vault.md`.*
 *v4.5: CEO Strategic Brief — Phase A pricing revised ($99 standard / $49 founding member). Volume-over-margin strategy. AI features deferred to Phase B. Sprint 21 (Local-First Storage) started — SQLite persistence, adapter completion, FTS5 search, local auth. Sprint sequencing resolved through Sprint 24+. Revenue projections updated for new pricing. See `Research/Agent-5-Docs/CEO-Strategic-Brief-Phase-A-Pricing.md`.*
