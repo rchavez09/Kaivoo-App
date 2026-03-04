@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 5.4
+**Version:** 6.0
 **Last Updated:** March 4, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -8,23 +8,35 @@
 
 ## What Is Kaivoo?
 
-Kaivoo is an AI-powered workflow OS that puts the power of a whole business in your hands. It starts as a personal productivity command center — your journal, todos, calendar, captures, and second brain under one roof — and scales into a collaborative platform where solopreneurs and small teams run their entire operation from one place.
+Kaivoo is **personal infrastructure for the AI era.** It starts as a plug-and-play AI productivity app — your journal, todos, calendar, captures, and second brain under one roof — and evolves into a cross-platform MCP foundation layer: the intelligent orchestration layer between you and everything on your machine, accessible from anywhere.
 
-The platform ships as **two products on one foundation:**
+The application layer is dying. AI collapses the need for separate apps — you don't need a word processor if AI generates the document, a file manager if AI knows where everything is, or an email client if AI sends the email. What replaces apps is an **intelligent command layer** that understands intent and orchestrates execution. Kaivoo is building that layer.
 
-- **Product 1: Kaivoo Productivity** ($99 one-time / $49 founding member) — A polished, self-contained productivity app. Journal, tasks, projects, calendar, captures, widgets, theme customization, data export. Local-first, you own everything. The Obsidian + Notion + Calendar replacement.
+### The Trajectory
 
-- **Product 2: Kaivoo Orchestrator** (premium subscription, pricing TBD) — An AI agent orchestration platform for builders. Sprint management, multi-model routing, messaging-based control (Telegram or equivalent), autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can manage from their phone.
+```
+TODAY         →  Plug & play AI productivity app (ship, sell, learn)
+NEAR-TERM     →  MCP foundation layer (your machine, known to AI, accessible everywhere)
+LONG-TERM     →  Personal OS (the intelligent layer between you and your digital life)
+```
 
-- **Full Stack:** Both together. Productivity modules + Orchestrator modules, one platform. Toggle what you need in settings.
+### The Products
 
-**Phase A** ships the Productivity app. **Phase B** adds the Orchestrator as a standalone product AND as an integration/addon for productivity users, plus the One Workflow cloud platform (oneworkflow.ai) with collaboration, business tools, and AI-powered widgets.
+- **Kaivoo Core** ($99 one-time / $49 founding member) — The productivity app. Journal, tasks, projects, calendar, captures, widgets, theme customization, data export. Local-first, you own everything. BYO API keys. The Obsidian + Notion + Calendar replacement. **Ships now.**
+
+- **Kaivoo Cloud Companion** (subscription, pricing TBD) — Always-on sync to cloud. Mobile/tablet access to your data even when your desktop sleeps. Managed AI (we provide the keys). "Your data, always available." Download anytime, run locally if you cancel. **You own your data — the subscription is for convenience and infrastructure, never for gatekeeping.**
+
+- **Kaivoo Orchestrator** (premium subscription, pricing TBD) — AI agent orchestration for builders. Sprint management, multi-model routing, messaging-based control, autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can text from their couch.
+
+- **Full Stack:** All of the above. Toggle what you need in settings.
+
+**Phase A** ships the productivity app (the wedge). **Phase B** adds the Cloud Companion and Orchestrator. **Phase C** opens the marketplace. **Phase D** builds the MCP foundation layer and personal OS trajectory.
 
 The AI isn't a chat box. It's an engine underneath purpose-built tools. Users see specific actions and clear outcomes — not blank prompts. Every widget tells them exactly what it does and what's possible. One button to the moon.
 
-**One sentence:** One workflow. One place. One AI brain that grows from personal assistant to autonomous operator.
+**One sentence:** Your machine. Your data. Your AI. Accessible from everywhere. Owned by you.
 
-**The product promise:** Start with the essentials — journal, tasks, calendar, email, AI concierge — and scale into a full AI-powered operating system for your life and your business. Or skip straight to the builder tools and let your AI team ship code while you're on the couch.
+**The product promise:** Start with the essentials — journal, tasks, calendar, captures, AI concierge — and scale into a personal OS that knows everything on your machine, acts on your behalf, and even builds new capabilities when you ask for them.
 
 ---
 
@@ -52,6 +64,10 @@ These are non-negotiable. Every feature, sprint, and decision must align with th
 
 10. **Progressive autonomy.** Start manual, graduate to assisted, evolve to autonomous. The AI earns trust by suggesting before it acts. Every suggestion teaches the user what's possible. The goal: your AI runs your business while you steer.
 
+11. **MCP-native.** The Model Context Protocol is the backbone, not a bolt-on. Every data source, tool, and action in Kaivoo is exposed via MCP so any AI can access it with permission. This makes Kaivoo the foundation layer that AI agents talk to when they need to know about *you* — your files, your tasks, your calendar, your projects, your everything. Protocol-first architecture means the product improves as the MCP ecosystem grows.
+
+12. **Self-building.** The ultimate expression of an MCP-native platform: users can ask Kaivoo to build new capabilities for itself. "I wish we had a page for tracking client invoices" → the AI researches, plans, and builds it. The product isn't just a tool — it's a platform that evolves through conversation. The Core Foundation is immutable. Everything on top of it is fair game.
+
 ---
 
 ## The Autonomy Ladder
@@ -66,8 +82,75 @@ The AI starts watching and suggesting. "You have a PPT due at 3pm — want me to
 
 This is the "I can do that for you" layer. Critically, it teaches the user what's possible. Every suggestion is a discovery moment: "Oh, it can do *that*?" This solves the blank-chat-box problem — users don't need to know what to ask because the AI tells them what it can do.
 
-### Level 3: AI Operates (Future)
+### Level 3: AI Operates (Phase C+)
 The AI doesn't ask. It just does. Your todo list isn't yours — it's the AI's work queue. Emails get answered. Reports get generated. Follow-ups happen. You review and course-correct. You're the CEO of your own operation, and the AI is your staff.
+
+### Level 4: AI Builds (Phase D)
+The AI doesn't just operate within the app — it extends the app itself. "I wish we had a page for tracking client invoices." The concierge researches what's needed, plans the implementation, builds the page, and deploys it to your instance. You don't file a feature request. You don't wait for the next release. You describe what you want, and the platform evolves. The product becomes self-improving through conversation.
+
+---
+
+## The North Star: Personal OS
+
+The long-term vision for Kaivoo is not a productivity app. It is a **personal operating system for the AI era** — the intelligent layer between you and your digital life.
+
+### The Thesis
+
+The way computer operating systems work is dying. Apps are going away now that AI is here. MCP (Model Context Protocol) is where the market is going. If Kaivoo builds the first cross-platform MCP foundation layer, it becomes a massive disruptor.
+
+The old system: you open Word and start typing. The new system: you see a document brief on your todos, click execute, the AI has all your notes and context, produces a high-quality brief, exports it to the correct project, and maybe sends it to the right person. You can message the concierge from your phone to send that document to a client. The document is ready and available to you anywhere — desktop, mobile, shared link.
+
+AI is radically changing not just how we work, but how we interact with computers. Kaivoo is at the forefront.
+
+### The Architecture — Your Machine as a Server
+
+Like Plex proved for media, your desktop can be your personal cloud:
+
+**Mode A — Desktop is awake (Plex model):**
+- Tauri app runs a lightweight local server
+- Companion app connects over LAN or secure tunnel (Tailscale, Cloudflare Tunnel)
+- Real-time access to all files — search, preview, open, interact
+- Desktop must be on — fine for 80% of use cases
+
+**Mode B — Desktop is asleep (Sync model):**
+- Encrypted sync of metadata + recent files to cloud relay
+- Companion app works offline with synced data
+- Full files pulled on-demand when desktop wakes
+- This is what the Cloud Companion subscription pays for
+
+The killer product is **both** — Mode A when your machine is reachable, Mode B as fallback. Users don't think about modes. It just works.
+
+### What Makes This Different
+
+| | Obsidian | Notion | Kaivoo |
+|---|---|---|---|
+| Scope | Markdown notes + images | Cloud workspace | All files — PPTs, videos, PDFs, notes, everything |
+| Data ownership | Local vault | Cloud-only, vendor lock-in | Local-first, your machine, your data |
+| Access | Sync copies across devices | Browser | Live access to your machine + selective cloud sync |
+| Intelligence | Plugin-based, user-assembled | Built-in AI (cloud) | Built-in: search, concierge, MCP, self-building |
+| MCP | None | None | Native — every data source exposed as MCP |
+| Self-building | No | No | "I wish we had X" → AI builds it |
+| Identity | Note-taking app | Team workspace | Personal infrastructure / productivity OS |
+
+### The MCP Foundation Layer
+
+Kaivoo's MCP layer is what makes the personal OS vision possible:
+
+1. **Indexes and understands everything on your machine** — files, notes, projects, calendar, media
+2. **Exposes it all via MCP** so any AI can access it with user permission
+3. **Orchestrates actions** — create docs, send emails, move files, notify people
+4. **Syncs selectively to cloud** for mobile/always-on access
+5. **Self-builds** — new pages, widgets, and capabilities through conversation
+
+Nobody is building cross-platform, local-first, MCP-native, user-owned personal infrastructure with optional cloud. That's white space.
+
+### Why Now
+
+- Post-AI, people generate more local files than ever — exports, PDFs, decks, recordings, datasets
+- Cloud storage is expensive and fragmented (Google Drive, Dropbox, iCloud, OneDrive)
+- Privacy is a buying trigger, not a niche — "your data never leaves your machine" is a headline feature
+- MCP is early but growing fast — building the foundation layer now means being ready when the wave hits
+- The Plex model is proven. Obsidian proved the appetite for local-first. Nobody's combined them for general productivity.
 
 ---
 
@@ -168,32 +251,45 @@ Think of it as a lego castle. The Command Space is the baseplate and first few l
 ### Architecture
 
 ```
-┌───────────────────────────────────────────────────────────┐
-│                    ONE WORKFLOW PLATFORM                    │
-│                                                           │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
-│  │Marketing │  │  Sales   │  │  Doc     │  │  User-   │  │
-│  │  Tools   │  │Dashboard │  │  Mgmt    │  │  Built   │  │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  │
-│       └──────────────┴──────────────┴──────────────┘      │
-│                          │                                │
-│  ┌────────────────────────────────────────────────────┐   │
-│  │       AI CONCIERGE (The Orchestrator)               │   │
-│  │  Routes tasks · Suggests actions · Learns you       │   │
-│  │  Watches → Offers → Executes (with permission)      │   │
-│  └────────────────────────────────────────────────────┘   │
-│                          │                                │
-│  ┌────────────────────────────────────────────────────┐   │
-│  │       INTEGRATIONS & SKILLS LAYER                   │   │
-│  │  Gmail · Calendar · Slack/Teams · Skills Store      │   │
-│  └────────────────────────────────────────────────────┘   │
-│                          │                                │
-│  ┌────────────────────────────────────────────────────┐   │
-│  │       CORE FOUNDATION (Command Space)               │   │
-│  │  Journal · Todos · Calendar · Captures · Vault      │   │
-│  │  Theming · White-Label Config · Auth · Data Layer   │   │
-│  └────────────────────────────────────────────────────┘   │
-└───────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                     KAIVOO PERSONAL OS                         │
+│                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
+│  │Marketing │  │  Sales   │  │  Doc     │  │  User-   │     │
+│  │  Tools   │  │Dashboard │  │  Mgmt    │  │  Built   │     │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘     │
+│       └──────────────┴──────────────┴──────────────┘         │
+│                          │                                   │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │       AI CONCIERGE + SELF-BUILDER                    │     │
+│  │  Routes tasks · Suggests · Executes · Builds new     │     │
+│  │  "I wish we had X" → researches, plans, builds it    │     │
+│  └─────────────────────────────────────────────────────┘     │
+│                          │                                   │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │       MCP FOUNDATION LAYER                           │     │
+│  │  Local file index · Cross-device access · Protocol   │     │
+│  │  Every data source exposed as MCP · AI-accessible    │     │
+│  └─────────────────────────────────────────────────────┘     │
+│                          │                                   │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │       INTEGRATIONS & SKILLS LAYER                    │     │
+│  │  Gmail · Calendar · Slack/Teams · Skills Store       │     │
+│  └─────────────────────────────────────────────────────┘     │
+│                          │                                   │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │       SYNC & ACCESS LAYER                            │     │
+│  │  Local server (Mode A) · Cloud sync (Mode B)         │     │
+│  │  Desktop ↔ Mobile companion · Encrypted relay        │     │
+│  └─────────────────────────────────────────────────────┘     │
+│                          │                                   │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │       CORE FOUNDATION (Command Space)                │     │
+│  │  Journal · Todos · Calendar · Captures · Vault       │     │
+│  │  Theming · White-Label Config · Auth · Data Layer    │     │
+│  │  SQLite (local) · Supabase (cloud companion)         │     │
+│  └─────────────────────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 **Core Foundation (always present):** Journal, Daily View, Projects & Tasks, Calendar, Captures, Second Brain, AI Concierge, Theming, White-Label Config, Auth, Data Layer.
@@ -244,6 +340,8 @@ The concierge doesn't just operate within the app — it builds within the app. 
 
 **Personal customization (Phase B):** "I want my Notes in rich text, not markdown." "Add a field to my Captures for priority level." "Build me a client dashboard that pulls from Projects and Email." The concierge modifies and extends the user's instance through conversation. No code. No prompts. Just outcomes.
 
+**Self-building (Phase D):** "I wish we had an app for tracking invoices." The concierge doesn't just modify existing surfaces — it researches what's needed, plans the implementation, and builds entirely new pages, widgets, and integrations. The user describes intent. The AI ships the feature. The platform evolves through conversation. This is the ultimate expression of MCP-native architecture: the product *is* the platform *is* the builder.
+
 **Marketplace creation (Phase C):** Users package their concierge-built creations and list them for others to install. A marketing consultant builds a "Client Pulse" dashboard, polishes it, and sells it for $9.99. The platform earns commission. The ecosystem grows.
 
 **Guardrails:**
@@ -290,9 +388,9 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 ## Business Model
 
-### Three-Tier Revenue Strategy
+### Four-Tier Revenue Strategy
 
-The app is local-first and yours forever. The subscription is for convenience and infrastructure — not for gatekeeping features. Users choose how much they want managed for them.
+The app is local-first and yours forever. The subscription is for convenience and infrastructure — not for gatekeeping features. Users choose how much they want managed for them. **"You own your data"** is non-negotiable: at any time, users can download their data and run everything locally.
 
 #### Tier 1: Kaivoo Core (One-Time Purchase)
 
@@ -312,13 +410,15 @@ The app is local-first and yours forever. The subscription is for convenience an
 
 **Revenue milestone:** 2,000+ founding member sales = ~$100K. This funds Tier 2 development and validates demand.
 
-#### Tier 2: Kaivoo Pro (Subscription — ARR)
+#### Tier 2: Kaivoo Cloud Companion (Subscription — ARR)
 
 | | |
 |---|---|
 | **Price** | $8-12/mo (or ~$99/yr) — final pricing pending research |
-| **What you get** | Everything in Core + managed AI (we provide the keys, you don't think about it), multi-device sync, cloud backup, Google Calendar integration, Gmail integration, priority updates, future integrations. **We handle the infrastructure.** |
-| **Target** | Users who want convenience over DIY. Productivity optimizers. Solopreneurs. |
+| **What you get** | Everything in Core + **always-on cloud sync** (your data available even when your desktop sleeps), managed AI (we provide the keys), mobile/tablet companion access, cloud backup, Google Calendar integration, Gmail integration, priority updates, future integrations. **We handle the infrastructure.** |
+| **Target** | Users who want convenience over DIY. Mobile access. Always-on availability. Solopreneurs. |
+
+**The value prop:** Your desktop won't always be on. The Cloud Companion syncs your data to Supabase so you can access notes, files, and projects from your phone, tablet, or any browser — even when your machine sleeps. Cancel anytime and download everything. You're paying for infrastructure, not permission.
 
 **Why this works:** You're not charging for features. You're charging for "we handle it." That's the JetBrains model. That's the Obsidian Sync model. The app is yours. The service is a subscription. Forced SaaS is dead — elective SaaS (sync, managed AI, integrations that require server-side infrastructure) is the future.
 
@@ -329,12 +429,22 @@ The app is local-first and yours forever. The subscription is for convenience an
 | | |
 |---|---|
 | **Price** | $29-49/mo — pricing pending market validation |
-| **What you get** | Everything in Pro + Orchestrator modules, MCP connectors, agent system, sprint management, build-review-test pipeline, multi-model routing. **Your AI team.** |
+| **What you get** | Everything in Cloud Companion + Orchestrator modules, MCP connectors, agent system, sprint management, build-review-test pipeline, multi-model routing. **Your AI team.** |
 | **Target** | Solo developers, technical founders, agencies building with AI |
 
 **When:** Not at launch. Tier 3 ships when Tier 2 has enough users to validate demand for more autonomy. Research runs in parallel.
 
-**Pricing note:** Tier 2 and 3 subscription pricing requires research on AI token costs per user, competitive pricing teardowns (HubSpot, Monday, Notion), and addon model analysis. Agent 5 + Agent 8 to deliver before subscription tiers launch.
+#### Tier 4: Kaivoo Personal OS (Premium — Long-term)
+
+| | |
+|---|---|
+| **Price** | TBD — premium subscription or one-time + subscription hybrid |
+| **What you get** | Everything below + **full MCP foundation layer** — local file indexing engine, cross-device orchestration, self-building capabilities ("I wish we had X" → AI builds it), flow automation (triggers, actions, multi-service orchestration), advanced file intelligence (search across all files on your machine, not just the vault). **Your machine becomes intelligent infrastructure.** |
+| **Target** | Power users, technical professionals, anyone who wants their computer to work *for* them |
+
+**When:** Phase D. The MCP ecosystem needs to mature, and Tiers 1-3 need to validate the market. Research starts now. Architecture decisions are made MCP-first from today.
+
+**Pricing note:** Tier 2-4 subscription pricing requires research on AI token costs per user, competitive pricing teardowns, sync infrastructure costs, and addon model analysis. Agent 5 + Agent 8 to deliver before subscription tiers launch.
 
 ### Revenue Target: $1M ARR
 
@@ -480,6 +590,37 @@ The app is local-first and yours forever. The subscription is for convenience an
 | YouTube / Content Factory module | PLANNED |
 | Additional community-driven modules via Skills Store | PLANNED |
 
+### Phase D: MCP Foundation & Personal OS
+*Build the intelligent layer between users and their digital life. Kaivoo becomes personal infrastructure.*
+
+| Milestone | Status |
+|---|---|
+| **MCP Foundation Layer** | |
+| Local file indexing engine — index and understand all files on the user's machine, not just the vault. Personal search engine. | PLANNED |
+| MCP server layer — expose all Kaivoo data sources (tasks, notes, calendar, files, projects) as MCP resources and tools | PLANNED |
+| MCP-native architecture — every new feature built as MCP tool first, UI second | PLANNED |
+| Cross-device MCP — expose MCP endpoints over secure tunnel for remote AI access | PLANNED |
+| **Sync & Access** | |
+| Local server mode (Mode A) — Tauri app runs lightweight HTTP/WebSocket server, companion connects over LAN or tunnel | PLANNED |
+| Secure tunnel integration — Tailscale, Cloudflare Tunnel, or libp2p for remote desktop access | PLANNED |
+| Cloud relay mode (Mode B) — encrypted metadata + file sync to Supabase for always-on access when desktop sleeps | PLANNED |
+| Companion app — mobile/tablet web app for accessing desktop data remotely | PLANNED |
+| Selective sync protocol — smart sync of recent/priority files, on-demand pull for everything else | PLANNED |
+| **Self-Building** | |
+| AI Concierge Level 4 — self-building capabilities, "I wish we had X" → AI researches, plans, builds | PLANNED |
+| Sandboxed page builder — AI generates new pages/widgets within security sandbox | PLANNED |
+| Flow automation engine — triggers, conditions, actions across services (send email when X, notify when Y) | PLANNED |
+| Cross-service orchestration — AI coordinates actions across email, calendar, files, external APIs | PLANNED |
+| **File Intelligence** | |
+| Universal file search — search across all files on machine (not just vault), smarter than Spotlight/Windows Search | PLANNED |
+| File type handlers — preview and interact with PPTs, videos, PDFs, spreadsheets, images from within Kaivoo | PLANNED |
+| Context-aware file intelligence — AI understands file contents, relationships, and relevance to current work | PLANNED |
+| **Personal OS** | |
+| Desktop widget system — system tray, desktop widgets, always-on presence | PLANNED |
+| Notification orchestration — unified notifications across all connected services | PLANNED |
+| Voice interface — talk to your concierge, hands-free operation | PLANNED |
+| Activity awareness — understand what the user is working on (with permission) to offer contextual help | PLANNED |
+
 ---
 
 ## Research Parcels (Active)
@@ -506,12 +647,20 @@ These run in parallel with sprint work, not blocking it.
 | SQLite schema + adapter interface | Agent 3 | Local-first schema design. Mirror Supabase or redesign? Adapter pattern for swappable backend. | **DONE (Sprint 20)** — DataAdapter pattern implemented |
 | File watching mechanism | Agent 3 | How to detect manual file changes on disk for "permissive by nature" design | PLANNED |
 | Desktop auto-update + code signing | Agent 9 | Update distribution mechanism, Apple notarization, Windows signing | PLANNED |
+| MCP server architecture | Agent 3 | How to expose Kaivoo data (tasks, notes, calendar, files) as MCP resources/tools. Protocol design, permission model, local vs. remote access | PLANNED |
+| Local file indexing engine | Agent 3 | Architecture for indexing all files on machine (not just vault). Performance at scale, incremental updates, search ranking | PLANNED |
+| Secure tunnel evaluation | Agent 9 | Tailscale vs. Cloudflare Tunnel vs. libp2p vs. custom — for remote desktop access from companion app. Setup friction, reliability, security | PLANNED |
+| Companion app architecture | Agent 3 | Mobile/tablet web app connecting to local desktop server. Offline-first with selective sync. PWA vs. native. | PLANNED |
+| Self-building sandbox model | Agent 3 + Agent 4 | How the AI builds new pages/widgets safely. Sandboxing, capability permissions, immutable core protection, rollback | PLANNED |
+| Plex/Obsidian model analysis | Agent 5 | How Plex (local server + remote access) and Obsidian Sync (encrypted relay) work technically. Lessons for Kaivoo's Mode A/B architecture | PLANNED |
+| Cloud sync infrastructure costs | Agent 5 | Cost modeling for Supabase relay (Mode B) at scale — per-user sync bandwidth, storage, always-on relay pricing | PLANNED |
+| MCP ecosystem landscape | Agent 5 | Current state of MCP ecosystem — who's building what, adoption curves, partnership opportunities, timing risk assessment | PLANNED |
 
 ---
 
 ## Current Position
 
-**We are in:** Phase A — Productivity App (final pre-launch sprints)
+**We are in:** Phase A — Productivity App (the wedge — final pre-launch sprints, shipping toward the personal OS vision)
 **Active sprint:** None (planning Sprint 27)
 **Last completed:** Sprint 26 (Feature Completion) — Attachments everywhere (topics, journal entries, projects), inline images in rich text (storage-backed upload), topic content editing (Tiptap editor + auto-save + DB migration), desktop data export (JSON + markdown), vault markdown export UI, FloatingChat cleanup. 9/9 parcels done. See `Sprints/Sprint-26-Feature-Completion.md`.
 
@@ -599,6 +748,18 @@ These run in parallel with sprint work, not blocking it.
 - ~~Gmail/Calendar at launch~~ → **Deferred to post-launch fast-follow** — investigate MCP for faster delivery. Launch story is "AI concierge that knows you" not "email client."
 - ~~Phase A feature scope~~ → **Ship what's built + soul file + licensing + landing page + legal.** Everything else is fast-follow. We're close — finish, don't strip.
 
+**Key decisions resolved (CEO Session #6 — March 4, 2026):**
+- ~~Product identity~~ → **Personal infrastructure for the AI era** — starts as plug-and-play AI productivity (the wedge), evolves into cross-platform MCP foundation layer, long-term trajectory is personal OS. "Plex started as 'play my movies.' Obsidian as 'edit my notes.' Kaivoo starts as 'plug and play AI productivity.'"
+- ~~MCP role in architecture~~ → **MCP-native from day one** — not a bolt-on. Every data source exposed as MCP resource. Every action as MCP tool. New Core Principles #11 (MCP-native) and #12 (Self-building) added.
+- ~~Cloud vs. local-only~~ → **Local-first with SaaS attachments** — desktop is primary, cloud sync is optional paid companion for always-on mobile access. Users can download data anytime and run fully locally. "You own your data" enforced at every tier.
+- ~~Always-on assumption~~ → **Dual-mode architecture** — Mode A (desktop awake, direct access like Plex) + Mode B (desktop asleep, encrypted cloud sync). Users don't think about modes. It just works.
+- ~~Companion app~~ → **Web-based companion for mobile/tablet** — not a full native app initially. Accesses data via local server (Mode A) or cloud sync (Mode B). Paid feature via Cloud Companion subscription.
+- ~~Self-building capability~~ → **Phase D milestone** — "I wish we had an app for X" → AI researches, plans, builds. Autonomy Ladder Level 4. Core Foundation remains immutable; everything on top is fair game.
+- ~~Apps dying thesis~~ → **Captured as strategic thesis** — apps are the old model, MCP + intelligent orchestration is the new model. Kaivoo aims to be the first cross-platform MCP foundation layer. Not replacing OS now, but the trajectory points there.
+- ~~Phase D added~~ → **MCP Foundation & Personal OS phase** — local file indexing, MCP server layer, secure tunnel, companion app, self-building, flow automation, universal file search, voice interface. Research parcels assigned.
+- ~~Business model~~ → **Four-tier model** — Tier 1 (Core, one-time), Tier 2 (Cloud Companion, subscription), Tier 3 (Builders, subscription), Tier 4 (Personal OS, premium). Tier 2 reframed from "Pro" to "Cloud Companion" to reflect the local-first + SaaS hybrid.
+- ~~Near-term plan~~ → **Ship the wedge, build toward the vision.** Current codebase is the foundation. Tauri, SQLite, DataAdapter, UI — all stay. Framing shifts from "productivity app" to "personal infrastructure layer." Bug fixes and launch prep continue as planned.
+
 **Key decisions ahead:**
 - **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
 - **Desktop auto-update** — How do users get updates for the desktop app? Agent 9.
@@ -613,6 +774,14 @@ These run in parallel with sprint work, not blocking it.
 - **Orchestrator pricing** — Subscription, usage-based, or hybrid (Agent 8)
 - **Solo Builder market validation** — Is the market real and big enough? (Agent 8)
 - **Remote execution security** — Auth and blast-radius controls for text-triggered git operations (Agent 4)
+- **MCP server design** — How to expose Kaivoo data as MCP resources/tools (Agent 3)
+- **Local file indexing architecture** — How to index all files on a machine at scale (Agent 3)
+- **Secure tunnel for remote access** — Tailscale vs. Cloudflare Tunnel vs. alternatives (Agent 9)
+- **Companion app architecture** — PWA vs. native, offline-first design, selective sync protocol (Agent 3)
+- **Self-building sandbox** — How AI builds new pages safely within security boundaries (Agent 3 + Agent 4)
+- **Cloud sync cost modeling** — Per-user infrastructure costs for Mode B relay (Agent 5)
+- **GitHub Actions optimization** — Desktop Build workflow burning too many CI minutes. Only run on main, add path filters, drop multi-platform from PRs (Agent 9)
+- **Repo visibility** — Public (unlimited CI minutes, code visible) vs. Pro (3,000 min/mo, $4/mo). Workflow optimization is the real fix regardless.
 
 ---
 
@@ -675,6 +844,12 @@ Why Kaivoo wins where others don't:
 
 7. **Grows with you.** Start personal, go professional. The same tool that manages your journal and habits also runs your team's projects and client work. No migration. No second tool. One workflow.
 
+8. **MCP-native from day one.** While everyone else bolts MCP onto existing products, Kaivoo is built protocol-first. Every data source is an MCP resource. Every action is an MCP tool. This means any AI — not just Kaivoo's concierge — can access your data with permission. As the MCP ecosystem grows, Kaivoo becomes more powerful automatically.
+
+9. **Your machine, accessible everywhere.** Plex proved the model for media. Kaivoo applies it to productivity. Your desktop is your server. Your phone is your remote. No cloud dependency for core functionality — but optional cloud sync when you want always-on access. Nobody else offers this for productivity.
+
+10. **Self-building.** Tell Kaivoo what you wish it could do, and it builds it. Not a feature request. Not a plugin marketplace search. A conversation that ends with a new capability. The product evolves through use, not through release cycles.
+
 ---
 
 ## How This Document Is Used
@@ -690,7 +865,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v5.4 — March 4, 2026*
+*Vision v6.0 — March 4, 2026*
+*v6.0: CEO Session #6 — Strategic evolution from productivity app to personal infrastructure for the AI era. New identity: "Your machine. Your data. Your AI. Accessible from everywhere. Owned by you." MCP-native architecture adopted as core principle (#11). Self-building adopted as core principle (#12). Autonomy Ladder extended to Level 4 (AI Builds). New "North Star: Personal OS" section — thesis on apps dying, MCP as the future, Plex model for productivity, dual-mode architecture (local server + cloud sync). Business model expanded to four tiers: Core (one-time), Cloud Companion (subscription, replaces "Pro"), Builders (premium), Personal OS (long-term premium). Phase D added: MCP Foundation & Personal OS (local file indexing, MCP server layer, secure tunnel, companion app, self-building, flow automation, universal file search, voice interface). Architecture diagram updated with MCP Foundation Layer and Sync & Access Layer. Competitive edge expanded (#8 MCP-native, #9 your machine accessible everywhere, #10 self-building). 9 new research parcels assigned. Near-term plan unchanged: ship the wedge (plug-and-play AI productivity), build toward the vision.*
 *v5.4: Sprint 26 (Feature Completion) complete. 9/9 parcels done. File attachments now work on topics, journal entries, and projects (was project-only). Inline images upload to Supabase Storage bucket (was base64). Topic content editing shipped (Tiptap rich text + content DB column + auto-save). Desktop JSON + markdown export working. FloatingChat removed (ConciergeChat is sole chat). File attachments and topic content editing milestones marked DONE. See `Sprints/Sprint-26-Feature-Completion.md`.*
 *v5.3: Sprint 26 (Feature Completion) started. Code-vs-Vision audit found 5 gaps: attachments project-only, no topic content editing, desktop export broken, vault markdown export orphaned, FloatingChat legacy overlap. File attachments milestone corrected from DONE to PARTIAL. Topic content editing added as new milestone. Launch prep bumped to Sprint 27.*
 *v5.2: Sprint 25 (Ship Prep & Desktop Polish) complete. Ed25519 license key system with offline verification, Stripe Checkout ($49/$99), auto-updater foundation (tauri-plugin-updater + release workflow), file attachments with drag-and-drop, subtask reorder (dnd-kit), OpenRouter provider, bundle optimization (497KB→381KB), 8 desktop sandbox fixes (Tauri permissions, adapter race condition, vault scope, habit completion reactivity). 17/17 parcels done. See `Sprints/Sprint-25-Ship-Prep.md`.*
