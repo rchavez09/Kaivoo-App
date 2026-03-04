@@ -112,7 +112,14 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
     if (isLocal) {
       // Desktop mode but local adapters still loading — return null data to prevent
       // React Query from firing against Supabase during the async init window.
-      return { data: null, auth: supabaseAuth, search: supabaseSearch, vault: null, attachments: noOpAttachments, isLocal: true };
+      return {
+        data: null,
+        auth: supabaseAuth,
+        search: supabaseSearch,
+        vault: null,
+        attachments: noOpAttachments,
+        isLocal: true,
+      };
     }
 
     // Web mode: only SupabaseDataAdapter depends on user.id
