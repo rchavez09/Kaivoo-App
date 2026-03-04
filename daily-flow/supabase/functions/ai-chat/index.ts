@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Invalid provider" }, 400);
     }
 
-    // Validate Ollama URL — prevent SSRF
+    // Validate Ollama URL — prevent SSRF (localhost only)
     if (provider === "ollama" && ollamaBaseUrl) {
       try {
         const parsed = new URL(ollamaBaseUrl);
@@ -77,6 +77,28 @@ Deno.serve(async (req) => {
         }
       } catch {
         return jsonResponse({ error: "Invalid Ollama URL" }, 400);
+      }
+    }
+
+    // Validate custom base URL — prevent SSRF (block private IPs, require HTTPS)
+    if (provider === "openai-compatible" && body.customBaseUrl) {
+      try {
+        const parsed = new URL(body.customBaseUrl);
+        if (parsed.protocol !== "https:") {
+          return jsonResponse({ error: "Custom base URL must use HTTPS" }, 400);
+        }
+        const host = parsed.hostname.toLowerCase();
+        if (
+          host === "localhost" || host === "127.0.0.1" || host === "::1" ||
+          host.startsWith("10.") || host.startsWith("192.168.") ||
+          host === "169.254.169.254" || host.startsWith("169.254.") ||
+          /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+          host.endsWith(".internal") || host.endsWith(".local")
+        ) {
+          return jsonResponse({ error: "Custom base URL cannot target private/internal addresses" }, 400);
+        }
+      } catch {
+        return jsonResponse({ error: "Invalid custom base URL" }, 400);
       }
     }
 

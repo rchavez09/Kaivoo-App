@@ -46,7 +46,7 @@ export default function AIProviderSettings() {
   const [memories, setMemories] = useState<AIMemory[]>([]);
 
   useEffect(() => {
-    void getMemories().then(setMemories);
+    void getMemories(false).then(setMemories);
   }, []);
 
   const provider = getProviderConfig(settings.provider);
@@ -395,7 +395,7 @@ export default function AIProviderSettings() {
                   <button
                     type="button"
                     onClick={() => {
-                      void toggleMemoryActive(memory.id, !memory.active).then(() => getMemories()).then(setMemories);
+                      void toggleMemoryActive(memory.id, !memory.active).then(() => getMemories(false)).then(setMemories);
                     }}
                     className="rounded p-1 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
                     title={memory.active ? 'Disable memory' : 'Enable memory'}
@@ -405,7 +405,7 @@ export default function AIProviderSettings() {
                   <button
                     type="button"
                     onClick={() => {
-                      void deleteMemory(memory.id).then(() => getMemories()).then((m) => { setMemories(m); toast.success('Memory deleted'); });
+                      void deleteMemory(memory.id).then(() => getMemories(false)).then((m) => { setMemories(m); toast.success('Memory deleted'); });
                     }}
                     className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     title="Delete memory"

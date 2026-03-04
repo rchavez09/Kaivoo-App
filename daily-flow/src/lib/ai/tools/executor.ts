@@ -169,14 +169,15 @@ export async function executeTool(
         const startTime = args.start_time as string;
         const endTime = (args.end_time as string) || (() => {
           const [h, m] = startTime.split(':').map(Number);
-          return `${String(h + 1).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+          const endH = Math.min(h + 1, 23);
+          return `${String(endH).padStart(2, '0')}:${String(endH === 23 && h === 23 ? 59 : m).padStart(2, '0')}`;
         })();
         const startISO = `${date}T${startTime}:00`;
         const endISO = `${date}T${endTime}:00`;
         const meeting = await actions.addMeeting({
           title: args.title as string,
-          startTime: startISO,
-          endTime: endISO,
+          startTime: new Date(startISO),
+          endTime: new Date(endISO),
           description: (args.description as string) || '',
           location: (args.location as string) || '',
           attendees: [],

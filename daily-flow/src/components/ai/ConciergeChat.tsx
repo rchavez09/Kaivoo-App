@@ -36,7 +36,7 @@ import type { AppContext } from '@/lib/ai/prompt-assembler';
 import { ALL_TOOLS } from '@/lib/ai/tools';
 import { executeTool, resetToolCallCount } from '@/lib/ai/tools';
 import type { ExecutorActions } from '@/lib/ai/tools';
-import { getMemories } from '@/lib/ai/memory-service';
+import { getMemories, getSummaries } from '@/lib/ai/memory-service';
 import { extractMemories } from '@/lib/ai/extraction';
 import { summarizeConversation } from '@/lib/ai/summarizer';
 import { useKaivooStore } from '@/stores/useKaivooStore';
@@ -201,11 +201,13 @@ const ConciergeChat = () => {
       const activeMemories = memories.filter((m) => m.active);
       const appContext = buildAppContext();
 
+      const summaries = await getSummaries();
+
       const systemPrompt = assembleSystemPrompt({
         soul,
         depth: settings.depth,
         memories: activeMemories,
-        summaries: [], // TODO: P17 will populate this
+        summaries,
         appContext,
         hasTools: true,
       });
