@@ -24,6 +24,20 @@
       ]
     },
     {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        { "path": "$APPDATA/.kaivoo/**" },
+        { "path": "$APPDATA/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-stat",
+      "allow": [
+        { "path": "$APPDATA/.kaivoo/**" },
+        { "path": "$APPDATA/**" }
+      ]
+    },
+    {
       "identifier": "fs:allow-exists",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },

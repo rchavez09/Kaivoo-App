@@ -32,6 +32,9 @@ export interface VaultNode {
 // ═══════════════════════════════════════════════════════
 
 export interface VaultAdapter {
+  /** The vault root directory path (desktop only, undefined on web). */
+  readonly root?: string;
+
   /** Create root folder structure (Journal/, Projects/, Library/, Inbox/) */
   initialize(): Promise<void>;
 
