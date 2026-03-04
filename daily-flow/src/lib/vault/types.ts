@@ -98,9 +98,9 @@ const MONTH_NAMES = [
 
 /** Sanitize a name for use as a folder/file name */
 export function sanitizeName(name: string): string {
-  // eslint-disable-next-line no-control-regex
   return (
     name
+      // eslint-disable-next-line no-control-regex
       .replace(/[<>:"/\\|?*\x00-\x1f]/g, '')
       .replace(/\s+/g, ' ')
       .trim() || 'Untitled'
