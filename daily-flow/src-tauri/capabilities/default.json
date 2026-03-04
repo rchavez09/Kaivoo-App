@@ -48,6 +48,8 @@
         { "path": "$APPDATA/.kaivoo/**" },
         { "path": "$APPDATA/com.kaivoo.desktop/**" }
       ]
-    }
+    },
+    "updater:default",
+    "process:allow-restart"
   ]
 }

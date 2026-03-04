@@ -145,10 +145,13 @@ const JournalCalendarSidebar = ({
                       ? 'bg-accent text-accent-foreground'
                       : 'text-muted-foreground hover:bg-accent/50',
                   )}
-                  aria-label={`Jump to section at ${format(section.timestamp, 'h:mm a')}`}
+                  aria-label={`Jump to section at ${format(section.timestamp, 'h:mm a')}${section.label ? ` — ${section.label}` : ''}`}
                 >
                   <Clock className="h-3.5 w-3.5 shrink-0" />
-                  {format(section.timestamp, 'h:mm a')}
+                  <span className="truncate">
+                    {format(section.timestamp, 'h:mm a')}
+                    {section.label && <span className="text-foreground/70"> — {section.label}</span>}
+                  </span>
                 </button>
               ))
             )}

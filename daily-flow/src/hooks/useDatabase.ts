@@ -130,6 +130,7 @@ export const useDatabaseOperations = () => {
       updates: { completed?: boolean; completedAt?: Date; title?: string; tags?: string[] },
     ) => ensureAdapter().subtasks.update(id, updates),
     deleteSubtask: (id: string) => ensureAdapter().subtasks.delete(id),
+    reorderSubtasks: (taskId: string, subtaskIds: string[]) => ensureAdapter().subtasks.reorder(taskId, subtaskIds),
 
     // Topics
     createTopic: (topic: Omit<Topic, 'id' | 'createdAt'>) => ensureAdapter().topics.create(topic),

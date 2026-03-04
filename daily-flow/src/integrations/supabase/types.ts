@@ -439,6 +439,7 @@ export type Database = {
           completed_at: string | null;
           created_at: string;
           id: string;
+          sort_order: number | null;
           tags: string[] | null;
           task_id: string;
           title: string;
@@ -449,6 +450,7 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           id?: string;
+          sort_order?: number | null;
           tags?: string[] | null;
           task_id: string;
           title: string;
@@ -459,6 +461,7 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           id?: string;
+          sort_order?: number | null;
           tags?: string[] | null;
           task_id?: string;
           title?: string;

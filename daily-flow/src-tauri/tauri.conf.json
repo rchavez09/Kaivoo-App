@@ -36,5 +36,12 @@
       "icons/icon.ico"
     ]
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "pubkey": "TODO_REPLACE_WITH_UPDATER_PUBLIC_KEY",
+      "endpoints": [
+        "https://github.com/rchavez09/Kaivoo-App/releases/latest/download/latest.json"
+      ]
+    }
+  }
 }

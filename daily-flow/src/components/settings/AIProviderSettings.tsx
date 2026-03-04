@@ -101,10 +101,15 @@ export default function AIProviderSettings() {
     }
   }, [settings]);
 
+  const soulSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const updateSoul = useCallback((patch: Partial<SoulConfig>) => {
     setSoul((prev) => {
       const next = { ...prev, ...patch };
       saveSoulConfig(next);
+      clearTimeout(soulSaveTimerRef.current);
+      soulSaveTimerRef.current = setTimeout(() => {
+        toast.success('Saved', { duration: 1200, icon: <Check className="h-4 w-4" /> });
+      }, 800);
       return next;
     });
   }, []);
@@ -115,7 +120,7 @@ export default function AIProviderSettings() {
     <div className="space-y-6">
       {/* Provider */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-foreground">Provider</label>
+        <label htmlFor="ai-provider" className="mb-2 block text-sm font-medium text-foreground">Provider</label>
         <Select value={settings.provider} onValueChange={handleProviderChange}>
           <SelectTrigger>
             <SelectValue />
@@ -133,10 +138,11 @@ export default function AIProviderSettings() {
       {/* API Key */}
       {provider?.requiresApiKey && (
         <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">API Key</label>
+          <label htmlFor="ai-api-key" className="mb-2 block text-sm font-medium text-foreground">API Key</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
+                id="ai-api-key"
                 type={showKey ? 'text' : 'password'}
                 value={settings.apiKey}
                 onChange={(e) => update({ apiKey: e.target.value })}
@@ -177,8 +183,9 @@ export default function AIProviderSettings() {
       {/* Ollama Base URL */}
       {settings.provider === 'ollama' && (
         <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">Ollama Server URL</label>
+          <label htmlFor="ollama-url" className="mb-2 block text-sm font-medium text-foreground">Ollama Server URL</label>
           <Input
+            id="ollama-url"
             value={settings.ollamaBaseUrl}
             onChange={(e) => update({ ollamaBaseUrl: e.target.value })}
             placeholder="http://localhost:11434"
@@ -189,8 +196,9 @@ export default function AIProviderSettings() {
       {/* Custom Base URL for OpenAI-compatible */}
       {settings.provider === 'openai-compatible' && (
         <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">Base URL</label>
+          <label htmlFor="custom-base-url" className="mb-2 block text-sm font-medium text-foreground">Base URL</label>
           <Input
+            id="custom-base-url"
             value={settings.customBaseUrl || ''}
             onChange={(e) => update({ customBaseUrl: e.target.value })}
             placeholder="https://your-provider.com/v1"
@@ -203,7 +211,7 @@ export default function AIProviderSettings() {
 
       {/* Model */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-foreground">Model</label>
+        <label htmlFor="ai-model" className="mb-2 block text-sm font-medium text-foreground">Model</label>
         <Select value={settings.model} onValueChange={(value) => update({ model: value })}>
           <SelectTrigger>
             <SelectValue />
@@ -287,8 +295,9 @@ export default function AIProviderSettings() {
 
       {/* Concierge Personality */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-foreground">Concierge Name</label>
+        <label htmlFor="soul-name" className="mb-2 block text-sm font-medium text-foreground">Concierge Name</label>
         <Input
+          id="soul-name"
           value={soul.name}
           onChange={(e) => updateSoul({ name: e.target.value })}
           placeholder="Kaivoo Assistant"
@@ -325,8 +334,9 @@ export default function AIProviderSettings() {
 
       {/* Your Name */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-foreground">Your Name</label>
+        <label htmlFor="soul-user-name" className="mb-2 block text-sm font-medium text-foreground">Your Name</label>
         <Input
+          id="soul-user-name"
           value={soul.userName || ''}
           onChange={(e) => updateSoul({ userName: e.target.value })}
           placeholder="What should the concierge call you?"
@@ -335,8 +345,9 @@ export default function AIProviderSettings() {
 
       {/* Backstory */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-foreground">Concierge Backstory</label>
+        <label htmlFor="soul-backstory" className="mb-2 block text-sm font-medium text-foreground">Concierge Backstory</label>
         <Textarea
+          id="soul-backstory"
           value={soul.backstory || ''}
           onChange={(e) => updateSoul({ backstory: e.target.value })}
           placeholder="Optional personality description, e.g. 'You are a stoic productivity coach who quotes Marcus Aurelius...'"
@@ -347,8 +358,9 @@ export default function AIProviderSettings() {
 
       {/* Communication Notes */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-foreground">Communication Preferences</label>
+        <label htmlFor="soul-comm-notes" className="mb-2 block text-sm font-medium text-foreground">Communication Preferences</label>
         <Textarea
+          id="soul-comm-notes"
           value={soul.communicationNotes || ''}
           onChange={(e) => updateSoul({ communicationNotes: e.target.value })}
           placeholder="e.g. 'I prefer bullet points over long paragraphs. I like when you ask follow-up questions.'"
@@ -359,8 +371,9 @@ export default function AIProviderSettings() {
 
       {/* Working Style */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-foreground">Working Style</label>
+        <label htmlFor="soul-working-style" className="mb-2 block text-sm font-medium text-foreground">Working Style</label>
         <Input
+          id="soul-working-style"
           value={soul.workingStyle || ''}
           onChange={(e) => updateSoul({ workingStyle: e.target.value })}
           placeholder="e.g. 'Deep work mornings, meetings in the afternoon'"
@@ -392,7 +405,7 @@ export default function AIProviderSettings() {
             {memories.map((memory) => (
               <div
                 key={memory.id}
-                className={`group flex items-start gap-3 rounded-lg border p-3 transition-colors ${
+                className={`group flex min-h-[44px] items-start gap-3 rounded-lg border p-3 transition-colors ${
                   memory.active ? 'border-border bg-card' : 'border-border/50 bg-muted/30'
                 }`}
               >
@@ -412,8 +425,8 @@ export default function AIProviderSettings() {
                         .then(() => getMemories(false))
                         .then(setMemories);
                     }}
-                    className="rounded p-1 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
-                    title={memory.active ? 'Disable memory' : 'Enable memory'}
+                    className="min-h-[44px] min-w-[44px] rounded px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    aria-label={memory.active ? 'Disable memory' : 'Enable memory'}
                   >
                     {memory.active ? 'Disable' : 'Enable'}
                   </button>
@@ -427,8 +440,8 @@ export default function AIProviderSettings() {
                           toast.success('Memory deleted');
                         });
                     }}
-                    className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    title="Delete memory"
+                    className="min-h-[44px] min-w-[44px] rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Delete memory"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>

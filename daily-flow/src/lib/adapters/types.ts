@@ -306,6 +306,7 @@ export interface SubtaskAdapter {
   create(input: CreateSubtaskInput): Promise<Subtask>;
   update(id: string, input: UpdateSubtaskInput): Promise<void>;
   delete(id: string): Promise<void>;
+  reorder(taskId: string, subtaskIds: string[]): Promise<void>;
 }
 
 export interface JournalAdapter {
@@ -517,6 +518,33 @@ export interface FileWatchEvent {
 }
 
 // ═══════════════════════════════════════════════════════
+// Attachment Adapter — file attachments for entities
+// ═══════════════════════════════════════════════════════
+
+/**
+ * AttachmentAdapter — manages file attachments associated with topics/notes.
+ *
+ * Implementations:
+ *  - LocalAttachmentAdapter: Tauri fs → `.attachments/{entityId}/`
+ *  - SupabaseAttachmentAdapter: Supabase Storage bucket
+ *  - NoOpAttachmentAdapter: no-op stub (when storage unavailable)
+ */
+export interface AttachmentAdapter {
+  uploadFile(entityId: string, file: File): Promise<AttachmentInfo>;
+  deleteFile(entityId: string, filename: string): Promise<void>;
+  getFileUrl(entityId: string, filename: string): Promise<string>;
+  listFiles(entityId: string): Promise<AttachmentInfo[]>;
+}
+
+export interface AttachmentInfo {
+  name: string;
+  size: number;
+  mimeType: string;
+  url: string;
+  createdAt: Date;
+}
+
+// ═══════════════════════════════════════════════════════
 // Adapter Provider — runtime adapter access
 // ═══════════════════════════════════════════════════════
 
@@ -529,4 +557,5 @@ export interface AdapterSet {
   auth: AuthAdapter;
   search: SearchAdapter;
   file: FileAdapter;
+  attachments: AttachmentAdapter;
 }

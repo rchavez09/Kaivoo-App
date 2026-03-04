@@ -11,6 +11,11 @@ import { ROOT_FOLDERS } from './types';
 export class LocalVaultAdapter implements VaultAdapter {
   private constructor(private rootPath: string) {}
 
+  /** The vault root directory path. */
+  get root(): string {
+    return this.rootPath;
+  }
+
   /** Factory: resolve the vault root. Checks for user-selected path from setup wizard,
    *  falling back to the Tauri app data directory. */
   static async create(): Promise<LocalVaultAdapter> {

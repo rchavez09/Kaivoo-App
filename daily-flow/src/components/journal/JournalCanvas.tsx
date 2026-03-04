@@ -60,6 +60,7 @@ const HIGHLIGHT_COLORS = [
 export interface CanvasSection {
   entryId: string;
   timestamp: Date;
+  label?: string;
 }
 
 interface JournalCanvasProps {
@@ -594,6 +595,7 @@ const JournalCanvas = ({
     sectionsRef.current = entries.map((e) => ({
       entryId: e.id,
       timestamp: new Date(e.timestamp),
+      ...(e.label ? { label: e.label } : {}),
     }));
     onSectionsChangeRef.current(sectionsRef.current);
 
@@ -633,6 +635,7 @@ const JournalCanvas = ({
     sectionsRef.current = entries.map((e) => ({
       entryId: e.id,
       timestamp: new Date(e.timestamp),
+      ...(e.label ? { label: e.label } : {}),
     }));
     onSectionsChangeRef.current(sectionsRef.current);
 

@@ -70,6 +70,7 @@ import {
   createSubtask,
   updateSubtask,
   deleteSubtask,
+  reorderSubtasks,
   dbToTask,
 } from '@/services/tasks.service';
 import {
@@ -170,18 +171,22 @@ class SupabaseSubtaskAdapter implements SubtaskAdapter {
         completed: r.completed,
         completedAt: r.completed_at ? new Date(r.completed_at) : undefined,
         tags: r.tags || [],
+        sortOrder: (r as Record<string, unknown>).sort_order as number ?? 0,
       }),
     );
   }
   async create(input: CreateSubtaskInput) {
     const result = await createSubtask(this.userId, input.taskId, input.title);
-    return { ...result, taskId: input.taskId, tags: [], completedAt: undefined } as Subtask;
+    return { id: result.id, title: result.title, completed: result.completed, taskId: input.taskId, tags: [], completedAt: undefined, sortOrder: result.sort_order ?? 0 };
   }
   async update(id: string, input: UpdateSubtaskInput) {
     return updateSubtask(this.userId, id, input);
   }
   async delete(id: string) {
     return deleteSubtask(this.userId, id);
+  }
+  async reorder(taskId: string, subtaskIds: string[]) {
+    return reorderSubtasks(this.userId, taskId, subtaskIds);
   }
 }
 

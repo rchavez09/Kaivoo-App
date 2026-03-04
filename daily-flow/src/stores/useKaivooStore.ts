@@ -111,6 +111,7 @@ interface KaivooStore {
   updateSubtask: (taskId: string, subtaskId: string, updates: Partial<Subtask>) => void;
   toggleSubtask: (taskId: string, subtaskId: string) => void;
   deleteSubtask: (taskId: string, subtaskId: string) => void;
+  reorderSubtasks: (taskId: string, subtaskIds: string[]) => void;
   getTasksByTopic: (topicId: string) => Task[];
   getTasksByTag: (tagName: string) => Task[];
   getTasksDueToday: () => Task[];
@@ -725,11 +726,14 @@ export const useKaivooStore = create<KaivooStore>()(
       },
 
       addSubtask: (taskId, title) => {
+        const task = get().tasks.find((t) => t.id === taskId);
+        const maxOrder = task ? Math.max(-1, ...task.subtasks.map((s) => s.sortOrder)) : -1;
         const subtask = {
           id: `subtask-${generateId()}`,
           title,
           completed: false,
           tags: [],
+          sortOrder: maxOrder + 1,
           createdAt: new Date(), // Track when subtask was created for activity feed
         };
         set((state) => ({
@@ -771,6 +775,24 @@ export const useKaivooStore = create<KaivooStore>()(
         set((state) => ({
           tasks: state.tasks.map((t) =>
             t.id === taskId ? { ...t, subtasks: t.subtasks.filter((s) => s.id !== subtaskId) } : t,
+          ),
+        }));
+      },
+
+      reorderSubtasks: (taskId, subtaskIds) => {
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  subtasks: subtaskIds
+                    .map((id, index) => {
+                      const s = t.subtasks.find((sub) => sub.id === id);
+                      return s ? { ...s, sortOrder: index } : null;
+                    })
+                    .filter(Boolean) as typeof t.subtasks,
+                }
+              : t,
           ),
         }));
       },

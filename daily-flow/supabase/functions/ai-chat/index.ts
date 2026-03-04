@@ -23,10 +23,11 @@ const OPENAI_COMPATIBLE_PROVIDERS: Record<string, string> = {
   groq: "https://api.groq.com/openai/v1",
   deepseek: "https://api.deepseek.com/v1",
   mistral: "https://api.mistral.ai/v1",
+  openrouter: "https://openrouter.ai/api/v1",
 };
 
 const VALID_PROVIDERS = [
-  "openai", "anthropic", "google", "groq", "mistral", "deepseek", "ollama", "openai-compatible",
+  "openai", "anthropic", "google", "groq", "mistral", "deepseek", "openrouter", "ollama", "openai-compatible",
 ] as const;
 
 const MAX_MESSAGES = 100;

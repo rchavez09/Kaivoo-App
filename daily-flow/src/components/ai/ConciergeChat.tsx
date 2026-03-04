@@ -358,7 +358,7 @@ const ConciergeChat = () => {
             {view === 'list' ? (
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-base">Conversations</SheetTitle>
-                <Button variant="ghost" size="sm" onClick={handleNewConversation}>
+                <Button variant="ghost" size="sm" aria-label="New conversation" onClick={handleNewConversation}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -368,6 +368,7 @@ const ConciergeChat = () => {
                   variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0"
+                  aria-label="Back to conversations"
                   onClick={() => {
                     setView('list');
                     setConversations(getConversations());
@@ -376,7 +377,7 @@ const ConciergeChat = () => {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <SheetTitle className="flex-1 truncate text-base">{conversation.title}</SheetTitle>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleNewConversation}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="New conversation" onClick={handleNewConversation}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -520,6 +521,7 @@ const ConciergeChat = () => {
                   />
                   <Button
                     size="sm"
+                    aria-label="Send message"
                     onClick={() => void handleSend()}
                     disabled={!isConfigured || !input.trim() || streaming}
                     className="h-9 px-3"

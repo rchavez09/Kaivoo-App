@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
-import { User, Bell, Palette, Database, Keyboard, Bot, ChevronLeft } from 'lucide-react';
+import { User, Bell, Palette, Database, Keyboard, Bot, Key, ChevronLeft } from 'lucide-react';
 import AISettingsCard from '@/components/AISettingsCard';
 import AIProviderSettings from '@/components/settings/AIProviderSettings';
+import LicenseSettings from '@/components/settings/LicenseSettings';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
@@ -10,10 +11,11 @@ import DataSettings from '@/components/settings/DataSettings';
 import KeyboardShortcutsSettings from '@/components/settings/KeyboardShortcutsSettings';
 import { Button } from '@/components/ui/button';
 
-type SettingsSection = 'main' | 'profile' | 'notifications' | 'appearance' | 'shortcuts' | 'data' | 'ai-provider';
+type SettingsSection = 'main' | 'profile' | 'notifications' | 'appearance' | 'shortcuts' | 'data' | 'ai-provider' | 'license';
 
 const settingsSections = [
   { id: 'ai-provider' as const, icon: Bot, label: 'AI Provider', description: 'Configure your AI model and API key' },
+  { id: 'license' as const, icon: Key, label: 'License', description: 'Activate your Kaivoo license' },
   { id: 'profile' as const, icon: User, label: 'Profile', description: 'Manage your account settings' },
   { id: 'notifications' as const, icon: Bell, label: 'Notifications', description: 'Configure alerts and reminders' },
   { id: 'appearance' as const, icon: Palette, label: 'Appearance', description: 'Customize your experience' },
@@ -33,6 +35,8 @@ const SettingsPage = () => {
     switch (activeSection) {
       case 'ai-provider':
         return <AIProviderSettings />;
+      case 'license':
+        return <LicenseSettings />;
       case 'profile':
         return <ProfileSettings />;
       case 'notifications':

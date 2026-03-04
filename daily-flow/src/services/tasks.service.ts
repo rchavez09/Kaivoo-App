@@ -59,7 +59,7 @@ export const fetchTasks = async (userId: string) => {
 };
 
 export const fetchSubtasks = async (userId: string) => {
-  const { data, error } = await supabase.from('subtasks').select('*').eq('user_id', userId).order('created_at');
+  const { data, error } = await supabase.from('subtasks').select('*').eq('user_id', userId).order('sort_order').order('created_at');
   if (error) throw error;
   return data || [];
 };
@@ -119,13 +119,23 @@ export const deleteTask = async (userId: string, id: string) => {
 
 // Subtask CRUD
 export const createSubtask = async (userId: string, taskId: string, title: string) => {
+  // Get next sort_order for this task's subtasks
+  const { data: existing } = await supabase
+    .from('subtasks')
+    .select('sort_order')
+    .eq('task_id', taskId)
+    .eq('user_id', userId)
+    .order('sort_order', { ascending: false })
+    .limit(1);
+  const nextOrder = (existing?.[0]?.sort_order ?? -1) + 1;
+
   const { data, error } = await supabase
     .from('subtasks')
-    .insert({ user_id: userId, task_id: taskId, title })
+    .insert({ user_id: userId, task_id: taskId, title, sort_order: nextOrder })
     .select()
     .single();
   if (error) throw error;
-  return { id: data.id, title: data.title, completed: data.completed };
+  return { id: data.id, title: data.title, completed: data.completed, sort_order: data.sort_order ?? 0 };
 };
 
 export const updateSubtask = async (
@@ -146,4 +156,16 @@ export const updateSubtask = async (
 export const deleteSubtask = async (userId: string, id: string) => {
   const { error } = await supabase.from('subtasks').delete().eq('id', id).eq('user_id', userId);
   if (error) throw error;
+};
+
+export const reorderSubtasks = async (userId: string, taskId: string, subtaskIds: string[]) => {
+  for (let i = 0; i < subtaskIds.length; i++) {
+    const { error } = await supabase
+      .from('subtasks')
+      .update({ sort_order: i })
+      .eq('id', subtaskIds[i])
+      .eq('task_id', taskId)
+      .eq('user_id', userId);
+    if (error) throw error;
+  }
 };

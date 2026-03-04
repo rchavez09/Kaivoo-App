@@ -13,7 +13,7 @@
  *  - local-search.ts     — LocalSearchAdapter (FTS5)
  */
 
-import type { DataAdapter, FileAdapter, FileEntry } from './types';
+import type { DataAdapter, FileAdapter, FileEntry, AttachmentAdapter, AttachmentInfo } from './types';
 
 import type { TauriDatabase } from './local-types';
 import { SCHEMA_SQL } from './local-schema';
@@ -42,6 +42,7 @@ import { LocalSearchAdapter } from './local-search';
 // Re-export public adapters for dynamic import in provider.tsx
 export { LocalAuthAdapter } from './local-auth';
 export { LocalSearchAdapter } from './local-search';
+export { LocalAttachmentAdapter } from './local-attachments';
 
 // ═══════════════════════════════════════════════════════
 // LocalDataAdapter
@@ -152,5 +153,24 @@ export class NoOpFileAdapter implements FileAdapter {
   }
   async watchDir(): Promise<() => void> {
     return () => {};
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// NoOpAttachmentAdapter — stub for AttachmentAdapter
+// ═══════════════════════════════════════════════════════
+
+export class NoOpAttachmentAdapter implements AttachmentAdapter {
+  async uploadFile(): Promise<AttachmentInfo> {
+    throw new Error('Attachment storage not available');
+  }
+  async deleteFile(): Promise<void> {
+    throw new Error('Attachment storage not available');
+  }
+  async getFileUrl(): Promise<string> {
+    throw new Error('Attachment storage not available');
+  }
+  async listFiles(): Promise<AttachmentInfo[]> {
+    return [];
   }
 }

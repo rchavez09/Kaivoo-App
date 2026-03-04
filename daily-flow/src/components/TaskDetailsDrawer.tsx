@@ -13,13 +13,14 @@ import {
   PlayCircle,
   RefreshCw,
   Layers,
+  GripVertical,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { TaskStatus, TaskPriority, RecurrenceType } from '@/types';
+import { TaskStatus, TaskPriority, RecurrenceType, Subtask } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { toast } from 'sonner';
@@ -30,8 +31,134 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { statusConfig, priorityConfig } from '@/lib/task-config';
+
+// ─── Sortable Subtask Item ───
+
+interface SortableSubtaskItemProps {
+  subtask: Subtask;
+  taskId: string;
+  editingSubtaskId: string | null;
+  editingSubtaskTitle: string;
+  setEditingSubtaskId: (id: string | null) => void;
+  setEditingSubtaskTitle: (title: string) => void;
+  onToggle: (taskId: string, subtaskId: string) => void;
+  onUpdate: (taskId: string, subtaskId: string, updates: { title: string }) => void;
+  onDelete: (taskId: string, subtaskId: string) => void;
+}
+
+function SortableSubtaskItem({
+  subtask,
+  taskId,
+  editingSubtaskId,
+  editingSubtaskTitle,
+  setEditingSubtaskId,
+  setEditingSubtaskTitle,
+  onToggle,
+  onUpdate,
+  onDelete,
+}: SortableSubtaskItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: subtask.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'group -mx-2 flex items-center gap-1 rounded-lg px-2 py-1.5 hover:bg-card/50',
+        isDragging && 'z-10 bg-card shadow-md opacity-90',
+      )}
+    >
+      <button
+        className="flex-shrink-0 cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+        aria-label="Drag to reorder"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-3.5 w-3.5" />
+      </button>
+      <button onClick={() => onToggle(taskId, subtask.id)} className="flex-shrink-0">
+        {subtask.completed ? (
+          <CheckCircle2 className="h-4 w-4 text-success-foreground" />
+        ) : (
+          <Circle className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
+      {editingSubtaskId === subtask.id ? (
+        <Input
+          value={editingSubtaskTitle}
+          onChange={(e) => setEditingSubtaskTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              if (editingSubtaskTitle.trim()) {
+                onUpdate(taskId, subtask.id, { title: editingSubtaskTitle.trim() });
+              }
+              setEditingSubtaskId(null);
+            } else if (e.key === 'Escape') {
+              setEditingSubtaskId(null);
+            }
+          }}
+          onBlur={() => {
+            if (editingSubtaskTitle.trim() && editingSubtaskTitle !== subtask.title) {
+              onUpdate(taskId, subtask.id, { title: editingSubtaskTitle.trim() });
+            }
+            setEditingSubtaskId(null);
+          }}
+          className="h-7 flex-1 text-sm"
+          autoFocus
+        />
+      ) : (
+        <span
+          className={cn(
+            'flex-1 cursor-pointer text-sm hover:text-foreground',
+            subtask.completed && 'text-muted-foreground line-through',
+          )}
+          onClick={() => {
+            setEditingSubtaskId(subtask.id);
+            setEditingSubtaskTitle(subtask.title);
+          }}
+        >
+          {subtask.title}
+        </span>
+      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Delete subtask"
+        className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+        onClick={() => onDelete(taskId, subtask.id)}
+      >
+        <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+      </Button>
+    </div>
+  );
+}
+
+// ─── Task Details Drawer ───
 
 interface TaskDetailsDrawerProps {
   taskId: string | null;
@@ -45,7 +172,7 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
   const topics = useKaivooStore((s) => s.topics);
   const topicPages = useKaivooStore((s) => s.topicPages);
   const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
-  const { updateTask, deleteTask, addSubtask, toggleSubtask, updateSubtask, deleteSubtask } = useKaivooActions();
+  const { updateTask, deleteTask, addSubtask, toggleSubtask, updateSubtask, deleteSubtask, reorderSubtasks } = useKaivooActions();
 
   // State for inline subtask editing
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
@@ -80,6 +207,17 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
       icon: <Check className="h-4 w-4" />,
     });
   }, []);
+
+  // dnd-kit sensors for subtask reorder (must be before early return)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const sortedSubtasks = useMemo(
+    () => (task ? [...task.subtasks].sort((a, b) => a.sortOrder - b.sortOrder) : []),
+    [task],
+  );
 
   useEffect(() => {
     if (task) {
@@ -129,6 +267,18 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
   const handleDelete = () => {
     deleteTask(task.id);
     onOpenChange(false);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = sortedSubtasks.findIndex((s) => s.id === active.id);
+    const newIndex = sortedSubtasks.findIndex((s) => s.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const reordered = [...sortedSubtasks];
+    const [moved] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, moved);
+    reorderSubtasks(task.id, reordered.map((s) => s.id));
   };
 
   const handleToggleTopic = (topicId: string) => {
@@ -588,68 +738,26 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
 
             {totalSubtasks > 0 && <Progress value={progress} className="h-1.5" />}
 
-            <div className="space-y-1">
-              {task.subtasks.map((subtask) => (
-                <div
-                  key={subtask.id}
-                  className="group -mx-2 flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-card/50"
-                >
-                  <button onClick={() => toggleSubtask(task.id, subtask.id)} className="flex-shrink-0">
-                    {subtask.completed ? (
-                      <CheckCircle2 className="h-4 w-4 text-success-foreground" />
-                    ) : (
-                      <Circle className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </button>
-                  {editingSubtaskId === subtask.id ? (
-                    <Input
-                      value={editingSubtaskTitle}
-                      onChange={(e) => setEditingSubtaskTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          if (editingSubtaskTitle.trim()) {
-                            updateSubtask(task.id, subtask.id, { title: editingSubtaskTitle.trim() });
-                          }
-                          setEditingSubtaskId(null);
-                        } else if (e.key === 'Escape') {
-                          setEditingSubtaskId(null);
-                        }
-                      }}
-                      onBlur={() => {
-                        if (editingSubtaskTitle.trim() && editingSubtaskTitle !== subtask.title) {
-                          updateSubtask(task.id, subtask.id, { title: editingSubtaskTitle.trim() });
-                        }
-                        setEditingSubtaskId(null);
-                      }}
-                      className="h-7 flex-1 text-sm"
-                      autoFocus
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={sortedSubtasks.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-1">
+                  {sortedSubtasks.map((subtask) => (
+                    <SortableSubtaskItem
+                      key={subtask.id}
+                      subtask={subtask}
+                      taskId={task.id}
+                      editingSubtaskId={editingSubtaskId}
+                      editingSubtaskTitle={editingSubtaskTitle}
+                      setEditingSubtaskId={setEditingSubtaskId}
+                      setEditingSubtaskTitle={setEditingSubtaskTitle}
+                      onToggle={toggleSubtask}
+                      onUpdate={updateSubtask}
+                      onDelete={deleteSubtask}
                     />
-                  ) : (
-                    <span
-                      className={cn(
-                        'flex-1 cursor-pointer text-sm hover:text-foreground',
-                        subtask.completed && 'text-muted-foreground line-through',
-                      )}
-                      onClick={() => {
-                        setEditingSubtaskId(subtask.id);
-                        setEditingSubtaskTitle(subtask.title);
-                      }}
-                    >
-                      {subtask.title}
-                    </span>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete subtask"
-                    className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={() => deleteSubtask(task.id, subtask.id)}
-                  >
-                    <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />
-                  </Button>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
 
             <div className="flex items-center gap-2">
               <Circle className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
