@@ -33,6 +33,7 @@ const TrackingWidget = ({ date }: TrackingWidgetProps = {}) => {
   const { invalidate } = useInvalidate();
   const db = useDatabaseOperations();
   const habits = useKaivooStore((s) => s.habits);
+  const habitCompletions = useKaivooStore((s) => s.habitCompletions);
   const isHabitCompleted = useKaivooStore((s) => s.isHabitCompleted);
   const getHabitCompletionCount = useKaivooStore((s) => s.getHabitCompletionCount);
   const toggleHabitCompletion = useKaivooStore((s) => s.toggleHabitCompletion);
@@ -64,7 +65,7 @@ const TrackingWidget = ({ date }: TrackingWidgetProps = {}) => {
         }
         return isHabitCompleted(h.id, dateStr);
       }).length,
-    [activeHabits, dateStr, isHabitCompleted, getHabitCompletionCount],
+    [activeHabits, dateStr, isHabitCompleted, getHabitCompletionCount, habitCompletions],
   );
   const totalCount = activeHabits.length;
   const overallProgress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;

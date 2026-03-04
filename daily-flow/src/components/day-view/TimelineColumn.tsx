@@ -1,5 +1,6 @@
 import { memo, useMemo, useRef, useEffect } from 'react';
 import { format, isToday, setHours, setMinutes, differenceInMinutes, isBefore, isAfter } from 'date-fns';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Meeting, RoutineItem } from '@/types';
 import type { RoutineCompletionRecord } from '@/stores/useKaivooStore';
@@ -128,7 +129,7 @@ const TimelineColumn = memo(
                         done ? 'border-primary bg-primary text-primary-foreground' : 'border-border',
                       )}
                     >
-                      {done && <span className="text-[10px]">&#10003;</span>}
+                      {done && <Check className="h-3 w-3" />}
                     </div>
                     <span>{r.name}</span>
                   </button>
