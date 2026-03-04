@@ -1,73 +1,82 @@
 # Next Sprint Planning
 
-**Updated:** March 3, 2026
-**Last completed:** Sprint 24 (Soul File & Concierge)
-**Current sprint:** Sprint 25 (Ship Prep & Desktop Polish) — in progress
-**Source:** Vision v5.1, Sprint 24 retrospective, Agent 5 research (license keys, code signing, auto-updater)
+**Updated:** March 4, 2026
+**Last completed:** Sprint 25 (Ship Prep & Desktop Polish)
+**Current sprint:** Sprint 26 (Feature Completion) — IN PROGRESS
+**Source:** Vision v5.2, Code-vs-Vision audit (March 4), Sprint 25 retrospective
 
 ---
 
-## Sprint 25: Ship Prep & Desktop Polish (ACTIVE)
+## Sprint 26: Feature Completion — ACTIVE
 
-See `Sprint-25-Ship-Prep.md` for full spec.
+See `Sprint-26-Feature-Completion.md` for full plan.
 
-**Theme:** Make the product purchasable, installable, and updatable. Fix deferred UX debt.
-**Tracks:** UX Debt (4 parcels) + License Keys (4 parcels) + Desktop Distribution (5 parcels) + File Attachments (2 parcels) + Quality & Bundle (2 parcels) = 17 parcels.
-
----
-
-## Sprint 26: Launch Prep
-
-**Theme:** Landing page, legal, marketing site, Product Hunt prep. The last mile before real users.
-
-### Track 1: Landing Page & Marketing Site (P0)
-
-| Parcel | Description |
-|---|---|
-| Landing page | Positioning, pricing table, screenshots, CTA → Stripe Checkout flow. "Own your AI's memory" messaging. Deploy to marketing domain. |
-| Product Hunt listing draft | Title, tagline, description, screenshots, maker story. Ready to submit on launch day. |
-
-### Track 2: Legal (P0)
-
-| Parcel | Description |
-|---|---|
-| EULA / proprietary license | License terms for one-time purchase. Personal or internal business use. No redistribution. Attorney review required. |
-| Privacy policy | Data handling, BYO-key model, local-first storage, no telemetry. |
-| Terms of service | For web version and any future subscription tiers. |
-
-### Track 3: Polish & Hardening (P1)
-
-| Parcel | Description |
-|---|---|
-| Getting started guide | Quick setup doc, BYO key walkthrough, FAQ. In-app or shipped with desktop. |
-| General polish pass | Reserve capacity for issues discovered during Sprint 25 testing. |
-| Navigate_to tool | Low priority — if time permits. |
+**Theme:** Close the gaps between what the Vision claims and what the code delivers.
+**Parcels:** 9 across 3 tracks (Attachments Everywhere, Topic Content Editing, Export & Cleanup)
 
 ---
 
-## Sprint 27: Launch
+## Sprint 27: Launch Ready (Next)
 
-- Product Hunt listing + launch day plan
+**Theme:** Close the last mile — deploy backend services, build the storefront, draft legal. Everything between "code complete" and "accepting money."
+**Timeline:** After Sprint 26 merges.
+**Scope philosophy:** No new features. Pure deployment, configuration, storefront, and legal. The product code is done. This sprint makes it purchasable.
+
+### Track 1: Revenue Pipeline (P0)
+
+Everything needed to go from "user clicks Buy" to "user has a working license in their app." All Sprint 25 pre-release TODO items plus end-to-end verification.
+
+| # | Parcel | Agent | Priority |
+|---|---|---|---|
+| P1 | **Upload signing keys** — Add `TAURI_SIGNING_PRIVATE_KEY` to GitHub Secrets. Add license Ed25519 private key as Supabase Edge Function env var `LICENSE_PRIVATE_KEY`. | User + Agent 9 | P0 |
+| P2 | **Configure Stripe products** — Create two products in Stripe Dashboard: "Kaivoo Founding Member" ($49) and "Kaivoo Standard" ($99). Record price IDs. Configure webhook endpoint + signing secret. | User + Agent 4 | P0 |
+| P3 | **Deploy Edge Functions** — Deploy `license-keygen`, `license-lookup`, and `stripe-checkout` to Supabase. Set env vars. Verify reachable. | Agent 2 + Agent 9 | P0 |
+| P4 | **Create Storage bucket** — Create `attachments` bucket in Supabase Storage. Configure RLS policies. | Agent 12 | P0 |
+| P5 | **End-to-end payment test** — Full flow in Stripe test mode: Checkout → webhook → license key → email → activate in app. Verify both tiers. | Agent 2 + Agent 4 | P0 |
+
+### Track 2: Landing Page (P0)
+
+| # | Parcel | Agent | Priority |
+|---|---|---|---|
+| P6 | **Landing page build** — Astro static site. Hero, Features, Soul File callout, Screenshots, Pricing, FAQ, Footer. CTA → Stripe Checkout. | Agent 2 + Design Agents | P0 |
+| P7 | **Deploy landing page** — Netlify site. Custom domain. SSL. OG meta tags. | Agent 9 | P0 |
+| P8 | **App screenshots** — 4-6 polished screenshots (light + dark mode). | User + Design Agents | P0 |
+
+### Track 3: Legal & Launch Prep (P1)
+
+| # | Parcel | Agent | Priority |
+|---|---|---|---|
+| P9 | **EULA draft** — Attorney-review draft. Standard software license patterns. | Agent 5 | P0 |
+| P10 | **Privacy Policy draft** — Local-first data handling, BYO-key model, Stripe processing. | Agent 5 | P0 |
+| P11 | **Product Hunt listing draft** — Title, tagline, description, maker story, screenshots. | Agent 8 | P1 |
+
+---
+
+## Sprint 28: Harden & Launch
+
+- Product Hunt launch execution
+- Security hardening (Stripe webhook timestamp, CORS, rate limiting)
+- Accessibility P1s (17 items from Sprint 25 design review)
+- E2E test infrastructure (Playwright)
+- Getting started guide / onboarding docs
+- Terms of Service
 - Community setup (Discord or GitHub Discussions)
 - Basic analytics + error reporting (privacy-respecting)
-- Monitor, respond, iterate
+- Code signing resolution (if accounts verified)
 
 ---
 
-## Post-Launch Fast-Follow (Sprint 28+)
+## Post-Launch Fast-Follow (Sprint 29+)
 
 | Item | Notes |
 |---|---|
-| Google Calendar integration | MCP server exists: `mcp-server-google-calendar`. Evaluate for faster delivery. |
-| Gmail integration | MCP server exists: `mcp-server-gmail`. Evaluate alongside Calendar. |
-| Soul file Phase 2 | Embedding-based retrieval when memories > 200, memory decay, MCP server exposure |
+| Google Calendar integration | MCP server exists: `mcp-server-google-calendar` |
+| Gmail integration | MCP server exists: `mcp-server-gmail` |
+| Soul file Phase 2 | Embedding-based retrieval, memory decay, MCP server |
 | Topic-level AI access controls | Per-topic `ai_access` toggle |
 | Mobile responsive design | Layout, touch targets, navigation. PWA support. |
-| Outlook integration | After Google Calendar/Gmail |
 | White-label config | Logo, colors, app name as settings |
 | Notifications & reminders | System notifications for tasks, calendar events |
-| E2E tests for AI features | Mock LLM responses or recorded fixtures |
-| Supabase Edge Function deployment pipeline | CI step for `supabase functions deploy` |
 
 ---
 
@@ -77,7 +86,7 @@ See `Sprint-25-Ship-Prep.md` for full spec.
 
 | Item | Notes |
 |---|---|
-| Drag-and-drop file upload | After file browser is stable |
+| In-vault markdown editor | Full editing surface inside the vault browser (Phase B) |
 | Wikilinks + backlinks | Requires content indexing |
 | File type filtering (PDF, image, etc.) | After basic browser works |
 | Folder templates ("New Client Project") | After core vault is stable |
@@ -96,4 +105,4 @@ See `Sprint-25-Ship-Prep.md` for full spec.
 
 ---
 
-*Next Sprint Planning — Updated March 3, 2026 — Sprint 25 active, Sprint 26+ staged*
+*Next Sprint Planning — Updated March 4, 2026 — Sprint 26 (Feature Completion) active, Sprint 27 (Launch Ready) staged, Sprint 28+ outlined*

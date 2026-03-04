@@ -18,6 +18,7 @@ import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { cn } from '@/lib/utils';
 import { MOODS } from './EntryMetadataPills';
+import EntityAttachments from '@/components/attachments/EntityAttachments';
 
 interface AIExtraction {
   suggestions: Array<{
@@ -211,6 +212,9 @@ const JournalDetailsPanel = ({
               </div>
             </>
           )}
+
+          {/* Attachments (per-entry) */}
+          {activeEntryId && entry && <EntityAttachments entityId={activeEntryId} label="Attachments" compact />}
 
           {/* AI Extract (day-level scope — always visible) */}
           <div className="space-y-2">

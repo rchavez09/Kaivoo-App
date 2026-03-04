@@ -16,7 +16,7 @@
 | Quality | Agent 7, Agent 10, Agent 11 | Code review, test strategy, feature integrity |
 | Design | Visual Design Agent, Accessibility & Theming Agent, UX Completeness Agent | Visual craft, accessibility, dark mode, UX completeness, interaction patterns |
 | Research | Agent 5 | Technology scouting, competitive analysis |
-| Marketing | TBD | Content, growth, brand |
+| Marketing | Sales Page Copywriter | Sales page copy, landing pages, conversion optimization |
 
 ### The Director
 Sits above all departments at `Agents/Director.md`. Owns the product vision (`Agents/Vision.md`), orchestrates sprint planning, and coordinates cross-department work. The Director is the single entry point for all sprint lifecycle operations.
@@ -202,7 +202,9 @@ Agents/
     Agent-{N}-Docs/
 
   Marketing/
-    (agents TBD)
+    Agent-Sales-Page-Copywriter.md       # Direct response conversion copy
+    Agent-Marketing-Docs/                # Shared working documents
+    Marketing-Copy-Draft.md              # Raw copy material from CEO sessions
 
   Sprints/
     Sprint-Protocol.md                     # This document

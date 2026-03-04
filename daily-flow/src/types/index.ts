@@ -12,6 +12,7 @@ export interface Topic {
   parentId?: string;
   icon?: string;
   description?: string;
+  content?: string;
   createdAt: Date;
 }
 
@@ -20,6 +21,7 @@ export interface TopicPage {
   topicId: string;
   name: string;
   description?: string;
+  content?: string;
   createdAt: Date;
 }
 

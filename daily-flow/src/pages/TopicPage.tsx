@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { ChevronLeft, FolderOpen, FileText, Plus, Briefcase, Trash2 } from 'lucide-react';
@@ -23,6 +23,8 @@ import EmojiPicker from '@/components/ui/EmojiPicker';
 import TopicCapturesWidget from '@/components/widgets/TopicCapturesWidget';
 import TopicTasksWidget from '@/components/widgets/TopicTasksWidget';
 import TopicTagsWidget from '@/components/widgets/TopicTagsWidget';
+import EntityAttachments from '@/components/attachments/EntityAttachments';
+import RichTextEditor from '@/components/journal/RichTextEditor';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +42,8 @@ const TopicPage = () => {
   const [createPageOpen, setCreatePageOpen] = useState(false);
   const [newPageName, setNewPageName] = useState('');
   const [deletePageOpen, setDeletePageOpen] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSaveRef = useRef<{ html: string; isPage: boolean; pageId?: string; topicId?: string } | null>(null);
 
   // Get the current topic or page
   const topic = topics.find((t) => t.id === topicId);
@@ -64,6 +68,48 @@ const TopicPage = () => {
   const contentId = pageId || topicId || '';
   const displayName = page?.name || topic?.name || 'Unknown';
   const isPage = !!page;
+
+  // Content editor state with debounced auto-save
+  const currentContent = page?.content ?? topic?.content ?? '';
+  const [editorContent, setEditorContent] = useState(currentContent);
+
+  // Sync editor when navigating to a different topic/page
+  useEffect(() => {
+    setEditorContent(page?.content ?? topic?.content ?? '');
+  }, [topicId, pageId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleContentChange = useCallback(
+    (html: string) => {
+      setEditorContent(html);
+      pendingSaveRef.current = { html, isPage, pageId, topicId };
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        pendingSaveRef.current = null;
+        if (isPage && pageId) {
+          void updateTopicPage(pageId, { content: html });
+        } else if (topicId) {
+          void updateTopic(topicId, { content: html });
+        }
+      }, 1500);
+    },
+    [isPage, pageId, topicId, updateTopic, updateTopicPage],
+  );
+
+  // Flush pending save on unmount or navigation
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      const pending = pendingSaveRef.current;
+      if (pending) {
+        if (pending.isPage && pending.pageId) {
+          void updateTopicPage(pending.pageId, { content: pending.html });
+        } else if (pending.topicId) {
+          void updateTopic(pending.topicId, { content: pending.html });
+        }
+        pendingSaveRef.current = null;
+      }
+    };
+  }, [updateTopic, updateTopicPage]);
 
   const journalEntries = getJournalEntriesByTopic(contentId);
   const captures = getCapturesByTopic(contentId);
@@ -280,6 +326,15 @@ const TopicPage = () => {
             );
           })()}
 
+        {/* Content Editor */}
+        <section className="mb-6">
+          <RichTextEditor
+            content={editorContent}
+            onChange={handleContentChange}
+            placeholder={isPage ? 'Write page content...' : 'Write topic content...'}
+          />
+        </section>
+
         {/* Tags Widget - moved to top when there are tags */}
         {allTags.size > 0 && (
           <div className="mb-4">
@@ -307,6 +362,9 @@ const TopicPage = () => {
 
           {/* Tasks Widget */}
           <TopicTasksWidget tasks={tasks} topicName={displayName} selectedTag={selectedTag} topicId={contentId} />
+
+          {/* Attachments */}
+          <EntityAttachments entityId={contentId} />
         </div>
 
         {/* Empty state guidance for topics */}

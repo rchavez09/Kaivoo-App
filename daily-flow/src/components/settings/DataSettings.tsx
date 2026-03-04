@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdapters } from '@/lib/adapters/provider';
+import { exportAll } from '@/lib/vault/export';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Download, Upload, Loader2 } from 'lucide-react';
+import { Download, Upload, Loader2, FileText } from 'lucide-react';
 
 interface ExportData {
   exportedAt: string;
@@ -28,71 +30,134 @@ interface ExportData {
 
 const DataSettings = () => {
   const { user } = useAuth();
+  const { data: dataAdapter, vault, isLocal } = useAdapters();
   const [exporting, setExporting] = useState(false);
+  const [exportingMd, setExportingMd] = useState(false);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
-    if (!user) return;
+    if (!user && !isLocal) return;
     setExporting(true);
 
     try {
-      const [
-        tasks,
-        subtasks,
-        journals,
-        captures,
-        topics,
-        topicPages,
-        tags,
-        meetings,
-        routineGroups,
-        routines,
-        routineCompletions,
-        widgetSettings,
-        aiSettings,
-        profile,
-        projects,
-        projectNotes,
-      ] = await Promise.all([
-        supabase.from('tasks').select('*').eq('user_id', user.id),
-        supabase.from('subtasks').select('*').eq('user_id', user.id),
-        supabase.from('journal_entries').select('*').eq('user_id', user.id),
-        supabase.from('captures').select('*').eq('user_id', user.id),
-        supabase.from('topics').select('*').eq('user_id', user.id),
-        supabase.from('topic_pages').select('*').eq('user_id', user.id),
-        supabase.from('tags').select('*').eq('user_id', user.id),
-        supabase.from('meetings').select('*').eq('user_id', user.id),
-        supabase.from('routine_groups').select('*').eq('user_id', user.id),
-        supabase.from('routines').select('*').eq('user_id', user.id),
-        supabase.from('routine_completions').select('*').eq('user_id', user.id),
-        supabase.from('widget_settings').select('*').eq('user_id', user.id),
-        supabase.from('ai_settings').select('*').eq('user_id', user.id),
-        supabase.from('profiles').select('*').eq('user_id', user.id).single(),
-        supabase.from('projects').select('*').eq('user_id', user.id),
-        supabase.from('project_notes').select('*').eq('user_id', user.id),
-      ]);
+      let exportData: ExportData;
 
-      const exportData: ExportData = {
-        exportedAt: new Date().toISOString(),
-        version: 2,
-        tasks: tasks.data || [],
-        subtasks: subtasks.data || [],
-        journalEntries: journals.data || [],
-        captures: captures.data || [],
-        topics: topics.data || [],
-        topicPages: topicPages.data || [],
-        tags: tags.data || [],
-        meetings: meetings.data || [],
-        routineGroups: routineGroups.data || [],
-        routines: routines.data || [],
-        routineCompletions: routineCompletions.data || [],
-        widgetSettings: widgetSettings.data || [],
-        aiSettings: aiSettings.data || [],
-        profile: profile.data || null,
-        projects: projects.data || [],
-        projectNotes: projectNotes.data || [],
-      };
+      if (dataAdapter) {
+        // Adapter-based export — works on both web and desktop
+        const [
+          tasks,
+          subtasks,
+          journals,
+          captures,
+          topics,
+          topicPages,
+          tags,
+          meetings,
+          routineGroups,
+          routines,
+          routineCompletions,
+          projects,
+          projectNotes,
+        ] = await Promise.all([
+          dataAdapter.tasks.fetchAll(),
+          dataAdapter.subtasks.fetchAll(),
+          dataAdapter.journalEntries.fetchAll(),
+          dataAdapter.captures.fetchAll(),
+          dataAdapter.topics.fetchAll(),
+          dataAdapter.topicPages.fetchAll(),
+          dataAdapter.tags.fetchAll(),
+          dataAdapter.meetings.fetchAll(),
+          dataAdapter.routineGroups.fetchAll(),
+          dataAdapter.routines.fetchAll(),
+          dataAdapter.routineCompletions.fetchAll(),
+          dataAdapter.projects.fetchAll(),
+          dataAdapter.projectNotes.fetchAll(),
+        ]);
+
+        exportData = {
+          exportedAt: new Date().toISOString(),
+          version: 2,
+          tasks: tasks as unknown as Record<string, unknown>[],
+          subtasks: subtasks as unknown as Record<string, unknown>[],
+          journalEntries: journals as unknown as Record<string, unknown>[],
+          captures: captures as unknown as Record<string, unknown>[],
+          topics: topics as unknown as Record<string, unknown>[],
+          topicPages: topicPages as unknown as Record<string, unknown>[],
+          tags: tags as unknown as Record<string, unknown>[],
+          meetings: meetings as unknown as Record<string, unknown>[],
+          routineGroups: routineGroups as unknown as Record<string, unknown>[],
+          routines: routines as unknown as Record<string, unknown>[],
+          routineCompletions: routineCompletions as unknown as Record<string, unknown>[],
+          widgetSettings: [],
+          aiSettings: [],
+          profile: null,
+          projects: projects as unknown as Record<string, unknown>[],
+          projectNotes: projectNotes as unknown as Record<string, unknown>[],
+        };
+      } else if (user) {
+        // Legacy Supabase-only path (fallback)
+        const [
+          tasks,
+          subtasks,
+          journals,
+          captures,
+          topics,
+          topicPages,
+          tags,
+          meetings,
+          routineGroups,
+          routines,
+          routineCompletions,
+          widgetSettings,
+          aiSettings,
+          profile,
+          projects,
+          projectNotes,
+        ] = await Promise.all([
+          supabase.from('tasks').select('*').eq('user_id', user.id),
+          supabase.from('subtasks').select('*').eq('user_id', user.id),
+          supabase.from('journal_entries').select('*').eq('user_id', user.id),
+          supabase.from('captures').select('*').eq('user_id', user.id),
+          supabase.from('topics').select('*').eq('user_id', user.id),
+          supabase.from('topic_pages').select('*').eq('user_id', user.id),
+          supabase.from('tags').select('*').eq('user_id', user.id),
+          supabase.from('meetings').select('*').eq('user_id', user.id),
+          supabase.from('routine_groups').select('*').eq('user_id', user.id),
+          supabase.from('routines').select('*').eq('user_id', user.id),
+          supabase.from('routine_completions').select('*').eq('user_id', user.id),
+          supabase.from('widget_settings').select('*').eq('user_id', user.id),
+          supabase.from('ai_settings').select('*').eq('user_id', user.id),
+          supabase.from('profiles').select('*').eq('user_id', user.id).single(),
+          supabase.from('projects').select('*').eq('user_id', user.id),
+          supabase.from('project_notes').select('*').eq('user_id', user.id),
+        ]);
+
+        exportData = {
+          exportedAt: new Date().toISOString(),
+          version: 2,
+          tasks: tasks.data || [],
+          subtasks: subtasks.data || [],
+          journalEntries: journals.data || [],
+          captures: captures.data || [],
+          topics: topics.data || [],
+          topicPages: topicPages.data || [],
+          tags: tags.data || [],
+          meetings: meetings.data || [],
+          routineGroups: routineGroups.data || [],
+          routines: routines.data || [],
+          routineCompletions: routineCompletions.data || [],
+          widgetSettings: widgetSettings.data || [],
+          aiSettings: aiSettings.data || [],
+          profile: profile.data || null,
+          projects: projects.data || [],
+          projectNotes: projectNotes.data || [],
+        };
+      } else {
+        toast.error('Not signed in');
+        setExporting(false);
+        return;
+      }
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -110,6 +175,38 @@ const DataSettings = () => {
     }
 
     setExporting(false);
+  };
+
+  /** Export all data as Obsidian-compatible markdown files (downloaded as .zip on web). */
+  const handleMarkdownExport = async () => {
+    if (!dataAdapter || !vault) return;
+    setExportingMd(true);
+
+    try {
+      const [journals, captures, topics, topicPages] = await Promise.all([
+        dataAdapter.journalEntries.fetchAll(),
+        dataAdapter.captures.fetchAll(),
+        dataAdapter.topics.fetchAll(),
+        dataAdapter.topicPages.fetchAll(),
+      ]);
+
+      const result = await exportAll({ journals, captures, topics, topicPages }, vault);
+
+      if (result.errors.length > 0) {
+        console.error('Markdown export errors:', result.errors);
+        toast.warning(
+          `Exported ${result.exported} files with ${result.errors.length} error(s) — check console for details.`,
+          { duration: 6000 },
+        );
+      } else {
+        toast.success(`Exported ${result.exported} markdown files to vault`);
+      }
+    } catch (error) {
+      console.error('Markdown export error:', error);
+      toast.error('Failed to export markdown');
+    }
+
+    setExportingMd(false);
   };
 
   const stripIds = (rows: Record<string, unknown>[], userId: string) =>
@@ -428,6 +525,28 @@ const DataSettings = () => {
             <>
               <Download className="mr-2 h-4 w-4" />
               Export Data
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div className="space-y-3 rounded-lg border border-border p-4">
+        <div>
+          <h3 className="font-medium text-foreground">Export to Markdown</h3>
+          <p className="text-sm text-muted-foreground">
+            Export journals, captures, and topics as Obsidian-compatible markdown files with YAML frontmatter.
+          </p>
+        </div>
+        <Button onClick={handleMarkdownExport} disabled={exportingMd || !dataAdapter || !vault} variant="outline">
+          {exportingMd ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <FileText className="mr-2 h-4 w-4" />
+              Export Markdown
             </>
           )}
         </Button>

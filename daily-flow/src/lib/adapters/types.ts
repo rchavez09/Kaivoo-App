@@ -128,6 +128,7 @@ export interface UpdateCaptureInput {
 export interface CreateTopicInput {
   name: string;
   description?: string;
+  content?: string;
   icon?: string;
   parentId?: string;
 }
@@ -135,6 +136,7 @@ export interface CreateTopicInput {
 export interface UpdateTopicInput {
   name?: string;
   description?: string;
+  content?: string;
   icon?: string;
 }
 
@@ -144,11 +146,13 @@ export interface CreateTopicPageInput {
   topicId: string;
   name: string;
   description?: string;
+  content?: string;
 }
 
 export interface UpdateTopicPageInput {
   name?: string;
   description?: string;
+  content?: string;
 }
 
 // ─── Tags ───

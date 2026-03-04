@@ -398,7 +398,10 @@ export const useKaivooActions = () => {
     return [topic.id, page.id];
   };
 
-  const updateTopic = async (id: string, updates: { name?: string; description?: string; icon?: string }) => {
+  const updateTopic = async (
+    id: string,
+    updates: { name?: string; description?: string; content?: string; icon?: string },
+  ) => {
     const prev = getStore().topics.find((t) => t.id === id);
     getStore().updateTopic(id, updates);
     if (user) {
@@ -428,7 +431,7 @@ export const useKaivooActions = () => {
     }
   };
 
-  const updateTopicPage = async (id: string, updates: { name?: string; description?: string }) => {
+  const updateTopicPage = async (id: string, updates: { name?: string; description?: string; content?: string }) => {
     const prev = getStore().topicPages.find((p) => p.id === id);
     getStore().updateTopicPage(id, updates);
     if (user) {

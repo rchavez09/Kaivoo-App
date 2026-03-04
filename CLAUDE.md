@@ -27,7 +27,7 @@
 | Quality | `Agents/Quality/` | Agent 7 (Code Reviewer), Agent 10 (QA Architect — activates Sprint 4+), Agent 11 (Feature Integrity Guardian) |
 | Design | `Agents/Design/` | Visual Design Agent, Accessibility & Theming Agent, UX Completeness Agent |
 | Research | `Agents/Research/` | Agent 5 (Research Analyst) |
-| Marketing | `Agents/Marketing/` | TBD |
+| Marketing | `Agents/Marketing/` | Content Strategist & SEO, Sales Page Copywriter, Growth Strategist |
 
 ### Sprint System
 - Protocol: `Agents/Sprints/Sprint-Protocol.md`
