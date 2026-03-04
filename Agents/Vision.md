@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 5.1
-**Last Updated:** March 3, 2026
+**Version:** 5.2
+**Last Updated:** March 4, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -399,14 +399,14 @@ The app is local-first and yours forever. The subscription is for convenience an
 | Desktop packaging (Tauri 2.0) — macOS scaffold complete, .dmg builds. Windows/Linux CI in Sprint 22. | **DONE** | Sprint 20 |
 | Data layer abstraction — DataAdapter pattern (4 interfaces, 15 entity sub-adapters). SupabaseAdapter + LocalAdapter. Runtime switching via `isTauri()`. | **DONE** | Sprint 20 |
 | Local-first storage — SQLite CRUD persistence, FTS5 search, local auth session. Data persists to disk without Supabase. | **DONE** | Sprint 21 |
-| File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | PLANNED | Must-have |
+| File attachments + image embedding — files in project/topic folders, images embedded inline in notes, `.attachments/` storage | **DONE** (Sprint 25) | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | **DONE** (Sprint 23) | Must-have |
 | AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | **DONE** (Sprint 23 — in-app chat; Telegram deferred to Phase B) | Must-have |
 | Soul file — persistent AI memory (SQLite `ai_memories` table, fact extraction pipeline, user-editable memory UI, app context injection, conversation summaries). The concierge learns, remembers, and sees your data. | **DONE** (Sprint 24) | Must-have |
 | Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | **DONE** (Sprint 23) | Must-have |
-| License key system — activation, tier validation, commercial distribution | PLANNED | Must-have |
+| License key system — activation, tier validation, commercial distribution | **DONE** (Sprint 25 — Ed25519 offline verification, Stripe checkout, activation UX) | Must-have |
 | Landing page & marketing site | PLANNED | Must-have |
-| Stripe integration — one-time payment flow | PLANNED | Must-have |
+| Stripe integration — one-time payment flow | **DONE** (Sprint 25 — $49/$99 Checkout, Edge Functions) | Must-have |
 | EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED | Must-have |
 | Product Hunt launch | PLANNED | Must-have |
 | Google Calendar integration — OAuth, two-way sync (investigate MCP for faster delivery) | PLANNED | Post-launch fast-follow |
@@ -511,8 +511,8 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (final pre-launch sprints)
-**Active sprint:** None (Sprint 24 just completed)
-**Last completed:** Sprint 24 (Soul File & Concierge Intelligence) — soul file personality system, AI memory CRUD with dedup, 18-tool concierge with tool-use loops, 6-layer prompt assembly, provider-agnostic streaming (8 providers), Anthropic message transformation, memory extraction pipeline, conversation summaries, WCAG AA accessibility fixes
+**Active sprint:** None (Sprint 25 just completed)
+**Last completed:** Sprint 25 (Ship Prep & Desktop Polish) — Ed25519 license key system, Stripe Checkout integration, auto-updater (tauri-plugin-updater), release workflow (3-platform CI/CD), file attachments, subtask reorder, OpenRouter provider, bundle optimization (497KB→381KB), desktop sandbox fixes (Tauri permissions, adapter race condition, vault scope validation, habit completion reactivity)
 
 **Sprint 24 delivered:** Soul File & Concierge Intelligence — soul file personality (name, tone, backstory, communication prefs, working style), AI memory system (localStorage + SQLite CRUD, substring dedup, category/source tracking), 18-tool concierge with multi-round tool-use loops (create/read/update tasks, journal, calendar, notes, captures, projects, routines, habits, memory), 6-layer system prompt assembly (soul + memories + summaries + app context + tools), provider-agnostic SSE streaming via Supabase Edge Function (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Ollama, OpenAI-compatible), Anthropic message transformation for tool-use round-trips, memory extraction pipeline (LLM-based fact extraction with batch dedup), conversation summaries, per-provider API key caching, WCAG AA accessibility (aria-checked radio groups, non-color selection indicators, token-based contrast). 265 tests. See `Sprints/Sprint-24-Soul-File-Concierge.md`.
 
@@ -689,7 +689,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v5.1 — March 3, 2026*
+*Vision v5.2 — March 4, 2026*
+*v5.2: Sprint 25 (Ship Prep & Desktop Polish) complete. Ed25519 license key system with offline verification, Stripe Checkout ($49/$99), auto-updater foundation (tauri-plugin-updater + release workflow), file attachments with drag-and-drop, subtask reorder (dnd-kit), OpenRouter provider, bundle optimization (497KB→381KB), 8 desktop sandbox fixes (Tauri permissions, adapter race condition, vault scope, habit completion reactivity). 17/17 parcels done. See `Sprints/Sprint-25-Ship-Prep.md`.*
 *v5.1: Sprint 24 (Soul File & Concierge Intelligence) complete. Soul file personality system, AI memory CRUD with dedup pipeline, 18-tool concierge with tool-use loops, 6-layer prompt assembly, provider-agnostic streaming (8 providers), Anthropic message transformation, memory extraction, conversation summaries, WCAG AA accessibility fixes. Soul file milestone marked DONE. See `Sprints/Sprint-24-Soul-File-Concierge.md`.*
 *v5.0: CEO Session #5 — Strategic pivot to three-tier revenue model (Core $49 one-time / Pro subscription / Builders subscription). "Day execution" replaces "day-centric" as core positioning. Soul file elevated to Phase A must-have (persistent AI memory the user owns). ChatGPT memory crisis narrative toned down — "own your AI's memory" framing. Gmail/Calendar deferred to post-launch fast-follow (investigate MCP). BYO-key economics validated by market research (TypingMind, JetBrains precedents). Competitive edge section rewritten around ownership, execution, and BYO-everything. Sprint 23 (Setup & AI Foundation) complete.*
 *v4.6: Sprint 22 (Knowledge Vault) complete. Vault file browser with 5-folder structure (Topics/Projects/Journal/Library/Inbox), dual-adapter architecture, Obsidian-compatible markdown export, topic nesting, adapter stabilization (local.ts split, SearchIndexer, entity_type discriminator). 265 tests. 6 P0 security/correctness fixes. See `Sprints/Sprint-22-Knowledge-Vault.md`.*

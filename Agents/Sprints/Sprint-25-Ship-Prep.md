@@ -2,7 +2,7 @@
 
 **Theme:** Make the product purchasable, installable, and updatable. Fix deferred UX debt. Everything a customer needs from "take my money" to "app running on my machine."
 **Branch:** `sprint/25-ship-prep`
-**Status:** PHASE 5 — USER ACCEPTANCE
+**Status:** DONE — MERGED TO MAIN
 **Compiled by:** Director
 **Date:** March 3, 2026
 
@@ -220,9 +220,9 @@ User gates:
 - [x] Agent 7 code audit — PASS (0 P0, 11 P1, 8 P2; blocking P1s fixed: filename sanitization)
 - [x] Agent 11 feature integrity — PASS (no regressions, all 15 feature paths verified)
 - [x] 3-agent design review — Visual PASS, A11y PASS, UX conditional PASS (placeholder key acknowledged)
-- [ ] E2E test against deploy preview
-- [ ] Sandbox Track A (Web): User reviews Netlify deploy preview
-- [ ] Sandbox Track B (Desktop): User builds locally (`npm run tauri dev`), tests native features
+- [ ] E2E test against deploy preview *(no Playwright tests set up yet — deferred to Sprint 26)*
+- [x] Sandbox Track A (Web): User reviews Netlify deploy preview — PASS
+- [x] Sandbox Track B (Desktop): User builds locally (`npm run tauri dev`), tests native features — PASS
 
 ---
 
@@ -369,4 +369,48 @@ Per Sprint Protocol v2.0 Phase 5, step 5.
 
 ---
 
-*Sprint 25 — Ship Prep & Desktop Polish — March 3, 2026*
+## Sprint Retrospective
+
+**Merged:** March 4, 2026 — PR #10 squash-merged to `main`
+
+### What Went Well
+- **17/17 parcels completed** — all five tracks delivered. License key system (Ed25519), Stripe integration, auto-updater, file attachments, subtask reorder, OpenRouter, bundle optimization, and file splits all landed.
+- **Two-track sandbox testing caught real bugs** — Track B (desktop) uncovered 7 distinct issues that would have shipped broken. The Protocol v2.0 dual-track model proved its value.
+- **Agent research was accurate** — Agent 5's license key, code signing, and auto-updater research translated directly to implementation with minimal pivots.
+
+### What Went Wrong
+- **Tauri v2 `$APPDATA` scope doubling** — `$APPDATA` already includes the bundle identifier on macOS, so `$APPDATA/com.kaivoo.desktop/**` was a doubled path that silently blocked all filesystem operations. This was invisible until sandbox testing.
+- **Zustand function selector reactivity** — Subscribing to store functions (`isHabitCompleted`) instead of data (`habitCompletions`) caused components to never re-render on completion state changes. Affected 3 components (RoutinesPage, TrackingWidget, HabitTrackingSection). Pattern: always subscribe to the underlying data, not derived functions.
+- **Adapter race condition** — When `isLocal=true` but `localAdapters` was still initializing (async dynamic import), the value memo fell through to the Supabase path, leaking web data into desktop mode.
+- **Stale localStorage vault paths** — Dialog-selected iCloud paths only persist FS scope for one session. Persisting the path in localStorage caused scope failures on relaunch. Fixed with try/catch validation in `LocalVaultAdapter.create()`.
+- **Testing on wrong target** — User initially tested the Netlify deploy preview (old code) instead of refreshing after local fixes were pushed. Cost one round-trip of confusion.
+
+### Lessons Learned
+1. **Tauri v2 scope variables**: `$APPDATA` = `~/Library/Application Support/{bundle_id}/` — never add the bundle ID again.
+2. **Zustand selector pattern**: When a component needs to react to data changes, subscribe to the data slice, not a function that reads it. Functions are stable references — Zustand won't re-render for them.
+3. **WebView storage location**: Tauri's WKWebView stores localStorage at `~/Library/WebKit/{app-name}/`. Must know this for debugging stale state.
+4. **WKWebView scrollbar limitation**: Safari/WKWebView ignores `::-webkit-scrollbar` — native macOS overlay scrollbar is expected behavior for desktop apps.
+5. **Always specify test target**: When sandbox testing, confirm whether user is on deploy preview or localhost before debugging.
+
+### Sandbox Fixes (Post-Gate, Pre-Merge)
+| Fix | Files Changed |
+|---|---|
+| Tauri SQL capabilities (`sql:allow-execute`, `sql:allow-select`) | `capabilities/default.json` |
+| FS scope doubling (`$APPDATA/**` instead of `$APPDATA/com.kaivoo.desktop/**`) | `capabilities/default.json` |
+| Adapter race condition (null data when isLocal && loading) | `provider.tsx` |
+| Retry mechanism (added `retryCount` state to useEffect deps) | `provider.tsx` |
+| Vault scope validation (catch stale iCloud paths) | `local-vault.ts` |
+| CSS background (added `bg-background` to html/main, window backgroundColor) | `index.css`, `AppLayout.tsx`, `tauri.conf.json` |
+| Habit completion reactivity (subscribe to `habitCompletions` data) | `RoutinesPage.tsx`, `TrackingWidget.tsx`, `HabitTrackingSection.tsx` |
+| Timeline checkmark (Lucide `<Check>` icon replacing HTML entity) | `TimelineColumn.tsx` |
+
+### Metrics
+- **Parcels:** 17/17 DONE
+- **Tests:** 265/265 pass
+- **Bundle:** 381KB initial load (down from 497KB)
+- **Sandbox fixes:** 8 issues found and fixed during Phase 5
+- **External blockers:** Apple + Azure code signing still verifying (non-blocking for sprint completion)
+
+---
+
+*Sprint 25 — Ship Prep & Desktop Polish — Completed March 4, 2026*
