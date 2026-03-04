@@ -70,8 +70,9 @@ jobs:
         working-directory: daily-flow
         run: npm ci
 
+      # macOS certificate import — only runs when APPLE_CERTIFICATE secret is configured
       - name: Import Apple certificate
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-latest' && env.APPLE_CERTIFICATE != ''
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -90,13 +91,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          # macOS notarization
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # ── Code signing env vars (add secrets to enable) ──
+          # macOS: APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
+          #        APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID
+          # Windows: WINDOWS_CERTIFICATE, WINDOWS_CERTIFICATE_PASSWORD
         with:
           projectPath: daily-flow
           tagName: ${{ github.ref_name }}
@@ -107,8 +105,11 @@ jobs:
           args: ${{ matrix.args }}
 
       # Windows code signing via Azure Trusted Signing (post-build)
+      # Only runs when Azure signing secrets are configured
       - name: Sign Windows binaries
-        if: matrix.platform == 'windows-latest'
+        if: matrix.platform == 'windows-latest' && env.AZURE_TENANT_ID != ''
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         uses: azure/trusted-signing-action@v0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
