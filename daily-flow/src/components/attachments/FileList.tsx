@@ -77,12 +77,7 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
       {/* Image preview */}
       {isImage && url && (
         <a href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block">
-          <img
-            src={url}
-            alt={file.name}
-            loading="lazy"
-            className="max-h-40 w-full rounded-md object-contain"
-          />
+          <img src={url} alt={file.name} loading="lazy" className="max-h-40 w-full rounded-md object-contain" />
         </a>
       )}
 

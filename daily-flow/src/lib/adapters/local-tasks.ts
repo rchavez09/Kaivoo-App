@@ -156,7 +156,9 @@ export class LocalSubtaskAdapter implements SubtaskAdapter {
 
   async fetchAll(): Promise<Subtask[]> {
     try {
-      const rows = await this.db.select<Array<Record<string, unknown>>>('SELECT * FROM subtasks ORDER BY sort_order, created_at');
+      const rows = await this.db.select<Array<Record<string, unknown>>>(
+        'SELECT * FROM subtasks ORDER BY sort_order, created_at',
+      );
       return rows.map((r) => ({
         id: r.id as string,
         taskId: r.task_id as string,
@@ -180,10 +182,12 @@ export class LocalSubtaskAdapter implements SubtaskAdapter {
         [input.taskId],
       );
       const sortOrder = ((maxRow?.max_order as number) ?? -1) + 1;
-      await this.db.execute(
-        'INSERT INTO subtasks (id, task_id, title, sort_order) VALUES ($1, $2, $3, $4)',
-        [id, input.taskId, input.title, sortOrder],
-      );
+      await this.db.execute('INSERT INTO subtasks (id, task_id, title, sort_order) VALUES ($1, $2, $3, $4)', [
+        id,
+        input.taskId,
+        input.title,
+        sortOrder,
+      ]);
       if (this.indexer)
         try {
           await this.indexer.upsert('subtask', id, input.title, '', JSON.stringify({ taskId: input.taskId }));
@@ -243,10 +247,11 @@ export class LocalSubtaskAdapter implements SubtaskAdapter {
   async reorder(taskId: string, subtaskIds: string[]): Promise<void> {
     try {
       for (let i = 0; i < subtaskIds.length; i++) {
-        await this.db.execute(
-          'UPDATE subtasks SET sort_order = $1 WHERE id = $2 AND task_id = $3',
-          [i, subtaskIds[i], taskId],
-        );
+        await this.db.execute('UPDATE subtasks SET sort_order = $1 WHERE id = $2 AND task_id = $3', [
+          i,
+          subtaskIds[i],
+          taskId,
+        ]);
       }
     } catch (e) {
       rethrow('Subtask', 'reorder', e);

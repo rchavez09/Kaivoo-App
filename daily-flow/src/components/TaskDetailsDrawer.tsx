@@ -90,7 +90,7 @@ function SortableSubtaskItem({
       style={style}
       className={cn(
         'group -mx-2 flex items-center gap-1 rounded-lg px-2 py-1.5 hover:bg-card/50',
-        isDragging && 'z-10 bg-card shadow-md opacity-90',
+        isDragging && 'z-10 bg-card opacity-90 shadow-md',
       )}
     >
       <button
@@ -172,7 +172,8 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
   const topics = useKaivooStore((s) => s.topics);
   const topicPages = useKaivooStore((s) => s.topicPages);
   const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
-  const { updateTask, deleteTask, addSubtask, toggleSubtask, updateSubtask, deleteSubtask, reorderSubtasks } = useKaivooActions();
+  const { updateTask, deleteTask, addSubtask, toggleSubtask, updateSubtask, deleteSubtask, reorderSubtasks } =
+    useKaivooActions();
 
   // State for inline subtask editing
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
@@ -278,7 +279,10 @@ const TaskDetailsDrawer = ({ taskId, open, onOpenChange }: TaskDetailsDrawerProp
     const reordered = [...sortedSubtasks];
     const [moved] = reordered.splice(oldIndex, 1);
     reordered.splice(newIndex, 0, moved);
-    reorderSubtasks(task.id, reordered.map((s) => s.id));
+    reorderSubtasks(
+      task.id,
+      reordered.map((s) => s.id),
+    );
   };
 
   const handleToggleTopic = (topicId: string) => {

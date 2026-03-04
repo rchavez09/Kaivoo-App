@@ -2,12 +2,7 @@
  * Local Entity Adapters — Habits & HabitCompletions
  */
 
-import type {
-  HabitAdapter,
-  HabitCompletionAdapter,
-  CreateHabitInput,
-  UpdateHabitInput,
-} from './types';
+import type { HabitAdapter, HabitCompletionAdapter, CreateHabitInput, UpdateHabitInput } from './types';
 
 import type { Habit, HabitCompletion } from '@/types';
 

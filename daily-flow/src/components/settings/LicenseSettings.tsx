@@ -81,9 +81,7 @@ export default function LicenseSettings() {
             </div>
           </div>
           {license.issuedAt && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              Issued: {license.issuedAt.toLocaleDateString()}
-            </p>
+            <p className="mt-3 text-xs text-muted-foreground">Issued: {license.issuedAt.toLocaleDateString()}</p>
           )}
         </div>
 
@@ -154,8 +152,8 @@ export default function LicenseSettings() {
       <div className="rounded-xl border border-dashed border-border p-4">
         <p className="mb-1 text-sm font-medium text-foreground">Don&apos;t have a license?</p>
         <p className="text-xs text-muted-foreground">
-          Purchase Kaivoo to receive your license key via email. All features work without a license —
-          this just removes the reminder banner.
+          Purchase Kaivoo to receive your license key via email. All features work without a license — this just removes
+          the reminder banner.
         </p>
       </div>
     </div>

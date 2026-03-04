@@ -44,9 +44,7 @@ export default function UpdateNotification() {
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
-          {error && (
-            <p className="mb-2 text-xs text-destructive">{error}</p>
-          )}
+          {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
           <div className="flex gap-2">
             <Button size="sm" onClick={() => void downloadAndInstall()} className="flex-1">
               <Download className="mr-1.5 h-3.5 w-3.5" />

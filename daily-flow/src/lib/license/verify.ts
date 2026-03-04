@@ -12,9 +12,7 @@ import { EMPTY_LICENSE } from './types';
 
 // Ed25519 public key (hex) — generated alongside the private key stored in Supabase secrets.
 // This key can ONLY verify signatures, not create them.
-// TODO: Replace with actual public key after running `generate-license-keypair` script
-const PUBLIC_KEY_HEX =
-  '0000000000000000000000000000000000000000000000000000000000000000';
+const PUBLIC_KEY_HEX = '1593ff8d9d4cd806219506d7de0753e8aeb3ae4b477d931495184ee99db0054b';
 
 function hexToBytes(hex: string): Uint8Array {
   const bytes = new Uint8Array(hex.length / 2);
@@ -44,7 +42,10 @@ function fromBase64Url(str: string): Uint8Array {
  * ----- END KAIVOO LICENSE -----
  */
 function parseLicenseBlock(raw: string): string | null {
-  const lines = raw.trim().split('\n').map((l) => l.trim());
+  const lines = raw
+    .trim()
+    .split('\n')
+    .map((l) => l.trim());
   const beginIdx = lines.findIndex((l) => l.includes('BEGIN KAIVOO LICENSE'));
   const endIdx = lines.findIndex((l) => l.includes('END KAIVOO LICENSE'));
 

@@ -171,13 +171,21 @@ class SupabaseSubtaskAdapter implements SubtaskAdapter {
         completed: r.completed,
         completedAt: r.completed_at ? new Date(r.completed_at) : undefined,
         tags: r.tags || [],
-        sortOrder: (r as Record<string, unknown>).sort_order as number ?? 0,
+        sortOrder: ((r as Record<string, unknown>).sort_order as number) ?? 0,
       }),
     );
   }
   async create(input: CreateSubtaskInput) {
     const result = await createSubtask(this.userId, input.taskId, input.title);
-    return { id: result.id, title: result.title, completed: result.completed, taskId: input.taskId, tags: [], completedAt: undefined, sortOrder: result.sort_order ?? 0 };
+    return {
+      id: result.id,
+      title: result.title,
+      completed: result.completed,
+      taskId: input.taskId,
+      tags: [],
+      completedAt: undefined,
+      sortOrder: result.sort_order ?? 0,
+    };
   }
   async update(id: string, input: UpdateSubtaskInput) {
     return updateSubtask(this.userId, id, input);

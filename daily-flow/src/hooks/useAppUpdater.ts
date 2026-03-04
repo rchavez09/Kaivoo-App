@@ -9,8 +9,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 
-const isTauri = (): boolean =>
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const isTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 interface UpdateState {
   available: boolean;

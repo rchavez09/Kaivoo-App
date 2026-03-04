@@ -377,7 +377,13 @@ const ConciergeChat = () => {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <SheetTitle className="flex-1 truncate text-base">{conversation.title}</SheetTitle>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="New conversation" onClick={handleNewConversation}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  aria-label="New conversation"
+                  onClick={handleNewConversation}
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>

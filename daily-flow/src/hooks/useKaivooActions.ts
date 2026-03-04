@@ -107,7 +107,13 @@ export const useKaivooActions = () => {
                   ...t,
                   subtasks: [
                     ...t.subtasks,
-                    { id: subtask.id, title: subtask.title, completed: subtask.completed, tags: [], sortOrder: subtask.sortOrder ?? t.subtasks.length },
+                    {
+                      id: subtask.id,
+                      title: subtask.title,
+                      completed: subtask.completed,
+                      tags: [],
+                      sortOrder: subtask.sortOrder ?? t.subtasks.length,
+                    },
                   ],
                 }
               : t,

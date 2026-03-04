@@ -59,7 +59,12 @@ export const fetchTasks = async (userId: string) => {
 };
 
 export const fetchSubtasks = async (userId: string) => {
-  const { data, error } = await supabase.from('subtasks').select('*').eq('user_id', userId).order('sort_order').order('created_at');
+  const { data, error } = await supabase
+    .from('subtasks')
+    .select('*')
+    .eq('user_id', userId)
+    .order('sort_order')
+    .order('created_at');
   if (error) throw error;
   return data || [];
 };

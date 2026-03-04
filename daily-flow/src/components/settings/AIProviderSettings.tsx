@@ -120,7 +120,9 @@ export default function AIProviderSettings() {
     <div className="space-y-6">
       {/* Provider */}
       <div>
-        <label htmlFor="ai-provider" className="mb-2 block text-sm font-medium text-foreground">Provider</label>
+        <label htmlFor="ai-provider" className="mb-2 block text-sm font-medium text-foreground">
+          Provider
+        </label>
         <Select value={settings.provider} onValueChange={handleProviderChange}>
           <SelectTrigger>
             <SelectValue />
@@ -138,7 +140,9 @@ export default function AIProviderSettings() {
       {/* API Key */}
       {provider?.requiresApiKey && (
         <div>
-          <label htmlFor="ai-api-key" className="mb-2 block text-sm font-medium text-foreground">API Key</label>
+          <label htmlFor="ai-api-key" className="mb-2 block text-sm font-medium text-foreground">
+            API Key
+          </label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
@@ -183,7 +187,9 @@ export default function AIProviderSettings() {
       {/* Ollama Base URL */}
       {settings.provider === 'ollama' && (
         <div>
-          <label htmlFor="ollama-url" className="mb-2 block text-sm font-medium text-foreground">Ollama Server URL</label>
+          <label htmlFor="ollama-url" className="mb-2 block text-sm font-medium text-foreground">
+            Ollama Server URL
+          </label>
           <Input
             id="ollama-url"
             value={settings.ollamaBaseUrl}
@@ -196,7 +202,9 @@ export default function AIProviderSettings() {
       {/* Custom Base URL for OpenAI-compatible */}
       {settings.provider === 'openai-compatible' && (
         <div>
-          <label htmlFor="custom-base-url" className="mb-2 block text-sm font-medium text-foreground">Base URL</label>
+          <label htmlFor="custom-base-url" className="mb-2 block text-sm font-medium text-foreground">
+            Base URL
+          </label>
           <Input
             id="custom-base-url"
             value={settings.customBaseUrl || ''}
@@ -211,7 +219,9 @@ export default function AIProviderSettings() {
 
       {/* Model */}
       <div>
-        <label htmlFor="ai-model" className="mb-2 block text-sm font-medium text-foreground">Model</label>
+        <label htmlFor="ai-model" className="mb-2 block text-sm font-medium text-foreground">
+          Model
+        </label>
         <Select value={settings.model} onValueChange={(value) => update({ model: value })}>
           <SelectTrigger>
             <SelectValue />
@@ -295,7 +305,9 @@ export default function AIProviderSettings() {
 
       {/* Concierge Personality */}
       <div>
-        <label htmlFor="soul-name" className="mb-2 block text-sm font-medium text-foreground">Concierge Name</label>
+        <label htmlFor="soul-name" className="mb-2 block text-sm font-medium text-foreground">
+          Concierge Name
+        </label>
         <Input
           id="soul-name"
           value={soul.name}
@@ -334,7 +346,9 @@ export default function AIProviderSettings() {
 
       {/* Your Name */}
       <div>
-        <label htmlFor="soul-user-name" className="mb-2 block text-sm font-medium text-foreground">Your Name</label>
+        <label htmlFor="soul-user-name" className="mb-2 block text-sm font-medium text-foreground">
+          Your Name
+        </label>
         <Input
           id="soul-user-name"
           value={soul.userName || ''}
@@ -345,7 +359,9 @@ export default function AIProviderSettings() {
 
       {/* Backstory */}
       <div>
-        <label htmlFor="soul-backstory" className="mb-2 block text-sm font-medium text-foreground">Concierge Backstory</label>
+        <label htmlFor="soul-backstory" className="mb-2 block text-sm font-medium text-foreground">
+          Concierge Backstory
+        </label>
         <Textarea
           id="soul-backstory"
           value={soul.backstory || ''}
@@ -358,7 +374,9 @@ export default function AIProviderSettings() {
 
       {/* Communication Notes */}
       <div>
-        <label htmlFor="soul-comm-notes" className="mb-2 block text-sm font-medium text-foreground">Communication Preferences</label>
+        <label htmlFor="soul-comm-notes" className="mb-2 block text-sm font-medium text-foreground">
+          Communication Preferences
+        </label>
         <Textarea
           id="soul-comm-notes"
           value={soul.communicationNotes || ''}
@@ -371,7 +389,9 @@ export default function AIProviderSettings() {
 
       {/* Working Style */}
       <div>
-        <label htmlFor="soul-working-style" className="mb-2 block text-sm font-medium text-foreground">Working Style</label>
+        <label htmlFor="soul-working-style" className="mb-2 block text-sm font-medium text-foreground">
+          Working Style
+        </label>
         <Input
           id="soul-working-style"
           value={soul.workingStyle || ''}

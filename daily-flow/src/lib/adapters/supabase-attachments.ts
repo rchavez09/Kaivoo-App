@@ -54,16 +54,12 @@ export class SupabaseAttachmentAdapter implements AttachmentAdapter {
   }
 
   async deleteFile(entityId: string, filename: string): Promise<void> {
-    const { error } = await this.supabase.storage
-      .from(BUCKET)
-      .remove([this.storagePath(entityId, filename)]);
+    const { error } = await this.supabase.storage.from(BUCKET).remove([this.storagePath(entityId, filename)]);
     if (error) throw new Error(`Delete failed: ${error.message}`);
   }
 
   async getFileUrl(entityId: string, filename: string): Promise<string> {
-    const { data } = this.supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(this.storagePath(entityId, filename));
+    const { data } = this.supabase.storage.from(BUCKET).getPublicUrl(this.storagePath(entityId, filename));
     return data.publicUrl;
   }
 
@@ -78,9 +74,7 @@ export class SupabaseAttachmentAdapter implements AttachmentAdapter {
     return data
       .filter((f) => f.name !== '.emptyFolderPlaceholder')
       .map((f) => {
-        const { data: urlData } = this.supabase.storage
-          .from(BUCKET)
-          .getPublicUrl(this.storagePath(entityId, f.name));
+        const { data: urlData } = this.supabase.storage.from(BUCKET).getPublicUrl(this.storagePath(entityId, f.name));
         return {
           name: f.name,
           size: f.metadata?.size ?? 0,

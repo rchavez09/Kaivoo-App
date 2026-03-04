@@ -2,7 +2,7 @@
 
 **Theme:** Make the product purchasable, installable, and updatable. Fix deferred UX debt. Everything a customer needs from "take my money" to "app running on my machine."
 **Branch:** `sprint/25-ship-prep`
-**Status:** PHASE 4 — VERIFICATION
+**Status:** PHASE 5 — USER ACCEPTANCE
 **Compiled by:** Director
 **Date:** March 3, 2026
 
@@ -87,7 +87,7 @@ The revenue gate. Follows Agent 5's recommendation: Ed25519 signed keys, pure of
 ### Definition of Done — Track 2
 - [ ] Stripe Checkout works end-to-end: user pays $49/$99 → receives license key via email *(Edge Functions need deploy + Stripe config)*
 - [x] License key contains Ed25519 signature over tier/email_hash/issued_at payload
-- [ ] Desktop app verifies key offline via Rust `ed25519-dalek` — no internet required *(TypeScript only for now)*
+- [ ] Desktop app verifies key offline via Rust `ed25519-dalek` — no internet required *(TypeScript verification done; Rust deferred)*
 - [x] Web app verifies key via TypeScript `@noble/ed25519`
 - [x] Verified license stored in SQLite (desktop) / encrypted localStorage (web)
 - [x] License status exposed in Zustand store (`isLicensed`, `tier`, `issuedAt`)
@@ -221,7 +221,8 @@ User gates:
 - [x] Agent 11 feature integrity — PASS (no regressions, all 15 feature paths verified)
 - [x] 3-agent design review — Visual PASS, A11y PASS, UX conditional PASS (placeholder key acknowledged)
 - [ ] E2E test against deploy preview
-- [ ] Sandbox review by user (Phase 5)
+- [ ] Sandbox Track A (Web): User reviews Netlify deploy preview
+- [ ] Sandbox Track B (Desktop): User builds locally (`npm run tauri dev`), tests native features
 
 ---
 
@@ -304,18 +305,67 @@ User gates:
 
 ---
 
-## Known Pre-Deployment TODOs
+## Phase 5 — Sandbox Testing Checklists
 
-| Item | Status | Notes |
+### Track A: Web (Netlify Deploy Preview)
+
+Test from deploy preview URL once PR is open.
+
+| # | Flow | What to Check |
 |---|---|---|
-| Generate Ed25519 license keypair | TODO | Replace placeholder in `verify.ts`, store private key as Supabase secret |
-| Generate Ed25519 updater signing keypair | TODO | `npx tauri signer generate`, replace in `tauri.conf.json`, store as GitHub Secret |
-| Deploy Edge Functions (license-keygen, license-lookup, stripe-checkout) | TODO | Deploy to Supabase project |
-| Configure Stripe products/prices | TODO | Create $49/$99 products in Stripe Dashboard |
-| Set ALLOWED_ORIGIN on Edge Functions | TODO | Set to production domain |
-| Create Supabase Storage `attachments` bucket | TODO | For web mode file uploads |
-| Apple code signing secrets | BLOCKED | Apple Developer account verifying |
-| Azure Trusted Signing secrets | BLOCKED | Azure account verifying |
+| A1 | **Subtask reorder** | Drag subtasks to reorder. Refresh — order persists. |
+| A2 | **Journal sidebar** | Rename a journal entry. Sidebar shows "{time} — {title}". |
+| A3 | **OpenRouter provider** | Settings > AI > add OpenRouter key. Select a model. Send a message. |
+| A4 | **License activation** | Settings > License. Paste a test key. Tier badge appears. |
+| A5 | **Unlicensed banner** | Clear license. Gentle banner appears. Dismiss → returns on reload. |
+| A6 | **File attachments** | Open a project. Drag a file to upload. Image preview renders. Delete works. |
+| A7 | **Accessibility** | Tab through forms — focus rings visible. Icon buttons have aria-labels (inspect). |
+| A8 | **Dark mode** | Toggle dark mode. All new UI (license settings, file upload, banner) renders correctly. |
+| A9 | **Regression check** | Navigate all main sections (Today, Journal, Vault, Concierge, Settings). Nothing broken. |
+
+### Track B: Desktop (Local Tauri Build)
+
+Run `cd daily-flow && npm run tauri dev` on your Mac.
+
+| # | Flow | What to Check |
+|---|---|---|
+| B1 | **App launches** | Tauri window opens. No blank screen or crash. |
+| B2 | **Auto-updater UX** | Settings > About shows version + "Check for Updates" button. Button triggers check (will find nothing — that's fine). |
+| B3 | **Local file attachments** | Upload a file in a project. Verify it lands in `.attachments/` on disk. Delete removes the file. |
+| B4 | **Local SQLite license** | Activate a test license key. Close and reopen app — license persists. |
+| B5 | **All Track A flows** | Repeat A1–A9 in the desktop app to verify parity. |
+| B6 | **Native window** | Resize, minimize, maximize, close. Menu bar items work. |
+
+**Note:** Unsigned build is expected — right-click → Open to bypass macOS Gatekeeper. Signing is a distribution concern handled post-merge when Apple/Azure accounts are verified.
+
+---
+
+## Pre-Release Checklist (Post-Merge, Pre-`v*` Tag)
+
+Per Sprint Protocol v2.0 Phase 5, step 5.
+
+### Blocking Release (must complete before `v*` tag push)
+
+| # | Item | Status | Action |
+|---|---|---|---|
+| R1 | Generate Ed25519 updater signing keypair | DONE | Pubkey in `tauri.conf.json`. Private key at `~/.tauri/kaivoo-updater.key` — add as `TAURI_SIGNING_PRIVATE_KEY` GitHub Secret before `v*` tag push. |
+| R2 | Generate Ed25519 license keypair | DONE | Pubkey in `verify.ts`. Private key at `~/.kaivoo-secrets/license-private-key.hex` — add as Supabase Edge Function secret before deploying `license-keygen`. |
+
+### Blocking Specific Features (release can ship, feature won't work until done)
+
+| # | Item | Status | Feature Blocked | Action |
+|---|---|---|---|---|
+| F1 | Deploy Edge Functions | TODO | License key email delivery | Deploy `license-keygen`, `license-lookup`, `stripe-checkout` to Supabase project |
+| F2 | Configure Stripe products/prices | TODO | Payment checkout | Create $49 Founding Member + $99 Standard products in Stripe Dashboard |
+| F3 | Set ALLOWED_ORIGIN on Edge Functions | TODO | Edge Function CORS | Set to production domain |
+| F4 | Create Supabase Storage `attachments` bucket | TODO | Web file uploads | Create bucket in Supabase Dashboard for web-mode file attachments |
+
+### Blocked Externally (waiting on third parties)
+
+| # | Item | Status | Impact | Action When Unblocked |
+|---|---|---|---|---|
+| E1 | Apple code signing secrets | BLOCKED — Apple account verifying | macOS .dmg will trigger Gatekeeper warning | Export Developer ID cert → populate `APPLE_*` GitHub Secrets → re-run release |
+| E2 | Azure Trusted Signing secrets | BLOCKED — Azure account verifying | Windows .exe will trigger SmartScreen warning | Configure Azure Trusted Signing → populate `AZURE_*` GitHub Secrets → re-run release |
 
 ---
 

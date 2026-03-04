@@ -197,7 +197,6 @@ function VaultStep({
 
   const handleBrowse = async () => {
     try {
-      // @ts-expect-error — plugin-dialog is optional, installed separately
       const { open } = await import('@tauri-apps/plugin-dialog');
       const selected = await open({ directory: true, title: 'Choose Vault Folder' });
       if (selected) {
@@ -275,7 +274,6 @@ function ImportStep({
 
   const handleImport = async () => {
     try {
-      // @ts-expect-error — plugin-dialog is optional, installed separately
       const { open } = await import('@tauri-apps/plugin-dialog');
       const selected = await open({
         directory: true,

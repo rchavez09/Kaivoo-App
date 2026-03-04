@@ -21,10 +21,18 @@ const isTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNA
 
 // Shared no-op attachment adapter (used when no storage backend is available)
 const noOpAttachments: AttachmentAdapter = {
-  async uploadFile(): Promise<AttachmentInfo> { throw new Error('Attachment storage not available'); },
-  async deleteFile(): Promise<void> { throw new Error('Attachment storage not available'); },
-  async getFileUrl(): Promise<string> { throw new Error('Attachment storage not available'); },
-  async listFiles(): Promise<AttachmentInfo[]> { return []; },
+  async uploadFile(): Promise<AttachmentInfo> {
+    throw new Error('Attachment storage not available');
+  },
+  async deleteFile(): Promise<void> {
+    throw new Error('Attachment storage not available');
+  },
+  async getFileUrl(): Promise<string> {
+    throw new Error('Attachment storage not available');
+  },
+  async listFiles(): Promise<AttachmentInfo[]> {
+    return [];
+  },
 };
 
 interface AdapterContextValue {
@@ -61,10 +69,8 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
 
     (async () => {
       try {
-        const [{ LocalDataAdapter, LocalAuthAdapter, LocalAttachmentAdapter }, { LocalVaultAdapter }] = await Promise.all([
-          import('./local'),
-          import('../vault/local-vault'),
-        ]);
+        const [{ LocalDataAdapter, LocalAuthAdapter, LocalAttachmentAdapter }, { LocalVaultAdapter }] =
+          await Promise.all([import('./local'), import('../vault/local-vault')]);
         const data = await LocalDataAdapter.create();
         dataAdapterRef.current = data;
         const auth = await LocalAuthAdapter.create(data.database);
@@ -102,12 +108,16 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
       };
     }
 
+    if (isLocal) {
+      // Desktop mode but local adapters still loading — return null data to prevent
+      // React Query from firing against Supabase during the async init window.
+      return { data: null, auth: supabaseAuth, search: supabaseSearch, vault: null, attachments: noOpAttachments, isLocal: true };
+    }
+
     // Web mode: only SupabaseDataAdapter depends on user.id
     const data = user ? new SupabaseDataAdapter(user.id) : null;
     virtualVault.setDataAdapter(data);
-    const attachments: AttachmentAdapter = user
-      ? new SupabaseAttachmentAdapter(supabase, user.id)
-      : noOpAttachments;
+    const attachments: AttachmentAdapter = user ? new SupabaseAttachmentAdapter(supabase, user.id) : noOpAttachments;
     return { data, auth: supabaseAuth, search: supabaseSearch, vault: virtualVault, attachments, isLocal: false };
   }, [isLocal, localAdapters, user?.id, supabaseAuth, supabaseSearch, virtualVault]);
 

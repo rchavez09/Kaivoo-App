@@ -61,7 +61,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           <LicenseBanner />
           {/* Depth Bar — Kaivoo signature gradient stripe (Design System v2.0) */}
           <div className="depth-bar" aria-hidden="true" />
-          <main className="scrollbar-thin flex-1 overflow-auto">{children}</main>
+          <main className="scrollbar-thin flex-1 overflow-auto bg-background">{children}</main>
         </div>
       </div>
       <Suspense fallback={null}>

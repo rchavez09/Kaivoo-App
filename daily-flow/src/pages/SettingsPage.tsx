@@ -11,7 +11,15 @@ import DataSettings from '@/components/settings/DataSettings';
 import KeyboardShortcutsSettings from '@/components/settings/KeyboardShortcutsSettings';
 import { Button } from '@/components/ui/button';
 
-type SettingsSection = 'main' | 'profile' | 'notifications' | 'appearance' | 'shortcuts' | 'data' | 'ai-provider' | 'license';
+type SettingsSection =
+  | 'main'
+  | 'profile'
+  | 'notifications'
+  | 'appearance'
+  | 'shortcuts'
+  | 'data'
+  | 'ai-provider'
+  | 'license';
 
 const settingsSections = [
   { id: 'ai-provider' as const, icon: Bot, label: 'AI Provider', description: 'Configure your AI model and API key' },

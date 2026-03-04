@@ -100,9 +100,7 @@ export default function PurchaseSuccessPage() {
             <CheckCircle2 className="h-8 w-8 text-success-foreground" />
           </div>
           <h1 className="mb-2 text-2xl font-semibold text-foreground">Thank you!</h1>
-          <p className="text-sm text-muted-foreground">
-            Your Kaivoo {tierLabel} license is ready.
-          </p>
+          <p className="text-sm text-muted-foreground">Your Kaivoo {tierLabel} license is ready.</p>
         </div>
 
         {/* License key display */}
@@ -130,7 +128,15 @@ export default function PurchaseSuccessPage() {
         ) : error ? (
           <div className="rounded-xl border border-border bg-card p-6 text-center">
             <p className="mb-3 text-sm text-muted-foreground">{error}</p>
-            <Button variant="outline" size="sm" onClick={() => { setLoading(true); setError(null); void fetchLicense(); }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setLoading(true);
+                setError(null);
+                void fetchLicense();
+              }}
+            >
               Try Again
             </Button>
           </div>

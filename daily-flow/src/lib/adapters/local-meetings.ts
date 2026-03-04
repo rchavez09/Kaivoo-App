@@ -2,11 +2,7 @@
  * Local Entity Adapters — Meetings
  */
 
-import type {
-  MeetingAdapter,
-  CreateMeetingInput,
-  UpdateMeetingInput,
-} from './types';
+import type { MeetingAdapter, CreateMeetingInput, UpdateMeetingInput } from './types';
 
 import type { Meeting } from '@/types';
 

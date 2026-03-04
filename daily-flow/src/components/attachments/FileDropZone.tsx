@@ -118,20 +118,11 @@ const FileDropZone = ({ onUpload, uploading, className }: FileDropZoneProps) => 
       ) : (
         <>
           <Upload className="h-6 w-6" />
-          <span className="text-xs">
-            {isDragging ? 'Drop to upload' : 'Drop files here or click to browse'}
-          </span>
+          <span className="text-xs">{isDragging ? 'Drop to upload' : 'Drop files here or click to browse'}</span>
           <span className="text-[10px] text-muted-foreground/60">Max 10MB per file</span>
         </>
       )}
-      <input
-        ref={inputRef}
-        type="file"
-        multiple
-        className="hidden"
-        onChange={handleInputChange}
-        tabIndex={-1}
-      />
+      <input ref={inputRef} type="file" multiple className="hidden" onChange={handleInputChange} tabIndex={-1} />
     </div>
   );
 };
