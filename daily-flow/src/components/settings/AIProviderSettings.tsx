@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, EyeOff, Loader2, CheckCircle2, XCircle, Zap, Sparkles, Brain, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, CheckCircle2, XCircle, Zap, Sparkles, Brain, Trash2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { AI_PROVIDERS, getProviderConfig } from '@/lib/ai/providers';
 import {
@@ -221,20 +221,24 @@ export default function AIProviderSettings() {
       {/* Depth Preference */}
       <div>
         <label className="mb-2 block text-sm font-medium text-foreground">Response Depth</label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Response depth">
           {DEPTH_OPTIONS.map((opt) => {
             const Icon = opt.icon;
+            const selected = settings.depth === opt.value;
             return (
               <button
                 key={opt.value}
                 type="button"
+                role="radio"
+                aria-checked={selected}
                 onClick={() => update({ depth: opt.value })}
-                className={`rounded-xl border p-3 text-center transition-colors ${
-                  settings.depth === opt.value
+                className={`relative rounded-xl border p-3 text-center transition-colors ${
+                  selected
                     ? 'border-primary bg-primary/5 text-foreground'
                     : 'border-border bg-card text-muted-foreground hover:border-primary/50'
                 }`}
               >
+                {selected && <Check className="absolute right-1.5 top-1.5 h-3 w-3 text-primary" aria-hidden="true" />}
                 <Icon className="mx-auto mb-1 h-4 w-4" />
                 <p className="text-sm font-medium">{opt.label}</p>
                 <p className="text-xs text-muted-foreground">{opt.description}</p>
@@ -265,9 +269,7 @@ export default function AIProviderSettings() {
         {testResult && (
           <div
             className={`mt-3 flex items-start gap-2 rounded-lg p-3 text-sm ${
-              testResult.ok
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                : 'bg-destructive/10 text-destructive'
+              testResult.ok ? 'bg-success text-success-foreground' : 'bg-destructive/10 text-destructive'
             }`}
           >
             {testResult.ok ? (
@@ -296,22 +298,28 @@ export default function AIProviderSettings() {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-foreground">Concierge Tone</label>
-        <div className="grid grid-cols-3 gap-2">
-          {TONE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => updateSoul({ tone: opt.value })}
-              className={`rounded-xl border p-3 text-center transition-colors ${
-                soul.tone === opt.value
-                  ? 'border-primary bg-primary/5 text-foreground'
-                  : 'border-border bg-card text-muted-foreground hover:border-primary/50'
-              }`}
-            >
-              <p className="text-sm font-medium">{opt.label}</p>
-              <p className="text-xs text-muted-foreground">{opt.description}</p>
-            </button>
-          ))}
+        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Concierge tone">
+          {TONE_OPTIONS.map((opt) => {
+            const selected = soul.tone === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => updateSoul({ tone: opt.value })}
+                className={`relative rounded-xl border p-3 text-center transition-colors ${
+                  selected
+                    ? 'border-primary bg-primary/5 text-foreground'
+                    : 'border-border bg-card text-muted-foreground hover:border-primary/50'
+                }`}
+              >
+                {selected && <Check className="absolute right-1.5 top-1.5 h-3 w-3 text-primary" aria-hidden="true" />}
+                <p className="text-sm font-medium">{opt.label}</p>
+                <p className="text-xs text-muted-foreground">{opt.description}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -385,12 +393,14 @@ export default function AIProviderSettings() {
               <div
                 key={memory.id}
                 className={`group flex items-start gap-3 rounded-lg border p-3 transition-colors ${
-                  memory.active ? 'border-border bg-card' : 'border-border/50 bg-muted/30 opacity-60'
+                  memory.active ? 'border-border bg-card' : 'border-border/50 bg-muted/30'
                 }`}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-foreground">{memory.content}</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">
+                  <p className={`text-sm ${memory.active ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {memory.content}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {memory.category} · {memory.source} · {new Date(memory.createdAt).toLocaleDateString()}
                   </p>
                 </div>
