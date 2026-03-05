@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 6.0
+**Version:** 6.1
 **Last Updated:** March 4, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -661,8 +661,8 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (the wedge — final pre-launch sprints, shipping toward the personal OS vision)
-**Active sprint:** None (planning Sprint 27)
-**Last completed:** Sprint 26 (Feature Completion) — Attachments everywhere (topics, journal entries, projects), inline images in rich text (storage-backed upload), topic content editing (Tiptap editor + auto-save + DB migration), desktop data export (JSON + markdown), vault markdown export UI, FloatingChat cleanup. 9/9 parcels done. See `Sprints/Sprint-26-Feature-Completion.md`.
+**Active sprint:** None (planning Sprint 28)
+**Last completed:** Sprint 27 (Desktop Verification) — Verified all Sprint 26 features on Tauri desktop. Found and fixed 8 issues: inline image URL protocol, data import auth gate, CSP for asset protocol, Tauri v2 dot-prefix glob scoping, dark mode cursor visibility, native drag-drop interception, blob URLs replacing asset protocol, Opener plugin for file opening. 5/5 parcels + 8-commit hotfix. See `Sprints/Sprint-27-Desktop-Verification.md`.
 
 **Sprint 24 delivered:** Soul File & Concierge Intelligence — soul file personality (name, tone, backstory, communication prefs, working style), AI memory system (localStorage + SQLite CRUD, substring dedup, category/source tracking), 18-tool concierge with multi-round tool-use loops (create/read/update tasks, journal, calendar, notes, captures, projects, routines, habits, memory), 6-layer system prompt assembly (soul + memories + summaries + app context + tools), provider-agnostic SSE streaming via Supabase Edge Function (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Ollama, OpenAI-compatible), Anthropic message transformation for tool-use round-trips, memory extraction pipeline (LLM-based fact extraction with batch dedup), conversation summaries, per-provider API key caching, WCAG AA accessibility (aria-checked radio groups, non-color selection indicators, token-based contrast). 265 tests. See `Sprints/Sprint-24-Soul-File-Concierge.md`.
 
@@ -865,7 +865,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v6.0 — March 4, 2026*
+*Vision v6.1 — March 4, 2026*
+*v6.1: Sprint 27 (Desktop Verification) complete. Verified all Sprint 26 features on Tauri desktop. Found and fixed 8 issues across code audit (2) and Track B sandbox testing (6): inline image URL protocol, data import auth gate, CSP for asset protocol, Tauri v2 dot-prefix glob scoping, dark mode cursor, native drag-drop interception, blob URLs for local files, Opener plugin for file opening. Key learning: Tauri v2 deny-by-default capabilities have non-obvious behaviors only discoverable at runtime. 5/5 parcels + 8-commit hotfix. See `Sprints/Sprint-27-Desktop-Verification.md`.*
 *v6.0: CEO Session #6 — Strategic evolution from productivity app to personal infrastructure for the AI era. New identity: "Your machine. Your data. Your AI. Accessible from everywhere. Owned by you." MCP-native architecture adopted as core principle (#11). Self-building adopted as core principle (#12). Autonomy Ladder extended to Level 4 (AI Builds). New "North Star: Personal OS" section — thesis on apps dying, MCP as the future, Plex model for productivity, dual-mode architecture (local server + cloud sync). Business model expanded to four tiers: Core (one-time), Cloud Companion (subscription, replaces "Pro"), Builders (premium), Personal OS (long-term premium). Phase D added: MCP Foundation & Personal OS (local file indexing, MCP server layer, secure tunnel, companion app, self-building, flow automation, universal file search, voice interface). Architecture diagram updated with MCP Foundation Layer and Sync & Access Layer. Competitive edge expanded (#8 MCP-native, #9 your machine accessible everywhere, #10 self-building). 9 new research parcels assigned. Near-term plan unchanged: ship the wedge (plug-and-play AI productivity), build toward the vision.*
 *v5.4: Sprint 26 (Feature Completion) complete. 9/9 parcels done. File attachments now work on topics, journal entries, and projects (was project-only). Inline images upload to Supabase Storage bucket (was base64). Topic content editing shipped (Tiptap rich text + content DB column + auto-save). Desktop JSON + markdown export working. FloatingChat removed (ConciergeChat is sole chat). File attachments and topic content editing milestones marked DONE. See `Sprints/Sprint-26-Feature-Completion.md`.*
 *v5.3: Sprint 26 (Feature Completion) started. Code-vs-Vision audit found 5 gaps: attachments project-only, no topic content editing, desktop export broken, vault markdown export orphaned, FloatingChat legacy overlap. File attachments milestone corrected from DONE to PARTIAL. Topic content editing added as new milestone. Launch prep bumped to Sprint 27.*

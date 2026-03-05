@@ -2,7 +2,7 @@
 
 **Theme:** Verify all Sprint 26 features work on desktop (Tauri + local SQLite). Sprint 26 skipped Track B sandbox testing entirely — this sprint closes that gap before launch prep begins.
 **Branch:** `sprint/27-desktop-verification`
-**Status:** VERIFICATION COMPLETE — awaiting PR + sandbox
+**Status:** DONE — merged to main (PR #12 + hotfix PR #13)
 **Compiled by:** Director
 **Date:** March 4, 2026
 
@@ -135,6 +135,64 @@ Build the desktop app, test every Sprint 26 feature on local SQLite, fix what's 
 | Local attachment storage path doesn't exist | `LocalAttachments.uploadFile()` creates `.attachments/{entityId}/` on first upload. VERIFIED in code audit. |
 | Inline images use wrong URL protocol on desktop | **FOUND AND FIXED** — was `attachment://`, now uses `convertFileSrc()` via `getFileUrl()`. |
 | Data import broken on desktop | **FOUND AND FIXED** — was Supabase-only, now has full adapter path. |
+
+---
+
+---
+
+## Sprint Retrospective
+
+**Completed:** March 4, 2026
+**Parcels:** 5/5 DONE (plus 8-commit hotfix cycle for sandbox findings)
+**PRs:** #12 (sprint branch) + #13 (hotfix/desktop-sandbox-fixes)
+**Tag:** `post-sprint-27`
+
+### What Was Delivered
+
+Sprint 27 verified and fixed all Sprint 26 features on desktop (Tauri + local SQLite). The sprint itself (PR #12) found and fixed 2 critical bugs: inline images using wrong URL protocol and data import completely broken on desktop. Track B sandbox testing then uncovered 6 additional desktop-specific issues that required an 8-commit hotfix cycle (PR #13):
+
+1. **CSP blocking Tauri asset protocol** — added `asset:` and `http://asset.localhost` to Content-Security-Policy
+2. **Tauri v2 glob doesn't match dot-prefixed paths** — `$APPDATA/**` silently failed for `.attachments/` directory. Fixed by adding explicit `$APPDATA/vault/.attachments/**` to all 9 fs permission scopes.
+3. **Invisible cursor in dark mode** — ProseMirror default caret color blended with dark background (#12101E). Fixed with `caret-color: currentColor`.
+4. **Drag-and-drop intercepted by Tauri** — Tauri's native `dragDropEnabled: true` (default) captured file drops before web `dataTransfer.files`. Fixed by setting `dragDropEnabled: false`.
+5. **Inline images rendered as HTML links** — `convertFileSrc()` returned `asset://` URLs the webview couldn't load. Replaced with blob URLs via `readFile()` + `URL.createObjectURL()`.
+6. **Clicking attachments did nothing** — `shell.open()` only handles URLs, not file paths. Installed `@tauri-apps/plugin-opener` and used `openPath()` for OS-native file opening.
+
+### Verification Results
+
+- **Deterministic checks:** lint clean, typecheck clean, 265/265 tests pass, build succeeds
+- **Desktop build:** `cargo check` passes (Rust 1.93.1)
+- **Agent 7:** Code audit passed (P0-1 topicIds remapping fixed)
+- **Agent 11:** PASS — zero regressions
+- **Track A (Web):** Approved
+- **Track B (Desktop):** Approved after hotfix cycle — all 10 checklist items verified
+
+### Sandbox Findings
+
+Track B sandbox testing was the most productive phase of this sprint. The code-level audit (Phase 4) caught the 2 critical bugs, but 6 of 8 total issues were only discoverable by running the actual Tauri app. Key insight: **Tauri v2's deny-by-default capability system has non-obvious behaviors** (dot-prefix glob exclusion, native drag-drop interception, shell.open URL-only restriction) that no amount of code review can catch.
+
+### Deferred Items
+
+| Item | Target |
+|---|---|
+| E2E test infrastructure (Playwright) | Sprint 28 |
+| Extract import functions to utility files | Sprint 28 |
+| Import validation (Zod schema) | Sprint 28 |
+| Duplicate import warning dialog | Sprint 28 |
+| Import progress indicator | Sprint 28+ |
+| Image resize handles in editor | Sprint 28+ |
+
+### Key Learnings
+
+1. **Tauri v2 glob matching skips dot-prefixed path components.** `$APPDATA/**` does NOT match `$APPDATA/vault/.attachments/file.png`. You must add explicit scopes for dot-prefixed directories. This applies to ALL fs permissions (read, write, stat, exists, mkdir, readDir, remove).
+
+2. **`shell.open()` is URL-only.** For opening local files with the OS default app, use `@tauri-apps/plugin-opener` with `openPath()`. This is a separate plugin, not part of the shell plugin.
+
+3. **`convertFileSrc()` asset protocol is fragile.** Blob URLs via `readFile()` + `URL.createObjectURL()` are more reliable for displaying local files in the webview. Asset protocol requires both a Cargo feature flag AND scope configuration AND CSP headers, and can still fail.
+
+4. **Tauri's native drag-drop handler intercepts web drag events.** Set `dragDropEnabled: false` in window config if the web app handles its own file drops.
+
+5. **Desktop sandbox testing catches what code review cannot.** 6 of 8 issues found in this sprint were runtime-only, invisible in code. The Sprint Protocol v2.0 Track B requirement proved essential.
 
 ---
 
