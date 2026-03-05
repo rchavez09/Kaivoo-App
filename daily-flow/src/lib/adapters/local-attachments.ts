@@ -75,6 +75,12 @@ export class LocalAttachmentAdapter implements AttachmentAdapter {
     return URL.createObjectURL(blob);
   }
 
+  async openFile(entityId: string, filename: string): Promise<void> {
+    const { open } = await import('@tauri-apps/plugin-shell');
+    const safe = sanitizeFilename(filename);
+    await open(`${this.entityDir(entityId)}/${safe}`);
+  }
+
   async listFiles(entityId: string): Promise<AttachmentInfo[]> {
     const { readDir, exists, stat } = await import('@tauri-apps/plugin-fs');
     const dir = this.entityDir(entityId);

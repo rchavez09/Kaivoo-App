@@ -17,6 +17,7 @@ interface UseAttachmentsReturn {
   upload: (file: File) => Promise<void>;
   remove: (filename: string) => Promise<void>;
   getUrl: (filename: string) => Promise<string>;
+  openFile: (filename: string) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -91,5 +92,18 @@ export function useAttachments(entityId: string | undefined): UseAttachmentsRetu
     [entityId, attachments],
   );
 
-  return { files, isLoading, uploading, upload, remove, getUrl, refresh };
+  const openFile = useCallback(
+    async (filename: string) => {
+      if (!entityId) return;
+      if (attachments.openFile) {
+        await attachments.openFile(entityId, filename);
+      } else {
+        const url = await attachments.getFileUrl(entityId, filename);
+        window.open(url, '_blank');
+      }
+    },
+    [entityId, attachments],
+  );
+
+  return { files, isLoading, uploading, upload, remove, getUrl, openFile, refresh };
 }

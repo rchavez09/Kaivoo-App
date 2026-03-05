@@ -538,6 +538,8 @@ export interface AttachmentAdapter {
   deleteFile(entityId: string, filename: string): Promise<void>;
   getFileUrl(entityId: string, filename: string): Promise<string>;
   listFiles(entityId: string): Promise<AttachmentInfo[]>;
+  /** Open a file with the OS default application (desktop) or new tab (web). */
+  openFile?(entityId: string, filename: string): Promise<void>;
 }
 
 export interface AttachmentInfo {

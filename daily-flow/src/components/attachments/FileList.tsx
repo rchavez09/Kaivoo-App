@@ -27,6 +27,7 @@ interface FileListProps {
   files: AttachmentInfo[];
   onDelete: (filename: string) => Promise<void>;
   getUrl: (filename: string) => Promise<string>;
+  onOpen?: (filename: string) => void;
   isLoading?: boolean;
   className?: string;
 }
@@ -35,9 +36,10 @@ interface FileItemProps {
   file: AttachmentInfo;
   onDelete: (filename: string) => Promise<void>;
   getUrl: (filename: string) => Promise<string>;
+  onOpen?: (filename: string) => void;
 }
 
-const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
+const FileItem = ({ file, onDelete, getUrl, onOpen }: FileItemProps) => {
   const [url, setUrl] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -67,6 +69,16 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
     }
   }, [file.name, onDelete]);
 
+  const handleOpen = useCallback(
+    (e: React.MouseEvent) => {
+      if (onOpen) {
+        e.preventDefault();
+        onOpen(file.name);
+      }
+    },
+    [file.name, onOpen],
+  );
+
   return (
     <div className="group flex items-center gap-2 overflow-hidden rounded-md border border-border bg-[hsl(var(--surface-elevated))] px-3 py-2">
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -77,6 +89,7 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleOpen}
             className="block truncate text-sm font-medium text-foreground underline decoration-muted-foreground/40 underline-offset-2 hover:decoration-foreground"
             title={file.name}
           >
@@ -97,6 +110,7 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleOpen}
             aria-label={`Open ${file.name}`}
             className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-secondary/50 hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
           >
@@ -137,7 +151,7 @@ const FileItem = ({ file, onDelete, getUrl }: FileItemProps) => {
   );
 };
 
-const FileList = ({ files, onDelete, getUrl, isLoading, className }: FileListProps) => {
+const FileList = ({ files, onDelete, getUrl, onOpen, isLoading, className }: FileListProps) => {
   if (isLoading) {
     return (
       <div className={cn('flex items-center justify-center py-4', className)}>
@@ -151,7 +165,7 @@ const FileList = ({ files, onDelete, getUrl, isLoading, className }: FileListPro
   return (
     <div className={cn('grid gap-1.5', className)}>
       {files.map((file) => (
-        <FileItem key={file.name} file={file} onDelete={onDelete} getUrl={getUrl} />
+        <FileItem key={file.name} file={file} onDelete={onDelete} getUrl={getUrl} onOpen={onOpen} />
       ))}
     </div>
   );
