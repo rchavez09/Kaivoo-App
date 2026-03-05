@@ -878,7 +878,7 @@ const JournalCanvas = ({
         }
         .ProseMirror {
           min-height: 400px;
-          caret-color: hsl(var(--foreground));
+          caret-color: currentColor;
         }
         .ProseMirror:focus {
           outline: none;
