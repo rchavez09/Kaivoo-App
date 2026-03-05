@@ -57,6 +57,11 @@ export class SupabaseAttachmentAdapter implements AttachmentAdapter {
     return data.publicUrl;
   }
 
+  async openFile(entityId: string, filename: string): Promise<void> {
+    const url = await this.getFileUrl(entityId, filename);
+    window.open(url, '_blank');
+  }
+
   async listFiles(entityId: string): Promise<AttachmentInfo[]> {
     const { data, error } = await this.supabase.storage
       .from(BUCKET)

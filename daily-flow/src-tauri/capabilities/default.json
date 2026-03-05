@@ -5,7 +5,13 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "shell:allow-open",
+    {
+      "identifier": "shell:allow-open",
+      "allow": [
+        { "url": "^https?://.+" },
+        { "url": "^file://.+" }
+      ]
+    },
     "sql:default",
     "sql:allow-execute",
     "sql:allow-select",
@@ -13,42 +19,79 @@
       "identifier": "fs:allow-read-text-file",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/**" }
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        { "path": "$APPDATA/.kaivoo/**" },
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
       ]
     },
     {
       "identifier": "fs:allow-write-text-file",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/**" }
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        { "path": "$APPDATA/.kaivoo/**" },
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-stat",
+      "allow": [
+        { "path": "$APPDATA/.kaivoo/**" },
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
       ]
     },
     {
       "identifier": "fs:allow-exists",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/**" }
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
       ]
     },
     {
       "identifier": "fs:allow-mkdir",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/**" }
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
       ]
     },
     {
       "identifier": "fs:allow-read-dir",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/**" }
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
       ]
     },
     {
       "identifier": "fs:allow-remove",
       "allow": [
         { "path": "$APPDATA/.kaivoo/**" },
-        { "path": "$APPDATA/**" }
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
       ]
     },
     "updater:default",

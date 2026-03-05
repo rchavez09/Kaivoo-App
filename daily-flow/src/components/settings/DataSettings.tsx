@@ -226,7 +226,8 @@ const DataSettings = () => {
           { duration: 6000 },
         );
       } else {
-        toast.success(`Exported ${result.exported} markdown files to vault`);
+        const pathHint = vault.root ? ` → ${vault.root}` : '';
+        toast.success(`Exported ${result.exported} markdown files to vault${pathHint}`, { duration: 8000 });
       }
     } catch (error) {
       console.error('Markdown export error:', error);
@@ -547,6 +548,25 @@ const DataSettings = () => {
 
   const handleImport = async (file: File) => {
     if (!user && !dataAdapter) return;
+
+    // Dedup warning: check if user already has data
+    if (dataAdapter) {
+      try {
+        const existing = await dataAdapter.tasks.fetchAll();
+        if (existing.length > 0) {
+          const confirmed = window.confirm(
+            'You already have data in Kaivoo. Importing will ADD to your existing data (duplicates are possible).\n\nContinue?',
+          );
+          if (!confirmed) {
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+          }
+        }
+      } catch {
+        // If check fails, proceed anyway
+      }
+    }
+
     setImporting(true);
 
     try {
@@ -591,7 +611,8 @@ const DataSettings = () => {
           { duration: 8000 },
         );
       } else {
-        toast.success(`Imported: ${summary}. Refresh to see your data.`, { duration: 6000 });
+        toast.success(`Imported: ${summary}. Reloading...`, { duration: 3000 });
+        setTimeout(() => window.location.reload(), 1500);
       }
     } catch (error) {
       console.error('Import error:', error);

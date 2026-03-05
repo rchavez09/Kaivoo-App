@@ -397,6 +397,7 @@ const RichTextEditor = ({
         }
         .ProseMirror {
           min-height: 400px;
+          caret-color: currentColor;
         }
         .ProseMirror:focus {
           outline: none;
