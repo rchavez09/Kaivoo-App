@@ -132,7 +132,15 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
     const data = user ? new SupabaseDataAdapter(user.id) : null;
     virtualVault.setDataAdapter(data);
     const attachments: AttachmentAdapter = user ? new SupabaseAttachmentAdapter(supabase, user.id) : noOpAttachments;
-    return { data, auth: supabaseAuth, search: supabaseSearch, vault: virtualVault, fileVault: null, attachments, isLocal: false };
+    return {
+      data,
+      auth: supabaseAuth,
+      search: supabaseSearch,
+      vault: virtualVault,
+      fileVault: null,
+      attachments,
+      isLocal: false,
+    };
   }, [isLocal, localAdapters, user?.id, supabaseAuth, supabaseSearch, virtualVault]);
 
   // Desktop mode: show error screen if local database init failed

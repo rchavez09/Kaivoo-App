@@ -485,20 +485,12 @@ class SupabaseConversationAdapter implements ConversationAdapter {
       updates.messages = JSON.parse(input.messages).slice(-200);
     }
 
-    const { error } = await supabase
-      .from('ai_conversations')
-      .update(updates)
-      .eq('id', id)
-      .eq('user_id', this.userId);
+    const { error } = await supabase.from('ai_conversations').update(updates).eq('id', id).eq('user_id', this.userId);
     if (error) throw error;
   }
 
   async delete(id: string) {
-    const { error } = await supabase
-      .from('ai_conversations')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', this.userId);
+    const { error } = await supabase.from('ai_conversations').delete().eq('id', id).eq('user_id', this.userId);
     if (error) throw error;
   }
 }

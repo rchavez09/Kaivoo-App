@@ -64,7 +64,9 @@ const ConciergeChat = () => {
       const convos = await dataAdapter.conversations.fetchAll();
       if (!cancelled) setConversations(convos);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [dataAdapter]);
 
   // Scroll to bottom on new messages

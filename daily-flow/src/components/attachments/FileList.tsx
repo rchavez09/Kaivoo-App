@@ -154,9 +154,7 @@ const FileItem = ({ file, onDelete, onRename, getUrl, onOpen }: FileItemProps) =
             {file.name}
           </p>
         )}
-        {!isRenaming && (
-          <p className="text-[11px] text-muted-foreground">{formatFileSize(file.size)}</p>
-        )}
+        {!isRenaming && <p className="text-[11px] text-muted-foreground">{formatFileSize(file.size)}</p>}
       </div>
 
       {/* Actions */}
@@ -184,34 +182,35 @@ const FileItem = ({ file, onDelete, onRename, getUrl, onOpen }: FileItemProps) =
           </a>
         )}
 
-        {!isRenaming && (confirmDelete ? (
-          <div className="flex items-center gap-1">
+        {!isRenaming &&
+          (confirmDelete ? (
+            <div className="flex items-center gap-1">
+              <button
+                className={cn(
+                  'rounded-md px-2 py-1 text-[11px] font-medium text-destructive-foreground',
+                  'bg-destructive hover:bg-destructive/90',
+                )}
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Delete'}
+              </button>
+              <button
+                className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-secondary/50"
+                onClick={() => setConfirmDelete(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
             <button
-              className={cn(
-                'rounded-md px-2 py-1 text-[11px] font-medium text-destructive-foreground',
-                'bg-destructive hover:bg-destructive/90',
-              )}
-              onClick={handleDelete}
-              disabled={deleting}
+              aria-label={`Delete ${file.name}`}
+              className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-destructive/10 hover:text-destructive md:opacity-0 md:group-hover:opacity-100"
+              onClick={() => setConfirmDelete(true)}
             >
-              {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Delete'}
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
-            <button
-              className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-secondary/50"
-              onClick={() => setConfirmDelete(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            aria-label={`Delete ${file.name}`}
-            className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-destructive/10 hover:text-destructive md:opacity-0 md:group-hover:opacity-100"
-            onClick={() => setConfirmDelete(true)}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        ))}
+          ))}
       </div>
     </div>
   );

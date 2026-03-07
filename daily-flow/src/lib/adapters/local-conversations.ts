@@ -79,19 +79,14 @@ export class LocalConversationAdapter implements ConversationAdapter {
 
     if (input.title !== undefined) add('title', input.title);
     if (input.messages !== undefined) {
-      const trimmed = JSON.stringify(
-        JSON.parse(input.messages).slice(-MAX_MESSAGES_PER_CONVERSATION),
-      );
+      const trimmed = JSON.stringify(JSON.parse(input.messages).slice(-MAX_MESSAGES_PER_CONVERSATION));
       add('messages', trimmed);
     }
     add('updated_at', now());
 
     if (sets.length === 0) return;
     vals.push(id);
-    await this.db.execute(
-      `UPDATE ai_conversations SET ${sets.join(', ')} WHERE id = $${i}`,
-      vals,
-    );
+    await this.db.execute(`UPDATE ai_conversations SET ${sets.join(', ')} WHERE id = $${i}`, vals);
   }
 
   async delete(id: string): Promise<void> {

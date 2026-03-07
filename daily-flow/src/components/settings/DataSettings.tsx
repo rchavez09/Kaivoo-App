@@ -901,7 +901,11 @@ const DataSettings = () => {
             Export journals, captures, and topics as Obsidian-compatible markdown files with YAML frontmatter.
           </p>
         </div>
-        <Button onClick={handleMarkdownExport} disabled={exportingMd || !dataAdapter || !(fileVault ?? vault)} variant="outline">
+        <Button
+          onClick={handleMarkdownExport}
+          disabled={exportingMd || !dataAdapter || !(fileVault ?? vault)}
+          variant="outline"
+        >
           {exportingMd ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

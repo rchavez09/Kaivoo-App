@@ -94,9 +94,7 @@ export function useAttachments(entityId: string | undefined): UseAttachmentsRetu
       }
       try {
         const finalName = await attachments.renameFile(entityId, oldName, newName);
-        setFiles((prev) =>
-          prev.map((f) => (f.name === oldName ? { ...f, name: finalName } : f)),
-        );
+        setFiles((prev) => prev.map((f) => (f.name === oldName ? { ...f, name: finalName } : f)));
         toast.success(`Renamed to ${finalName}`);
       } catch (e) {
         const msg = e instanceof Error ? e.message : 'Rename failed';
