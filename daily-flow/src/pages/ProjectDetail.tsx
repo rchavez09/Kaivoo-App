@@ -192,7 +192,7 @@ const ProjectDetail = () => {
               <h1
                 role="button"
                 tabIndex={0}
-                className="cursor-pointer text-2xl font-semibold text-foreground transition-colors hover:text-primary"
+                className="cursor-pointer rounded text-2xl font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 onClick={() => {
                   setNameInput(project!.name);
                   setEditingName(true);
@@ -282,7 +282,7 @@ const ProjectDetail = () => {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  'group flex cursor-pointer items-start gap-2 rounded-lg p-3 text-sm transition-colors hover:bg-secondary/30',
+                  'group flex cursor-pointer items-start gap-2 rounded-lg p-3 text-sm transition-colors hover:bg-secondary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   project.description ? 'text-muted-foreground' : 'italic text-muted-foreground/50',
                 )}
                 onClick={() => {

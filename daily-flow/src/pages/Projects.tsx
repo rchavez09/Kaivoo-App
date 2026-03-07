@@ -164,7 +164,6 @@ const Projects = () => {
 
             {/* Status tabs */}
             <div
-              role="tablist"
               aria-label="Filter projects by status"
               className="mb-6 flex w-fit items-center gap-1 overflow-x-auto rounded-lg bg-[hsl(var(--surface-elevated))] p-1"
             >
@@ -174,11 +173,10 @@ const Projects = () => {
                 return (
                   <button
                     key={tab.key}
-                    role="tab"
-                    aria-selected={activeTab === tab.key}
+                    aria-pressed={activeTab === tab.key}
                     onClick={() => setActiveTab(tab.key)}
                     className={cn(
-                      'rounded-md px-3 py-1.5 text-sm font-medium transition-all',
+                      'rounded-md px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                       activeTab === tab.key
                         ? 'bg-background text-foreground shadow-sm'
                         : 'text-muted-foreground hover:text-foreground',
@@ -260,7 +258,8 @@ const Projects = () => {
                 {inboxCount > 0 && activeTab === 'all' && (
                   <button
                     onClick={() => navigate('/projects/inbox')}
-                    className="widget-card group cursor-pointer text-left transition-shadow hover:shadow-md"
+                    aria-label={`Inbox: ${inboxCount} unassigned task${inboxCount !== 1 ? 's' : ''}`}
+                    className="widget-card group cursor-pointer text-left transition-all hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     <div className="mb-3 flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">

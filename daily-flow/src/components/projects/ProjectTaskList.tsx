@@ -128,7 +128,7 @@ const ProjectTaskList = ({
                       onTaskClick(task.id);
                     }
                   }}
-                  className="group -mx-2 flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/30"
+                  className="group -mx-2 flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <button
                     aria-label={

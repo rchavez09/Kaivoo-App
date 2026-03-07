@@ -168,6 +168,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowSignOutDialog(true)}
+                  aria-label="Sign Out"
                   className="nav-item w-full justify-center px-2 text-muted-foreground hover:text-destructive"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
