@@ -1,58 +1,26 @@
 # Next Sprint Planning
 
-**Updated:** March 4, 2026
-**Last completed:** Sprint 26 (Feature Completion)
-**Current sprint:** Sprint 27 (Desktop Verification) — PLANNING
-**Source:** Sprint 26 post-mortem, Sprint Protocol v2.0
+**Updated:** March 6, 2026
+**Last completed:** Sprint 27 (Desktop Verification)
+**Current sprint:** Sprint 28 (Launch Ready) — ACTIVE
+**Source:** Sprint 27 retrospective, Vision v7.0, CEO Strategic Brief, CEO Session #7 (Adam/OpenClaw analysis)
 
 ---
 
-## Sprint 27: Desktop Verification — ACTIVE
+## Sprint 28: Launch Ready — ACTIVE
 
-See `Sprint-27-Desktop-Verification.md` for full plan.
+See `Sprint-28-Launch-Ready.md` for full plan.
 
-**Theme:** Verify all Sprint 26 features work on desktop (Tauri + local SQLite). Sprint 26 skipped Track B sandbox testing — this sprint closes that gap.
-**Parcels:** 5 (build verification, topic content, attachments, export, fixes)
-
----
-
-## Sprint 28: Launch Ready (Next)
-
-**Theme:** Close the last mile — deploy backend services, build the storefront, draft legal. Everything between "code complete" and "accepting money."
-**Timeline:** After Sprint 27 merges.
-**Scope philosophy:** No new features. Pure deployment, configuration, storefront, and legal. The product code is done. This sprint makes it purchasable.
-
-### Track 1: Revenue Pipeline (P0)
-
-Everything needed to go from "user clicks Buy" to "user has a working license in their app." All Sprint 25 pre-release TODO items plus end-to-end verification.
-
-| # | Parcel | Agent | Priority |
-|---|---|---|---|
-| P1 | **Upload signing keys** — Add `TAURI_SIGNING_PRIVATE_KEY` to GitHub Secrets. Add license Ed25519 private key as Supabase Edge Function env var `LICENSE_PRIVATE_KEY`. | User + Agent 9 | P0 |
-| P2 | **Configure Stripe products** — Create two products in Stripe Dashboard: "Kaivoo Founding Member" ($49) and "Kaivoo Standard" ($99). Record price IDs. Configure webhook endpoint + signing secret. | User + Agent 4 | P0 |
-| P3 | **Deploy Edge Functions** — Deploy `license-keygen`, `license-lookup`, and `stripe-checkout` to Supabase. Set env vars. Verify reachable. | Agent 2 + Agent 9 | P0 |
-| P4 | **Create Storage bucket** — Create `attachments` bucket in Supabase Storage. Configure RLS policies. | Agent 12 | P0 |
-| P5 | **End-to-end payment test** — Full flow in Stripe test mode: Checkout → webhook → license key → email → activate in app. Verify both tiers. | Agent 2 + Agent 4 | P0 |
-
-### Track 2: Landing Page (P0)
-
-| # | Parcel | Agent | Priority |
-|---|---|---|---|
-| P6 | **Landing page build** — Astro static site. Hero, Features, Soul File callout, Screenshots, Pricing, FAQ, Footer. CTA → Stripe Checkout. | Agent 2 + Design Agents | P0 |
-| P7 | **Deploy landing page** — Netlify site. Custom domain. SSL. OG meta tags. | Agent 9 | P0 |
-| P8 | **App screenshots** — 4-6 polished screenshots (light + dark mode). | User + Design Agents | P0 |
-
-### Track 3: Legal & Launch Prep (P1)
-
-| # | Parcel | Agent | Priority |
-|---|---|---|---|
-| P9 | **EULA draft** — Attorney-review draft. Standard software license patterns. | Agent 5 | P0 |
-| P10 | **Privacy Policy draft** — Local-first data handling, BYO-key model, Stripe processing. | Agent 5 | P0 |
-| P11 | **Product Hunt listing draft** — Title, tagline, description, maker story, screenshots. | Agent 8 | P1 |
+**Theme:** Close the last mile — deploy backend services, build the storefront, draft legal. No new features. The product code is done. This sprint makes it purchasable.
+**Parcels:** 11 (revenue pipeline, landing page, legal)
+**Branch:** `sprint/28-launch-ready`
 
 ---
 
 ## Sprint 29: Harden & Launch
+
+**Theme:** Security hardening, accessibility, E2E testing, and launch execution.
+**Timeline:** After Sprint 28 merges.
 
 - Product Hunt launch execution
 - Security hardening (Stripe webhook timestamp, CORS, rate limiting)
@@ -63,20 +31,52 @@ Everything needed to go from "user clicks Buy" to "user has a working license in
 - Community setup (Discord or GitHub Discussions)
 - Basic analytics + error reporting (privacy-respecting)
 - Code signing resolution (if accounts verified)
+- Extract import functions to utility files (Agent 7 P1-1 from Sprint 27)
+- Import validation with Zod schema (Agent 7 P1-2 from Sprint 27)
+- Duplicate import warning dialog (Agent 7 P1-3 from Sprint 27)
+- Agent 11 Sprint 26 non-blocking concerns (empty state, widgetSettings, HTML-to-markdown, TS casts)
 
 ---
 
 ## Post-Launch Fast-Follow (Sprint 30+)
 
+### Concierge Memory Architecture (CEO Session #7 — Priority)
+
+The concierge memory architecture is Kaivoo's competitive moat. These items build the 7-layer cortex/hippocampus model from Vision v7.0.
+
+| Item | Notes | Vision Layer |
+|---|---|---|
+| Pre-compaction memory flush | Before context truncation, force concierge to write lasting notes to `ai_memories`. Prevents context loss in long chats. Small, high-impact. | Layer 4 |
+| Deterministic context assembly | Audit Sprint 24's 6-layer system prompt. Ensure soul/memory injection is compiled from structured data, not AI-generated. Define `assembleConciergeContext()` abstraction. | Layer 1-2 |
+| Concierge coherence monitoring (basic) | Lightweight drift detection: is the concierge still referencing soul personality? Still citing user data accurately? Log drift signals for Phase B advanced monitoring. | Layer 7 (basic) |
+
+### Integrations & Enhancements
+
 | Item | Notes |
 |---|---|
 | Google Calendar integration | MCP server exists: `mcp-server-google-calendar` |
 | Gmail integration | MCP server exists: `mcp-server-gmail` |
-| Soul file Phase 2 | Embedding-based retrieval, memory decay, MCP server |
 | Topic-level AI access controls | Per-topic `ai_access` toggle |
-| Mobile responsive design | Layout, touch targets, navigation. PWA support. |
+| Mobile responsive design | Layout, touch targets, navigation. PWA support. Foundation for companion app. |
 | White-label config | Logo, colors, app name as settings |
 | Notifications & reminders | System notifications for tasks, calendar events |
+| Import progress indicator | Agent 7 P2-2 from Sprint 27 |
+| Image resize handles in editor | Sprint 27 |
+
+### Phase B Foundation (Research Sprint)
+
+These items run as research parcels to de-risk Phase B architecture:
+
+| Item | Owner | Notes |
+|---|---|---|
+| Hybrid memory search architecture | Agent 3 | Embedding provider selection, SQLite vector extension, temporal decay tuning, token budget for hippocampus |
+| Memory consolidation pipeline design | Agent 3 | Sleep cycle: diff-based consolidation, dedup, relevance scoring, stale memory pruning |
+| Companion app architecture | Agent 3 | Stripped-down mobile: concierge chat, today view, quick capture. PWA vs. native. Session scoping (one brain, many mouths). |
+| Concierge coherence signal definition | Agent 3 | What behavioral signals define "drift"? Personality consistency, data citation accuracy, generic-vs-personalized scoring |
+| Exec approval system design | Agent 4 | Study OpenClaw's pattern: unique approval IDs, timeouts, audit trail. Design Kaivoo's version for Orchestrator. |
+| Memory hippocampus token budget | Agent 5 | How many tokens for compiled working memory? Cost implications at scale across providers. |
+| Companion app sync costs | Agent 5 | Per-user sync bandwidth, concierge API routing, push notification infrastructure costs |
+| Memory tier pricing model | Agent 8 | Is hybrid search + sleep cycle compelling for subscription conversion? Willingness-to-pay vs. free AI chat. |
 
 ---
 
@@ -105,4 +105,4 @@ Everything needed to go from "user clicks Buy" to "user has a working license in
 
 ---
 
-*Next Sprint Planning — Updated March 4, 2026 — Sprint 27 (Desktop Verification) active, Sprint 28 (Launch Ready) staged, Sprint 29+ outlined*
+*Next Sprint Planning — Updated March 6, 2026 — Sprint 28 (Launch Ready) active, Sprint 29 (Harden & Launch) staged. Post-launch roadmap updated with concierge memory architecture (CEO Session #7, Adam/OpenClaw analysis), companion app as communication layer, Phase B research parcels.*

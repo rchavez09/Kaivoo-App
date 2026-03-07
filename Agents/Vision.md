@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 6.1
-**Last Updated:** March 4, 2026
+**Version:** 7.1
+**Last Updated:** March 6, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -22,15 +22,55 @@ LONG-TERM     →  Personal OS (the intelligent layer between you and your digit
 
 ### The Products
 
-- **Kaivoo Core** ($99 one-time / $49 founding member) — The productivity app. Journal, tasks, projects, calendar, captures, widgets, theme customization, data export. Local-first, you own everything. BYO API keys. The Obsidian + Notion + Calendar replacement. **Ships now.**
+**The Desktop App Is the Product.**
 
-- **Kaivoo Cloud Companion** (subscription, pricing TBD) — Always-on sync to cloud. Mobile/tablet access to your data even when your desktop sleeps. Managed AI (we provide the keys). "Your data, always available." Download anytime, run locally if you cancel. **You own your data — the subscription is for convenience and infrastructure, never for gatekeeping.**
+- **Kaivoo Desktop** ($99 one-time / $49 founding member) — The flagship. Journal, tasks, projects, calendar, captures, vault, routines, widgets, theme customization, data export. AI concierge with BYO API keys. Soul file. Local-first — everything runs on your machine, your data never leaves, Kaivoo's ongoing cost per user is zero. That's why one-time pricing works. **Multiple apps in one + an AI that knows you, remembers you, and executes for you. You own everything. Forever.**
+
+- **Kaivoo Web Access + Sync** ($8-12/mo subscription) — Access your desktop data from any browser, even when your machine sleeps. Supabase-hosted sync. Managed AI (we provide the keys). The subscription covers real infrastructure costs: storage, bandwidth, auth, database, file uploads — all cost money per user per month. One-time pricing here would be a liability, not a sale. **Cancel anytime and download everything. You're paying for infrastructure, not permission.**
+
+- **Kaivoo Companion App** (requires Web Access subscription) — Mobile/tablet access. Concierge chat, today view, quick capture, notifications. The companion *needs* cloud sync to see your desktop data — this isn't an artificial gate, it's an architectural reality. **Your AI in your pocket.**
 
 - **Kaivoo Orchestrator** (premium subscription, pricing TBD) — AI agent orchestration for builders. Sprint management, multi-model routing, messaging-based control, autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can text from their couch.
 
-- **Full Stack:** All of the above. Toggle what you need in settings.
+**Phase A** ships the desktop app (the flagship). **Phase B** adds Web Access, Companion, and Orchestrator. **Phase C** opens the marketplace. **Phase D** builds the MCP foundation layer and personal OS trajectory.
 
-**Phase A** ships the productivity app (the wedge). **Phase B** adds the Cloud Companion and Orchestrator. **Phase C** opens the marketplace. **Phase D** builds the MCP foundation layer and personal OS trajectory.
+### The Funnel
+
+```
+FREE WEB TRIAL (14 days)
+│  Sign up, full experience, BYO key, no payment
+│  "Try the AI that remembers you"
+│  Trial users are already on web infrastructure
+│
+├──→ BUY DESKTOP ($49/$99 one-time)
+│    Everything local. BYO keys. Zero ongoing costs.
+│    "You own everything. Forever."
+│    Highest-value users — most likely to add sync later.
+│
+└──→ SUBSCRIBE WEB ($8-12/mo)
+     Keep web access after trial ends.
+     Full app, Supabase storage, managed AI option.
+     "We handle the infrastructure."
+
+DESKTOP OWNERS (warm leads for cloud)
+│
+└──→ ADD WEB ACCESS + SYNC ($8-12/mo)
+     Mobile access via Companion App.
+     Cloud sync when desktop sleeps.
+     "Your data, available everywhere."
+```
+
+Both paths lead to revenue. Desktop buyers are the most engaged users and the strongest conversion candidates for cloud add-ons. The funnel isn't free → paid. It's paid → *more* paid.
+
+### Cost-to-Serve Logic
+
+The pricing model follows the economics, not the other way around:
+
+- **Desktop (one-time):** User downloads the app, everything runs on their machine. Kaivoo's ongoing cost is zero. No servers, no storage, no bandwidth. One-time pricing works because there's nothing to pay for after the sale.
+- **Web (subscription):** User's data lives on Supabase. Storage, bandwidth, auth, database rows, file uploads — all cost money per user per month. A one-time payment here is a liability, not a sale. Subscription is the only sustainable model.
+- **Free trial (web):** Limited duration, no payment. Top of funnel. Try the concierge, see the soul file, create some tasks. Fall in love, then buy desktop or subscribe.
+
+This is the Obsidian model — but stronger. Obsidian's core app is free; they depend entirely on Sync ($4/mo) and Publish ($8/mo) conversions. Kaivoo gets paid at the door ($49/$99) AND on cloud add-ons. Revenue from both sides.
 
 The AI isn't a chat box. It's an engine underneath purpose-built tools. Users see specific actions and clear outcomes — not blank prompts. Every widget tells them exactly what it does and what's possible. One button to the moon.
 
@@ -120,6 +160,25 @@ Like Plex proved for media, your desktop can be your personal cloud:
 
 The killer product is **both** — Mode A when your machine is reachable, Mode B as fallback. Users don't think about modes. It just works.
 
+### The Companion App — Your Concierge in Your Pocket
+
+The companion app is a stripped-down mobile version of Kaivoo focused on two things: **accessing your data** and **messaging your concierge**. It is not a full-featured mobile port — it's a purpose-built companion that extends the desktop experience to your phone.
+
+**Core surfaces:**
+- **Concierge chat** — Message your AI from anywhere. Same soul, same memory, same tools. "Add a task for tomorrow: review the Q2 report." Done.
+- **Today view** — Quick glance at your day: tasks, calendar, journal prompt
+- **Quick capture** — Photos, voice notes, text captures that sync to your vault
+- **Notifications** — Task reminders, calendar alerts, concierge suggestions (Level 2+)
+
+**What it is NOT:**
+- Not a full editor (vault browsing and editing happen on desktop)
+- Not a standalone app (requires Cloud Companion subscription for sync)
+- Not a third-party messaging wrapper (we own the entire stack)
+
+**Architecture:** The companion app connects to Kaivoo's cloud relay (Supabase). Conversation threads are stored per-surface (companion vs. desktop) but share the same concierge brain, soul file, and memory. When the desktop is awake, the companion can reach it directly (Mode A). When the desktop sleeps, the companion works with synced data (Mode B).
+
+**Revenue:** The companion app is a Tier 2 (Web Access + Sync) feature. It requires the sync infrastructure subscription — not as an artificial gate, but because the companion needs cloud sync to access desktop data. Desktop-only users who run everything locally use only the desktop app.
+
 ### What Makes This Different
 
 | | Obsidian | Notion | Kaivoo |
@@ -182,6 +241,66 @@ The soul file is readable and editable by the user (Core Principle #2 — no bla
 
 **Design constraint:** The soul must be lightweight enough to load on every interaction without adding latency. A few KB of structured data, not an embedding store. Phase B's RAG and semantic search layer can deepen the concierge's knowledge, but the core soul stays fast and simple.
 
+### Concierge Memory Architecture
+
+The concierge's memory is Kaivoo's competitive moat. Every productivity app will bolt on AI chat. Very few will build memory that makes the AI genuinely know you. The architecture follows a **cortex/hippocampus split** — unbounded long-term storage, with a lean compiled snapshot for each session.
+
+**The principle:** "The memory is in the data. The model is just the reader." The LLM is stateless compute. All persistence, identity, and continuity live in structured data the user owns. Swap the AI provider, keep the memory, and continuity persists.
+
+#### Layer 1: Soul File (Identity — always loaded)
+The core personality and preferences. A few KB. Loaded on every interaction. This is the "who I am" layer — name, tone, relationship with the user. **Deterministic injection** — compiled from stored data, never AI-generated. The concierge's sense of self is a read, not an inference. This prevents personality drift across sessions.
+
+#### Layer 2: Working Memory (Session context — compiled per session)
+A lean, targeted snapshot assembled at session start from long-term storage. Contains: user's name, active tasks/projects, recent conversation summary, top relevant memories for the current context. Discarded and rebuilt each session. Stays lean to preserve context window for actual work.
+
+#### Layer 3: Long-Term Memory (Fact store — grows forever)
+The full `ai_memories` table — every fact, preference, decision, and conversation summary. The cortex. Can grow to thousands of entries without impacting session performance because only relevant memories are surfaced via search.
+
+#### Layer 4: Pre-Compaction Memory Flush
+Before context truncation in long conversations, the concierge automatically writes lasting notes to memory. A silent system message says "save any important facts or decisions before we continue." The AI writes to `ai_memories`, *then* compaction happens. Session boundaries become non-events — nothing important is lost.
+
+#### Layer 5: Hybrid Memory Search (Phase B — Cloud Companion)
+When the memory store grows beyond simple keyword matching, hybrid search surfaces the right memories at the right time:
+- **Semantic search** (vector similarity) — finds conceptually related memories
+- **Keyword search** (BM25/FTS) — finds exact term matches
+- **Weighted hybrid merge** — configurable ratio (default 70/30 semantic/keyword)
+- **Temporal decay** — newer memories score higher (configurable half-life)
+- **Diversity re-ranking** — prevents redundant results
+
+This enables the concierge to recall patterns, preferences, and context that simple substring matching misses. "What does this user prefer for morning planning?" requires semantic recall, not keyword search.
+
+#### Layer 6: Memory Consolidation (Phase B — "Sleep Cycle")
+Between sessions, an offline process consolidates short-term conversation logs into long-term memory:
+- Summarize recent conversations
+- Extract new facts and preferences
+- Merge into long-term memory with deduplication
+- Update relevance scores on existing memories
+- Prune stale or superseded facts
+
+The concierge gets smarter between sessions, not just during them. This is a managed Cloud Companion feature — the consolidation runs on Kaivoo's infrastructure.
+
+#### Layer 7: Coherence Monitoring (Phase B — Concierge Level 2+)
+Long conversations degrade AI coherence before context limits hit. The model doesn't announce it — it quietly drifts. Coherence monitoring detects this via behavioral signals:
+- Is the concierge still referencing the soul file personality?
+- Is it still citing user data accurately?
+- Has it started giving generic responses instead of personalized ones?
+
+When drift is detected, a silent re-anchor injection restores coherence. The user never sees the mechanic — they just experience an AI that **stays sharp** across long sessions.
+
+#### Revenue Alignment
+
+| Memory Layer | Tier 1 (Desktop $49/$99) | Tier 2 (Web Access + Sync) |
+|---|---|---|
+| Soul file (identity) | Included | Included |
+| Working memory (compiled context) | Included | Included |
+| Long-term memory (fact store) | Included (keyword search) | Included (hybrid search) |
+| Pre-compaction flush | Included | Included |
+| Hybrid memory search | — | Included |
+| Memory consolidation (sleep cycle) | — | Included |
+| Coherence monitoring | Basic | Advanced |
+
+Desktop users get a concierge that remembers. Subscribers get a concierge that **learns, consolidates, and stays sharp**. The memory architecture is the subscription differentiator.
+
 ### Concierge Scope Boundary
 
 The concierge has two capability tiers, cleanly separated by product:
@@ -201,12 +320,29 @@ The concierge has two capability tiers, cleanly separated by product:
 **Orchestrator Concierge (Product 2 — Phase B):**
 - Everything above, plus...
 - Sprint orchestration, agent coordination, build-review-test-push pipeline
-- Messaging control (Telegram or equivalent)
+- Companion app messaging — message your concierge from anywhere, same brain, same memory
 - Multi-model routing across roles (e.g., cheap model for chat, Sonnet for search, Opus for building, Gemini for testing)
-- Remote-triggered code execution with security gates
+- Remote-triggered code execution with security gates and exec approval flows
 - **It builds things for you.**
 
 Same concierge architecture. Same soul file. Same hatching. Different capability ceiling. The Orchestrator unlocks the builder layer — it doesn't replace the productivity layer.
+
+### One Brain, Many Surfaces
+
+The concierge is accessible from multiple surfaces but operates as a single intelligence:
+
+- **Desktop app** — Full concierge chat with tool use, context panel, conversation history
+- **Companion app** — Stripped-down mobile interface for messaging the concierge on the go
+- **Future surfaces** — Notifications, widgets, voice (Phase D)
+
+**Architecture principle:** Same concierge, same soul, same memory — but **separate conversation threads** with **shared context**. When you message your concierge from the companion app "remind me to finish the proposal," it shows up in your Tasks on desktop. But the companion conversation history and the desktop chat history are separate threads. One brain, many mouths.
+
+**Why we own the channel:** Building our own communication layer through the companion app gives us end-to-end control over the experience. The concierge lives in *your* app — not Telegram, not WhatsApp, not someone else's platform. This means:
+- No third-party API dependencies or rate limits
+- Full control over UX, notifications, and interaction patterns
+- Concierge context (your tasks, calendar, data) is natively available — no bridging
+- Push notifications, typing indicators, and rich responses designed for our use case
+- Privacy: your AI conversations never touch a third-party messaging platform
 
 ---
 
@@ -388,11 +524,23 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 ## Business Model
 
-### Four-Tier Revenue Strategy
+### Revenue Strategy
 
-The app is local-first and yours forever. The subscription is for convenience and infrastructure — not for gatekeeping features. Users choose how much they want managed for them. **"You own your data"** is non-negotiable: at any time, users can download their data and run everything locally.
+The desktop app is local-first and yours forever. Cloud services are subscriptions that cover real infrastructure costs — not feature gates. **"You own your data"** is non-negotiable: at any time, users can download their data and run everything locally.
 
-#### Tier 1: Kaivoo Core (One-Time Purchase)
+#### Free Tier: Web Trial (Top of Funnel)
+
+| | |
+|---|---|
+| **Price** | Free — 14-day full-experience trial |
+| **What you get** | Full web app experience. BYO API key. Concierge chat. Soul file. Journal, tasks, calendar, captures. No feature gating — everything works during trial. |
+| **Target** | Anyone curious. Zero commitment, zero friction. |
+
+**Strategy:** Time-limited, not feature-limited. Full experience creates the "aha moment" (target: < 5 minutes to value). No payment required. Trial users are already on web infrastructure, so converting to web subscription is seamless. Natural urgency — the clock is ticking, then either buy desktop or subscribe.
+
+**Cost exposure:** Each free trial user costs Supabase rows, auth, and bandwidth with zero revenue. 14-day limit controls burn. Agent 5 to model per-user trial cost.
+
+#### Tier 1: Kaivoo Desktop (One-Time Purchase — The Flagship)
 
 | | |
 |---|---|
@@ -406,23 +554,27 @@ The app is local-first and yours forever. The subscription is for convenience an
 
 **License:** Proprietary EULA. Personal or internal business use only. No redistribution, resale, sublicensing, or derivative products for sale. License key required for activation.
 
-**Strategy:** Volume over margin. $49 is impulse pricing. BYO-key means zero AI API costs — Kaivoo carries 70-80% gross margins. Every Core buyer is a warm lead for Tier 2. "Pay once, own forever" resonates with a subscription-fatigued market.
+**Why one-time works:** User downloads the app, everything runs on their machine. Kaivoo's ongoing cost per user is zero — no servers, no storage, no bandwidth. BYO-key means zero AI API costs. 70-80% gross margins. "Pay once, own forever" resonates with a subscription-fatigued market.
 
 **Revenue milestone:** 2,000+ founding member sales = ~$100K. This funds Tier 2 development and validates demand.
 
-#### Tier 2: Kaivoo Cloud Companion (Subscription — ARR)
+**Desktop buyers are the highest-value users.** They paid $49-99 upfront, they're invested, and they're the most likely to convert to web sync when they want mobile access. The funnel isn't free → paid. It's paid → *more* paid.
+
+#### Tier 2: Web Access + Sync + Companion (Subscription — ARR)
 
 | | |
 |---|---|
-| **Price** | $8-12/mo (or ~$99/yr) — final pricing pending research |
-| **What you get** | Everything in Core + **always-on cloud sync** (your data available even when your desktop sleeps), managed AI (we provide the keys), mobile/tablet companion access, cloud backup, Google Calendar integration, Gmail integration, priority updates, future integrations. **We handle the infrastructure.** |
-| **Target** | Users who want convenience over DIY. Mobile access. Always-on availability. Solopreneurs. |
+| **Price** | $8-12/mo base (or ~$99/yr) — final pricing pending research. May be tiered by storage (e.g., 5GB / 25GB / 100GB like Google Drive). Managed AI may be bundled or addon depending on cost modeling. |
+| **What you get** | **Web access** (browser-based app, always available), **cloud sync** (your data available even when your desktop sleeps), **Companion App** (mobile/tablet — concierge chat, today view, quick capture), managed AI (we provide the keys — or BYO), cloud backup, file storage, Google Calendar integration, Gmail integration, priority updates, future integrations. **We handle the infrastructure.** |
+| **Target** | Desktop owners who want mobile access. Users who want convenience over DIY. Solopreneurs. |
 
-**The value prop:** Your desktop won't always be on. The Cloud Companion syncs your data to Supabase so you can access notes, files, and projects from your phone, tablet, or any browser — even when your machine sleeps. Cancel anytime and download everything. You're paying for infrastructure, not permission.
+**Why subscription is the only option here:** User data lives on Supabase. Storage, bandwidth, auth, database rows, file uploads — all cost money per user per month. A one-time payment for cloud infrastructure is a liability, not a sale. Subscription is the only sustainable model.
+
+**The value prop:** Your desktop won't always be on. Web Access syncs your data to Supabase so you can access notes, files, and projects from your phone, tablet, or any browser — even when your machine sleeps. The Companion App puts your concierge in your pocket. Cancel anytime and download everything. You're paying for infrastructure, not permission.
+
+**Companion App requires this tier** — not as an artificial gate, but because the companion *needs* cloud sync infrastructure to access your desktop data. Users understand "your phone needs cloud sync to see your desktop data." That's honest, not extractive.
 
 **Why this works:** You're not charging for features. You're charging for "we handle it." That's the JetBrains model. That's the Obsidian Sync model. The app is yours. The service is a subscription. Forced SaaS is dead — elective SaaS (sync, managed AI, integrations that require server-side infrastructure) is the future.
-
-**The HubSpot play:** Cut their pricing at the core. Target the SMBs that are confused by HubSpot's 47 tiers and using a tenth of its features. Simple pricing. Clear capabilities. AI that actually helps instead of adding complexity.
 
 #### Tier 3: Kaivoo for Builders (Premium Subscription — Future)
 
@@ -462,8 +614,8 @@ The app is local-first and yours forever. The subscription is for convenience an
 
 | Widget/Module | Price Model | What They Get |
 |---|---|---|
-| **Command Space** | Included (Tier 1) | Core foundation — journal, todos, calendar, captures, daily view, AI concierge |
-| **Managed AI + Sync** | Tier 2 subscription | Cloud backup, multi-device sync, managed API keys |
+| **Command Space** | Included (Desktop / Tier 1) | Core foundation — journal, todos, calendar, captures, daily view, AI concierge |
+| **Web Access + Sync + Companion** | Tier 2 subscription | Browser access, cloud sync, mobile companion, managed API keys |
 | **Marketing Tools** | Addon (TBD) | Content creation, social media, campaign planning, brand guidelines |
 | **Sales Dashboard** | Addon (TBD) | Pipeline tracking, contact management, lightweight CRM |
 | **Document Management** | Addon (TBD) | Upload, organize, share, version business documents |
@@ -476,7 +628,17 @@ The app is local-first and yours forever. The subscription is for convenience an
 
 ## Phased Roadmap
 
-### Phase A: Ship & Sell the Productivity App
+### Launch Sequence
+
+Desktop and web launch on parallel tracks:
+
+1. **Web free trial launches first** — no Apple cert dependency. Sign-up flow, 14-day full experience, "subscribe" or "buy desktop" CTAs. Doesn't need Stripe checkout or license key validation — just a sign-up flow, usage limits, and conversion prompts.
+2. **Desktop ships when certs clear** — Apple notarization + code signing happen in parallel with feature work. Desktop is the flagship product; it launches when it's ready, not gated by web.
+3. **Companion app follows Tier 2** — ships when Web Access subscription infrastructure is live.
+
+Both tracks can run in parallel. Web trial infrastructure is already partially built (Supabase auth, the full React app). Desktop needs signing certs.
+
+### Phase A: Ship & Sell the Desktop App
 *Finish the product. Charge $99/$49. Hit $100K. Learn from real users.*
 
 #### Completed (Sprints 0–18)
@@ -512,8 +674,10 @@ The app is local-first and yours forever. The subscription is for convenience an
 | File attachments + image embedding — files in project/topic/journal folders, images uploaded to storage and embedded inline in rich text editor, `.attachments/` storage (desktop), Supabase Storage bucket (web) | **DONE** (Sprint 25 projects, Sprint 26 topics + journal + inline images) | Must-have |
 | Topic content editing — rich text body on topics and topic pages, Tiptap editor, auto-save, content column in DB | **DONE** (Sprint 26) | Must-have |
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | **DONE** (Sprint 23) | Must-have |
-| AI chat concierge — in-app conversational AI, messaging app integration (Telegram) | **DONE** (Sprint 23 — in-app chat; Telegram deferred to Phase B) | Must-have |
+| AI chat concierge — in-app conversational AI | **DONE** (Sprint 23 — in-app chat) | Must-have |
 | Soul file — persistent AI memory (SQLite `ai_memories` table, fact extraction pipeline, user-editable memory UI, app context injection, conversation summaries). The concierge learns, remembers, and sees your data. | **DONE** (Sprint 24) | Must-have |
+| Pre-compaction memory flush — before context truncation in long conversations, concierge writes lasting notes to memory. Prevents context loss. | PLANNED | Should-have |
+| Deterministic context assembly — ensure soul/memory injection is compiled from structured data, not AI-generated. Prevents personality drift. | PLANNED | Should-have |
 | Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | **DONE** (Sprint 23) | Must-have |
 | License key system — activation, tier validation, commercial distribution | **DONE** (Sprint 25 — Ed25519 offline verification, Stripe checkout, activation UX) | Must-have |
 | Landing page & marketing site | PLANNED | Must-have |
@@ -537,10 +701,11 @@ The app is local-first and yours forever. The subscription is for convenience an
 | Productize agent system — markdown specs → executable agent templates | PLANNED |
 | Orchestrator dashboard — sprint completions, production connections, sandbox, deployment status | PLANNED |
 | Multi-model routing engine — assign models to roles, API key management, cost tracking | PLANNED |
-| Messaging integration (Telegram or alternative) — first-class control surface, not just notifications | PLANNED |
+| Companion app concierge — message your AI from the companion app, same brain/memory, remote task execution | PLANNED |
+| Exec approval system — confirmation flows for remote-triggered actions, unique approval IDs, timeouts, audit trail | PLANNED |
 | "New Project" wizard — concierge generates Vision, agent roster, first sprint from conversation | PLANNED |
 | Productization sprint — clean templates, strip Kaivoo-specific content, blank-slate onboarding | PLANNED |
-| Security model — auth for remote-triggered execution, confirmation flows, blast-radius controls | PLANNED |
+| Security model — auth for remote-triggered execution, blast-radius controls, sandboxed agent execution | PLANNED |
 | Orchestrator-as-addon — toggle for existing productivity app users to add builder capabilities | PLANNED |
 | Orchestrator subscription billing — premium pricing, Stripe recurring | PLANNED |
 
@@ -548,18 +713,22 @@ The app is local-first and yours forever. The subscription is for convenience an
 
 | Milestone | Status |
 |---|---|
+| **Companion App** — stripped-down mobile app: concierge chat, today view, quick capture, notifications. Connects via cloud relay. | PLANNED |
+| **Hybrid memory search** — vector + BM25 + temporal decay + diversity re-ranking for concierge memory recall | PLANNED |
+| **Memory consolidation (sleep cycle)** — offline process consolidates conversation logs into long-term memory between sessions | PLANNED |
+| **Coherence monitoring** — detect within-session concierge drift via behavioral signals, silent re-anchoring | PLANNED |
+| **Context assembly interface** — pluggable `assembleConciergeContext()` abstraction for deterministic system prompt compilation | PLANNED |
 | Shared notes, tasks, calendars — collaboration foundation | PLANNED |
 | Task assignment & delegation — assign, track, complete | PLANNED |
 | Role-based access — admin / manager / member tiers | PLANNED |
 | Team onboarding — invite, set roles, configure shared workspaces | PLANNED |
 | AI Concierge Level 2 — proactive suggestions, "I can do that for you" prompts | PLANNED |
-| Skills & integration architecture — plugin API, MCP-based skills store design | PLANNED |
+| Skills & integration architecture — plugin API, module SDK, documentation-first skill manifests | PLANNED |
 | Integration: Slack/Teams — connect (not rebuild), messages flow through One Workflow | PLANNED |
 | Marketing widget — content creation, social media, campaign planning | PLANNED |
 | Sales dashboard widget — pipeline tracking, contact management, lightweight CRM | PLANNED |
 | Document management widget — upload, organize, share, version | PLANNED |
 | The Concierge — AI routing engine (Claude/OpenAI/Gemini, Ollama for self-hosted) | PLANNED |
-| Soul file — concierge identity, user preferences, communication style, persistent memory | PLANNED |
 | Concierge-as-Builder — personal customization through conversation (pages, widgets, field changes) | PLANNED |
 | Concierge Hatching (Phase B) — extended onboarding wizard, guided platform tour led by the concierge | PLANNED |
 | 1st-party modules — Marketing, Sales, Docs built in Page + Today Widget format (marketplace template) | PLANNED |
@@ -609,6 +778,7 @@ The app is local-first and yours forever. The subscription is for convenience an
 | **Self-Building** | |
 | AI Concierge Level 4 — self-building capabilities, "I wish we had X" → AI researches, plans, builds | PLANNED |
 | Sandboxed page builder — AI generates new pages/widgets within security sandbox | PLANNED |
+| Documentation-first module manifests — modules ship as readable manifests the concierge reads and writes. The AI is the plugin loader. | PLANNED |
 | Flow automation engine — triggers, conditions, actions across services (send email when X, notify when Y) | PLANNED |
 | Cross-service orchestration — AI coordinates actions across email, calendar, files, external APIs | PLANNED |
 | **File Intelligence** | |
@@ -629,14 +799,26 @@ These run in parallel with sprint work, not blocking it.
 
 | Parcel | Owner | Deliverable | Status |
 |---|---|---|---|
-| Token cost modeling | Agent 5 | Cost-per-user estimates at light/medium/heavy AI usage tiers | PLANNED |
-| Competitive pricing teardown | Agent 8 | HubSpot, Monday, Notion, Asana pricing analysis — where the floor is for SMBs | PLANNED |
+| **Tier 2 Pricing & Cost Research** | | | |
+| Supabase cost-per-user modeling | Agent 5 | Actual Supabase costs per web user at light/medium/heavy usage: database rows, auth sessions, storage (MB/GB), bandwidth, edge function invocations, realtime connections. Model at 100/1K/10K users. What does each tier of user cost us per month? | PLANNED |
+| Managed AI cost-per-user modeling | Agent 5 | Cost of providing managed AI keys (we pay, user doesn't BYO). Token costs per conversation at light (5 msgs/day) / medium (20 msgs/day) / heavy (50+ msgs/day) usage across providers (OpenAI, Anthropic, Google). What's the margin at $8/mo vs. $12/mo? Is managed AI sustainable at Tier 2 pricing or does it need its own addon? | PLANNED |
+| Storage tier modeling | Agent 5 | Google Drive-style tiered storage analysis. What does Supabase charge per GB for file storage + bandwidth? Model tiers: 1GB free trial / 5GB base subscriber / 25GB mid / 100GB+ power user. At what storage level does a $8-12/mo subscription become unprofitable? What are the breakpoints? | PLANNED |
+| Free trial cost modeling | Agent 5 | Per-user cost of 14-day web trial on Supabase (rows, auth, bandwidth, storage). What's the burn rate per free user? At what trial volume does this become a problem? What usage limits (if any) keep trial costs under $0.50/user? | PLANNED |
+| Cloud storage competitive teardown | Agent 8 | Google Drive ($1.99/100GB), iCloud ($0.99/50GB), OneDrive ($1.99/100GB), Dropbox ($11.99/2TB), Obsidian Sync ($4/mo/1GB), Notion ($8-10/mo/unlimited). What's the market expectation for storage at each price point? Where does Kaivoo fit? | PLANNED |
+| Tier 2 subscription pricing recommendation | Agent 8 | Synthesize Agent 5's cost models + competitive teardown into a pricing recommendation. Flat rate vs. tiered (e.g., $8/mo for 5GB, $12/mo for 25GB, $20/mo for 100GB)? Should managed AI be bundled or addon? What margin target is sustainable? What price maximizes desktop→subscriber conversion? | PLANNED |
+| Competitive pricing teardown (productivity) | Agent 8 | HubSpot, Monday, Notion, Asana, Sunsama pricing analysis — where the floor is for SMBs. Focus on what users get at the $8-12/mo tier across competitors | PLANNED |
 | Addon pricing model | Agent 8 | Per-seat vs. per-workspace vs. usage-based analysis with widget addon tiers | PLANNED |
 | Legal / EULA research | Agent 5 | EULA template, redistribution terms, privacy policy framework — to be reviewed by attorney | PLANNED |
 | "One Workflow" positioning validation | Agent 8 | Does the name resonate? Does "replace your stack" land with target personas? | PLANNED |
 | Marketplace model analysis | Agent 8 | Shopify Apps, Figma Community, Notion Templates — commission structures, quality control, creator incentives | PLANNED |
 | Sandboxed module runtime | Agent 3 | Evaluate iframe sandboxing, Web Components, controlled runtimes for user-built modules — security vs. capability | PLANNED |
-| Messaging channel evaluation | Agent 5 | Telegram Bot API capabilities/limitations vs. custom messaging layer — viability for Orchestrator control surface | PLANNED |
+| Companion app architecture | Agent 3 | Stripped-down mobile app: concierge chat, today view, quick capture, notifications. PWA vs. native. Session scoping for multi-surface concierge (one brain, many mouths). | PLANNED |
+| Concierge coherence signals | Agent 3 | Define behavioral signals for concierge drift detection — personality consistency, data citation accuracy, generic-vs-personalized response scoring. What's the "scratchpad" equivalent for our system? | PLANNED |
+| Hybrid memory search architecture | Agent 3 | Embedding provider selection (OpenAI, local via transformers.js), SQLite vector extension vs. separate store, temporal decay tuning, token budget for hippocampus compilation | PLANNED |
+| Memory consolidation pipeline | Agent 3 | Sleep cycle design: diff-based consolidation, dedup strategy, relevance scoring, stale memory pruning. Runs between sessions on cloud infrastructure. | PLANNED |
+| Exec approval system design | Agent 4 | Study OpenClaw's exec approval pattern: unique approval IDs, timeouts, audit trail, challenge-response. Design Kaivoo's version for Orchestrator remote execution. | PLANNED |
+| Companion app sync costs | Agent 5 | Cost modeling for companion app cloud relay — per-user sync bandwidth, concierge API routing, push notification infrastructure. Feeds into Supabase cost-per-user modeling above. | PLANNED |
+| Memory tier pricing model | Agent 8 | Hybrid memory search + sleep cycle consolidation as subscription differentiators — willingness-to-pay analysis, competitive positioning vs. free AI chat | PLANNED |
 | Agent system productization | Agent 3 | How to turn markdown agent specs into executable, shippable agent templates without losing simplicity | PLANNED |
 | Solo Builder market validation | Agent 8 | Is the autonomous AI dev team market big enough? Willingness-to-pay for $99-199/mo Orchestrator subscription | PLANNED |
 | Remote execution security model | Agent 4 | Auth, confirmation flows, blast-radius controls for text-triggered code execution and git operations | PLANNED |
@@ -650,7 +832,7 @@ These run in parallel with sprint work, not blocking it.
 | MCP server architecture | Agent 3 | How to expose Kaivoo data (tasks, notes, calendar, files) as MCP resources/tools. Protocol design, permission model, local vs. remote access | PLANNED |
 | Local file indexing engine | Agent 3 | Architecture for indexing all files on machine (not just vault). Performance at scale, incremental updates, search ranking | PLANNED |
 | Secure tunnel evaluation | Agent 9 | Tailscale vs. Cloudflare Tunnel vs. libp2p vs. custom — for remote desktop access from companion app. Setup friction, reliability, security | PLANNED |
-| Companion app architecture | Agent 3 | Mobile/tablet web app connecting to local desktop server. Offline-first with selective sync. PWA vs. native. | PLANNED |
+| Companion app architecture | Agent 3 | Stripped-down mobile app with concierge chat, today view, quick capture, notifications. Session scoping for multi-surface concierge. PWA vs. native. Cloud relay architecture. | PLANNED |
 | Self-building sandbox model | Agent 3 + Agent 4 | How the AI builds new pages/widgets safely. Sandboxing, capability permissions, immutable core protection, rollback | PLANNED |
 | Plex/Obsidian model analysis | Agent 5 | How Plex (local server + remote access) and Obsidian Sync (encrypted relay) work technically. Lessons for Kaivoo's Mode A/B architecture | PLANNED |
 | Cloud sync infrastructure costs | Agent 5 | Cost modeling for Supabase relay (Mode B) at scale — per-user sync bandwidth, storage, always-on relay pricing | PLANNED |
@@ -760,6 +942,22 @@ These run in parallel with sprint work, not blocking it.
 - ~~Business model~~ → **Four-tier model** — Tier 1 (Core, one-time), Tier 2 (Cloud Companion, subscription), Tier 3 (Builders, subscription), Tier 4 (Personal OS, premium). Tier 2 reframed from "Pro" to "Cloud Companion" to reflect the local-first + SaaS hybrid.
 - ~~Near-term plan~~ → **Ship the wedge, build toward the vision.** Current codebase is the foundation. Tauri, SQLite, DataAdapter, UI — all stay. Framing shifts from "productivity app" to "personal infrastructure layer." Bug fixes and launch prep continue as planned.
 
+**Key decisions resolved (CEO Session #7 — March 6, 2026):**
+- ~~Communication channel for Orchestrator~~ → **Build our own through the companion app** — not Telegram, not WhatsApp. The companion app IS the mobile communication layer. E2E control over experience, no third-party API dependencies, native context access, privacy (conversations never touch external platforms).
+- ~~Concierge memory as feature vs. moat~~ → **Competitive moat** — memory architecture (hybrid search, coherence monitoring, sleep cycle consolidation, deterministic boot) is the defensibility. "The AI that actually remembers you" differentiates from every bolt-on AI chat.
+- ~~Companion app scope~~ → **Stripped-down mobile version** — concierge chat, today view, quick capture, notifications. Not a full port. Requires Cloud Companion subscription (sync infrastructure).
+- ~~Memory architecture~~ → **7-layer cortex/hippocampus model** — soul file (identity), working memory (compiled per session), long-term memory (grows forever), pre-compaction flush, hybrid search (Phase B), memory consolidation (Phase B), coherence monitoring (Phase B). Revenue-aligned: Core gets layers 1-4, Cloud Companion gets layers 5-7.
+- ~~Skills/module architecture validation~~ → **Documentation-first manifests confirmed** — OpenClaw's production-validated pattern (skills as markdown the AI reads, not code the gateway loads) validates Kaivoo's module architecture. Modules ship as Page + Today Widget + skill manifest + concierge context snippet.
+- ~~Exec approval for Orchestrator~~ → **Study OpenClaw's pattern** — unique approval IDs, timeouts, audit trail, challenge-response. Agent 4 research parcel assigned.
+
+**Key decisions resolved (CEO Session #8 — March 6, 2026):**
+- ~~Desktop vs. web as primary~~ → **Desktop is the flagship product.** Web access and companion app are premium add-ons (Tier 2 subscription). Desktop one-time pricing works because cost-to-serve is zero. Web subscription is the only sustainable model because Supabase infrastructure costs money per user per month.
+- ~~Free trial model~~ → **14-day full-experience web trial** — time-limited, not feature-limited. Full experience triggers the "aha moment." Converts to desktop purchase or web subscription. No feature-gating complexity.
+- ~~Companion app gating~~ → **Requires Tier 2 subscription** — architectural necessity (needs cloud sync), not artificial paywall. Users understand "your phone needs cloud sync."
+- ~~Launch sequencing~~ → **Web trial first (no cert dependency), desktop when Apple certs clear.** Parallel tracks. Web trial doesn't need full Stripe checkout — just sign-up, usage limits, and conversion CTAs.
+- ~~Cost-to-serve reasoning~~ → **Documented in Vision.** Desktop = zero marginal cost (one-time works). Web = per-user infrastructure (subscription required). Free trial = controlled burn (14-day limit). This is the Obsidian model but stronger — Kaivoo gets paid at the door AND on cloud add-ons.
+- ~~Tier naming~~ → **Tier 1: "Kaivoo Desktop" (was "Core"). Tier 2: "Web Access + Sync + Companion" (was "Cloud Companion").** Names reflect what users actually get.
+
 **Key decisions ahead:**
 - **File watching mechanism** — How does the app detect manual file changes on disk? Agent 3.
 - **Desktop auto-update** — How do users get updates for the desktop app? Agent 9.
@@ -769,7 +967,7 @@ These run in parallel with sprint work, not blocking it.
 - **Sandboxed module runtime** — How user-built modules run safely (iframe, Web Components, controlled runtime) (Agent 3)
 - **Marketplace commission model** — Revenue split that attracts creators without undercutting platform revenue (Agent 8)
 - **Legal review** — EULA needs attorney review before Phase A ships
-- **Messaging channel for Orchestrator** — Telegram vs. custom vs. multi-platform (Agent 5 research)
+- **Companion app as communication layer** — Concierge chat, session scoping (one brain, many mouths), push notifications. Resolved: build our own, not Telegram (Agent 3)
 - **Agent system productization** — How to ship executable agent templates without losing markdown simplicity (Agent 3)
 - **Orchestrator pricing** — Subscription, usage-based, or hybrid (Agent 8)
 - **Solo Builder market validation** — Is the market real and big enough? (Agent 8)
@@ -777,7 +975,10 @@ These run in parallel with sprint work, not blocking it.
 - **MCP server design** — How to expose Kaivoo data as MCP resources/tools (Agent 3)
 - **Local file indexing architecture** — How to index all files on a machine at scale (Agent 3)
 - **Secure tunnel for remote access** — Tailscale vs. Cloudflare Tunnel vs. alternatives (Agent 9)
-- **Companion app architecture** — PWA vs. native, offline-first design, selective sync protocol (Agent 3)
+- **Companion app architecture** — PWA vs. native, offline-first design, selective sync protocol, concierge session scoping (Agent 3)
+- **Concierge coherence signals** — What behavioral signals define "drift" for Kaivoo's concierge? Personality consistency, data citation accuracy, generic-vs-personalized scoring (Agent 3)
+- **Memory hippocampus token budget** — How many tokens for the compiled working memory snapshot? Cost implications at scale (Agent 5)
+- **Memory tier differentiation** — Is hybrid search + sleep cycle compelling enough for subscription conversion? Willingness-to-pay vs. free AI chat (Agent 8)
 - **Self-building sandbox** — How AI builds new pages safely within security boundaries (Agent 3 + Agent 4)
 - **Cloud sync cost modeling** — Per-user infrastructure costs for Mode B relay (Agent 5)
 - **GitHub Actions optimization** — Desktop Build workflow burning too many CI minutes. Only run on main, add path filters, drop multi-platform from PRs (Agent 9)
@@ -865,7 +1066,9 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v6.1 — March 4, 2026*
+*Vision v7.1 — March 6, 2026*
+*v7.1: CEO Session #8 — Desktop as flagship, web as premium. Pricing model clarified: desktop one-time ($49/$99) works because cost-to-serve is zero; web subscription ($8-12/mo) required because Supabase infrastructure costs per user per month. Free 14-day web trial added as top of funnel (full experience, time-limited not feature-limited). Companion App explicitly gated behind Tier 2 subscription (architectural necessity, not paywall). Launch sequence documented: web trial first (no cert dependency), desktop when Apple certs clear. Conversion funnel added: Free → Buy Desktop or Subscribe Web; Desktop owners → Add Web Sync. Cost-to-serve reasoning documented. Tier naming updated: "Kaivoo Desktop" (was Core), "Web Access + Sync + Companion" (was Cloud Companion). Tier 2 pricing research expanded: 7 new research parcels covering Supabase cost-per-user modeling, managed AI costs, storage tier modeling (Google Drive-style), free trial burn rate, cloud storage competitive teardown (Google Drive/iCloud/OneDrive/Dropbox/Obsidian Sync), subscription pricing recommendation, and productivity competitor pricing. Tiered storage pricing added as possibility ($8 base / higher tiers for more storage). Managed AI noted as potentially separate addon if cost modeling shows it's unsustainable at base subscription price. Obsidian model comparison strengthened — Kaivoo gets paid at the door AND on cloud add-ons.*
+*v7.0: Concierge Memory Architecture (7-layer cortex/hippocampus model). Companion app as communication layer (replaces Telegram). Hybrid memory search, coherence monitoring, sleep cycle consolidation, pre-compaction flush added to Phase B roadmap. Exec approval system for Orchestrator. Documentation-first module manifests confirmed. New research parcels: coherence signals, hybrid search architecture, memory consolidation pipeline, companion app sync costs, memory tier pricing. Informed by analysis of Adam Framework and OpenClaw Gateway.*
 *v6.1: Sprint 27 (Desktop Verification) complete. Verified all Sprint 26 features on Tauri desktop. Found and fixed 8 issues across code audit (2) and Track B sandbox testing (6): inline image URL protocol, data import auth gate, CSP for asset protocol, Tauri v2 dot-prefix glob scoping, dark mode cursor, native drag-drop interception, blob URLs for local files, Opener plugin for file opening. Key learning: Tauri v2 deny-by-default capabilities have non-obvious behaviors only discoverable at runtime. 5/5 parcels + 8-commit hotfix. See `Sprints/Sprint-27-Desktop-Verification.md`.*
 *v6.0: CEO Session #6 — Strategic evolution from productivity app to personal infrastructure for the AI era. New identity: "Your machine. Your data. Your AI. Accessible from everywhere. Owned by you." MCP-native architecture adopted as core principle (#11). Self-building adopted as core principle (#12). Autonomy Ladder extended to Level 4 (AI Builds). New "North Star: Personal OS" section — thesis on apps dying, MCP as the future, Plex model for productivity, dual-mode architecture (local server + cloud sync). Business model expanded to four tiers: Core (one-time), Cloud Companion (subscription, replaces "Pro"), Builders (premium), Personal OS (long-term premium). Phase D added: MCP Foundation & Personal OS (local file indexing, MCP server layer, secure tunnel, companion app, self-building, flow automation, universal file search, voice interface). Architecture diagram updated with MCP Foundation Layer and Sync & Access Layer. Competitive edge expanded (#8 MCP-native, #9 your machine accessible everywhere, #10 self-building). 9 new research parcels assigned. Near-term plan unchanged: ship the wedge (plug-and-play AI productivity), build toward the vision.*
 *v5.4: Sprint 26 (Feature Completion) complete. 9/9 parcels done. File attachments now work on topics, journal entries, and projects (was project-only). Inline images upload to Supabase Storage bucket (was base64). Topic content editing shipped (Tiptap rich text + content DB column + auto-save). Desktop JSON + markdown export working. FloatingChat removed (ConciergeChat is sole chat). File attachments and topic content editing milestones marked DONE. See `Sprints/Sprint-26-Feature-Completion.md`.*

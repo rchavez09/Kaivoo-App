@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/global.css';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const mdPath = path.resolve('..', 'legal', 'EULA.md');
+const rawMd = fs.readFileSync(mdPath, 'utf-8');
+
+// Simple markdown → HTML (headings, paragraphs, bold, lists, horizontal rules)
+function mdToHtml(md: string): string {
+  return md
+    .split('\n\n')
+    .map(block => {
+      block = block.trim();
+      if (!block) return '';
+      // Headings
+      if (block.startsWith('# ')) return `<h1 class="text-3xl font-brand font-medium mt-12 mb-4">${block.slice(2)}</h1>`;
+      if (block.startsWith('## ')) return `<h2 class="text-2xl font-brand font-medium mt-10 mb-3">${block.slice(3)}</h2>`;
+      if (block.startsWith('### ')) return `<h3 class="text-xl font-brand font-medium mt-8 mb-2">${block.slice(4)}</h3>`;
+      // Horizontal rule
+      if (block === '---') return '<hr class="my-8 border-navy/10 dark:border-white/10" />';
+      // List items
+      if (block.split('\n').every(l => l.startsWith('- '))) {
+        const items = block.split('\n').map(l => `<li>${l.slice(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('');
+        return `<ul class="list-disc pl-6 space-y-1 my-4">${items}</ul>`;
+      }
+      // Paragraph
+      return `<p class="my-3 leading-relaxed">${block.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br />')}</p>`;
+    })
+    .join('\n');
+}
+
+const html = mdToHtml(rawMd);
+---
+
+<Layout
+  title="End User License Agreement — Kaivoo"
+  description="Kaivoo software license terms. One-time purchase, local-first, you own your data."
+>
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-sand/90 dark:bg-abyss-canvas/90 backdrop-blur-sm border-b border-navy/5 dark:border-white/5 transition-colors">
+    <div class="max-w-content mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/" class="font-brand text-xl font-medium tracking-tight text-navy dark:text-white">
+        Kaivoo
+      </a>
+      <a href="/" class="text-sm text-storm dark:text-white/60 hover:text-navy dark:hover:text-white transition-colors">
+        Back to home
+      </a>
+    </div>
+  </nav>
+  <div class="depth-bar fixed top-16 left-0 right-0 z-50" aria-hidden="true"></div>
+
+  <main class="pt-32 pb-20 px-6">
+    <article class="max-w-3xl mx-auto text-storm dark:text-white/70 prose-headings:text-navy dark:prose-headings:text-white">
+      <Fragment set:html={html} />
+    </article>
+  </main>
+
+  <footer class="py-12 px-6 border-t border-navy/5 dark:border-white/5">
+    <div class="max-w-content mx-auto text-center">
+      <p class="text-xs text-storm/50 dark:text-white/30">
+        &copy; {new Date().getFullYear()} Kaivoo Media. All rights reserved.
+      </p>
+    </div>
+  </footer>
+</Layout>
