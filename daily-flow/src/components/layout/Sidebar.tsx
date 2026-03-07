@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Sun,
   Calendar,
-  FolderOpen,
   BarChart3,
   Settings,
   PanelLeftClose,
@@ -12,7 +11,7 @@ import {
   BookOpen,
   Briefcase,
   Repeat,
-  HardDrive,
+  Library,
 } from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 import { cn } from '@/lib/utils';
@@ -59,14 +58,9 @@ const navItems = [
     icon: Calendar,
   },
   {
-    path: '/vault',
-    label: 'Vault',
-    icon: HardDrive,
-  },
-  {
     path: '/topics',
-    label: 'Topics',
-    icon: FolderOpen,
+    label: 'Knowledge',
+    icon: Library,
   },
   {
     path: '/insights',

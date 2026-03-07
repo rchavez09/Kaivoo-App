@@ -1,26 +1,19 @@
 # Next Sprint Planning
 
 **Updated:** March 7, 2026
-**Last completed:** Sprint 30 (Bug Bash + Concierge Hardening)
-**Current sprint:** Sprint 31 (Tasks + Projects Merge) — ACTIVE
-**Source:** Phase-A-Roadmap, Sprint 30 retrospective + deferred items, Agent docs scan (March 7, 2026), ClickUp 4.0 / Linear research, Vision v7.4
+**Last completed:** Sprint 31 (Tasks + Projects Merge)
+**Current sprint:** Sprint 32 (Knowledge Unification) — PLANNING
+**Source:** Phase-A-Roadmap, Sprint 31 retrospective + deferred items, Agent docs scan (March 7, 2026), Vision v7.5
 
 ---
 
-## Sprint 31: Tasks + Projects Merge — ACTIVE
+## Sprint 32: Knowledge Unification — PLANNING
 
-See `Sprint-31-Tasks-Projects-Merge.md` for full plan.
+See `Sprint-32-Knowledge-Unification.md` for full plan.
 
-**Theme:** Merge Tasks and Projects into a unified page with top-level tabs and tabbed project detail.
-**Parcels:** 14 (4 tracks: Quick Fixes, Projects Page Tabs, Project Detail Tabs, Navigation & Routing)
-**Branch:** `sprint/31-tasks-projects-merge`
-
----
-
-## Sprint 32: Knowledge Unification
-
-**Theme:** Research and merge Vault + Topics into unified knowledge browser.
-**Timeline:** After Sprint 31 merges.
+**Theme:** Merge Vault and Topics into a unified "Knowledge" page with top-level tabs.
+**Parcels:** 10 (3 tracks: Knowledge Page Tabs, Navigation & Routing, Polish & Consistency)
+**Branch:** `sprint/32-knowledge-unification`
 
 ---
 
@@ -30,12 +23,17 @@ See `Sprint-31-Tasks-Projects-Merge.md` for full plan.
 **Timeline:** After Sprint 32 merges.
 
 - Code quality: extract import utilities, Zod validation, duplicate import warning (Agent 7 Sprint 27)
-- Accessibility: dark mode contrast fix (3.8:1 → 4.5:1), Sprint 25 P1s (17 items)
+- Accessibility: dark mode contrast fix (3.8:1 → 4.5:1), Sprint 25 P1s (17 items), touch targets (P2)
 - Technical debt: empty state/editor co-presence, adapter gaps, htmlToPlainMarkdown, TS casts (Agent 11 Sprint 26)
 - Adapter layer P1 issues: try/catch, FTS5 stale index, habits/routines discriminator, adapter recreation, empty-input guard (Agent 7 Sprint 21)
 - Security: CORS hardening, rate limiting
+- Concierge: `to_tsquery` sanitization, coherence monitor tone expansion, dead code cleanup, floating-point fix, pre-compaction flush status message
+- Full concierge integration in project Chat tab (Sprint 31 P10)
+- ProjectDetail component splitting (~476 lines)
+- Bundle size audit (<512KB budget)
 - Screenshots retake (Sprint 29 P7)
-- Plus any issues surfaced during Sprints 29–32
+- Prettier pre-commit hook
+- Plus any issues surfaced during Sprint 32
 
 ---
 
@@ -118,4 +116,4 @@ These items run as research parcels to de-risk Phase B architecture:
 
 ---
 
-*Next Sprint Planning — Updated March 7, 2026 — Sprint 30 (Bug Bash + Concierge Hardening) merged. Sprint 31 (Tasks + Projects Merge) approved and active. Pre-sprint research: architecture audit of Tasks/Projects pages, ClickUp 4.0/Linear competitive research. Design decision: top-level tabs on Projects page (All Tasks | Projects) + tabbed sub-nav on project detail (Tasks | Documents | Notes | Chat). Single sidebar entry. Sprint plan aligned with Phase-A-Roadmap (Sprints 31–34).*
+*Next Sprint Planning — Updated March 7, 2026 — Sprint 31 (Tasks + Projects Merge) shipped. Sprint 32 (Knowledge Unification) in planning. Design decision: top-level tabs on Topics page (Topics | Vault), renamed sidebar entry to "Knowledge". Follows Sprint 31 tabs-merge pattern. Sprint plan aligned with Phase-A-Roadmap (Sprints 32–34).*

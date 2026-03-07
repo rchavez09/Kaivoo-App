@@ -170,7 +170,7 @@ const TopicPage = () => {
             <FolderOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
             <h3 className="mb-2 text-lg font-medium text-foreground">Topic not found</h3>
             <Link to="/topics">
-              <Button variant="outline">Back to Topics</Button>
+              <Button variant="outline">Back to Knowledge</Button>
             </Link>
           </div>
         </div>
@@ -185,7 +185,7 @@ const TopicPage = () => {
         <header className="mb-8">
           <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
             <Link to="/topics" className="transition-colors hover:text-foreground">
-              Topics
+              Knowledge
             </Link>
             {parentChain.map((parent) => (
               <span key={parent.id} className="contents">

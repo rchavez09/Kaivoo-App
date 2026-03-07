@@ -272,7 +272,7 @@ function TreeNode({
 
 // ─── Vault Page ───
 
-const Vault = () => {
+export const VaultContent = () => {
   const navigate = useNavigate();
   const vaultAdapter = useVault();
   const [tree, setTree] = useState<VaultNode | null>(null);
@@ -400,15 +400,13 @@ const Vault = () => {
   }, [currentNode, searchQuery]);
 
   return (
-    <AppLayout>
-      <div className="mx-auto max-w-4xl px-6 py-8">
-        {/* Header */}
-        <header className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="mb-1 flex items-center gap-2 text-2xl font-semibold text-foreground">
-              <HardDrive className="h-6 w-6" />
-              Vault
-            </h1>
+    <div className="mx-auto max-w-4xl px-6 py-8">
+      {/* Header */}
+      <header className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="mb-1 text-2xl font-semibold text-foreground">
+            Vault
+          </h1>
             <p className="text-sm text-muted-foreground">
               {totalFolders} folder{totalFolders !== 1 ? 's' : ''}, {totalFiles} file
               {totalFiles !== 1 ? 's' : ''}
@@ -516,8 +514,14 @@ const Vault = () => {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 };
+
+/** Full-page wrapper (used by route). */
+const Vault = () => (
+  <AppLayout>
+    <VaultContent />
+  </AppLayout>
+);
 
 export default Vault;
