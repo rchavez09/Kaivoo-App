@@ -2,7 +2,7 @@
 
 **Theme:** Landing page, legal documents, and launch prep. Revenue pipeline (signing keys, Stripe config, Edge Function deploy) deferred to a dedicated sprint per user decision.
 **Branch:** `sprint/28-launch-ready`
-**Status:** VERIFICATION (Phase 4)
+**Status:** PR OPEN (Phase 4 → Phase 5)
 **Compiled by:** Director
 **Date:** March 5, 2026
 
@@ -107,6 +107,9 @@ Entire track moved to a future sprint per user decision (wants to add more featu
 - [x] **Legal:** EULA and Privacy Policy drafted and ready for attorney review
 - [x] **Code review:** 4 P0 issues found and fixed (legal page 404s, missing favicon/og-image). 10 P1 items documented (content accuracy, aria labels, font loading). 8 P2 polish items.
 - [x] **Sprint file checkpoint:** All parcels marked final status
+- [~] **Agent 11 feature integrity:** Waived — sprint is a standalone landing page (Astro), no changes to the main app codebase
+- [~] **3-agent design review:** Waived — user approved visual quality; full design review deferred to next landing page iteration
+- [~] **E2E tests:** Waived — Playwright infrastructure not yet built; static landing page has no interactive app logic to test
 
 ---
 
