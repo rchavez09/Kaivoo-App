@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sun,
-  CheckSquare,
   Calendar,
   FolderOpen,
   BarChart3,
@@ -43,11 +42,6 @@ const navItems = [
     path: '/notes',
     label: 'Notes',
     icon: BookOpen,
-  },
-  {
-    path: '/tasks',
-    label: 'Tasks',
-    icon: CheckSquare,
   },
   {
     path: '/projects',
@@ -174,6 +168,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowSignOutDialog(true)}
+                  aria-label="Sign Out"
                   className="nav-item w-full justify-center px-2 text-muted-foreground hover:text-destructive"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />

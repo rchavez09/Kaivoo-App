@@ -1,30 +1,19 @@
 # Next Sprint Planning
 
 **Updated:** March 7, 2026
-**Last completed:** Sprint 29 (Flow Rebrand)
-**Current sprint:** Sprint 30 (Bug Bash + Concierge Hardening) — ACTIVE
-**Source:** Phase-A-Roadmap, Sprint 29 retrospective + deferred items, Agent docs scan (March 7, 2026), Vision v7.2
+**Last completed:** Sprint 30 (Bug Bash + Concierge Hardening)
+**Current sprint:** Sprint 31 (Tasks + Projects Merge) — ACTIVE
+**Source:** Phase-A-Roadmap, Sprint 30 retrospective + deferred items, Agent docs scan (March 7, 2026), ClickUp 4.0 / Linear research, Vision v7.4
 
 ---
 
-## Sprint 30: Bug Bash + Concierge Hardening — ACTIVE
+## Sprint 31: Tasks + Projects Merge — ACTIVE
 
-See `Sprint-30-Bug-Bash-Concierge.md` for full plan.
+See `Sprint-31-Tasks-Projects-Merge.md` for full plan.
 
-**Theme:** Fix all launch-blocking bugs, harden the concierge memory architecture, polish the upload experience.
-**Parcels:** 12 (3 tracks: Bug Fixes, Concierge Hardening, UX Polish)
-**Branch:** `sprint/30-bug-bash-concierge`
-
----
-
-## Sprint 31: Tasks + Projects Merge
-
-**Theme:** UX redesign — merge Tasks and Projects into a single page.
-**Timeline:** After Sprint 30 merges. Research session required first.
-
-- Project detail view with left AI panel + right task list + tabbed sub-nav
-- Tasks unassigned to a project appear in default/unassigned view
-- Reference design: NUWAVE Mainframe screenshot (see Phase-A-Roadmap)
+**Theme:** Merge Tasks and Projects into a unified page with top-level tabs and tabbed project detail.
+**Parcels:** 14 (4 tracks: Quick Fixes, Projects Page Tabs, Project Detail Tabs, Navigation & Routing)
+**Branch:** `sprint/31-tasks-projects-merge`
 
 ---
 
@@ -70,9 +59,9 @@ The concierge memory architecture is Flow's competitive moat. These items build 
 
 | Item | Notes | Vision Layer |
 |---|---|---|
-| Pre-compaction memory flush | **Moved to Sprint 30** | Layer 4 |
-| Deterministic context assembly | **Moved to Sprint 30** | Layer 1-2 |
-| Concierge coherence monitoring (basic) | **Moved to Sprint 30** | Layer 7 (basic) |
+| Pre-compaction memory flush | **DONE** (Sprint 30) | Layer 4 |
+| Deterministic context assembly | **DONE** (Sprint 30) | Layer 1-2 |
+| Concierge coherence monitoring (basic) | **DONE** (Sprint 30) | Layer 7 (basic) |
 
 ### Integrations & Enhancements
 
@@ -129,4 +118,4 @@ These items run as research parcels to de-risk Phase B architecture:
 
 ---
 
-*Next Sprint Planning — Updated March 7, 2026 — Sprint 29 (Flow Rebrand) complete. Sprint 30 (Bug Bash + Concierge Hardening) approved and active. 13 agent docs archived during Phase 6 cleanup. Sprint plan aligned with Phase-A-Roadmap (Sprints 30–34).*
+*Next Sprint Planning — Updated March 7, 2026 — Sprint 30 (Bug Bash + Concierge Hardening) merged. Sprint 31 (Tasks + Projects Merge) approved and active. Pre-sprint research: architecture audit of Tasks/Projects pages, ClickUp 4.0/Linear competitive research. Design decision: top-level tabs on Projects page (All Tasks | Projects) + tabbed sub-nav on project detail (Tasks | Documents | Notes | Chat). Single sidebar entry. Sprint plan aligned with Phase-A-Roadmap (Sprints 31–34).*

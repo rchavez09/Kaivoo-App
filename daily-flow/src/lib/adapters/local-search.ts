@@ -15,7 +15,7 @@ function getEntityPath(entityType: string, entityId: string, metadata: Record<st
   switch (entityType) {
     case 'task':
     case 'subtask':
-      return '/tasks';
+      return '/projects';
     case 'note':
       return '/notes';
     case 'project':

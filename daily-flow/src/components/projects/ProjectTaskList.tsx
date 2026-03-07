@@ -24,7 +24,7 @@ interface ProjectTaskListProps {
   projectId: string;
   onTaskClick: (taskId: string) => void;
   onToggleTask: (taskId: string, currentStatus: string) => void;
-  onLinkTask: (taskId: string) => void;
+  onLinkTask?: (taskId: string) => void;
   onAddTask: (title: string) => void;
 }
 
@@ -60,52 +60,54 @@ const ProjectTaskList = ({
       <div className="widget-header">
         <h2 className="widget-title">Tasks</h2>
         <div className="flex items-center gap-2">
-          <Popover
-            open={linkPopoverOpen}
-            onOpenChange={(open) => {
-              setLinkPopoverOpen(open);
-              if (!open) setLinkSearch('');
-            }}
-          >
-            <PopoverTrigger asChild>
-              <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs">
-                <Link2 className="h-3.5 w-3.5" />
-                Link existing
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72 p-0" align="end">
-              <div className="border-b border-border p-2">
-                <Input
-                  value={linkSearch}
-                  onChange={(e) => setLinkSearch(e.target.value)}
-                  placeholder="Search tasks..."
-                  className="h-8 text-xs"
-                  autoFocus
-                />
-              </div>
-              <div className="max-h-56 overflow-y-auto">
-                {linkableTasks.length === 0 ? (
-                  <p className="py-4 text-center text-xs text-muted-foreground">
-                    {linkSearch ? 'No matching tasks' : 'No unassigned tasks'}
-                  </p>
-                ) : (
-                  linkableTasks.map((task) => (
-                    <button
-                      key={task.id}
-                      onClick={() => {
-                        onLinkTask(task.id);
-                        toast.success(`Linked "${task.title}"`);
-                      }}
-                      className="flex w-full items-center gap-2 border-b border-border/30 px-3 py-2 text-left text-sm transition-colors last:border-0 hover:bg-secondary/50"
-                    >
-                      <Circle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                      <span className="truncate">{task.title}</span>
-                    </button>
-                  ))
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+          {onLinkTask && (
+            <Popover
+              open={linkPopoverOpen}
+              onOpenChange={(open) => {
+                setLinkPopoverOpen(open);
+                if (!open) setLinkSearch('');
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs">
+                  <Link2 className="h-3.5 w-3.5" />
+                  Link existing
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-0" align="end">
+                <div className="border-b border-border p-2">
+                  <Input
+                    value={linkSearch}
+                    onChange={(e) => setLinkSearch(e.target.value)}
+                    placeholder="Search tasks..."
+                    className="h-8 text-xs"
+                    autoFocus
+                  />
+                </div>
+                <div className="max-h-56 overflow-y-auto">
+                  {linkableTasks.length === 0 ? (
+                    <p className="py-4 text-center text-xs text-muted-foreground">
+                      {linkSearch ? 'No matching tasks' : 'No unassigned tasks'}
+                    </p>
+                  ) : (
+                    linkableTasks.map((task) => (
+                      <button
+                        key={task.id}
+                        onClick={() => {
+                          onLinkTask(task.id);
+                          toast.success(`Linked "${task.title}"`);
+                        }}
+                        className="flex w-full items-center gap-2 border-b border-border/30 px-3 py-2 text-left text-sm transition-colors last:border-0 hover:bg-secondary/50"
+                      >
+                        <Circle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <span className="truncate">{task.title}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       </div>
 
@@ -126,7 +128,7 @@ const ProjectTaskList = ({
                       onTaskClick(task.id);
                     }
                   }}
-                  className="group -mx-2 flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/30"
+                  className="group -mx-2 flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <button
                     aria-label={

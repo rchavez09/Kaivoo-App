@@ -72,7 +72,8 @@ const DEFAULT_PREFS: TasksViewPrefs = {
   tagFilter: 'all',
 };
 
-const Tasks = () => {
+/** Core tasks content — usable standalone or embedded in a tab. */
+export const TasksContent = () => {
   const tasks = useKaivooStore((s) => s.tasks);
   const projects = useKaivooStore((s) => s.projects);
   const topics = useKaivooStore((s) => s.topics);
@@ -428,7 +429,7 @@ const Tasks = () => {
   ];
 
   return (
-    <AppLayout>
+    <>
       <div className={cn('mx-auto px-6 py-8', viewMode === 'list' ? 'max-w-4xl' : 'max-w-full')}>
         {/* Header */}
         <header className="mb-6 flex items-center justify-between">
@@ -1039,8 +1040,15 @@ const Tasks = () => {
           onBulkDelete={handleBulkDelete}
         />
       )}
-    </AppLayout>
+    </>
   );
 };
+
+/** Full-page wrapper (used by route). */
+const Tasks = () => (
+  <AppLayout>
+    <TasksContent />
+  </AppLayout>
+);
 
 export default Tasks;

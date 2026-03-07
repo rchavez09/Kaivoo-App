@@ -133,7 +133,7 @@ const ProjectNotesList = ({ projectId }: ProjectNotesListProps) => {
   const hiddenCount = notes.length - INITIAL_VISIBLE;
 
   return (
-    <div className="widget-card mt-8">
+    <div className="widget-card">
       <div className="widget-header">
         <h2 className="widget-title">Notes</h2>
         <span className="text-xs text-muted-foreground">

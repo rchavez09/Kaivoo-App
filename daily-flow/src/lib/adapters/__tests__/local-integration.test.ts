@@ -399,7 +399,7 @@ describe('Integration: Search indexing', () => {
     expect(results[0].entityId).toBe('t1');
     expect(results[0].title).toBe('Build search');
     expect(results[0].preview).toBe('Implement **FTS5** search');
-    expect(results[0].path).toBe('/tasks');
+    expect(results[0].path).toBe('/projects');
 
     // Second result
     expect(results[1].entityType).toBe('note');

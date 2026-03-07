@@ -288,7 +288,7 @@ const TasksWidget = ({ date, onTaskClick }: TasksWidgetProps) => {
             onRemoveFromToday={(id) => updateTask(id, { dueDate: undefined })}
           />
 
-          <Link to="/tasks">
+          <Link to="/projects">
             <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground">
               <span className="text-xs">View all</span>
               <ChevronRight className="ml-1 h-3 w-3" />
