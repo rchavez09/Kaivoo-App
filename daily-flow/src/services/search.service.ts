@@ -25,7 +25,7 @@ function getEntityPath(result: SearchResult): string {
   switch (result.entityType) {
     case 'task':
     case 'subtask':
-      return '/tasks';
+      return '/projects';
     case 'note':
       return '/notes';
     case 'project':

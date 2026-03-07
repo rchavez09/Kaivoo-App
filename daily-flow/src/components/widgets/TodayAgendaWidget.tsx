@@ -281,7 +281,7 @@ const TodayAgendaWidget = ({ onTaskClick }: TodayAgendaWidgetProps) => {
             </PopoverContent>
           </Popover>
 
-          <Link to="/tasks">
+          <Link to="/projects">
             <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground">
               <span className="text-xs">View all</span>
               <ChevronRight className="ml-1 h-3 w-3" />

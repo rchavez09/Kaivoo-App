@@ -1,13 +1,14 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
-import { ChevronRight, Briefcase, Pencil, Calendar } from 'lucide-react';
+import { ChevronRight, Briefcase, Pencil, Calendar, Inbox, MessageSquare, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ProjectStatus } from '@/types';
 import { projectStatusConfig, getProjectColor } from '@/lib/project-config';
 import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
@@ -30,6 +32,13 @@ import ProjectAttachments from '@/components/projects/ProjectAttachments';
 import ProjectSettings from '@/components/projects/ProjectSettings';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
+import { Task } from '@/types';
+
+const sortDoneToBottom = (a: Task, b: Task) => {
+  if (a.status === 'done' && b.status !== 'done') return 1;
+  if (a.status !== 'done' && b.status === 'done') return -1;
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+};
 
 const formatDateLong = (d?: string) => {
   if (!d) return null;
@@ -43,6 +52,7 @@ const formatDateLong = (d?: string) => {
 const ProjectDetail = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const isInbox = projectId === 'inbox';
 
   const projects = useKaivooStore((s) => s.projects);
   const tasks = useKaivooStore((s) => s.tasks);
@@ -50,9 +60,16 @@ const ProjectDetail = () => {
   const isLoaded = useKaivooStore((s) => s.isLoaded);
   const { updateProject, deleteProject, addTask, updateTask } = useKaivooActions();
 
-  const project = useMemo(() => projects.find((p) => p.id === projectId), [projects, projectId]);
-  const projectIndex = useMemo(() => projects.findIndex((p) => p.id === projectId), [projects, projectId]);
+  const project = useMemo(
+    () => (isInbox ? null : projects.find((p) => p.id === projectId)),
+    [projects, projectId, isInbox],
+  );
+  const projectIndex = useMemo(
+    () => (isInbox ? -1 : projects.findIndex((p) => p.id === projectId)),
+    [projects, projectId, isInbox],
+  );
 
+  const [activeDetailTab, setActiveDetailTab] = useLocalStorage<string>('kaivoo-project-detail-tab', 'tasks');
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [editingDesc, setEditingDesc] = useState(false);
@@ -62,15 +79,10 @@ const ProjectDetail = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const projectTasks = useMemo(() => {
+    if (isInbox) return tasks.filter((t) => !t.projectId).sort(sortDoneToBottom);
     if (!project) return [];
-    return tasks
-      .filter((t) => t.projectId === project.id)
-      .sort((a, b) => {
-        if (a.status === 'done' && b.status !== 'done') return 1;
-        if (a.status !== 'done' && b.status === 'done') return -1;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
-  }, [tasks, project]);
+    return tasks.filter((t) => t.projectId === project.id).sort(sortDoneToBottom);
+  }, [tasks, project, isInbox]);
 
   const stats = useMemo(() => {
     const total = projectTasks.length;
@@ -117,7 +129,7 @@ const ProjectDetail = () => {
     );
   }
 
-  if (!project) {
+  if (!isInbox && !project) {
     return (
       <AppLayout>
         <div className="mx-auto max-w-4xl px-6 py-8">
@@ -136,8 +148,8 @@ const ProjectDetail = () => {
     );
   }
 
-  const color = getProjectColor(project, projectIndex);
-  const topicName = project.topicId ? topics.find((t) => t.id === project.topicId)?.name : undefined;
+  const color = project ? getProjectColor(project, projectIndex) : undefined;
+  const topicName = project?.topicId ? topics.find((t) => t.id === project.topicId)?.name : undefined;
 
   return (
     <AppLayout>
@@ -151,15 +163,23 @@ const ProjectDetail = () => {
             Projects
           </Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="truncate font-medium text-foreground">{project.name}</span>
+          <span className="truncate font-medium text-foreground">{isInbox ? 'Inbox' : project!.name}</span>
         </nav>
 
         {/* Header */}
         <header className="mb-8">
           <div className="mb-3 flex items-start gap-3">
-            <div className="mt-2 h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+            {isInbox ? (
+              <div className="mt-1.5 flex h-6 w-6 items-center justify-center rounded-lg bg-muted">
+                <Inbox className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="mt-2 h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+            )}
 
-            {editingName ? (
+            {isInbox ? (
+              <h1 className="text-2xl font-semibold text-foreground">Inbox</h1>
+            ) : editingName ? (
               <Input
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
@@ -174,108 +194,115 @@ const ProjectDetail = () => {
                 tabIndex={0}
                 className="cursor-pointer text-2xl font-semibold text-foreground transition-colors hover:text-primary"
                 onClick={() => {
-                  setNameInput(project.name);
+                  setNameInput(project!.name);
                   setEditingName(true);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setNameInput(project.name);
+                    setNameInput(project!.name);
                     setEditingName(true);
                   }
                 }}
               >
-                {project.name}
+                {project!.name}
               </h1>
             )}
           </div>
 
-          {/* Status + Topic + Dates + Progress row */}
-          <div className="flex flex-wrap items-center gap-3">
-            <Select
-              value={project.status}
-              onValueChange={(v) => updateProject(project.id, { status: v as ProjectStatus })}
-            >
-              <SelectTrigger
-                aria-label="Change project status"
-                className={cn(
-                  'inline-flex h-7 w-auto items-center gap-1 rounded-full border-0 px-2.5 text-xs font-medium shadow-none',
-                  projectStatusConfig[project.status].bg,
-                  projectStatusConfig[project.status].color,
-                )}
+          {/* Status + Topic + Dates + Progress row (real projects only) */}
+          {project && (
+            <div className="flex flex-wrap items-center gap-3">
+              <Select
+                value={project.status}
+                onValueChange={(v) => updateProject(project.id, { status: v as ProjectStatus })}
               >
-                {projectStatusConfig[project.status].icon}
-                <span>{projectStatusConfig[project.status].label}</span>
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(projectStatusConfig).map(([key, cfg]) => (
-                  <SelectItem key={key} value={key}>
-                    <span className={cn('inline-flex items-center gap-1.5', cfg.color)}>
-                      {cfg.icon}
-                      {cfg.label}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <SelectTrigger
+                  aria-label="Change project status"
+                  className={cn(
+                    'inline-flex h-7 w-auto items-center gap-1 rounded-full border-0 px-2.5 text-xs font-medium shadow-none',
+                    projectStatusConfig[project.status].bg,
+                    projectStatusConfig[project.status].color,
+                  )}
+                >
+                  {projectStatusConfig[project.status].icon}
+                  <span>{projectStatusConfig[project.status].label}</span>
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(projectStatusConfig).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>
+                      <span className={cn('inline-flex items-center gap-1.5', cfg.color)}>
+                        {cfg.icon}
+                        {cfg.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {topicName && (
-              <Badge variant="secondary" className="text-xs text-info-foreground">
-                {topicName}
-              </Badge>
-            )}
-
-            {(project.startDate || project.endDate) && (
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                {formatDateLong(project.startDate)}
-                {project.startDate && project.endDate && ' – '}
-                {formatDateLong(project.endDate)}
-              </span>
-            )}
-
-            {stats.total > 0 && (
-              <span className="ml-auto text-xs text-muted-foreground">{stats.progress}% complete</span>
-            )}
-          </div>
-        </header>
-
-        {/* Description */}
-        <div className="mb-6">
-          {editingDesc ? (
-            <Textarea
-              value={descInput}
-              onChange={(e) => setDescInput(e.target.value)}
-              onBlur={handleDescSave}
-              placeholder="Add a description..."
-              className="min-h-[80px] resize-none"
-              autoFocus
-            />
-          ) : (
-            <div
-              role="button"
-              tabIndex={0}
-              className={cn(
-                'group flex cursor-pointer items-start gap-2 rounded-lg p-3 text-sm transition-colors hover:bg-secondary/30',
-                project.description ? 'text-muted-foreground' : 'italic text-muted-foreground/50',
+              {topicName && (
+                <Badge variant="secondary" className="text-xs text-info-foreground">
+                  {topicName}
+                </Badge>
               )}
-              onClick={() => {
-                setDescInput(project.description || '');
-                setEditingDesc(true);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setDescInput(project.description || '');
-                  setEditingDesc(true);
-                }
-              }}
-            >
-              <span className="flex-1">{project.description || 'Add a description...'}</span>
-              <Pencil className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-50" />
+
+              {(project.startDate || project.endDate) && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  {formatDateLong(project.startDate)}
+                  {project.startDate && project.endDate && ' – '}
+                  {formatDateLong(project.endDate)}
+                </span>
+              )}
+
+              {stats.total > 0 && (
+                <span className="ml-auto text-xs text-muted-foreground">{stats.progress}% complete</span>
+              )}
             </div>
           )}
-        </div>
+
+          {/* Inbox subtitle */}
+          {isInbox && <p className="text-sm text-muted-foreground">Tasks not assigned to any project</p>}
+        </header>
+
+        {/* Description (real projects only) */}
+        {project && (
+          <div className="mb-6">
+            {editingDesc ? (
+              <Textarea
+                value={descInput}
+                onChange={(e) => setDescInput(e.target.value)}
+                onBlur={handleDescSave}
+                placeholder="Add a description..."
+                className="min-h-[80px] resize-none"
+                autoFocus
+              />
+            ) : (
+              <div
+                role="button"
+                tabIndex={0}
+                className={cn(
+                  'group flex cursor-pointer items-start gap-2 rounded-lg p-3 text-sm transition-colors hover:bg-secondary/30',
+                  project.description ? 'text-muted-foreground' : 'italic text-muted-foreground/50',
+                )}
+                onClick={() => {
+                  setDescInput(project.description || '');
+                  setEditingDesc(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setDescInput(project.description || '');
+                    setEditingDesc(true);
+                  }
+                }}
+              >
+                <span className="flex-1">{project.description || 'Add a description...'}</span>
+                <Pencil className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-50" />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Stats bar */}
         {stats.total > 0 && (
@@ -296,77 +323,152 @@ const ProjectDetail = () => {
           </div>
         )}
 
-        {/* Task list */}
-        <ProjectTaskList
-          projectTasks={projectTasks}
-          allTasks={tasks}
-          projectId={project.id}
-          onTaskClick={(taskId) => {
-            setSelectedTaskId(taskId);
-            setDrawerOpen(true);
-          }}
-          onToggleTask={(taskId, currentStatus) => {
-            updateTask(taskId, {
-              status: currentStatus === 'done' ? 'todo' : 'done',
-              completedAt: currentStatus === 'done' ? undefined : new Date(),
-            });
-          }}
-          onLinkTask={(taskId) => {
-            updateTask(taskId, { projectId: project.id });
-          }}
-          onAddTask={async (title) => {
-            await addTask({
-              title,
-              status: 'todo',
-              priority: 'medium',
-              tags: [],
-              topicIds: project.topicId ? [project.topicId] : [],
-              subtasks: [],
-              projectId: project.id,
-            });
-          }}
-        />
+        {/* Tabbed content */}
+        {isInbox ? (
+          /* Inbox: Tasks only, no tabs */
+          <ProjectTaskList
+            projectTasks={projectTasks}
+            allTasks={tasks}
+            projectId="inbox"
+            onTaskClick={(taskId) => {
+              setSelectedTaskId(taskId);
+              setDrawerOpen(true);
+            }}
+            onToggleTask={(taskId, currentStatus) => {
+              updateTask(taskId, {
+                status: currentStatus === 'done' ? 'todo' : 'done',
+                completedAt: currentStatus === 'done' ? undefined : new Date(),
+              });
+            }}
+            onAddTask={async (title) => {
+              await addTask({
+                title,
+                status: 'todo',
+                priority: 'medium',
+                tags: [],
+                topicIds: [],
+                subtasks: [],
+              });
+            }}
+          />
+        ) : (
+          /* Real project: tabbed sub-nav */
+          <Tabs value={activeDetailTab} onValueChange={setActiveDetailTab}>
+            <TabsList className="mb-6">
+              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="chat">Chat</TabsTrigger>
+            </TabsList>
 
-        {/* Notes */}
-        <ProjectNotesList projectId={project.id} />
+            <TabsContent value="tasks">
+              <ProjectTaskList
+                projectTasks={projectTasks}
+                allTasks={tasks}
+                projectId={project!.id}
+                onTaskClick={(taskId) => {
+                  setSelectedTaskId(taskId);
+                  setDrawerOpen(true);
+                }}
+                onToggleTask={(taskId, currentStatus) => {
+                  updateTask(taskId, {
+                    status: currentStatus === 'done' ? 'todo' : 'done',
+                    completedAt: currentStatus === 'done' ? undefined : new Date(),
+                  });
+                }}
+                onLinkTask={(taskId) => {
+                  updateTask(taskId, { projectId: project!.id });
+                }}
+                onAddTask={async (title) => {
+                  await addTask({
+                    title,
+                    status: 'todo',
+                    priority: 'medium',
+                    tags: [],
+                    topicIds: project!.topicId ? [project!.topicId] : [],
+                    subtasks: [],
+                    projectId: project!.id,
+                  });
+                }}
+              />
+            </TabsContent>
 
-        {/* Attachments */}
-        <ProjectAttachments projectId={project.id} />
+            <TabsContent value="documents">
+              <ProjectAttachments projectId={project!.id} />
+            </TabsContent>
 
-        {/* Settings */}
-        <ProjectSettings
-          project={project}
-          color={color}
-          topics={topics}
-          onUpdate={(fields) => updateProject(project.id, fields)}
-          onDeleteClick={() => setDeleteDialogOpen(true)}
-        />
+            <TabsContent value="notes">
+              <ProjectNotesList projectId={project!.id} />
+            </TabsContent>
+
+            <TabsContent value="chat">
+              <div className="widget-card">
+                <div className="py-12 text-center">
+                  <MessageSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+                  <h3 className="mb-2 text-lg font-medium text-foreground">Project Chat</h3>
+                  <p className="mb-4 text-sm text-muted-foreground">
+                    Chat with the concierge about this project. Ask for plans, prioritization, or brainstorming.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    <Button variant="outline" size="sm" className="gap-1.5" disabled>
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Plan this project
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1.5" disabled>
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Prioritize tasks
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1.5" disabled>
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Brainstorm ideas
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        )}
+
+        {/* Settings (real projects only, accessible via gear icon) */}
+        {project && (
+          <div className="mt-8">
+            <ProjectSettings
+              project={project}
+              color={color!}
+              topics={topics}
+              onUpdate={(fields) => updateProject(project.id, fields)}
+              onDeleteClick={() => setDeleteDialogOpen(true)}
+            />
+          </div>
+        )}
       </div>
 
       {/* Task Details Drawer */}
       <TaskDetailsDrawer taskId={selectedTaskId} open={drawerOpen} onOpenChange={setDrawerOpen} />
 
       {/* Delete confirmation */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete project?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will delete the project &ldquo;{project.name}&rdquo;. Tasks in this project will be unlinked but not
-              deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {project && (
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete project?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will delete the project &ldquo;{project.name}&rdquo;. Tasks in this project will be unlinked but
+                not deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </AppLayout>
   );
 };

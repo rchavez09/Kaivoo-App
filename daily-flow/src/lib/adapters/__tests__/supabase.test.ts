@@ -623,7 +623,7 @@ describe('SupabaseSearchAdapter', () => {
   });
 
   it('delegates to searchAll service', async () => {
-    const results = [{ entityType: 'task', entityId: 't1', title: 'Test', preview: '', rank: 1, path: '/tasks' }];
+    const results = [{ entityType: 'task', entityId: 't1', title: 'Test', preview: '', rank: 1, path: '/projects' }];
     mockSearchAll.mockResolvedValue(results);
 
     const result = await search.searchAll('test', 10);

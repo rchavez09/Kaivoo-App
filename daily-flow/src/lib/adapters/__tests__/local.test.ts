@@ -1046,7 +1046,7 @@ describe('LocalSearchAdapter', () => {
       expect(results).toHaveLength(1);
       expect(results[0].entityType).toBe('task');
       expect(results[0].entityId).toBe('t1');
-      expect(results[0].path).toBe('/tasks');
+      expect(results[0].path).toBe('/projects');
     });
 
     it('respects limit parameter', async () => {
@@ -1059,7 +1059,7 @@ describe('LocalSearchAdapter', () => {
 
     it('maps entity types to correct paths', async () => {
       const testCases = [
-        { entity_type: 'task', entity_id: 't1', expected: '/tasks' },
+        { entity_type: 'task', entity_id: 't1', expected: '/projects' },
         { entity_type: 'note', entity_id: 'j1', expected: '/notes' },
         { entity_type: 'topic', entity_id: 'top1', expected: '/topics/top1' },
         { entity_type: 'habit', entity_id: 'h1', expected: '/routines' },

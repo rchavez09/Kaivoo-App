@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sun,
-  CheckSquare,
   Calendar,
   FolderOpen,
   BarChart3,
@@ -43,11 +42,6 @@ const navItems = [
     path: '/notes',
     label: 'Notes',
     icon: BookOpen,
-  },
-  {
-    path: '/tasks',
-    label: 'Tasks',
-    icon: CheckSquare,
   },
   {
     path: '/projects',

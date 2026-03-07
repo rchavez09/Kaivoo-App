@@ -12,7 +12,6 @@ import { lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const Today = lazy(() => import('./pages/Today'));
-const Tasks = lazy(() => import('./pages/Tasks'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const Topics = lazy(() => import('./pages/Topics'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
@@ -100,14 +99,7 @@ const App = () => (
                     }
                   />
                   <Route path="/journal" element={<Navigate to="/notes" replace />} />
-                  <Route
-                    path="/tasks"
-                    element={
-                      <ProtectedPage>
-                        <Tasks />
-                      </ProtectedPage>
-                    }
-                  />
+                  <Route path="/tasks" element={<Navigate to="/projects" replace />} />
                   <Route
                     path="/projects"
                     element={
