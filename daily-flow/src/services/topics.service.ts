@@ -7,7 +7,7 @@ export const dbToTopic = (row: Tables<'topics'>): Topic => ({
   id: row.id,
   name: row.name,
   description: row.description,
-  content: (row as Record<string, unknown>).content as string | undefined,
+  content: row.content ?? undefined,
   icon: row.icon,
   parentId: row.parent_id,
   createdAt: new Date(row.created_at),
@@ -18,7 +18,7 @@ export const dbToTopicPage = (row: Tables<'topic_pages'>): TopicPage => ({
   topicId: row.topic_id,
   name: row.name,
   description: row.description,
-  content: (row as Record<string, unknown>).content as string | undefined,
+  content: row.content ?? undefined,
   createdAt: new Date(row.created_at),
 });
 
@@ -74,7 +74,7 @@ export const createTopic = async (userId: string, topic: Omit<Topic, 'id' | 'cre
       content: topic.content,
       icon: topic.icon,
       parent_id: parentId,
-    } as Record<string, unknown>)
+    })
     .select()
     .single();
   if (error) throw error;
@@ -132,7 +132,7 @@ export const createTopicPage = async (userId: string, page: Omit<TopicPage, 'id'
       name: normalizedName,
       description: page.description,
       content: page.content,
-    } as Record<string, unknown>)
+    })
     .select()
     .single();
   if (error) throw error;

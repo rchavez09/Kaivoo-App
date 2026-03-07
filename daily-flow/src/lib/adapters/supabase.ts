@@ -171,7 +171,7 @@ class SupabaseSubtaskAdapter implements SubtaskAdapter {
         completed: r.completed,
         completedAt: r.completed_at ? new Date(r.completed_at) : undefined,
         tags: r.tags || [],
-        sortOrder: ((r as Record<string, unknown>).sort_order as number) ?? 0,
+        sortOrder: r.sort_order ?? 0,
       }),
     );
   }

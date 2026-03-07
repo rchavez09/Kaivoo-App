@@ -565,6 +565,7 @@ export type Database = {
       };
       topic_pages: {
         Row: {
+          content: string | null;
           created_at: string;
           description: string | null;
           id: string;
@@ -573,6 +574,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          content?: string | null;
           created_at?: string;
           description?: string | null;
           id?: string;
@@ -581,6 +583,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          content?: string | null;
           created_at?: string;
           description?: string | null;
           id?: string;
@@ -600,6 +603,7 @@ export type Database = {
       };
       topics: {
         Row: {
+          content: string | null;
           created_at: string;
           description: string | null;
           icon: string | null;
@@ -609,6 +613,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          content?: string | null;
           created_at?: string;
           description?: string | null;
           icon?: string | null;
@@ -618,6 +623,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          content?: string | null;
           created_at?: string;
           description?: string | null;
           icon?: string | null;

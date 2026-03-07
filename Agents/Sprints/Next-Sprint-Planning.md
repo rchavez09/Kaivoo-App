@@ -1,44 +1,19 @@
 # Next Sprint Planning
 
-**Updated:** March 6, 2026
-**Last completed:** Sprint 28 (Launch Ready)
-**Current sprint:** Sprint 29 (Flow Rebrand) — ACTIVE
-**Source:** CEO Session #9 (Flow rebrand), Phase-A-Roadmap, Sprint 28 retrospective, Agent docs scan
+**Updated:** March 7, 2026
+**Last completed:** Sprint 29 (Flow Rebrand)
+**Current sprint:** Sprint 30 (Bug Bash + Concierge Hardening) — ACTIVE
+**Source:** Phase-A-Roadmap, Sprint 29 retrospective + deferred items, Agent docs scan (March 7, 2026), Vision v7.2
 
 ---
 
-## Sprint 29: Flow Rebrand — ACTIVE
+## Sprint 30: Bug Bash + Concierge Hardening — ACTIVE
 
-See `Sprint-29-Flow-Rebrand.md` for full plan.
+See `Sprint-30-Bug-Bash-Concierge.md` for full plan.
 
-**Theme:** Rename everything from "Kaivoo" to "Flow by Kaivoo." Landing page rebuild, legal updates, in-app rename, wizard copy. No new features, no bug fixes — just identity.
-**Parcels:** 7 (in-app rebrand + external rebrand)
-**Branch:** `sprint/29-flow-rebrand`
-
----
-
-## Sprint 30: Bug Bash + Concierge Hardening
-
-**Theme:** Fix P1 bugs, harden the concierge memory architecture, polish uploads.
-**Timeline:** After Sprint 29 merges.
-
-**Bugs (Must Fix):**
-- Data loss: TopicPage unmount doesn't flush pending saves (Agent 7 P1-A)
-- Base64 image unbounded growth (~2.7MB per image, Agent 7 P1-B)
-- Missing Supabase migration for content column (Agent 3 / Agent 7 P2-A)
-- Subtask reorder not working
-- Today page widgets not reorderable
-- Calendar widget showing old Supabase data / can't toggle on with no events
-- Search prefix matching ("NU" doesn't find "NUWAVE")
-
-**Concierge Hardening:**
-- Pre-compaction memory flush (Layer 4)
-- Deterministic context assembly (Layer 1-2)
-- Basic coherence monitoring (Layer 7 basic)
-
-**UX Polish:**
-- Image renaming on uploads
-- Upload system polish (progress, drag-drop zones)
+**Theme:** Fix all launch-blocking bugs, harden the concierge memory architecture, polish the upload experience.
+**Parcels:** 12 (3 tracks: Bug Fixes, Concierge Hardening, UX Polish)
+**Branch:** `sprint/30-bug-bash-concierge`
 
 ---
 
@@ -68,7 +43,9 @@ See `Sprint-29-Flow-Rebrand.md` for full plan.
 - Code quality: extract import utilities, Zod validation, duplicate import warning (Agent 7 Sprint 27)
 - Accessibility: dark mode contrast fix (3.8:1 → 4.5:1), Sprint 25 P1s (17 items)
 - Technical debt: empty state/editor co-presence, adapter gaps, htmlToPlainMarkdown, TS casts (Agent 11 Sprint 26)
+- Adapter layer P1 issues: try/catch, FTS5 stale index, habits/routines discriminator, adapter recreation, empty-input guard (Agent 7 Sprint 21)
 - Security: CORS hardening, rate limiting
+- Screenshots retake (Sprint 29 P7)
 - Plus any issues surfaced during Sprints 29–32
 
 ---
@@ -93,9 +70,9 @@ The concierge memory architecture is Flow's competitive moat. These items build 
 
 | Item | Notes | Vision Layer |
 |---|---|---|
-| Pre-compaction memory flush | Before context truncation, force concierge to write lasting notes to `ai_memories`. Prevents context loss in long chats. Small, high-impact. | Layer 4 |
-| Deterministic context assembly | Audit Sprint 24's 6-layer system prompt. Ensure soul/memory injection is compiled from structured data, not AI-generated. Define `assembleConciergeContext()` abstraction. | Layer 1-2 |
-| Concierge coherence monitoring (basic) | Lightweight drift detection: is the concierge still referencing soul personality? Still citing user data accurately? Log drift signals for Phase B advanced monitoring. | Layer 7 (basic) |
+| Pre-compaction memory flush | **Moved to Sprint 30** | Layer 4 |
+| Deterministic context assembly | **Moved to Sprint 30** | Layer 1-2 |
+| Concierge coherence monitoring (basic) | **Moved to Sprint 30** | Layer 7 (basic) |
 
 ### Integrations & Enhancements
 
@@ -152,4 +129,4 @@ These items run as research parcels to de-risk Phase B architecture:
 
 ---
 
-*Next Sprint Planning — Updated March 6, 2026 — Sprint 28 (Launch Ready) complete. Sprint 29 (Flow Rebrand) active per CEO Session #9. Sprint plan aligned with Phase-A-Roadmap (Sprints 29–34). Post-launch roadmap preserved.*
+*Next Sprint Planning — Updated March 7, 2026 — Sprint 29 (Flow Rebrand) complete. Sprint 30 (Bug Bash + Concierge Hardening) approved and active. 13 agent docs archived during Phase 6 cleanup. Sprint plan aligned with Phase-A-Roadmap (Sprints 30–34).*

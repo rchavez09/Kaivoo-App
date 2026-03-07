@@ -62,6 +62,21 @@ export class SupabaseAttachmentAdapter implements AttachmentAdapter {
     window.open(url, '_blank');
   }
 
+  async renameFile(entityId: string, oldName: string, newName: string): Promise<string> {
+    // Sanitize: strip path separators and traversal sequences
+    const safeName = newName.replace(/[/\\:\0]/g, '_').replace(/^\.+/, '') || 'unnamed';
+    const oldPath = this.storagePath(entityId, oldName);
+    // Check for collision
+    const { data: existing } = await this.supabase.storage.from(BUCKET).list(this.storagePath(entityId));
+    if (existing?.some((f) => f.name === safeName)) {
+      throw new Error(`A file named "${safeName}" already exists`);
+    }
+    const newPath = this.storagePath(entityId, safeName);
+    const { error } = await this.supabase.storage.from(BUCKET).move(oldPath, newPath);
+    if (error) throw new Error(`Rename failed: ${error.message}`);
+    return safeName;
+  }
+
   async listFiles(entityId: string): Promise<AttachmentInfo[]> {
     const { data, error } = await this.supabase.storage
       .from(BUCKET)

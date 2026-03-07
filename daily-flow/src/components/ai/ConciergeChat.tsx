@@ -27,14 +27,14 @@ import {
   createConversation,
 } from '@/lib/ai/chat-service';
 import type { Conversation, ConversationMessage, ToolCall } from '@/lib/ai/types';
-import { assembleSystemPrompt } from '@/lib/ai/prompt-assembler';
+import { assembleConciergeContext } from '@/lib/ai/prompt-assembler';
 import type { AppContext } from '@/lib/ai/prompt-assembler';
 import { ALL_TOOLS } from '@/lib/ai/tools';
 import { executeTool, resetToolCallCount } from '@/lib/ai/tools';
 import type { ExecutorActions } from '@/lib/ai/tools';
-import { getMemories, getSummaries } from '@/lib/ai/memory-service';
-import { extractMemories } from '@/lib/ai/extraction';
+import { extractMemories, preCompactionFlush, PRE_COMPACTION_THRESHOLD } from '@/lib/ai/extraction';
 import { summarizeConversation } from '@/lib/ai/summarizer';
+import { checkCoherence } from '@/lib/ai/coherence-monitor';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { useAIActionLog } from '@/hooks/useAIActionLog';
@@ -196,22 +196,15 @@ const ConciergeChat = () => {
     abortRef.current = controller;
 
     try {
-      // Build the enriched system prompt
-      const soul = getSoulConfig();
-      const memories = await getMemories();
-      const activeMemories = memories.filter((m) => m.active);
+      // Pre-compaction memory flush — Layer 4: save insights before context truncation
+      const visibleMessageCount = workingMessages.filter((m) => m.role === 'user' || m.role === 'assistant').length;
+      if (visibleMessageCount >= PRE_COMPACTION_THRESHOLD) {
+        await preCompactionFlush(workingMessages);
+      }
+
+      // Deterministic context assembly — single entry point for all structured data
       const appContext = buildAppContext();
-
-      const summaries = await getSummaries();
-
-      const systemPrompt = assembleSystemPrompt({
-        soul,
-        depth: settings.depth,
-        memories: activeMemories,
-        summaries,
-        appContext,
-        hasTools: true,
-      });
+      const systemPrompt = await assembleConciergeContext(appContext);
 
       let titleSuggestion: string | undefined;
       const executorActions = buildExecutorActions();
@@ -300,7 +293,14 @@ const ConciergeChat = () => {
       setStreamedContent('');
       setToolStatus(null);
 
-      // Post-conversation: extract memories + summarize (fire-and-forget)
+      // Post-conversation: coherence check + extract memories + summarize (fire-and-forget)
+      const lastAssistant = workingMessages.filter((m) => m.role === 'assistant').pop();
+      if (lastAssistant) {
+        const soul = getSoulConfig();
+        const userMsgs = workingMessages.filter((m) => m.role === 'user');
+        checkCoherence(lastAssistant.content, soul, finalConv.id, userMsgs);
+      }
+
       void (async () => {
         const [newMemories] = await Promise.all([
           extractMemories(workingMessages),

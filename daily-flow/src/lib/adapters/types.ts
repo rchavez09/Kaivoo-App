@@ -540,6 +540,8 @@ export interface AttachmentAdapter {
   listFiles(entityId: string): Promise<AttachmentInfo[]>;
   /** Open a file with the OS default application (desktop) or new tab (web). */
   openFile?(entityId: string, filename: string): Promise<void>;
+  /** Rename a file. Returns the final (sanitized/deduplicated) new name. */
+  renameFile?(entityId: string, oldName: string, newName: string): Promise<string>;
 }
 
 export interface AttachmentInfo {

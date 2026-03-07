@@ -27,20 +27,23 @@ const ScheduleWidget = ({ date, meetings: meetingsProp, onMeetingClick }: Schedu
     return getMeetingsForDate(stableDate);
   }, [meetingsProp, getMeetingsForDate, stableDate]);
 
-  if (meetings.length === 0) return null;
-
   return (
     <div className="widget-card animate-fade-in" style={{ animationDelay: '0.2s' }} id="day-section-schedule">
       <div className="widget-header">
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-primary" />
           <span className="widget-title">Today's Schedule</span>
-          <span className="ml-1 text-xs font-normal text-muted-foreground">
-            {meetings.length} meeting{meetings.length !== 1 ? 's' : ''}
-          </span>
+          {meetings.length > 0 && (
+            <span className="ml-1 text-xs font-normal text-muted-foreground">
+              {meetings.length} meeting{meetings.length !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
       </div>
 
+      {meetings.length === 0 ? (
+        <p className="py-4 text-center text-sm text-muted-foreground">No meetings today</p>
+      ) : (
       <div className="space-y-2">
         {meetings.map((meeting) => {
           const startTime = meeting.startTime instanceof Date ? meeting.startTime : new Date(meeting.startTime);
@@ -78,6 +81,7 @@ const ScheduleWidget = ({ date, meetings: meetingsProp, onMeetingClick }: Schedu
           );
         })}
       </div>
+      )}
     </div>
   );
 };

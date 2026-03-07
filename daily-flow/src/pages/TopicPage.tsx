@@ -75,8 +75,19 @@ const TopicPage = () => {
   const currentContent = page?.content ?? topic?.content ?? '';
   const [editorContent, setEditorContent] = useState(currentContent);
 
-  // Sync editor when navigating to a different topic/page
+  // Flush pending save + sync editor when navigating to a different topic/page
   useEffect(() => {
+    // Flush any pending save for the PREVIOUS topic/page before switching
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    const pending = pendingSaveRef.current;
+    if (pending) {
+      if (pending.isPage && pending.pageId) {
+        void updateTopicPage(pending.pageId, { content: pending.html });
+      } else if (pending.topicId) {
+        void updateTopic(pending.topicId, { content: pending.html });
+      }
+      pendingSaveRef.current = null;
+    }
     setEditorContent(page?.content ?? topic?.content ?? '');
   }, [topicId, pageId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -107,7 +118,7 @@ const TopicPage = () => {
     [contentId, attachments],
   );
 
-  // Flush pending save on unmount or navigation
+  // Flush pending save on unmount
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -121,6 +132,24 @@ const TopicPage = () => {
         pendingSaveRef.current = null;
       }
     };
+  }, [updateTopic, updateTopicPage]);
+
+  // Flush pending save on tab close / refresh
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      const pending = pendingSaveRef.current;
+      if (pending) {
+        if (pending.isPage && pending.pageId) {
+          void updateTopicPage(pending.pageId, { content: pending.html });
+        } else if (pending.topicId) {
+          void updateTopic(pending.topicId, { content: pending.html });
+        }
+        pendingSaveRef.current = null;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [updateTopic, updateTopicPage]);
 
   const journalEntries = getJournalEntriesByTopic(contentId);
