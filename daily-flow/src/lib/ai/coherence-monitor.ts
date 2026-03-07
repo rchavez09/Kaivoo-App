@@ -21,36 +21,19 @@ export interface CoherenceSignal {
   responseSnippet: string;
 }
 
-const COHERENCE_LOG_KEY = 'flow-coherence-log';
-const MAX_LOG_ENTRIES = 200;
-
-/** Retrieve all coherence log entries. */
-export function getCoherenceLog(): CoherenceSignal[] {
-  try {
-    const stored = localStorage.getItem(COHERENCE_LOG_KEY);
-    return stored ? (JSON.parse(stored) as CoherenceSignal[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveSignal(signal: CoherenceSignal): void {
-  const log = getCoherenceLog();
-  log.unshift(signal);
-  localStorage.setItem(COHERENCE_LOG_KEY, JSON.stringify(log.slice(0, MAX_LOG_ENTRIES)));
-}
-
 /**
  * Check a concierge response for drift signals.
  * Called after each assistant message is finalized.
  *
- * Returns any detected signals (empty array = coherent).
+ * Detected signals are passed to the `onSignal` callback for persistence
+ * (adapter-backed). Returns all detected signals (empty array = coherent).
  */
 export function checkCoherence(
   response: string,
   soul: SoulConfig | null,
   conversationId: string,
   recentUserMessages: ConversationMessage[],
+  onSignal?: (signal: CoherenceSignal) => void,
 ): CoherenceSignal[] {
   const signals: CoherenceSignal[] = [];
   const snippet = response.slice(0, 200);
@@ -116,9 +99,11 @@ export function checkCoherence(
     }
   }
 
-  // Save detected signals
-  for (const s of signals) {
-    saveSignal(s);
+  // Persist detected signals via callback
+  if (onSignal) {
+    for (const s of signals) {
+      onSignal(s);
+    }
   }
 
   return signals;

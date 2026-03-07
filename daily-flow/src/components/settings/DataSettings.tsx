@@ -57,7 +57,7 @@ interface ExportData {
 
 const DataSettings = () => {
   const { user } = useAuth();
-  const { data: dataAdapter, vault, isLocal } = useAdapters();
+  const { data: dataAdapter, vault, fileVault, isLocal } = useAdapters();
   const [exporting, setExporting] = useState(false);
   const [exportingMd, setExportingMd] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -206,7 +206,9 @@ const DataSettings = () => {
 
   /** Export all data as Obsidian-compatible markdown files (downloaded as .zip on web). */
   const handleMarkdownExport = async () => {
-    if (!dataAdapter || !vault) return;
+    // Use fileVault (LocalVaultAdapter) on desktop for filesystem writes, fall back to vault on web
+    const exportVault = fileVault ?? vault;
+    if (!dataAdapter || !exportVault) return;
     setExportingMd(true);
 
     try {
@@ -217,7 +219,7 @@ const DataSettings = () => {
         dataAdapter.topicPages.fetchAll(),
       ]);
 
-      const result = await exportAll({ journals, captures, topics, topicPages }, vault);
+      const result = await exportAll({ journals, captures, topics, topicPages }, exportVault);
 
       if (result.errors.length > 0) {
         console.error('Markdown export errors:', result.errors);
@@ -226,7 +228,7 @@ const DataSettings = () => {
           { duration: 6000 },
         );
       } else {
-        const pathHint = vault.root ? ` → ${vault.root}` : '';
+        const pathHint = exportVault.root ? ` → ${exportVault.root}` : '';
         toast.success(`Exported ${result.exported} markdown files to vault${pathHint}`, { duration: 8000 });
       }
     } catch (error) {
@@ -899,7 +901,7 @@ const DataSettings = () => {
             Export journals, captures, and topics as Obsidian-compatible markdown files with YAML frontmatter.
           </p>
         </div>
-        <Button onClick={handleMarkdownExport} disabled={exportingMd || !dataAdapter || !vault} variant="outline">
+        <Button onClick={handleMarkdownExport} disabled={exportingMd || !dataAdapter || !(fileVault ?? vault)} variant="outline">
           {exportingMd ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

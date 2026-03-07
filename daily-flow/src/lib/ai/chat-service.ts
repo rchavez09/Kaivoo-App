@@ -14,45 +14,11 @@ import type { ToolSchema } from './tools/schemas';
 import { supabase } from '@/integrations/supabase/client';
 import { getAISettings } from './settings';
 
-const CONVERSATIONS_KEY = 'kaivoo-conversations';
-const MAX_CONVERSATIONS = 50;
-const MAX_MESSAGES_PER_CONVERSATION = 200;
-
 // ─── Stream Event Types ───
 
 export type StreamEvent = { type: 'text'; text: string } | { type: 'tool_call'; toolCall: ToolCall };
 
-// ─── Conversation Persistence ───
-
-export function getConversations(): Conversation[] {
-  try {
-    const stored = localStorage.getItem(CONVERSATIONS_KEY);
-    if (stored) return JSON.parse(stored) as Conversation[];
-  } catch {
-    // Ignore
-  }
-  return [];
-}
-
-export function saveConversation(conversation: Conversation): void {
-  const conversations = getConversations();
-  const idx = conversations.findIndex((c) => c.id === conversation.id);
-  if (idx >= 0) {
-    conversations[idx] = conversation;
-  } else {
-    conversations.unshift(conversation);
-  }
-  const trimmed = conversations.slice(0, MAX_CONVERSATIONS).map((c) => ({
-    ...c,
-    messages: c.messages.slice(-MAX_MESSAGES_PER_CONVERSATION),
-  }));
-  localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(trimmed));
-}
-
-export function deleteConversation(id: string): void {
-  const conversations = getConversations().filter((c) => c.id !== id);
-  localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
-}
+// ─── Conversation Factory ───
 
 export function createConversation(): Conversation {
   return {

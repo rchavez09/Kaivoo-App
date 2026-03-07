@@ -316,31 +316,34 @@ function createMockDataAdapter(overrides?: {
     habitCompletions: { fetchAll: vi.fn().mockResolvedValue([]) },
     meetings: { fetchAll: vi.fn().mockResolvedValue([]) },
     projectNotes: { fetchAll: vi.fn().mockResolvedValue([]) },
+    conversations: { fetchAll: vi.fn().mockResolvedValue([]) },
+    coherenceLog: { fetchAll: vi.fn().mockResolvedValue([]) },
   } as unknown as DataAdapter;
 }
 
 describe('VirtualVaultAdapter', () => {
-  it('returns empty tree with 5 root folders when no data adapter', async () => {
+  it('returns empty tree with 6 root folders when no data adapter', async () => {
     const vault = new VirtualVaultAdapter(null);
     const tree = await vault.getTree();
 
     expect(tree.name).toBe('Vault');
     expect(tree.isDirectory).toBe(true);
-    expect(tree.children).toHaveLength(5);
+    expect(tree.children).toHaveLength(6);
     expect(tree.children!.map((c) => c.name)).toEqual([
       VAULT_FOLDERS.TOPICS,
       VAULT_FOLDERS.PROJECTS,
       VAULT_FOLDERS.JOURNAL,
       VAULT_FOLDERS.LIBRARY,
       VAULT_FOLDERS.INBOX,
+      VAULT_FOLDERS.AI_CONVERSATIONS,
     ]);
   });
 
-  it('returns empty tree with 5 root folders when data adapter has no entities', async () => {
+  it('returns empty tree with 6 root folders when data adapter has no entities', async () => {
     const vault = new VirtualVaultAdapter(createMockDataAdapter());
     const tree = await vault.getTree();
 
-    expect(tree.children).toHaveLength(5);
+    expect(tree.children).toHaveLength(6);
     const journal = tree.children!.find((c) => c.name === VAULT_FOLDERS.JOURNAL)!;
     expect(journal.children).toHaveLength(0);
   });
@@ -501,6 +504,7 @@ describe('VirtualVaultAdapter', () => {
       VAULT_FOLDERS.JOURNAL,
       VAULT_FOLDERS.LIBRARY,
       VAULT_FOLDERS.INBOX,
+      VAULT_FOLDERS.AI_CONVERSATIONS,
     ]);
 
     const topicsChildren = await vault.listFolder(VAULT_FOLDERS.TOPICS);

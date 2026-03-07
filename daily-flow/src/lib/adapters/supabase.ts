@@ -58,6 +58,11 @@ import type {
   UpdateProjectInput,
   CreateProjectNoteInput,
   UpdateProjectNoteInput,
+  ConversationAdapter,
+  CoherenceLogAdapter,
+  CreateConversationInput,
+  UpdateConversationInput,
+  CreateCoherenceSignalInput,
 } from './types';
 
 // Existing service functions — preserved as-is
@@ -430,6 +435,123 @@ class SupabaseProjectNoteAdapter implements ProjectNoteAdapter {
   }
 }
 
+// ─── AI Conversations ───
+
+class SupabaseConversationAdapter implements ConversationAdapter {
+  constructor(private userId: string) {}
+
+  async fetchAll() {
+    const { data, error } = await supabase
+      .from('ai_conversations')
+      .select('*')
+      .eq('user_id', this.userId)
+      .order('updated_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      id: r.id as string,
+      title: r.title as string,
+      messages: (r.messages ?? []) as import('@/lib/ai/types').ConversationMessage[],
+      createdAt: r.created_at as string,
+      updatedAt: r.updated_at as string,
+    }));
+  }
+
+  async create(input: CreateConversationInput) {
+    const messages = input.messages ? JSON.parse(input.messages).slice(-200) : [];
+    const row = {
+      ...(input.id ? { id: input.id } : {}),
+      user_id: this.userId,
+      title: input.title,
+      messages,
+    };
+
+    const { data, error } = await supabase.from('ai_conversations').insert(row).select().single();
+    if (error) throw error;
+    return {
+      id: data.id as string,
+      title: data.title as string,
+      messages: (data.messages ?? []) as import('@/lib/ai/types').ConversationMessage[],
+      createdAt: data.created_at as string,
+      updatedAt: data.updated_at as string,
+    };
+  }
+
+  async update(id: string, input: UpdateConversationInput) {
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (input.title !== undefined) updates.title = input.title;
+    if (input.messages !== undefined) {
+      updates.messages = JSON.parse(input.messages).slice(-200);
+    }
+
+    const { error } = await supabase
+      .from('ai_conversations')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', this.userId);
+    if (error) throw error;
+  }
+
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('ai_conversations')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', this.userId);
+    if (error) throw error;
+  }
+}
+
+// ─── AI Coherence Log ───
+
+class SupabaseCoherenceLogAdapter implements CoherenceLogAdapter {
+  constructor(private userId: string) {}
+
+  async fetchAll() {
+    const { data, error } = await supabase
+      .from('ai_coherence_log')
+      .select('*')
+      .eq('user_id', this.userId)
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      id: r.id as string,
+      timestamp: r.created_at as string,
+      conversationId: r.conversation_id as string,
+      signal: r.signal as import('@/lib/ai/coherence-monitor').CoherenceSignal['signal'],
+      severity: r.severity as import('@/lib/ai/coherence-monitor').CoherenceSignal['severity'],
+      details: r.details as string,
+      responseSnippet: r.response_snippet as string,
+    }));
+  }
+
+  async create(input: CreateCoherenceSignalInput) {
+    const row = {
+      user_id: this.userId,
+      conversation_id: input.conversationId,
+      signal: input.signal,
+      severity: input.severity,
+      details: input.details,
+      response_snippet: input.responseSnippet,
+    };
+
+    const { data, error } = await supabase.from('ai_coherence_log').insert(row).select().single();
+    if (error) throw error;
+    return {
+      id: data.id as string,
+      timestamp: data.created_at as string,
+      conversationId: data.conversation_id as string,
+      signal: data.signal as import('@/lib/ai/coherence-monitor').CoherenceSignal['signal'],
+      severity: data.severity as import('@/lib/ai/coherence-monitor').CoherenceSignal['severity'],
+      details: data.details as string,
+      responseSnippet: data.response_snippet as string,
+    };
+  }
+}
+
 // ─── Main DataAdapter ───
 
 export class SupabaseDataAdapter implements DataAdapter {
@@ -448,6 +570,8 @@ export class SupabaseDataAdapter implements DataAdapter {
   meetings: MeetingAdapter;
   projects: ProjectAdapter;
   projectNotes: ProjectNoteAdapter;
+  conversations: ConversationAdapter;
+  coherenceLog: CoherenceLogAdapter;
 
   constructor(private userId: string) {
     this.tasks = new SupabaseTaskAdapter(userId);
@@ -465,6 +589,8 @@ export class SupabaseDataAdapter implements DataAdapter {
     this.meetings = new SupabaseMeetingAdapter(userId);
     this.projects = new SupabaseProjectAdapter(userId);
     this.projectNotes = new SupabaseProjectNoteAdapter(userId);
+    this.conversations = new SupabaseConversationAdapter(userId);
+    this.coherenceLog = new SupabaseCoherenceLogAdapter(userId);
   }
 
   async initialize() {

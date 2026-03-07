@@ -88,6 +88,14 @@
       ]
     },
     {
+      "identifier": "fs:allow-rename",
+      "allow": [
+        { "path": "$APPDATA/.kaivoo/**" },
+        { "path": "$APPDATA/**" },
+        { "path": "$APPDATA/vault/.attachments/**" }
+      ]
+    },
+    {
       "identifier": "opener:allow-open-path",
       "allow": [
         { "path": "$APPDATA/**" },

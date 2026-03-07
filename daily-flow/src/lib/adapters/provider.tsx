@@ -40,6 +40,8 @@ interface AdapterContextValue {
   auth: AuthAdapter;
   search: SearchAdapter;
   vault: VaultAdapter | null;
+  /** Filesystem-backed vault for export/write operations (desktop only). */
+  fileVault: VaultAdapter | null;
   attachments: AttachmentAdapter;
   isLocal: boolean;
 }
@@ -98,12 +100,15 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo<AdapterContextValue>(() => {
     if (isLocal && localAdapters) {
-      // Desktop mode: use local adapters (already initialized via dynamic import)
+      // Desktop mode: use VirtualVaultAdapter for browsing (reads from DB),
+      // keep LocalVaultAdapter as fileVault for export/write operations.
+      const browseVault = new VirtualVaultAdapter(localAdapters.data);
       return {
         data: localAdapters.data,
         auth: localAdapters.auth,
         search: localAdapters.search,
-        vault: localAdapters.vault,
+        vault: browseVault,
+        fileVault: localAdapters.vault,
         attachments: localAdapters.attachments,
         isLocal: true,
       };
@@ -117,6 +122,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
         auth: supabaseAuth,
         search: supabaseSearch,
         vault: null,
+        fileVault: null,
         attachments: noOpAttachments,
         isLocal: true,
       };
@@ -126,7 +132,7 @@ export const AdapterProvider = ({ children }: { children: ReactNode }) => {
     const data = user ? new SupabaseDataAdapter(user.id) : null;
     virtualVault.setDataAdapter(data);
     const attachments: AttachmentAdapter = user ? new SupabaseAttachmentAdapter(supabase, user.id) : noOpAttachments;
-    return { data, auth: supabaseAuth, search: supabaseSearch, vault: virtualVault, attachments, isLocal: false };
+    return { data, auth: supabaseAuth, search: supabaseSearch, vault: virtualVault, fileVault: null, attachments, isLocal: false };
   }, [isLocal, localAdapters, user?.id, supabaseAuth, supabaseSearch, virtualVault]);
 
   // Desktop mode: show error screen if local database init failed
