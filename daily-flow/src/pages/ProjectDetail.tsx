@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
-import { ChevronRight, Briefcase, Pencil, Calendar, Inbox, MessageSquare, Sparkles } from 'lucide-react';
+import { ChevronRight, Briefcase, Pencil, Calendar, Inbox, MessageSquare, Sparkles, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -75,6 +75,7 @@ const ProjectDetail = () => {
   const [editingDesc, setEditingDesc] = useState(false);
   const [descInput, setDescInput] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -189,24 +190,33 @@ const ProjectDetail = () => {
                 autoFocus
               />
             ) : (
-              <h1
-                role="button"
-                tabIndex={0}
-                className="cursor-pointer rounded text-2xl font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                onClick={() => {
-                  setNameInput(project!.name);
-                  setEditingName(true);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
+              <>
+                <h1
+                  role="button"
+                  tabIndex={0}
+                  className="cursor-pointer rounded text-2xl font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  onClick={() => {
                     setNameInput(project!.name);
                     setEditingName(true);
-                  }
-                }}
-              >
-                {project!.name}
-              </h1>
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setNameInput(project!.name);
+                      setEditingName(true);
+                    }
+                  }}
+                >
+                  {project!.name}
+                </h1>
+                <button
+                  onClick={() => setSettingsOpen(true)}
+                  aria-label="Project settings"
+                  className="mt-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <Settings className="h-4 w-4" />
+                </button>
+              </>
             )}
           </div>
 
@@ -428,20 +438,20 @@ const ProjectDetail = () => {
             </TabsContent>
           </Tabs>
         )}
-
-        {/* Settings (real projects only, accessible via gear icon) */}
-        {project && (
-          <div className="mt-8">
-            <ProjectSettings
-              project={project}
-              color={color!}
-              topics={topics}
-              onUpdate={(fields) => updateProject(project.id, fields)}
-              onDeleteClick={() => setDeleteDialogOpen(true)}
-            />
-          </div>
-        )}
       </div>
+
+      {/* Settings dialog (real projects only) */}
+      {project && (
+        <ProjectSettings
+          project={project}
+          color={color!}
+          topics={topics}
+          onUpdate={(fields) => updateProject(project.id, fields)}
+          onDeleteClick={() => setDeleteDialogOpen(true)}
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+        />
+      )}
 
       {/* Task Details Drawer */}
       <TaskDetailsDrawer taskId={selectedTaskId} open={drawerOpen} onOpenChange={setDrawerOpen} />
