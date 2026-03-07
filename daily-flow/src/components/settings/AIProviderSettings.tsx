@@ -179,7 +179,7 @@ export default function AIProviderSettings() {
             </label>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Your API key is encrypted and stored locally. Never shared with Kaivoo servers.
+            Your API key is encrypted and stored locally. Never shared with our servers.
           </p>
         </div>
       )}
@@ -312,7 +312,7 @@ export default function AIProviderSettings() {
           id="soul-name"
           value={soul.name}
           onChange={(e) => updateSoul({ name: e.target.value })}
-          placeholder="Kaivoo Assistant"
+          placeholder="Flow Assistant"
         />
         <p className="mt-1 text-xs text-muted-foreground">The name your AI concierge introduces itself as.</p>
       </div>

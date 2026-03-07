@@ -21,7 +21,7 @@ export default function LicenseBanner() {
   return (
     <div className="flex items-center justify-between border-b border-primary/10 bg-primary/5 px-4 py-1.5">
       <p className="text-xs text-muted-foreground">
-        Enjoying Kaivoo?{' '}
+        Enjoying Flow?{' '}
         <button
           onClick={() => navigate('/settings')}
           className="font-medium text-primary underline-offset-2 hover:underline"

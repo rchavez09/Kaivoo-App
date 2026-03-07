@@ -20,6 +20,9 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
+
+const isTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -128,7 +131,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
       >
         <Link to="/" className="group flex items-center gap-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary shadow-sm transition-shadow group-hover:shadow-md">
-            <img src={kaivooLogo} alt="Kaivoo" className="h-5 w-5" />
+            <img src={kaivooLogo} alt="Flow" className="h-5 w-5" />
           </div>
           <span
             className={cn(
@@ -136,7 +139,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
               collapsed ? 'w-0 overflow-hidden opacity-0' : 'opacity-100',
             )}
           >
-            Kaivoo
+            Flow
           </span>
         </Link>
       </div>
@@ -164,7 +167,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
       {/* Settings & Sign Out */}
       <div className="space-y-1 border-t border-sidebar-border p-3">
         <NavItem path="/settings" label="Settings" icon={Settings} />
-        {user &&
+        {user && !isTauri() &&
           (collapsed ? (
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>

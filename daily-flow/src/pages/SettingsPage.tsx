@@ -23,7 +23,7 @@ type SettingsSection =
 
 const settingsSections = [
   { id: 'ai-provider' as const, icon: Bot, label: 'AI Provider', description: 'Configure your AI model and API key' },
-  { id: 'license' as const, icon: Key, label: 'License', description: 'Activate your Kaivoo license' },
+  { id: 'license' as const, icon: Key, label: 'License', description: 'Activate your Flow license' },
   { id: 'profile' as const, icon: User, label: 'Profile', description: 'Manage your account settings' },
   { id: 'notifications' as const, icon: Bell, label: 'Notifications', description: 'Configure alerts and reminders' },
   { id: 'appearance' as const, icon: Palette, label: 'Appearance', description: 'Customize your experience' },
@@ -69,7 +69,7 @@ const SettingsPage = () => {
           <>
             <header className="mb-8">
               <h1 className="mb-1 text-2xl font-semibold text-foreground">Settings</h1>
-              <p className="text-sm text-muted-foreground">Customize your Kaivoo experience</p>
+              <p className="text-sm text-muted-foreground">Customize your Flow experience</p>
             </header>
 
             <div className="space-y-6">

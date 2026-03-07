@@ -152,7 +152,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
         <Sparkles className="h-10 w-10 text-primary" />
       </div>
-      <h1 className="mb-3 text-3xl font-bold text-foreground">Welcome to Kaivoo</h1>
+      <h1 className="mb-3 text-3xl font-bold text-foreground">Welcome to Flow</h1>
       <p className="mb-8 text-lg text-muted-foreground">
         Your personal knowledge operating system.
         <br />
@@ -190,7 +190,7 @@ function VaultStep({
         const root = await appDataDir();
         setResolvedPath(`${root}vault`);
       } catch {
-        setResolvedPath('~/Kaivoo/vault');
+        setResolvedPath('~/Flow/vault');
       }
     })();
   }, [resolvedPath]);
@@ -226,7 +226,7 @@ function VaultStep({
       </div>
       <h2 className="mb-2 text-2xl font-semibold text-foreground">Your Vault</h2>
       <p className="mb-6 text-muted-foreground">
-        Kaivoo stores your notes, captures, and topics in a local vault folder. You can open these files in any markdown
+        Flow stores your notes, captures, and topics in a local vault folder. You can open these files in any markdown
         editor.
       </p>
 
@@ -390,7 +390,7 @@ function ImportStep({
           <Download className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <div>
             <p className="font-medium text-foreground">Yes, import my vault</p>
-            <p className="text-xs text-muted-foreground">Copy .md files into Kaivoo (non-destructive)</p>
+            <p className="text-xs text-muted-foreground">Copy .md files into Flow (non-destructive)</p>
           </div>
         </button>
         <button
@@ -517,7 +517,7 @@ function CompleteStep({
       <p className="mb-8 text-sm text-muted-foreground">You can always adjust settings later from the Settings page.</p>
       <Button size="lg" onClick={onComplete} className="gap-2">
         <Sparkles className="h-4 w-4" />
-        Start Using Kaivoo
+        Start Using Flow
       </Button>
       <div className="mt-4">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">

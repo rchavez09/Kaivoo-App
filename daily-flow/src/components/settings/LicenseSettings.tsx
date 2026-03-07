@@ -50,7 +50,7 @@ export default function LicenseSettings() {
         setKeyInput(text.trim());
         setError(null);
       } else {
-        setError('This file does not contain a valid Kaivoo license key.');
+        setError('This file does not contain a valid Flow license key.');
       }
     };
     input.click();
@@ -152,7 +152,7 @@ export default function LicenseSettings() {
       <div className="rounded-xl border border-dashed border-border p-4">
         <p className="mb-1 text-sm font-medium text-foreground">Don&apos;t have a license?</p>
         <p className="text-xs text-muted-foreground">
-          Purchase Kaivoo to receive your license key via email. All features work without a license — this just removes
+          Purchase Flow to receive your license key via email. All features work without a license — this just removes
           the reminder banner.
         </p>
       </div>

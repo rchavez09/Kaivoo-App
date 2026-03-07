@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 // ─── Layer Builders ───
 
 function buildIdentityLayer(soul: SoulConfig | null): string {
-  const name = soul?.name || 'Kaivoo Assistant';
+  const name = soul?.name || 'Flow Assistant';
   const tone = soul?.tone || 'casual';
 
   const toneDesc: Record<string, string> = {
@@ -28,7 +28,7 @@ function buildIdentityLayer(soul: SoulConfig | null): string {
     playful: 'fun, energetic, and lighthearted',
   };
 
-  let layer = `You are ${name}, a ${toneDesc[tone] || 'friendly'} AI concierge for Kaivoo — a personal knowledge operating system.`;
+  let layer = `You are ${name}, a ${toneDesc[tone] || 'friendly'} AI concierge for Flow — a personal knowledge operating system.`;
 
   if (soul?.backstory) {
     layer += `\n\nAbout you: ${soul.backstory}`;
@@ -161,7 +161,7 @@ function buildBehavioralLayer(depth: AIDepth, hasTools: boolean): string {
 
   if (hasTools) {
     rules.push(
-      "You have access to tools that can create, read, update, and complete items in the user's Kaivoo workspace.",
+      "You have access to tools that can create, read, update, and complete items in the user's Flow workspace.",
       'Use tools when the user asks you to take action (create tasks, log routines, search notes, etc.).',
       'For ambiguous references, search first to confirm the correct item before modifying it.',
       'For destructive actions (delete, bulk changes), confirm with the user before proceeding.',

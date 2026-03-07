@@ -100,7 +100,7 @@ export default function PurchaseSuccessPage() {
             <CheckCircle2 className="h-8 w-8 text-success-foreground" />
           </div>
           <h1 className="mb-2 text-2xl font-semibold text-foreground">Thank you!</h1>
-          <p className="text-sm text-muted-foreground">Your Kaivoo {tierLabel} license is ready.</p>
+          <p className="text-sm text-muted-foreground">Your Flow {tierLabel} license is ready.</p>
         </div>
 
         {/* License key display */}
@@ -146,7 +146,7 @@ export default function PurchaseSuccessPage() {
         <div className="rounded-xl border border-dashed border-border p-4 text-center">
           <p className="mb-2 text-sm font-medium text-foreground">How to activate</p>
           <ol className="space-y-1 text-left text-xs text-muted-foreground">
-            <li>1. Open Kaivoo on your computer</li>
+            <li>1. Open Flow on your computer</li>
             <li>2. Go to Settings → License</li>
             <li>3. Paste your license key or import the downloaded file</li>
             <li>4. Click Activate — done!</li>
@@ -155,7 +155,7 @@ export default function PurchaseSuccessPage() {
 
         <div className="text-center">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            Go to Kaivoo
+            Go to Flow
           </Button>
         </div>
       </div>

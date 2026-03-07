@@ -100,10 +100,10 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mb-3 flex justify-center">
-            <img src={kaivooLogo} alt="Kaivoo" className="h-10 w-10 object-contain" />
+            <img src={kaivooLogo} alt="Flow" className="h-10 w-10 object-contain" />
           </div>
-          <CardTitle className="text-2xl font-bold">Kaivoo</CardTitle>
-          <CardDescription>Your command center for deep work</CardDescription>
+          <CardTitle className="text-2xl font-bold">Flow</CardTitle>
+          <CardDescription>Your personal knowledge operating system</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">

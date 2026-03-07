@@ -71,7 +71,7 @@ const GuidedTour = () => {
       >
         {/* Branding */}
         <div className="mb-5 flex justify-center">
-          <img src={kaivooLogo} alt="Kaivoo" className="h-10 w-10" />
+          <img src={kaivooLogo} alt="Flow" className="h-10 w-10" />
         </div>
 
         {/* Step indicator */}
