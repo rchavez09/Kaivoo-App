@@ -2,7 +2,7 @@
 
 **Theme:** Landing page, legal documents, and launch prep. Revenue pipeline (signing keys, Stripe config, Edge Function deploy) deferred to a dedicated sprint per user decision.
 **Branch:** `sprint/28-launch-ready`
-**Status:** PR OPEN (Phase 4 → Phase 5)
+**Status:** COMPLETE (merged to main)
 **Compiled by:** Director
 **Date:** March 5, 2026
 
@@ -194,6 +194,41 @@ Entire track moved to a future sprint per user decision (wants to add more featu
 | JSON-LD structured data | Code review P2-22 | SEO polish |
 | Proper OG image (designed, not logo placeholder) | Code review P0-3 | Needs design work |
 | Copy refinement | User request | Parallel work stream |
+
+---
+
+## Sprint Retrospective
+
+**Completed:** March 6, 2026
+**Parcels:** 6/6 active parcels done (5 deferred parcels moved to future sprint)
+**PR:** #15 — merged to main
+
+### What Was Delivered
+- **Landing page** — Astro + Tailwind static site with 11 sections (Nav, Hero, Screenshots, Features, Soul File, Local-First, BYO Keys, Pricing, FAQ, CTA, Footer). Dark/light toggle. Responsive. Deployed to Netlify at https://kaivoo-landing.netlify.app
+- **EULA** — 11-section attorney-review-ready draft covering license grant, data ownership, BYO keys, redistribution restrictions, refund policy
+- **Privacy Policy** — 12-section draft covering local-first architecture, Stripe processing, no telemetry, user rights
+- **Product Hunt listing** — Tagline, description, maker comment, gallery order, launch checklist
+- **App screenshots** — 4 screenshots (hero + Soul File, light + dark) with theme-swap on toggle
+
+### Verification Results
+- Landing page build: pass (3 pages, 396ms)
+- Main app regression: typecheck pass, 265/265 tests pass, build pass, 0 lint errors
+- Lighthouse: Performance 82 | Accessibility 95 | Best Practices 100 | SEO 100
+- Code review: 4 P0s found and fixed (legal page 404s, missing favicon/og-image)
+- Agent 11, design review, E2E: waived (standalone Astro site, no main app changes)
+
+### Sandbox Findings
+- User approved on first review — no changes requested
+
+### Deferred Items
+- **Revenue pipeline** (Stripe, signing keys, Edge Functions, payment testing) — user wants more features before going live
+- **Landing page polish** — self-hosted fonts, mobile hamburger menu, JSON-LD, designed OG image, copy refinement
+- **Code quality** — E2E infrastructure, import refactors, accessibility P1s, security hardening
+
+### Key Learnings
+- Standalone deliverables (landing page as separate Astro site) can reasonably waive Agent 11 and design review gates — they don't touch the main app codebase
+- Revenue pipeline deferral was the right call — shipping the storefront and legal foundation independently keeps momentum while the user decides on feature scope
+- Astro + Tailwind was a good choice for a marketing landing page — fast builds (396ms), clean separation from the main React app, easy Netlify deploy
 
 ---
 
