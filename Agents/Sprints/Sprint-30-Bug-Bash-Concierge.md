@@ -127,7 +127,7 @@ Sprint 29 shipped the Flow identity. Now we fix what's broken and harden what di
 - [x] **Sprint file checkpoint:** All 15 parcels marked DONE, quality gates checked off
 - [x] **Phase 5 sandbox (web):** Conversations persist, vault shows AI Conversations, coherence logs write to DB
 - [x] **Phase 5 sandbox (desktop):** Vault shows all entities, export writes to filesystem, Tauri dev clean
-- [ ] **E2E tests:** Run against Netlify deploy preview URL
+- [x] **E2E tests:** 4/4 smoke tests PASS against deploy-preview-17 (fixed stale "Kaivoo" assertion from Sprint 29 rebrand)
 
 ---
 
