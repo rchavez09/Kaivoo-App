@@ -3,6 +3,9 @@
  *
  * Tests key user journeys with a logged-in session.
  * Depends on auth.setup.ts for storageState.
+ *
+ * Updated Sprint 31: Tasks merged into Projects page (All Tasks tab)
+ * Updated Sprint 32: Vault merged into Knowledge page (Vault tab at /topics?tab=vault)
  */
 
 import { test, expect, Page } from "@playwright/test";
@@ -33,12 +36,11 @@ test.describe("Navigation", () => {
     await page.goto("/");
     await waitForAppReady(page);
 
-    // Navigate to Tasks
-    await page.click('a[href="/tasks"]');
-    await expect(page).toHaveURL(/\/tasks/);
-    await expect(page.locator('h1:has-text("Tasks")')).toBeVisible({ timeout: 10000 });
+    // Navigate to Projects (Sprint 31: Tasks merged into Projects)
+    await page.click('a[href="/projects"]');
+    await expect(page).toHaveURL(/\/projects/);
 
-    // Navigate to Topics
+    // Navigate to Knowledge (Sprint 32: Topics + Vault merged)
     await page.click('a[href="/topics"]');
     await expect(page).toHaveURL(/\/topics/);
     await expect(page.locator('h1:has-text("Topics")')).toBeVisible({ timeout: 10000 });
@@ -55,10 +57,9 @@ test.describe("Navigation", () => {
 
   test("protected routes stay accessible when authenticated", async ({ page }) => {
     // Directly visit a protected route — should NOT redirect to /auth
-    await page.goto("/tasks");
+    await page.goto("/projects");
     await waitForAppReady(page);
-    await expect(page.locator('h1:has-text("Tasks")')).toBeVisible({ timeout: 10000 });
-    await expect(page).toHaveURL(/\/tasks/);
+    await expect(page).toHaveURL(/\/projects/);
   });
 });
 
@@ -81,21 +82,31 @@ test.describe("Today Dashboard", () => {
   });
 });
 
-// ─── Tasks ──────────────────────────────────────────────────
+// ─── Tasks (Sprint 31: merged into Projects page, "All Tasks" tab) ──
 
 test.describe("Tasks", () => {
-  test("tasks page loads with header and controls", async ({ page }) => {
-    await page.goto("/tasks");
+  test("tasks page loads via /projects with header and controls", async ({ page }) => {
+    // /tasks redirects to /projects (Sprint 31)
+    await page.goto("/projects");
     await waitForAppReady(page);
 
+    // "All Tasks" is the default tab — TasksContent renders h1 "Tasks"
     await expect(page.locator('h1:has-text("Tasks")')).toBeVisible({ timeout: 10000 });
 
     // Should see the New Task button
     await expect(page.locator('button:has-text("New Task")')).toBeVisible();
   });
 
-  test("can open new task input and cancel", async ({ page }) => {
+  test("/tasks redirects to /projects", async ({ page }) => {
     await page.goto("/tasks");
+    await waitForAppReady(page);
+
+    // Should redirect to /projects
+    await expect(page).toHaveURL(/\/projects/);
+  });
+
+  test("can open new task input and cancel", async ({ page }) => {
+    await page.goto("/projects");
     await waitForAppReady(page);
     await expect(page.locator('h1:has-text("Tasks")')).toBeVisible({ timeout: 10000 });
 
@@ -117,7 +128,7 @@ test.describe("Tasks", () => {
   });
 
   test("task view mode buttons are visible", async ({ page }) => {
-    await page.goto("/tasks");
+    await page.goto("/projects");
     await waitForAppReady(page);
     await expect(page.locator('h1:has-text("Tasks")')).toBeVisible({ timeout: 10000 });
 
@@ -128,7 +139,7 @@ test.describe("Tasks", () => {
   });
 
   test("task search input works", async ({ page }) => {
-    await page.goto("/tasks");
+    await page.goto("/projects");
     await waitForAppReady(page);
     await expect(page.locator('h1:has-text("Tasks")')).toBeVisible({ timeout: 10000 });
 
@@ -143,14 +154,19 @@ test.describe("Tasks", () => {
   });
 });
 
-// ─── Topics ─────────────────────────────────────────────────
+// ─── Knowledge (Sprint 32: Topics + Vault unified) ─────────
 
-test.describe("Topics", () => {
-  test("topics page loads with header", async ({ page }) => {
+test.describe("Knowledge", () => {
+  test("knowledge page loads with Topics tab by default", async ({ page }) => {
     await page.goto("/topics");
     await waitForAppReady(page);
 
+    // Topics tab is default — TopicsContent renders h1 "Topics"
     await expect(page.locator('h1:has-text("Topics")')).toBeVisible({ timeout: 10000 });
+
+    // Tab bar should show both tabs
+    await expect(page.locator('button[role="tab"]:has-text("Topics")')).toBeVisible();
+    await expect(page.locator('button[role="tab"]:has-text("Vault")')).toBeVisible();
   });
 
   test("new topic dialog opens and closes", async ({ page }) => {
@@ -168,6 +184,20 @@ test.describe("Topics", () => {
     // Close the dialog by pressing Escape
     await page.keyboard.press("Escape");
     await expect(input).not.toBeVisible();
+  });
+
+  test("switching to Vault tab shows vault content", async ({ page }) => {
+    await page.goto("/topics");
+    await waitForAppReady(page);
+
+    // Click Vault tab
+    await page.click('button[role="tab"]:has-text("Vault")');
+
+    // Should show Vault header
+    await expect(page.locator('h1:has-text("Vault")')).toBeVisible({ timeout: 10000 });
+
+    // URL should update to include tab=vault
+    await expect(page).toHaveURL(/tab=vault/);
   });
 });
 
@@ -213,12 +243,15 @@ test.describe("Calendar", () => {
   });
 });
 
-// ─── Vault (Sprint 22) ────────────────────────────────────
+// ─── Vault (Sprint 32: now a tab under Knowledge) ─────────
 
 test.describe("Vault", () => {
-  test("vault page loads with header and tree", async ({ page }) => {
+  test("/vault redirects to /topics?tab=vault and shows vault content", async ({ page }) => {
     await page.goto("/vault");
     await waitForAppReady(page);
+
+    // Should redirect to /topics with tab=vault
+    await expect(page).toHaveURL(/\/topics.*tab=vault/);
 
     await expect(page.locator('h1:has-text("Vault")')).toBeVisible({ timeout: 10000 });
 
@@ -229,8 +262,8 @@ test.describe("Vault", () => {
     await expect(page.locator(".widget-card")).toBeVisible();
   });
 
-  test("vault search input accepts text", async ({ page }) => {
-    await page.goto("/vault");
+  test("vault search input accepts text via tab", async ({ page }) => {
+    await page.goto("/topics?tab=vault");
     await waitForAppReady(page);
     await expect(page.locator('h1:has-text("Vault")')).toBeVisible({ timeout: 10000 });
 

@@ -1,6 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { Loader2 } from 'lucide-react';
 import {
   FolderOpen,
   Folder,
@@ -37,7 +40,9 @@ import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
 import type { Topic } from '@/types';
 
-const Topics = () => {
+const VaultContent = lazy(() => import('@/pages/Vault').then((m) => ({ default: m.VaultContent })));
+
+export const TopicsContent = () => {
   const navigate = useNavigate();
   const topics = useKaivooStore((s) => s.topics);
   const topicPages = useKaivooStore((s) => s.topicPages);
@@ -257,12 +262,11 @@ const Topics = () => {
   };
 
   return (
-    <AppLayout>
-      <div className="mx-auto max-w-4xl px-6 py-8">
-        {/* Header */}
-        <header className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="mb-1 text-2xl font-semibold text-foreground">Topics</h1>
+    <div className="mx-auto max-w-4xl px-6 py-8">
+      {/* Header */}
+      <header className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="mb-1 text-2xl font-semibold text-foreground">Topics</h1>
             <p className="text-sm text-muted-foreground">
               {topics.length} topic{topics.length !== 1 ? 's' : ''}, {topicPages.length} page
               {topicPages.length !== 1 ? 's' : ''}
@@ -387,6 +391,66 @@ const Topics = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+  );
+};
+
+/** Unified Knowledge page with Topics + Vault tabs. */
+const Topics = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [topTab, setTopTab] = useLocalStorage<string>('flow-knowledge-tab', 'topics');
+
+  // Sync tab from URL query param on mount — URL is source of truth for deep links
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'vault') {
+      setTopTab('vault');
+    } else {
+      setTopTab('topics');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTabChange = (value: string) => {
+    setTopTab(value);
+    if (value === 'vault') {
+      setSearchParams({ tab: 'vault' }, { replace: true });
+    } else {
+      // Remove query param for the default tab
+      setSearchParams({}, { replace: true });
+    }
+  };
+
+  return (
+    <AppLayout>
+      <Tabs value={topTab} onValueChange={handleTabChange} className="flex h-full flex-col">
+        <div className="border-b border-border bg-background px-6 pt-6">
+          <TabsList>
+            <TabsTrigger value="topics">Topics</TabsTrigger>
+            <TabsTrigger value="vault">Vault</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="topics" className="mt-0 flex-1">
+          <TopicsContent />
+        </TabsContent>
+
+        <TabsContent
+          value="vault"
+          className="mt-0 flex-1"
+          forceMount
+          hidden={topTab !== 'vault'}
+        >
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            }
+          >
+            <VaultContent />
+          </Suspense>
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 };

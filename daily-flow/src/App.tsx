@@ -15,7 +15,6 @@ const Today = lazy(() => import('./pages/Today'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const Topics = lazy(() => import('./pages/Topics'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
-const Vault = lazy(() => import('./pages/Vault'));
 const Insights = lazy(() => import('./pages/Insights'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const JournalPage = lazy(() => import('./pages/JournalPage'));
@@ -132,14 +131,7 @@ const App = () => (
                       </ProtectedPage>
                     }
                   />
-                  <Route
-                    path="/vault"
-                    element={
-                      <ProtectedPage>
-                        <Vault />
-                      </ProtectedPage>
-                    }
-                  />
+                  <Route path="/vault" element={<Navigate to="/topics?tab=vault" replace />} />
                   <Route
                     path="/topics"
                     element={
