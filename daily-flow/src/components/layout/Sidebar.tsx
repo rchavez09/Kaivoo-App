@@ -167,7 +167,8 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
       {/* Settings & Sign Out */}
       <div className="space-y-1 border-t border-sidebar-border p-3">
         <NavItem path="/settings" label="Settings" icon={Settings} />
-        {user && !isTauri() &&
+        {user &&
+          !isTauri() &&
           (collapsed ? (
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
