@@ -71,7 +71,7 @@ The MVP is not "minimum." It's the product you're proud to charge $49-99 for. Th
 | Sprint | Theme | Scope | Status |
 |---|---|---|---|
 | **28** | Launch Ready | Landing page, legal docs, Product Hunt listing | **DONE** |
-| **29** | Flow Rebrand | In-app rename (Kaivoo → Flow), landing page rebuild, legal updates, Product Hunt rewrite, wizard copy, sign-out removal, screenshots | **IN PROGRESS** |
+| **29** | Flow Rebrand | In-app rename (Kaivoo → Flow), landing page rebuild, legal updates, Product Hunt rewrite, wizard copy, sign-out removal, screenshots | **DONE** |
 | **30** | Bug Bash + Concierge Hardening | 5 bug fixes, pre-compaction flush, deterministic context assembly, coherence monitoring, image rename, upload polish | PLANNED |
 | **31** | Tasks + Projects Merge | UX redesign — single page, project detail with sub-nav tabs. Research in separate session first. | PLANNED |
 | **32** | Knowledge Unification | Vault + Topics research → merge into unified knowledge browser | PLANNED |
@@ -163,7 +163,7 @@ Desktop and web launch on parallel tracks:
 
 | Milestone | Status | Sprint |
 |---|---|---|
-| Flow rebrand (in-app, landing page, legal, Product Hunt) | **IN PROGRESS** | Sprint 29 |
+| Flow rebrand (in-app, landing page, legal, Product Hunt) | **DONE** | Sprint 29 |
 | Bug fixes (subtask reorder, widget reorder, calendar, search) | PLANNED | Sprint 30 |
 | Pre-compaction memory flush | PLANNED | Sprint 30 |
 | Deterministic context assembly | PLANNED | Sprint 30 |
@@ -180,10 +180,10 @@ Desktop and web launch on parallel tracks:
 
 ## Current Position
 
-**Active sprint:** Sprint 29 — Flow Rebrand (IN PROGRESS — P1-P6 complete, P7 screenshots awaiting user)
-**Branch:** `sprint/29-flow-rebrand`
+**Active sprint:** Sprint 29 DONE. Sprint 30 next.
+**Branch:** `main` (Sprint 29 merged via PR #16)
 **Tests:** 265 passing
-**Sprint sequence:** 6 focused sprints remaining (29–34). Each sprint is single-themed and tightly scoped for focused sandbox testing.
+**Sprint sequence:** 5 focused sprints remaining (30–34). Each sprint is single-themed and tightly scoped for focused sandbox testing.
 **Landing page:** Rebuilt as Flow by Kaivoo in Sprint 29. Deployed to Netlify.
 
 ---
