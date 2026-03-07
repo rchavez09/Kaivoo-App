@@ -1,0 +1,9 @@
+# Netlify Configuration — Kaivoo Landing Page
+# Static Astro site — no SPA routing needed
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"

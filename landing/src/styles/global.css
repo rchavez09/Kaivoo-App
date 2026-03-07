@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1A1F2E;
+    background-color: #FAF8F5;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .dark body {
+    color: #ffffff;
+    background-color: #12101E;
+  }
+
+  ::selection {
+    background-color: #D4EDE4;
+    color: #1A1F2E;
+  }
+
+  .dark ::selection {
+    background-color: #2A1B4E;
+    color: #ffffff;
+  }
+}
+
+@layer components {
+  .depth-bar {
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      #D4EDE4 0%,
+      #7EC8C8 20%,
+      #3B8C8C 40%,
+      #2B6E8A 60%,
+      #1E4D7A 75%,
+      #1E3364 85%,
+      #2A1B4E 95%,
+      #1A1232 100%
+    );
+  }
+}
