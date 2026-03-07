@@ -1,13 +1,13 @@
-# Product Hunt Listing Draft — Kaivoo
+# Product Hunt Listing Draft — Flow by Kaivoo
 
-> Status: DRAFT — Sprint 28, P11
+> Status: DRAFT — Sprint 29 (Flow Rebrand)
 > Last updated: 2026-03-06
 
 ---
 
 ## Product Name
 
-Kaivoo
+Flow
 
 ## Tagline (60 chars max)
 
@@ -25,11 +25,11 @@ Own your AI's memory. Own your workflow. Pay once.
 
 ## Description (~260 words)
 
-Kaivoo is a local-first productivity app that replaces your journal, task manager, calendar, knowledge base, and AI assistant — in one place.
+Flow is a local-first productivity app that replaces your journal, task manager, calendar, knowledge base, and AI assistant — in one place.
 
 **The problem:** You're running Notion for notes, Sunsama for planning, Obsidian for knowledge, Google Calendar for meetings, and ChatGPT on the side. That's five apps, five subscriptions, and constant context-switching. Your AI assistant can't see your tasks. Your task manager doesn't know your notes.
 
-**What Kaivoo does differently:**
+**What Flow does differently:**
 
 - **Day execution** — Today is your command center. Tasks, meetings, routines, and a daily brief on one screen. End each day with a guided shutdown ritual.
 - **AI concierge** — An assistant that sees your entire workspace. It creates tasks, searches notes, checks your schedule, and takes action directly in the app.
@@ -49,17 +49,17 @@ macOS, Windows, and Linux.
 
 Hey Product Hunt,
 
-I built Kaivoo because I was tired of paying monthly rent on my own productivity.
+I built Flow because I was tired of paying monthly rent on my own productivity.
 
 I had Notion for notes, Sunsama for day planning, Obsidian for knowledge, Google Calendar for meetings, and ChatGPT for everything else. Five apps. Five subscriptions. And none of them talked to each other. My AI assistant had no idea what was on my calendar. My task manager couldn't see my notes.
 
-So I built one app that does all of it.
+So I built one app that does all of it. Flow is the first product from Kaivoo.
 
-The part I'm most proud of is the Soul File. Every AI tool I've used treats memory as a black box — you can't see what it remembers, you can't edit it, and it sometimes resets without warning. In Kaivoo, your AI's memory is literally a file. You can read it, edit it, export it, or delete it. It lives on your device, not on a server.
+The part I'm most proud of is the Soul File. Every AI tool I've used treats memory as a black box — you can't see what it remembers, you can't edit it, and it sometimes resets without warning. In Flow, your AI's memory is literally a file. You can read it, edit it, export it, or delete it. It lives on your device, not on a server.
 
-The other thing that matters to me: you bring your own API keys. Kaivoo doesn't proxy your AI calls or charge a markup. You connect directly to OpenAI, Claude, Gemini, or whatever provider you prefer. You can even run fully local with Ollama — zero data leaves your machine.
+The other thing that matters to me: you bring your own API keys. Flow doesn't proxy your AI calls or charge a markup. You connect directly to OpenAI, Claude, Gemini, or whatever provider you prefer. You can even run fully local with Ollama — zero data leaves your machine.
 
-Kaivoo is a one-time purchase. $49 for founding members. No subscriptions. I believe productivity tools should be infrastructure you own, not services you rent.
+Flow is a one-time purchase. $49 for founding members. No subscriptions. I believe productivity tools should be infrastructure you own, not services you rent.
 
 I'd love to hear what you think. Happy to answer any questions in the comments.
 

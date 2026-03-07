@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
-  "productName": "Kaivoo",
+  "productName": "Flow",
   "version": "0.1.0",
   "identifier": "com.kaivoo.desktop",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Kaivoo",
+        "title": "Flow",
         "width": 1280,
         "height": 860,
         "minWidth": 900,

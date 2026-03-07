@@ -1,12 +1,12 @@
 # End User License Agreement (EULA)
 
-**Kaivoo Software**
+**Flow by Kaivoo**
 **Effective Date:** [DATE]
 **Version:** 1.0 (Draft — Pending Attorney Review)
 
 ---
 
-**IMPORTANT — READ CAREFULLY BEFORE USING THIS SOFTWARE.** This End User License Agreement ("Agreement") is a legal agreement between you ("User," "you," or "your") and Kaivoo Media ("Kaivoo," "we," "us," or "our") for the Kaivoo desktop application and web application (collectively, the "Software").
+**IMPORTANT — READ CAREFULLY BEFORE USING THIS SOFTWARE.** This End User License Agreement ("Agreement") is a legal agreement between you ("User," "you," or "your") and Kaivoo Media ("Kaivoo," "we," "us," or "our") for the Flow desktop application and web application (collectively, the "Software").
 
 By purchasing, downloading, installing, or using the Software, you agree to be bound by the terms of this Agreement. If you do not agree to these terms, do not purchase, download, install, or use the Software.
 
@@ -16,7 +16,7 @@ By purchasing, downloading, installing, or using the Software, you agree to be b
 
 ### 1.1 Scope of License
 
-Subject to the terms of this Agreement, Kaivoo grants you a **non-exclusive, non-transferable, perpetual license** to install and use the Software on a single device for personal or commercial use.
+Subject to the terms of this Agreement, Kaivoo Media grants you a **non-exclusive, non-transferable, perpetual license** to install and use the Software on a single device for personal or commercial use.
 
 ### 1.2 License Tiers
 
@@ -207,5 +207,5 @@ If you are unsatisfied with the Software, you may request a refund within thirty
 
 ---
 
-*EULA v1.0 Draft — Kaivoo Media*
+*EULA v1.0 Draft — Flow by Kaivoo — Kaivoo Media*
 *Prepared for attorney review. Placeholders marked with [BRACKETS] require completion before publication.*

@@ -1,8 +1,8 @@
-# Kaivoo Control Center
+# Flow by Kaivoo — Control Center
 
 ## Project Structure
 
-- `daily-flow/` — The React application (Vite + React 18 + TypeScript + Supabase)
+- `daily-flow/` — The Flow app (Vite + React 18 + TypeScript + Supabase)
 - `Branding/` — Brand identity and design system documents
 - `Agents/` — Multi-agent coordination system (see below)
 

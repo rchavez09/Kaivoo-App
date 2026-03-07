@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.1
+**Version:** 7.2
 **Last Updated:** March 6, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -24,7 +24,7 @@ LONG-TERM     →  Personal OS (the intelligent layer between you and your digit
 
 **The Desktop App Is the Product.**
 
-- **Kaivoo Desktop** ($99 one-time / $49 founding member) — The flagship. Journal, tasks, projects, calendar, captures, vault, routines, widgets, theme customization, data export. AI concierge with BYO API keys. Soul file. Local-first — everything runs on your machine, your data never leaves, Kaivoo's ongoing cost per user is zero. That's why one-time pricing works. **Multiple apps in one + an AI that knows you, remembers you, and executes for you. You own everything. Forever.**
+- **Flow Desktop** ($99 one-time / $49 founding member) — The flagship. Journal, tasks, projects, calendar, captures, vault, routines, widgets, theme customization, data export. AI concierge with BYO API keys. Soul file. Local-first — everything runs on your machine, your data never leaves, Kaivoo's ongoing cost per user is zero. That's why one-time pricing works. **Multiple apps in one + an AI that knows you, remembers you, and executes for you. You own everything. Forever.**
 
 - **Kaivoo Web Access + Sync** ($8-12/mo subscription) — Access your desktop data from any browser, even when your machine sleeps. Supabase-hosted sync. Managed AI (we provide the keys). The subscription covers real infrastructure costs: storage, bandwidth, auth, database, file uploads — all cost money per user per month. One-time pricing here would be a liability, not a sale. **Cancel anytime and download everything. You're paying for infrastructure, not permission.**
 
@@ -32,7 +32,7 @@ LONG-TERM     →  Personal OS (the intelligent layer between you and your digit
 
 - **Kaivoo Orchestrator** (premium subscription, pricing TBD) — AI agent orchestration for builders. Sprint management, multi-model routing, messaging-based control, autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can text from their couch.
 
-**Phase A** ships the desktop app (the flagship). **Phase B** adds Web Access, Companion, and Orchestrator. **Phase C** opens the marketplace. **Phase D** builds the MCP foundation layer and personal OS trajectory.
+**Phase A** ships Flow Desktop (the flagship). **Phase B** adds Web Access, Companion, and Orchestrator. **Phase C** opens the marketplace. **Phase D** builds the MCP foundation layer and personal OS trajectory.
 
 ### The Funnel
 
@@ -436,7 +436,7 @@ Think of it as a lego castle. The Command Space is the baseplate and first few l
 
 ### How It Works — The Solopreneur Example
 
-A freelance marketing consultant opens One Workflow. Their Day View shows todos, calendar, journal, captures, and email — all in one place. The AI concierge notices a todo: "Create social media content for Client X's spring campaign."
+A freelance marketing consultant opens Flow. Their Day View shows todos, calendar, journal, captures, and email — all in one place. The AI concierge notices a todo: "Create social media content for Client X's spring campaign."
 
 It surfaces a suggestion: "I can draft 5 Instagram captions based on Client X's brand guidelines. Want me to start?" The user taps yes. The Marketing widget activates. Copy appears. The user reviews, edits, and exports — never leaving the app.
 

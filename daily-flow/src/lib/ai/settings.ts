@@ -174,7 +174,7 @@ export function saveSoulConfig(config: SoulConfig): void {
 }
 
 export function buildSystemPrompt(soul: SoulConfig | null, depth: AIDepth): string {
-  const name = soul?.name || 'Kaivoo Assistant';
+  const name = soul?.name || 'Flow Assistant';
   const tone = soul?.tone || 'casual';
 
   const toneMap: Record<string, string> = {
@@ -189,5 +189,5 @@ export function buildSystemPrompt(soul: SoulConfig | null, depth: AIDepth): stri
     heavy: 'Be thorough and detailed in your responses.',
   };
 
-  return `You are ${name}, a ${tone} AI concierge for Kaivoo — a personal knowledge operating system that helps users organize notes, tasks, topics, and daily journals. ${toneMap[tone]} ${depthMap[depth]}`;
+  return `You are ${name}, a ${tone} AI concierge for Flow — a personal knowledge operating system that helps users organize notes, tasks, topics, and daily journals. ${toneMap[tone]} ${depthMap[depth]}`;
 }

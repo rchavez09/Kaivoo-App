@@ -1,14 +1,14 @@
 # Privacy Policy
 
-**Kaivoo Software**
+**Flow by Kaivoo**
 **Effective Date:** [DATE]
 **Version:** 1.0 (Draft — Pending Attorney Review)
 
 ---
 
-Kaivoo Media ("Kaivoo," "we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how the Kaivoo desktop application and web application (collectively, the "Software") handle your information.
+Kaivoo Media ("Kaivoo," "we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how the Flow desktop application and web application (collectively, the "Software") handle your information.
 
-**The short version:** Kaivoo is a local-first application. Your data stays on your device by default. We don't collect telemetry. We don't track you. We don't sell your data. We don't even have access to your data unless you explicitly use optional cloud features.
+**The short version:** Flow is a local-first application. Your data stays on your device by default. We don't collect telemetry. We don't track you. We don't sell your data. We don't even have access to your data unless you explicitly use optional cloud features.
 
 ---
 
@@ -59,7 +59,7 @@ The Software stores the following data **on your device** (desktop) or **in your
 | License key | Your activated license | Local only (localStorage or SQLite) |
 | App settings | UI preferences, widget configuration | Local only |
 
-**None of the above data is transmitted to Kaivoo's servers during normal use.**
+**None of the above data is transmitted to Kaivoo Media's servers during normal use.**
 
 ### 2.3 Information We Do NOT Collect
 
@@ -265,5 +265,5 @@ For questions, concerns, or requests regarding this Privacy Policy or your perso
 
 ---
 
-*Privacy Policy v1.0 Draft — Kaivoo Media*
+*Privacy Policy v1.0 Draft — Flow by Kaivoo — Kaivoo Media*
 *Prepared for attorney review. Placeholders marked with [BRACKETS] require completion before publication.*

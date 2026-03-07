@@ -1,7 +1,7 @@
 [package]
 name = "kaivoo"
 version = "0.1.0"
-description = "Kaivoo — AI-powered workflow OS"
+description = "Flow by Kaivoo — AI-powered workflow OS"
 authors = ["Kaivoo"]
 edition = "2021"
 

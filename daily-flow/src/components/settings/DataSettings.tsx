@@ -190,7 +190,7 @@ const DataSettings = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `kaivoo-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `flow-export-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -555,7 +555,7 @@ const DataSettings = () => {
         const existing = await dataAdapter.tasks.fetchAll();
         if (existing.length > 0) {
           const confirmed = window.confirm(
-            'You already have data in Kaivoo. Importing will ADD to your existing data (duplicates are possible).\n\nContinue?',
+            'You already have data in Flow. Importing will ADD to your existing data (duplicates are possible).\n\nContinue?',
           );
           if (!confirmed) {
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -918,7 +918,7 @@ const DataSettings = () => {
         <div>
           <h3 className="font-medium text-foreground">Import Data</h3>
           <p className="text-sm text-muted-foreground">
-            Restore data from a Kaivoo export file. This adds to your existing data (does not overwrite).
+            Restore data from a Flow export file. This adds to your existing data (does not overwrite).
           </p>
         </div>
         <input
