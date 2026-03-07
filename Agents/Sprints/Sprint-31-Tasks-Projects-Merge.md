@@ -2,7 +2,7 @@
 
 **Theme:** Merge Tasks and Projects into a unified page with top-level tabs and tabbed project detail.
 **Branch:** `sprint/31-tasks-projects-merge`
-**Status:** IMPLEMENTATION COMPLETE — Awaiting Phase 4 Gates
+**Status:** SHIPPED — Merged to main, deployed to production
 **Compiled by:** Director
 **Date:** March 7, 2026
 
@@ -169,13 +169,16 @@ SIDEBAR                         PROJECTS PAGE (/projects)
 ## Quality Gates
 
 - [x] Deterministic checks pass: `npm run lint && npm run typecheck && npm run test && npm run build`
-- [ ] Agent 7 code audit completed (no unresolved P0 issues)
-- [ ] Agent 11 feature integrity check passed (no regressions)
-- [ ] 3-agent design review completed (all PASS, no unresolved P0 issues)
-- [ ] Sprint file is current: all parcels have final status
-- [ ] E2E test: `npm run test:e2e` passes against deploy preview URL
-- [ ] Sandbox Track A (Web): User has reviewed deploy preview and approved
-- [ ] All sprint files committed to sprint branch
+- [x] Agent 7 code audit completed (0 P0, 3 P1 — all fixed)
+- [x] Agent 11 feature integrity check passed (1 mandatory fix — `onLinkTask` optional — fixed)
+- [x] 3-agent design review completed (all PASS; P1s fixed: ARIA tabs, focus rings, hover pattern, aria-labels)
+- [x] Sprint file is current: all parcels have final status
+- [x] E2E test: 4/4 smoke tests passed
+- [x] Sandbox Track A (Web): User approved deploy preview
+- [x] Sandbox Track B (Desktop): User approved Tauri desktop
+- [x] All sprint files committed to sprint branch
+- [x] PR #18 merged to main (squash merge, commit `c7155fb`)
+- [x] Tagged `post-sprint-31`
 
 ---
 
@@ -207,5 +210,48 @@ SIDEBAR                         PROJECTS PAGE (/projects)
 | Full concierge integration in project Chat tab | Sprint 31 P10 placeholder |
 
 ---
+
+---
+
+## Retrospective
+
+**Sprint 31 — Tasks + Projects Merge**
+**Completed:** March 7, 2026 | **PR:** #18 | **Commits:** 4 (3 on sprint branch + squash merge)
+
+### What Shipped
+14/14 parcels across 4 tracks. Merged Tasks and Projects into a single unified page at `/projects` with top-level tabs (All Tasks | Projects). Project detail now has a tabbed sub-nav (Tasks/Documents/Notes/Chat) instead of stacked sections. Inbox virtual project for unassigned tasks. Sidebar reduced from 9 to 8 items. All navigation paths updated. Settings moved from inline section to gear icon dialog (sandbox feedback).
+
+### What Went Well
+1. **Architecture held up.** The `TasksContent` extraction was clean — one named export, zero prop drilling. React.lazy + Suspense gave us code splitting for free.
+2. **Agent audits caught real bugs.** Agent 11 found the missing `onLinkTask` prop on Inbox — would have been a runtime crash in production. Agent 7's O(N*M) → O(N+M) optimization was a legitimate perf win.
+3. **3-agent design review added polish.** ARIA `aria-pressed` pattern (instead of fake `role="tab"` without keyboard nav), focus-visible rings, hover translate instead of shadow — all caught before users saw it.
+4. **Sprint 30 carryover was already done.** All 3 carryover parcels had been implemented in Sprint 30's final commit. Verification took <1 minute.
+5. **Sandbox feedback loop worked.** User spotted the settings problem (always visible on every tab page) during sandbox testing. Gear icon dialog was a clean fix — same sprint, same PR.
+
+### What Could Be Better
+1. **Chat tab is still a placeholder.** The concierge integration was intentionally deferred, but shipping a disabled "Plan this project" button isn't great UX. Should have a clearer "coming soon" state or skip the tab entirely.
+2. **No new tests for the merge.** 265 tests still pass, but there are no integration tests for the tab switching, Inbox filtering, or `/tasks` redirect. E2E smoke tests cover page load but not the new tab interactions.
+3. **ProjectDetail.tsx is getting large.** Currently ~476 lines with inline editing, stats, tabs, drawers, and dialogs. Approaching the 500-line warning threshold from Agent 7's standards.
+
+### Key Learnings
+- **Extracting components for embedding works well.** The pattern of exporting `FooContent` (no layout wrapper) alongside the default `Foo` (with layout) is reusable for future page merges.
+- **`useLocalStorage` for tab persistence is the right call.** Users expect their last tab to be remembered. Simple hook, zero backend cost.
+- **Settings as a dialog > settings as a section.** When config is rarely accessed, it shouldn't compete for screen real estate with primary content. Gear icon pattern validated.
+
+### Metrics
+| Metric | Value |
+|---|---|
+| Parcels | 14/14 (100%) |
+| Tests | 265/265 pass |
+| P0 issues | 0 |
+| P1 issues found | 4 (all fixed same sprint) |
+| Build time | 2.57s |
+| Bundle (main JS) | 166.27 KB (gzip: 49.04 KB) |
+
+### Deferred Items → Sprint 33
+- Full concierge integration in Chat tab
+- Bundle size audit (<512KB budget)
+- Enhanced project-scoped task features (filters, kanban within a project)
+- ProjectDetail component splitting (approaching size threshold)
 
 *Sprint 31 — Tasks + Projects Merge — Created March 7, 2026 by Director*

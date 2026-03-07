@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.4
+**Version:** 7.5
 **Last Updated:** March 7, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -843,8 +843,10 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (the wedge — final pre-launch sprints, shipping toward the personal OS vision)
-**Active sprint:** None (planning Sprint 31)
-**Last completed:** Sprint 30 (Bug Bash + Concierge Hardening) — 15/15 parcels across 4 tracks. Track 1: 7 bugs fixed (2 P0 data-loss: TopicPage navigation flush + base64 image 200KB cap; content column migration; subtask/widget reorder verified; calendar empty state; search prefix matching). Track 2: Concierge memory architecture hardened (pre-compaction flush at 40 msgs, deterministic context assembly via `assembleConciergeContext()`, coherence monitoring with 3 heuristic checks). Track 3: Image rename pipeline + upload progress polish. Track 4 (sandbox discoveries): AI conversations/coherence logs moved from localStorage to adapter pattern (SQLite + Supabase + RLS), AI Conversations vault folder, desktop vault fix (VirtualVaultAdapter for browsing, LocalVaultAdapter preserved as fileVault for exports). 265 tests. See `Sprints/Sprint-30-Bug-Bash-Concierge.md`.
+**Active sprint:** None (planning Sprint 32)
+**Last completed:** Sprint 31 (Tasks + Projects Merge) — 14/14 parcels across 4 tracks. Track 0: Unified `/projects` page with top-level tabs (All Tasks | Projects), lazy-loaded TasksContent via React.lazy + Suspense, `/tasks` redirects to `/projects`. Track 1: Project detail tabbed sub-nav (Tasks/Documents/Notes/Chat), Inbox virtual project for unassigned tasks, `sortDoneToBottom` extracted, chat placeholder with disabled buttons. Track 2: Sidebar Tasks entry removed, search paths updated, widget links updated, all navigation points to `/projects`. Track 3: Sprint 30 carryover — `onLinkTask` made optional, ProjectNotesList spacing fixed. Post-audit: O(N+M) taskStatsMap optimization, settings moved from inline section to gear icon dialog, ARIA `aria-pressed` pattern on filter tabs, `focus-visible:ring-*` on 5 element types, Inbox hover translate instead of shadow, sidebar sign-out `aria-label`. 265 tests. See `Sprints/Sprint-31-Tasks-Projects-Merge.md`.
+
+**Sprint 30 delivered:** Bug Bash + Concierge Hardening — 15/15 parcels across 4 tracks. Track 1: 7 bugs fixed (2 P0 data-loss: TopicPage navigation flush + base64 image 200KB cap; content column migration; subtask/widget reorder verified; calendar empty state; search prefix matching). Track 2: Concierge memory architecture hardened (pre-compaction flush at 40 msgs, deterministic context assembly via `assembleConciergeContext()`, coherence monitoring with 3 heuristic checks). Track 3: Image rename pipeline + upload progress polish. Track 4 (sandbox discoveries): AI conversations/coherence logs moved from localStorage to adapter pattern (SQLite + Supabase + RLS), AI Conversations vault folder, desktop vault fix (VirtualVaultAdapter for browsing, LocalVaultAdapter preserved as fileVault for exports). 265 tests. See `Sprints/Sprint-30-Bug-Bash-Concierge.md`.
 
 **Sprint 29 delivered:** Flow Rebrand — Full product rename from "Kaivoo" to "Flow by Kaivoo." In-app text, page titles, sidebar, settings, wizard, window title all updated. Sign-out button hidden on desktop. Landing page rebuilt with Flow identity. EULA + Privacy Policy updated. 6/7 parcels done (P7 screenshots deferred). See `Sprints/Sprint-29-Flow-Rebrand.md`.
 
@@ -1068,7 +1070,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v7.4 — March 7, 2026*
+*Vision v7.5 — March 7, 2026*
+*v7.5: Sprint 31 (Tasks + Projects Merge) complete. 14/14 parcels. Unified `/projects` page with top-level tabs (All Tasks | Projects), lazy-loaded TasksContent, `/tasks` redirect, project detail tabbed sub-nav (Tasks/Documents/Notes/Chat), Inbox virtual project, sidebar Tasks entry removed, all navigation updated. Post-audit: O(N+M) stats optimization, settings moved to gear icon dialog, ARIA improvements (aria-pressed, focus-visible rings), hover translate pattern. 265 tests. Current position updated.*
 *v7.4: Sprint 30 (Bug Bash + Concierge Hardening) complete. 15/15 parcels. 7 bugs fixed (2 P0 data-loss), concierge memory architecture hardened (pre-compaction flush, deterministic context assembly, coherence monitoring), upload polish, AI conversations moved to adapter pattern (localStorage→SQLite/Supabase), desktop vault fixed (VirtualVaultAdapter for browsing). 265 tests. Current position updated.*
 *v7.3: Sprint 29 (Flow Rebrand) complete. Product renamed from "Kaivoo" to "Flow by Kaivoo." In-app rename (all user-visible text), landing page rebuilt with Flow identity, EULA + Privacy Policy updated, Product Hunt listing rewritten, strategic docs updated. Internal identifiers preserved. Sign-out hidden on desktop. Agent 7 caught 6 missed renames — all fixed. Screenshots deferred to Sprint 33. Rebrand decision updated. Current position updated.*
 *v7.2: Sprint 28 (Launch Ready) complete. Landing page (Astro + Tailwind, 11 sections, dark/light toggle) deployed to Netlify. EULA and Privacy Policy drafts ready for attorney review. Product Hunt listing drafted. Revenue pipeline deferred to future sprint — user wants more features before launch. Custom domain pending DNS config. CTA buttons placeholder until Stripe configured. Current position updated.*
