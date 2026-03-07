@@ -2,7 +2,7 @@
 
 **Theme:** Fix all launch-blocking bugs, harden the concierge memory architecture, polish the upload experience.
 **Branch:** `sprint/30-bug-bash-concierge`
-**Status:** PHASE 4 — VERIFICATION
+**Status:** PHASE 5 — SANDBOX TESTING
 **Compiled by:** Director
 **Date:** March 7, 2026
 
@@ -26,7 +26,7 @@ Sprint 29 shipped the Flow identity. Now we fix what's broken and harden what di
 
 ---
 
-## Scope — 3 Tracks, 12 Parcels
+## Scope — 4 Tracks, 15 Parcels
 
 ### Track 1: Bug Fixes
 
@@ -48,7 +48,7 @@ Sprint 29 shipped the Flow identity. Now we fix what's broken and harden what di
 |---|---|---|---|---|
 | P8 | **Pre-compaction memory flush (Layer 4)** — Added `preCompactionFlush()` in `extraction.ts`. Triggers at 40 visible messages, extracts up to 8 lasting memories with dedicated prompt. Hooked into ConciergeChat before system prompt assembly. | Agent 2 | DONE | **P0** |
 | P9 | **Deterministic context assembly (Layer 1-2)** — Added `assembleConciergeContext()` in `prompt-assembler.ts`. Single entry point: soul + settings + memories + summaries → system prompt. ConciergeChat refactored to use it. No AI-generated text in system prompt. | Agent 2 + Agent 3 | DONE | **P1** |
-| P10 | **Basic coherence monitoring (Layer 7)** — Created `coherence-monitor.ts` with 3 heuristic checks: name mismatch, generic response, personality drift. Logs to localStorage (`flow-coherence-log`). Observation-only. Hooked into ConciergeChat post-response. | Agent 2 | DONE | **P2** |
+| P10 | **Basic coherence monitoring (Layer 7)** — Created `coherence-monitor.ts` with 3 heuristic checks: name mismatch, generic response, personality drift. Logs via adapter (SQLite/Supabase). Observation-only. Hooked into ConciergeChat post-response. | Agent 2 | DONE | **P2** |
 
 **Dependencies:** P8 is independent (can start immediately). P9 requires reading the existing system prompt code. P10 depends on P9 (needs to know the context assembly structure to detect drift from it).
 
@@ -60,6 +60,16 @@ Sprint 29 shipped the Flow identity. Now we fix what's broken and harden what di
 | P12 | **Upload system polish** — Added indeterminate progress bar during upload. Upload icon scales up on drag-enter. `indeterminate` keyframe added to Tailwind config. | Agent 2 | DONE | **P2** |
 
 **Dependencies:** P11 and P12 are independent. Lower priority — tackle after Track 1 and Track 2 are done.
+
+### Track 4: Sandbox Discoveries (Added During Phase 5)
+
+| # | Parcel | Agent | Status | Priority |
+|---|---|---|---|---|
+| P13 | **AI conversations → adapter pattern** — Moved conversations and coherence logs from localStorage to DataAdapter layer. Local (SQLite) + Supabase implementations with RLS. One-time localStorage migration utility. 50-conversation / 200-message caps. | Agent 2 | DONE | **P1** |
+| P14 | **Vault: AI Conversations folder** — Added `AI Conversations` folder to VirtualVaultAdapter. Conversations render as browsable markdown in the vault. `conversationToMarkdown()` renderer. entityRef type extended with `'conversation'`. | Agent 2 | DONE | **P2** |
+| P15 | **Desktop vault fix** — Desktop vault showed empty folders because `LocalVaultAdapter` reads from filesystem (empty until manual export). Switched desktop to `VirtualVaultAdapter` for browsing (reads from DB). Added `fileVault` context property to preserve `LocalVaultAdapter` for export/attachment operations. | Agent 2 | DONE | **P0** |
+
+**Dependencies:** P13 is prerequisite for P14 (vault needs adapter to fetch conversations). P15 discovered during desktop sandbox testing.
 
 ---
 
@@ -91,12 +101,17 @@ Sprint 29 shipped the Flow identity. Now we fix what's broken and harden what di
 - P10: Drift signals logged after concierge responses. Logging table exists.
 - P11: Users can rename uploaded images.
 - P12: Upload progress visible. Drag-drop zones styled with clear feedback.
+- P13: Conversations persist in SQLite (desktop) / Supabase (web). localStorage migration runs once.
+- P14: AI Conversations folder visible in vault with readable markdown rendering.
+- P15: Desktop vault shows all entities (journals, topics, captures, conversations). Export still writes to filesystem.
 
 ### Sprint-Level
 - [x] All 7 bugs fixed and verified (P4/P5 were already working — verified; P1/P2/P3/P6/P7 fixed)
 - [x] Zero data-loss scenarios remain (P1: 3 scenarios covered, P2: 200KB cap)
 - [x] Concierge memory flush working in long conversations (P8: 40-msg threshold)
 - [x] Context assembly is deterministic and auditable (P9: `assembleConciergeContext()`)
+- [x] AI conversations persisted via adapter pattern (P13: SQLite + Supabase + RLS)
+- [x] Desktop vault shows actual data (P15: VirtualVaultAdapter for browsing)
 - [x] 265 tests passing (no regression)
 - [x] Build clean, lint clean (0 errors), typecheck clean
 - [ ] Bundle size within budget (<512KB uncompressed)
@@ -109,7 +124,9 @@ Sprint 29 shipped the Flow identity. Now we fix what's broken and harden what di
 - [x] **Agent 7 code audit:** PASS WITH CONDITIONS — 0 P0s, 1 P1 (fixed: memory source label), 7 P2s (accepted). Grade: A- (85/100). Report: `Agent-7-Docs/Code-Audit-Sprint-30-Review.md`
 - [x] **Agent 11 feature integrity:** PASS — 0 regressions across 7 Feature Bibles, 3 P2 risks noted. Report: `Agent-11-Docs/Feature-Integrity-Sprint-30-Review.md`
 - [x] **3-agent design review:** PASS — Visual Design PASS, Accessibility PASS WITH CONDITIONS (P2: touch targets pre-existing), UX Completeness PASS. Report: `Agent-Design-Docs/Design-Review-Sprint-30.md`
-- [x] **Sprint file checkpoint:** All 12 parcels marked DONE, quality gates checked off
+- [x] **Sprint file checkpoint:** All 15 parcels marked DONE, quality gates checked off
+- [x] **Phase 5 sandbox (web):** Conversations persist, vault shows AI Conversations, coherence logs write to DB
+- [x] **Phase 5 sandbox (desktop):** Vault shows all entities, export writes to filesystem, Tauri dev clean
 - [ ] **E2E tests:** Run against Netlify deploy preview URL
 
 ---
