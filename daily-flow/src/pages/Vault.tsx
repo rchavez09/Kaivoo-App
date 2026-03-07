@@ -22,6 +22,7 @@ import {
   Library,
   Briefcase,
   Hash,
+  Bot,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -52,6 +53,8 @@ function getFolderIcon(name: string) {
       return Library;
     case VAULT_FOLDERS.INBOX:
       return Inbox;
+    case VAULT_FOLDERS.AI_CONVERSATIONS:
+      return Bot;
     default:
       return Folder;
   }
@@ -78,6 +81,8 @@ function getEntityRoute(node: VaultNode): string | null {
       return `/projects/${id}`;
     case 'project_note':
       return parentId ? `/projects/${parentId}` : '/projects';
+    case 'conversation':
+      return null; // Conversations are viewed in the concierge panel
     default:
       return null;
   }

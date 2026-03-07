@@ -36,6 +36,8 @@ import {
   LocalMeetingAdapter,
   LocalProjectAdapter,
   LocalProjectNoteAdapter,
+  LocalConversationAdapter,
+  LocalCoherenceLogAdapter,
 } from './local-entities-ext';
 import { LocalSearchAdapter } from './local-search';
 
@@ -64,6 +66,8 @@ export class LocalDataAdapter implements DataAdapter {
   readonly meetings;
   readonly projects;
   readonly projectNotes;
+  readonly conversations;
+  readonly coherenceLog;
   readonly searchAdapter: LocalSearchAdapter;
 
   private constructor(
@@ -86,6 +90,8 @@ export class LocalDataAdapter implements DataAdapter {
     this.meetings = new LocalMeetingAdapter(db, search);
     this.projects = new LocalProjectAdapter(db, search);
     this.projectNotes = new LocalProjectNoteAdapter(db, search);
+    this.conversations = new LocalConversationAdapter(db);
+    this.coherenceLog = new LocalCoherenceLogAdapter(db);
   }
 
   /** Exposes the database for shared adapters (e.g., LocalSearchAdapter). */

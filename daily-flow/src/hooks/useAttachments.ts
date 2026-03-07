@@ -16,6 +16,7 @@ interface UseAttachmentsReturn {
   uploading: string | null; // filename being uploaded, or null
   upload: (file: File) => Promise<void>;
   remove: (filename: string) => Promise<void>;
+  rename: (oldName: string, newName: string) => Promise<void>;
   getUrl: (filename: string) => Promise<string>;
   openFile: (filename: string) => Promise<void>;
   refresh: () => Promise<void>;
@@ -84,6 +85,25 @@ export function useAttachments(entityId: string | undefined): UseAttachmentsRetu
     [entityId, attachments],
   );
 
+  const rename = useCallback(
+    async (oldName: string, newName: string) => {
+      if (!entityId) return;
+      if (!attachments.renameFile) {
+        toast.error('Rename not supported');
+        return;
+      }
+      try {
+        const finalName = await attachments.renameFile(entityId, oldName, newName);
+        setFiles((prev) => prev.map((f) => (f.name === oldName ? { ...f, name: finalName } : f)));
+        toast.success(`Renamed to ${finalName}`);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Rename failed';
+        toast.error(msg);
+      }
+    },
+    [entityId, attachments],
+  );
+
   const getUrl = useCallback(
     async (filename: string) => {
       if (!entityId) return '';
@@ -105,5 +125,5 @@ export function useAttachments(entityId: string | undefined): UseAttachmentsRetu
     [entityId, attachments],
   );
 
-  return { files, isLoading, uploading, upload, remove, getUrl, openFile, refresh };
+  return { files, isLoading, uploading, upload, remove, rename, getUrl, openFile, refresh };
 }

@@ -15,7 +15,7 @@ interface ProjectAttachmentsProps {
 }
 
 const ProjectAttachments = ({ projectId }: ProjectAttachmentsProps) => {
-  const { files, isLoading, uploading, upload, remove, getUrl } = useAttachments(projectId);
+  const { files, isLoading, uploading, upload, remove, rename, getUrl } = useAttachments(projectId);
 
   return (
     <div className="widget-card mt-8">
@@ -29,7 +29,7 @@ const ProjectAttachments = ({ projectId }: ProjectAttachmentsProps) => {
         </span>
       </div>
 
-      <FileList files={files} onDelete={remove} getUrl={getUrl} isLoading={isLoading} />
+      <FileList files={files} onDelete={remove} onRename={rename} getUrl={getUrl} isLoading={isLoading} />
 
       <div className={files.length > 0 ? 'mt-3' : undefined}>
         <FileDropZone onUpload={upload} uploading={uploading} />

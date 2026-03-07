@@ -17,13 +17,20 @@ interface EntityAttachmentsProps {
 }
 
 const EntityAttachments = ({ entityId, label = 'Attachments', compact = false }: EntityAttachmentsProps) => {
-  const { files, isLoading, uploading, upload, remove, getUrl, openFile } = useAttachments(entityId);
+  const { files, isLoading, uploading, upload, remove, rename, getUrl, openFile } = useAttachments(entityId);
 
   if (compact) {
     return (
       <div className="space-y-2">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
-        <FileList files={files} onDelete={remove} getUrl={getUrl} onOpen={openFile} isLoading={isLoading} />
+        <FileList
+          files={files}
+          onDelete={remove}
+          onRename={rename}
+          getUrl={getUrl}
+          onOpen={openFile}
+          isLoading={isLoading}
+        />
         <FileDropZone onUpload={upload} uploading={uploading} />
       </div>
     );
@@ -41,7 +48,14 @@ const EntityAttachments = ({ entityId, label = 'Attachments', compact = false }:
         </span>
       </div>
 
-      <FileList files={files} onDelete={remove} getUrl={getUrl} onOpen={openFile} isLoading={isLoading} />
+      <FileList
+        files={files}
+        onDelete={remove}
+        onRename={rename}
+        getUrl={getUrl}
+        onOpen={openFile}
+        isLoading={isLoading}
+      />
 
       <div className={files.length > 0 ? 'mt-3' : undefined}>
         <FileDropZone onUpload={upload} uploading={uploading} />

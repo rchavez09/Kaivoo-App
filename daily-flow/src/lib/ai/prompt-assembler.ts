@@ -15,6 +15,8 @@
 
 import type { SoulConfig, AIDepth, AIMemory, AIConversationSummary } from './types';
 import { format } from 'date-fns';
+import { getMemories, getSummaries } from './memory-service';
+import { getSoulConfig, getAISettings } from './settings';
 
 // ─── Layer Builders ───
 
@@ -201,4 +203,37 @@ export function assembleSystemPrompt(input: PromptAssemblerInput): string {
  */
 export function estimateTokens(prompt: string): number {
   return Math.ceil(prompt.length / 4);
+}
+
+// ─── Deterministic Context Assembly (Layer 1-2) ───
+
+/**
+ * assembleConciergeContext — Sprint 30 P9
+ *
+ * Single entry point that deterministically builds the full system prompt
+ * from structured data sources. All inputs come from database reads or
+ * store state — never from AI-generated text.
+ *
+ * Data sources:
+ *   - Soul file (localStorage/settings)
+ *   - AI settings (localStorage/settings)
+ *   - Memories (SQLite or localStorage)
+ *   - Conversation summaries (SQLite or localStorage)
+ *   - App context (Zustand store snapshot)
+ */
+export async function assembleConciergeContext(appContext: AppContext | null): Promise<string> {
+  const soul = getSoulConfig();
+  const settings = getAISettings();
+  const allMemories = await getMemories();
+  const activeMemories = allMemories.filter((m) => m.active);
+  const summaries = await getSummaries();
+
+  return assembleSystemPrompt({
+    soul,
+    depth: settings.depth,
+    memories: activeMemories,
+    summaries,
+    appContext,
+    hasTools: true,
+  });
 }

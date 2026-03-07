@@ -216,6 +216,29 @@ ALTER TABLE subtasks ADD COLUMN sort_order INTEGER DEFAULT 0;
 ALTER TABLE topics ADD COLUMN content TEXT;
 ALTER TABLE topic_pages ADD COLUMN content TEXT;
 
+CREATE TABLE IF NOT EXISTS ai_conversations (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL DEFAULT 'New conversation',
+  messages TEXT NOT NULL DEFAULT '[]',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_conversations_updated ON ai_conversations(updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS ai_coherence_log (
+  id TEXT PRIMARY KEY,
+  conversation_id TEXT NOT NULL,
+  signal TEXT NOT NULL,
+  severity TEXT NOT NULL DEFAULT 'low',
+  details TEXT NOT NULL DEFAULT '',
+  response_snippet TEXT NOT NULL DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_coherence_log_conv ON ai_coherence_log(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_ai_coherence_log_created ON ai_coherence_log(created_at DESC);
+
 CREATE TABLE IF NOT EXISTS license (
   id TEXT PRIMARY KEY DEFAULT 'active',
   license_key TEXT NOT NULL,

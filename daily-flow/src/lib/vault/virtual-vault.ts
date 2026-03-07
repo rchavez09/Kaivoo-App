@@ -7,6 +7,7 @@
  */
 
 import type { JournalEntry, Capture, Topic, TopicPage, Project } from '@/types';
+import type { Conversation } from '@/lib/ai/types';
 import type { DataAdapter } from '../adapters/types';
 import type { VaultAdapter, VaultNode } from './types';
 import {
@@ -27,6 +28,7 @@ interface CachedData {
   topics: Topic[];
   topicPages: TopicPage[];
   topicNames: Map<string, string>;
+  conversations: Conversation[];
 }
 
 export class VirtualVaultAdapter implements VaultAdapter {
@@ -98,6 +100,10 @@ export class VirtualVaultAdapter implements VaultAdapter {
         const page = cached.topicPages.find((p) => p.id === id);
         return page ? topicPageToMarkdown(page) : '';
       }
+      case 'conversation': {
+        const conv = cached.conversations.find((c) => c.id === id);
+        return conv ? conversationToMarkdown(conv) : '';
+      }
       default:
         return '';
     }
@@ -135,16 +141,17 @@ function buildEmptyTree(): VaultNode {
 }
 
 async function buildTreeWithData(data: DataAdapter): Promise<CachedData> {
-  const [journals, captures, topics, topicPages, projects] = await Promise.all([
+  const [journals, captures, topics, topicPages, projects, conversations] = await Promise.all([
     data.journalEntries.fetchAll(),
     data.captures.fetchAll(),
     data.topics.fetchAll(),
     data.topicPages.fetchAll(),
     data.projects.fetchAll(),
+    data.conversations.fetchAll(),
   ]);
   const topicNames = new Map(topics.map((t) => [t.id, t.name]));
-  const tree = buildTree(journals, captures, topics, topicPages, projects);
-  return { tree, journals, captures, topics, topicPages, topicNames };
+  const tree = buildTree(journals, captures, topics, topicPages, projects, conversations);
+  return { tree, journals, captures, topics, topicPages, topicNames, conversations };
 }
 
 function buildTree(
@@ -153,6 +160,7 @@ function buildTree(
   topics: Topic[],
   topicPages: TopicPage[],
   projects: Project[],
+  conversations: Conversation[],
 ): VaultNode {
   // ─── Journal tree: Journal/YYYY/MM - MonthName/date.md ───
   const journalByFolder = new Map<string, VaultNode[]>();
@@ -219,6 +227,15 @@ function buildTree(
     entityRef: { type: 'capture' as const, id: c.id },
   }));
 
+  // ─── AI Conversations ───
+  const conversationChildren: VaultNode[] = conversations.map((c) => ({
+    name: `${sanitizeName(c.title)}.md`,
+    path: `${VAULT_FOLDERS.AI_CONVERSATIONS}/${sanitizeName(c.title)}-${c.id.slice(0, 8)}.md`,
+    isDirectory: false,
+    modifiedAt: c.updatedAt ? new Date(c.updatedAt) : undefined,
+    entityRef: { type: 'conversation' as const, id: c.id },
+  }));
+
   return {
     name: 'Vault',
     path: '',
@@ -248,6 +265,12 @@ function buildTree(
         path: VAULT_FOLDERS.INBOX,
         isDirectory: true,
         children: inboxChildren,
+      },
+      {
+        name: VAULT_FOLDERS.AI_CONVERSATIONS,
+        path: VAULT_FOLDERS.AI_CONVERSATIONS,
+        isDirectory: true,
+        children: conversationChildren,
       },
     ],
   };
@@ -299,4 +322,16 @@ function findNode(root: VaultNode, path: string): VaultNode | null {
     if (found) return found;
   }
   return null;
+}
+
+/** Render a conversation as readable markdown */
+function conversationToMarkdown(conv: Conversation): string {
+  const lines: string[] = [`# ${conv.title}`, ''];
+  if (conv.createdAt) lines.push(`*Started: ${conv.createdAt}*`, '');
+  for (const msg of conv.messages) {
+    if (msg.role === 'tool') continue;
+    const label = msg.role === 'user' ? '**You**' : '**Assistant**';
+    lines.push(`${label}:`, '', msg.content, '', '---', '');
+  }
+  return lines.join('\n');
 }

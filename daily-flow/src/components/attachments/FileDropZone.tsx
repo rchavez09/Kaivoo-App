@@ -111,13 +111,16 @@ const FileDropZone = ({ onUpload, uploading, className }: FileDropZoneProps) => 
       }}
     >
       {uploading ? (
-        <>
+        <div className="flex w-full flex-col items-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin" />
           <span className="text-xs">Uploading {uploading}...</span>
-        </>
+          <div className="h-1 w-full max-w-[200px] overflow-hidden rounded-full bg-secondary">
+            <div className="h-full w-1/3 animate-indeterminate rounded-full bg-primary" />
+          </div>
+        </div>
       ) : (
         <>
-          <Upload className="h-6 w-6" />
+          <Upload className={cn('h-6 w-6 transition-transform', isDragging && 'scale-125')} />
           <span className="text-xs">{isDragging ? 'Drop to upload' : 'Drop files here or click to browse'}</span>
           <span className="text-[10px] text-muted-foreground/60">Max 10MB per file</span>
         </>

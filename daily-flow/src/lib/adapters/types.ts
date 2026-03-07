@@ -282,6 +282,29 @@ export interface UpdateProjectNoteInput {
   content?: string;
 }
 
+// ─── AI Conversations ───
+
+export interface CreateConversationInput {
+  id?: string;
+  title: string;
+  messages: string; // JSON-serialized ConversationMessage[]
+}
+
+export interface UpdateConversationInput {
+  title?: string;
+  messages?: string; // JSON-serialized ConversationMessage[]
+}
+
+// ─── Coherence Log ───
+
+export interface CreateCoherenceSignalInput {
+  conversationId: string;
+  signal: 'personality_drift' | 'generic_response' | 'data_hallucination' | 'name_mismatch';
+  severity: 'low' | 'medium' | 'high';
+  details: string;
+  responseSnippet: string;
+}
+
 // ─── Search ───
 
 export interface SearchResult {
@@ -403,6 +426,18 @@ export interface ProjectNoteAdapter {
   delete(id: string): Promise<void>;
 }
 
+export interface ConversationAdapter {
+  fetchAll(): Promise<import('@/lib/ai/types').Conversation[]>;
+  create(input: CreateConversationInput): Promise<import('@/lib/ai/types').Conversation>;
+  update(id: string, input: UpdateConversationInput): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+export interface CoherenceLogAdapter {
+  fetchAll(): Promise<import('@/lib/ai/coherence-monitor').CoherenceSignal[]>;
+  create(input: CreateCoherenceSignalInput): Promise<import('@/lib/ai/coherence-monitor').CoherenceSignal>;
+}
+
 // ═══════════════════════════════════════════════════════
 // Top-Level Adapter Interfaces
 // ═══════════════════════════════════════════════════════
@@ -437,6 +472,8 @@ export interface DataAdapter {
   meetings: MeetingAdapter;
   projects: ProjectAdapter;
   projectNotes: ProjectNoteAdapter;
+  conversations: ConversationAdapter;
+  coherenceLog: CoherenceLogAdapter;
 }
 
 /**
@@ -540,6 +577,8 @@ export interface AttachmentAdapter {
   listFiles(entityId: string): Promise<AttachmentInfo[]>;
   /** Open a file with the OS default application (desktop) or new tab (web). */
   openFile?(entityId: string, filename: string): Promise<void>;
+  /** Rename a file. Returns the final (sanitized/deduplicated) new name. */
+  renameFile?(entityId: string, oldName: string, newName: string): Promise<string>;
 }
 
 export interface AttachmentInfo {

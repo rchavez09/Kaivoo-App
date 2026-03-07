@@ -5,8 +5,8 @@
  * No image preview thumbnails — keeps the UI clean and consistent for all file types.
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { FileText, Image, FileSpreadsheet, File, Trash2, ExternalLink, Loader2 } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { FileText, Image, FileSpreadsheet, File, Trash2, ExternalLink, Loader2, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AttachmentInfo } from '@/lib/adapters/types';
 
@@ -26,6 +26,7 @@ function getFileIcon(mimeType: string) {
 interface FileListProps {
   files: AttachmentInfo[];
   onDelete: (filename: string) => Promise<void>;
+  onRename?: (oldName: string, newName: string) => Promise<void>;
   getUrl: (filename: string) => Promise<string>;
   onOpen?: (filename: string) => void;
   isLoading?: boolean;
@@ -35,14 +36,18 @@ interface FileListProps {
 interface FileItemProps {
   file: AttachmentInfo;
   onDelete: (filename: string) => Promise<void>;
+  onRename?: (oldName: string, newName: string) => Promise<void>;
   getUrl: (filename: string) => Promise<string>;
   onOpen?: (filename: string) => void;
 }
 
-const FileItem = ({ file, onDelete, getUrl, onOpen }: FileItemProps) => {
+const FileItem = ({ file, onDelete, onRename, getUrl, onOpen }: FileItemProps) => {
   const [url, setUrl] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
+  const renameRef = useRef<HTMLInputElement>(null);
   const Icon = getFileIcon(file.mimeType);
 
   useEffect(() => {
@@ -79,12 +84,61 @@ const FileItem = ({ file, onDelete, getUrl, onOpen }: FileItemProps) => {
     [file.name, onOpen],
   );
 
+  const startRename = useCallback(() => {
+    // Pre-fill with filename without extension
+    const dotIdx = file.name.lastIndexOf('.');
+    setRenameValue(dotIdx > 0 ? file.name.slice(0, dotIdx) : file.name);
+    setIsRenaming(true);
+    // Focus the input after render
+    setTimeout(() => renameRef.current?.select(), 0);
+  }, [file.name]);
+
+  const commitRename = useCallback(async () => {
+    const trimmed = renameValue.trim();
+    if (!trimmed || !onRename) {
+      setIsRenaming(false);
+      return;
+    }
+    // Preserve original extension
+    const dotIdx = file.name.lastIndexOf('.');
+    const ext = dotIdx > 0 ? file.name.slice(dotIdx) : '';
+    const newName = trimmed + ext;
+    if (newName === file.name) {
+      setIsRenaming(false);
+      return;
+    }
+    await onRename(file.name, newName);
+    setIsRenaming(false);
+  }, [renameValue, file.name, onRename]);
+
+  const handleRenameKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        void commitRename();
+      } else if (e.key === 'Escape') {
+        setIsRenaming(false);
+      }
+    },
+    [commitRename],
+  );
+
   return (
     <div className="group flex items-center gap-2 overflow-hidden rounded-md border border-border bg-[hsl(var(--surface-elevated))] px-3 py-2">
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
 
       <div className="min-w-0 flex-1 overflow-hidden">
-        {url ? (
+        {isRenaming ? (
+          <input
+            ref={renameRef}
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onBlur={() => void commitRename()}
+            onKeyDown={handleRenameKeyDown}
+            className="w-full rounded border border-primary/50 bg-transparent px-1 py-0.5 text-sm font-medium text-foreground outline-none focus:border-primary"
+          />
+        ) : url ? (
           <a
             href={url}
             target="_blank"
@@ -100,12 +154,22 @@ const FileItem = ({ file, onDelete, getUrl, onOpen }: FileItemProps) => {
             {file.name}
           </p>
         )}
-        <p className="text-[11px] text-muted-foreground">{formatFileSize(file.size)}</p>
+        {!isRenaming && <p className="text-[11px] text-muted-foreground">{formatFileSize(file.size)}</p>}
       </div>
 
       {/* Actions */}
       <div className="flex shrink-0 items-center gap-0.5">
-        {url && (
+        {!isRenaming && onRename && (
+          <button
+            aria-label={`Rename ${file.name}`}
+            className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-secondary/50 hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
+            onClick={startRename}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
+
+        {!isRenaming && url && (
           <a
             href={url}
             target="_blank"
@@ -118,40 +182,41 @@ const FileItem = ({ file, onDelete, getUrl, onOpen }: FileItemProps) => {
           </a>
         )}
 
-        {confirmDelete ? (
-          <div className="flex items-center gap-1">
+        {!isRenaming &&
+          (confirmDelete ? (
+            <div className="flex items-center gap-1">
+              <button
+                className={cn(
+                  'rounded-md px-2 py-1 text-[11px] font-medium text-destructive-foreground',
+                  'bg-destructive hover:bg-destructive/90',
+                )}
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Delete'}
+              </button>
+              <button
+                className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-secondary/50"
+                onClick={() => setConfirmDelete(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
             <button
-              className={cn(
-                'rounded-md px-2 py-1 text-[11px] font-medium text-destructive-foreground',
-                'bg-destructive hover:bg-destructive/90',
-              )}
-              onClick={handleDelete}
-              disabled={deleting}
+              aria-label={`Delete ${file.name}`}
+              className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-destructive/10 hover:text-destructive md:opacity-0 md:group-hover:opacity-100"
+              onClick={() => setConfirmDelete(true)}
             >
-              {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Delete'}
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
-            <button
-              className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-secondary/50"
-              onClick={() => setConfirmDelete(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            aria-label={`Delete ${file.name}`}
-            className="rounded-md p-1.5 text-muted-foreground opacity-60 transition-opacity hover:bg-destructive/10 hover:text-destructive md:opacity-0 md:group-hover:opacity-100"
-            onClick={() => setConfirmDelete(true)}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        )}
+          ))}
       </div>
     </div>
   );
 };
 
-const FileList = ({ files, onDelete, getUrl, onOpen, isLoading, className }: FileListProps) => {
+const FileList = ({ files, onDelete, onRename, getUrl, onOpen, isLoading, className }: FileListProps) => {
   if (isLoading) {
     return (
       <div className={cn('flex items-center justify-center py-4', className)}>
@@ -165,7 +230,7 @@ const FileList = ({ files, onDelete, getUrl, onOpen, isLoading, className }: Fil
   return (
     <div className={cn('grid gap-1.5', className)}>
       {files.map((file) => (
-        <FileItem key={file.name} file={file} onDelete={onDelete} getUrl={getUrl} onOpen={onOpen} />
+        <FileItem key={file.name} file={file} onDelete={onDelete} onRename={onRename} getUrl={getUrl} onOpen={onOpen} />
       ))}
     </div>
   );

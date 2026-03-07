@@ -12,3 +12,4 @@ export { LocalRoutineAdapter, LocalRoutineGroupAdapter, LocalRoutineCompletionAd
 export { LocalHabitAdapter, LocalHabitCompletionAdapter } from './local-habits';
 export { LocalMeetingAdapter } from './local-meetings';
 export { LocalProjectAdapter, LocalProjectNoteAdapter } from './local-projects';
+export { LocalConversationAdapter, LocalCoherenceLogAdapter } from './local-conversations';

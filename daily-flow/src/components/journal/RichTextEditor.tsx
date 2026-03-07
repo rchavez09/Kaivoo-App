@@ -27,6 +27,39 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useRef } from 'react';
 
+const MAX_IMAGE_BYTES = 200_000; // 200KB target
+
+/** Compress an image file to JPEG ≤ MAX_IMAGE_BYTES using canvas downscaling. */
+async function compressImage(file: File): Promise<File> {
+  if (file.size <= MAX_IMAGE_BYTES) return file;
+
+  const bitmap = await createImageBitmap(file);
+  let { width, height } = bitmap;
+
+  // Scale down proportionally until area is reasonable for target size
+  const scaleFactor = Math.sqrt(MAX_IMAGE_BYTES / file.size);
+  width = Math.round(width * scaleFactor);
+  height = Math.round(height * scaleFactor);
+
+  const canvas = new OffscreenCanvas(width, height);
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  // Try progressively lower quality until under budget
+  for (let quality = 0.8; quality >= 0.3; quality -= 0.1) {
+    const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality });
+    if (blob.size <= MAX_IMAGE_BYTES || quality <= 0.3) {
+      const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+      return new File([blob], name, { type: 'image/jpeg' });
+    }
+  }
+
+  // Shouldn't reach here, but return last attempt
+  const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.3 });
+  return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+}
+
 const TEXT_COLORS = [
   { name: 'Default', color: null },
   { name: 'Gray', color: '#6B7280' },
@@ -137,7 +170,8 @@ const RichTextEditor = ({
         void (async () => {
           let uploadedUrl: string | null = null;
           try {
-            uploadedUrl = await onImageUpload(file);
+            const compressed = await compressImage(file);
+            uploadedUrl = await onImageUpload(compressed);
 
             // Verify the image is accessible before inserting
             const img = new window.Image();
@@ -165,14 +199,28 @@ const RichTextEditor = ({
           }
         })();
       } else {
-        // Fallback: embed as base64 (no upload callback provided)
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            editor.chain().focus().setImage({ src: reader.result }).run();
+        // Fallback: compress then embed as base64
+        void (async () => {
+          try {
+            const compressed = await compressImage(file);
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result === 'string') {
+                editor.chain().focus().setImage({ src: reader.result }).run();
+              }
+            };
+            reader.readAsDataURL(compressed);
+          } catch {
+            // Compression failed — fall back to raw embed
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result === 'string') {
+                editor.chain().focus().setImage({ src: reader.result }).run();
+              }
+            };
+            reader.readAsDataURL(file);
           }
-        };
-        reader.readAsDataURL(file);
+        })();
       }
     },
     [editor, onImageUpload],

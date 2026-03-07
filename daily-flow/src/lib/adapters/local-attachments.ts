@@ -81,6 +81,19 @@ export class LocalAttachmentAdapter implements AttachmentAdapter {
     await openPath(`${this.entityDir(entityId)}/${safe}`);
   }
 
+  async renameFile(entityId: string, oldName: string, newName: string): Promise<string> {
+    const { rename, exists } = await import('@tauri-apps/plugin-fs');
+    const dir = this.entityDir(entityId);
+    const safeName = sanitizeFilename(newName);
+    const oldPath = `${dir}/${sanitizeFilename(oldName)}`;
+    const newPath = `${dir}/${safeName}`;
+    if (await exists(newPath)) {
+      throw new Error(`A file named "${safeName}" already exists`);
+    }
+    await rename(oldPath, newPath);
+    return safeName;
+  }
+
   async listFiles(entityId: string): Promise<AttachmentInfo[]> {
     const { readDir, exists, stat } = await import('@tauri-apps/plugin-fs');
     const dir = this.entityDir(entityId);

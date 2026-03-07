@@ -20,7 +20,7 @@ export interface VaultNode {
   modifiedAt?: Date;
   /** Entity reference — links virtual nodes back to DB entities */
   entityRef?: {
-    type: 'journal' | 'capture' | 'topic' | 'topic_page' | 'project' | 'project_note';
+    type: 'journal' | 'capture' | 'topic' | 'topic_page' | 'project' | 'project_note' | 'conversation';
     id: string;
     /** Parent entity ID (e.g., topicId for topic_page, projectId for project_note) */
     parentId?: string;
@@ -70,6 +70,7 @@ export const VAULT_FOLDERS = {
   JOURNAL: 'Journal',
   LIBRARY: 'Library',
   INBOX: 'Inbox',
+  AI_CONVERSATIONS: 'AI Conversations',
 } as const;
 
 export const ROOT_FOLDERS = [
@@ -78,6 +79,7 @@ export const ROOT_FOLDERS = [
   VAULT_FOLDERS.JOURNAL,
   VAULT_FOLDERS.LIBRARY,
   VAULT_FOLDERS.INBOX,
+  VAULT_FOLDERS.AI_CONVERSATIONS,
 ] as const;
 
 const MONTH_NAMES = [

@@ -28,6 +28,8 @@ export type {
   MeetingAdapter,
   ProjectAdapter,
   ProjectNoteAdapter,
+  ConversationAdapter,
+  CoherenceLogAdapter,
   // Input types
   CreateTaskInput,
   UpdateTaskInput,
@@ -54,6 +56,9 @@ export type {
   UpdateProjectInput,
   CreateProjectNoteInput,
   UpdateProjectNoteInput,
+  CreateConversationInput,
+  UpdateConversationInput,
+  CreateCoherenceSignalInput,
   // Auth types
   AuthUser,
   AuthSession,
