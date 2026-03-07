@@ -2,7 +2,7 @@
 
 **Theme:** Fix all launch-blocking bugs, harden the concierge memory architecture, polish the upload experience.
 **Branch:** `sprint/30-bug-bash-concierge`
-**Status:** PHASE 5 — SANDBOX TESTING
+**Status:** COMPLETE — MERGED TO MAIN
 **Compiled by:** Director
 **Date:** March 7, 2026
 
@@ -155,6 +155,62 @@ Sprint 29 shipped the Flow identity. Now we fix what's broken and harden what di
 | Technical debt: empty state/editor co-presence, adapter gaps, htmlToPlainMarkdown, TS casts | Agent 11 Sprint 26 |
 | Security: CORS hardening, rate limiting | Next-Sprint-Planning |
 | Screenshots (P7 from Sprint 29) | Sprint 29 |
+
+---
+
+## Sprint Retrospective
+
+**Completed:** March 7, 2026
+**Parcels completed:** 15/15 (original 12 + 3 sandbox discoveries)
+**Branch:** `sprint/30-bug-bash-concierge` → merged to `main` via PR #17
+**Tag:** `post-sprint-30`
+
+### What Was Delivered
+
+**Track 1 (Bug Fixes):** All 7 bugs resolved. Two P0 data-loss bugs fixed: TopicPage content loss on navigation (beforeunload + unmount + same-component nav) and base64 image bloat (200KB compression cap). Content column Supabase migration applied. Subtask and widget reorder verified working. Calendar widget empty state fixed. Search prefix matching fixed (`:*` suffix).
+
+**Track 2 (Concierge Hardening):** Memory architecture hardened across 3 layers. Pre-compaction flush at 40 messages extracts lasting memories before context truncation. Deterministic context assembly via `assembleConciergeContext()` — single entry point, no AI-generated text in system prompt. Coherence monitoring with 3 heuristic checks (name mismatch, generic response, personality drift), observation-only.
+
+**Track 3 (UX Polish):** Full image rename pipeline (adapter → hook → UI). Upload progress bar with indeterminate state and drag-enter scaling.
+
+**Track 4 (Sandbox Discoveries):** AI conversations and coherence logs moved from localStorage to adapter pattern (SQLite on desktop, Supabase with RLS on web). One-time migration utility. AI Conversations folder added to vault. Desktop vault fixed — switched from LocalVaultAdapter (empty filesystem) to VirtualVaultAdapter (reads from DB) for browsing.
+
+### Verification Results
+
+- **Lint:** 0 errors (848 pre-existing warnings)
+- **Typecheck:** Clean
+- **Tests:** 265 passing (0 regressions)
+- **Build:** 2.60s clean
+- **Agent 7:** A- (85/100), 0 P0s
+- **Agent 11:** PASS, 0 regressions across 7 Feature Bibles
+- **Design review:** All 3 agents PASS
+- **E2E smoke:** 4/4 pass against deploy preview (fixed stale "Kaivoo" assertion)
+- **CI:** `build-and-test` green (format fix required — Prettier not in pre-commit)
+
+### Sandbox Findings
+
+- **Desktop vault empty:** User reported vault showed parent folders but no items. Root cause: `LocalVaultAdapter` reads from filesystem which only has empty root directories until manual export. Fix: switched desktop to `VirtualVaultAdapter`, added `fileVault` context property for export operations. This became P15.
+- **AI conversations not persisted:** Discovered during sandbox that conversations lived only in localStorage. Full adapter migration became P13-P14.
+- **E2E test stale assertion:** Smoke test still looked for "Kaivoo" heading after Sprint 29 rebrand to "Flow". Fixed.
+- **Prettier format:** CI caught 9 files with formatting issues. Fixed. Consider adding Prettier to pre-commit hook.
+
+### Deferred Items
+
+| Item | Destination |
+|---|---|
+| Bundle size audit (<512KB budget) | Sprint 31 or 33 |
+| Adapter layer P1 issues (7 items) | Sprint 33 |
+| Dark mode contrast (3.8:1 → 4.5:1) | Sprint 33 |
+| Accessibility: touch targets (P2) | Sprint 33 |
+| Screenshots for Sprint 29 rebrand | Sprint 33 |
+| Prettier pre-commit hook | Sprint 33 |
+
+### Key Learnings
+
+1. **Desktop vault was silently broken since Sprint 22.** `LocalVaultAdapter` showed empty folders because no one tested vault browsing on desktop (only export). The `VirtualVaultAdapter` (DB-backed) should have been the default from the start. Lesson: test desktop vault browsing in every sprint that touches vault or data.
+2. **localStorage is a liability.** AI conversations in localStorage meant no sync, no persistence across browser clears, no desktop parity. Moving to the adapter pattern was straightforward (same patterns as other entities) but should have been done when the concierge was built in Sprint 24.
+3. **Sandbox testing catches real issues.** Track 4 (3 parcels) was entirely sandbox-discovered work. The two-track sandbox process (web + desktop) proved its value — the desktop vault bug would not have been caught in web-only testing.
+4. **Format check should be in pre-commit.** CI caught Prettier issues that local dev missed. Adding a pre-commit hook would prevent this.
 
 ---
 

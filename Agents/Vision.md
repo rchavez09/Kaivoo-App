@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.2
-**Last Updated:** March 6, 2026
+**Version:** 7.4
+**Last Updated:** March 7, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -843,8 +843,10 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (the wedge — final pre-launch sprints, shipping toward the personal OS vision)
-**Active sprint:** None (planning Sprint 30)
-**Last completed:** Sprint 29 (Flow Rebrand) — Full product rename from "Kaivoo" to "Flow by Kaivoo." In-app text, page titles, sidebar, settings, wizard, window title all updated. Sign-out button hidden on desktop via `isTauri()`. Landing page rebuilt with Flow identity. EULA + Privacy Policy updated (product = Flow, company = Kaivoo Media). Product Hunt listing rewritten. Vision, Phase-A-Roadmap, CLAUDE.md updated. Internal code identifiers (`useKaivooStore`, localStorage keys, bundle ID) intentionally preserved. Agent 7 caught 6 missed renames — all fixed. 6/7 parcels done (P7 screenshots deferred to Sprint 33). See `Sprints/Sprint-29-Flow-Rebrand.md`.
+**Active sprint:** None (planning Sprint 31)
+**Last completed:** Sprint 30 (Bug Bash + Concierge Hardening) — 15/15 parcels across 4 tracks. Track 1: 7 bugs fixed (2 P0 data-loss: TopicPage navigation flush + base64 image 200KB cap; content column migration; subtask/widget reorder verified; calendar empty state; search prefix matching). Track 2: Concierge memory architecture hardened (pre-compaction flush at 40 msgs, deterministic context assembly via `assembleConciergeContext()`, coherence monitoring with 3 heuristic checks). Track 3: Image rename pipeline + upload progress polish. Track 4 (sandbox discoveries): AI conversations/coherence logs moved from localStorage to adapter pattern (SQLite + Supabase + RLS), AI Conversations vault folder, desktop vault fix (VirtualVaultAdapter for browsing, LocalVaultAdapter preserved as fileVault for exports). 265 tests. See `Sprints/Sprint-30-Bug-Bash-Concierge.md`.
+
+**Sprint 29 delivered:** Flow Rebrand — Full product rename from "Kaivoo" to "Flow by Kaivoo." In-app text, page titles, sidebar, settings, wizard, window title all updated. Sign-out button hidden on desktop. Landing page rebuilt with Flow identity. EULA + Privacy Policy updated. 6/7 parcels done (P7 screenshots deferred). See `Sprints/Sprint-29-Flow-Rebrand.md`.
 
 **Sprint 24 delivered:** Soul File & Concierge Intelligence — soul file personality (name, tone, backstory, communication prefs, working style), AI memory system (localStorage + SQLite CRUD, substring dedup, category/source tracking), 18-tool concierge with multi-round tool-use loops (create/read/update tasks, journal, calendar, notes, captures, projects, routines, habits, memory), 6-layer system prompt assembly (soul + memories + summaries + app context + tools), provider-agnostic SSE streaming via Supabase Edge Function (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Ollama, OpenAI-compatible), Anthropic message transformation for tool-use round-trips, memory extraction pipeline (LLM-based fact extraction with batch dedup), conversation summaries, per-provider API key caching, WCAG AA accessibility (aria-checked radio groups, non-color selection indicators, token-based contrast). 265 tests. See `Sprints/Sprint-24-Soul-File-Concierge.md`.
 
@@ -1066,7 +1068,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v7.3 — March 7, 2026*
+*Vision v7.4 — March 7, 2026*
+*v7.4: Sprint 30 (Bug Bash + Concierge Hardening) complete. 15/15 parcels. 7 bugs fixed (2 P0 data-loss), concierge memory architecture hardened (pre-compaction flush, deterministic context assembly, coherence monitoring), upload polish, AI conversations moved to adapter pattern (localStorage→SQLite/Supabase), desktop vault fixed (VirtualVaultAdapter for browsing). 265 tests. Current position updated.*
 *v7.3: Sprint 29 (Flow Rebrand) complete. Product renamed from "Kaivoo" to "Flow by Kaivoo." In-app rename (all user-visible text), landing page rebuilt with Flow identity, EULA + Privacy Policy updated, Product Hunt listing rewritten, strategic docs updated. Internal identifiers preserved. Sign-out hidden on desktop. Agent 7 caught 6 missed renames — all fixed. Screenshots deferred to Sprint 33. Rebrand decision updated. Current position updated.*
 *v7.2: Sprint 28 (Launch Ready) complete. Landing page (Astro + Tailwind, 11 sections, dark/light toggle) deployed to Netlify. EULA and Privacy Policy drafts ready for attorney review. Product Hunt listing drafted. Revenue pipeline deferred to future sprint — user wants more features before launch. Custom domain pending DNS config. CTA buttons placeholder until Stripe configured. Current position updated.*
 *v7.1: CEO Session #8 — Desktop as flagship, web as premium. Pricing model clarified: desktop one-time ($49/$99) works because cost-to-serve is zero; web subscription ($8-12/mo) required because Supabase infrastructure costs per user per month. Free 14-day web trial added as top of funnel (full experience, time-limited not feature-limited). Companion App explicitly gated behind Tier 2 subscription (architectural necessity, not paywall). Launch sequence documented: web trial first (no cert dependency), desktop when Apple certs clear. Conversion funnel added: Free → Buy Desktop or Subscribe Web; Desktop owners → Add Web Sync. Cost-to-serve reasoning documented. Tier naming updated: "Kaivoo Desktop" (was Core), "Web Access + Sync + Companion" (was Cloud Companion). Tier 2 pricing research expanded: 7 new research parcels covering Supabase cost-per-user modeling, managed AI costs, storage tier modeling (Google Drive-style), free trial burn rate, cloud storage competitive teardown (Google Drive/iCloud/OneDrive/Dropbox/Obsidian Sync), subscription pricing recommendation, and productivity competitor pricing. Tiered storage pricing added as possibility ($8 base / higher tiers for more storage). Managed AI noted as potentially separate addon if cost modeling shows it's unsustainable at base subscription price. Obsidian model comparison strengthened — Kaivoo gets paid at the door AND on cloud add-ons.*
