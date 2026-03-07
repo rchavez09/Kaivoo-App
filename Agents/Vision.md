@@ -1,6 +1,6 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.5
+**Version:** 7.6
 **Last Updated:** March 7, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
@@ -843,8 +843,10 @@ These run in parallel with sprint work, not blocking it.
 ## Current Position
 
 **We are in:** Phase A — Productivity App (the wedge — final pre-launch sprints, shipping toward the personal OS vision)
-**Active sprint:** None (planning Sprint 32)
-**Last completed:** Sprint 31 (Tasks + Projects Merge) — 14/14 parcels across 4 tracks. Track 0: Unified `/projects` page with top-level tabs (All Tasks | Projects), lazy-loaded TasksContent via React.lazy + Suspense, `/tasks` redirects to `/projects`. Track 1: Project detail tabbed sub-nav (Tasks/Documents/Notes/Chat), Inbox virtual project for unassigned tasks, `sortDoneToBottom` extracted, chat placeholder with disabled buttons. Track 2: Sidebar Tasks entry removed, search paths updated, widget links updated, all navigation points to `/projects`. Track 3: Sprint 30 carryover — `onLinkTask` made optional, ProjectNotesList spacing fixed. Post-audit: O(N+M) taskStatsMap optimization, settings moved from inline section to gear icon dialog, ARIA `aria-pressed` pattern on filter tabs, `focus-visible:ring-*` on 5 element types, Inbox hover translate instead of shadow, sidebar sign-out `aria-label`. 265 tests. See `Sprints/Sprint-31-Tasks-Projects-Merge.md`.
+**Active sprint:** None
+**Last completed:** Sprint 32 (Knowledge Unification) — 10/10 parcels across 3 tracks. Vault and Topics merged into unified "Knowledge" page at `/topics` with two tabs (Topics | Vault). Sidebar reduced from 8 to 7 entries (Library icon). `TopicsContent` and `VaultContent` extracted as named exports, lazy-loaded via React.lazy + Suspense. Tab state persisted via `useLocalStorage` + `useSearchParams` for deep linking. `forceMount` on Vault tab prevents state loss on tab switch. `/vault` redirects to `/topics?tab=vault`. Topic detail breadcrumbs updated to "Knowledge". E2E tests updated for Sprint 31+32 route changes. 265 tests. See `Sprints/Sprint-32-Knowledge-Unification.md`.
+
+**Sprint 31 delivered:** Tasks + Projects Merge — 14/14 parcels across 4 tracks. Track 0: Unified `/projects` page with top-level tabs (All Tasks | Projects), lazy-loaded TasksContent via React.lazy + Suspense, `/tasks` redirects to `/projects`. Track 1: Project detail tabbed sub-nav (Tasks/Documents/Notes/Chat), Inbox virtual project for unassigned tasks, `sortDoneToBottom` extracted, chat placeholder with disabled buttons. Track 2: Sidebar Tasks entry removed, search paths updated, widget links updated, all navigation points to `/projects`. Track 3: Sprint 30 carryover — `onLinkTask` made optional, ProjectNotesList spacing fixed. Post-audit: O(N+M) taskStatsMap optimization, settings moved from inline section to gear icon dialog, ARIA `aria-pressed` pattern on filter tabs, `focus-visible:ring-*` on 5 element types, Inbox hover translate instead of shadow, sidebar sign-out `aria-label`. 265 tests. See `Sprints/Sprint-31-Tasks-Projects-Merge.md`.
 
 **Sprint 30 delivered:** Bug Bash + Concierge Hardening — 15/15 parcels across 4 tracks. Track 1: 7 bugs fixed (2 P0 data-loss: TopicPage navigation flush + base64 image 200KB cap; content column migration; subtask/widget reorder verified; calendar empty state; search prefix matching). Track 2: Concierge memory architecture hardened (pre-compaction flush at 40 msgs, deterministic context assembly via `assembleConciergeContext()`, coherence monitoring with 3 heuristic checks). Track 3: Image rename pipeline + upload progress polish. Track 4 (sandbox discoveries): AI conversations/coherence logs moved from localStorage to adapter pattern (SQLite + Supabase + RLS), AI Conversations vault folder, desktop vault fix (VirtualVaultAdapter for browsing, LocalVaultAdapter preserved as fileVault for exports). 265 tests. See `Sprints/Sprint-30-Bug-Bash-Concierge.md`.
 

@@ -2,7 +2,7 @@
 
 **Theme:** Merge Vault and Topics into a unified "Knowledge" page with top-level tabs.
 **Branch:** `sprint/32-knowledge-unification`
-**Status:** ACTIVE
+**Status:** COMPLETE
 **Compiled by:** Director
 **Date:** March 7, 2026
 
@@ -77,26 +77,26 @@ SIDEBAR                         KNOWLEDGE PAGE (/topics)
 
 | # | Parcel | Agent | Status | Priority |
 |---|---|---|---|---|
-| P1 | **Refactor Topics.tsx to export `TopicsContent`** — Extract the Topics page content (tree view, search, CRUD, dialogs) into a named export `TopicsContent` without AppLayout wrapper. Default export preserved as thin wrapper with AppLayout. Follows the `TasksContent` pattern from Sprint 31. | Agent 2 | PENDING | **P0** |
-| P2 | **Refactor Vault.tsx to export `VaultContent`** — Extract the Vault browser content (file tree, breadcrumbs, search, statistics, keyboard navigation, ARIA) into a named export `VaultContent` without AppLayout wrapper. Default export preserved as thin wrapper. | Agent 2 | PENDING | **P0** |
-| P3 | **Build unified Knowledge page with tabs** — Rewrite Topics.tsx (or create Knowledge.tsx) with shadcn `<Tabs>`. Two tabs: "Topics" and "Vault". Default to "Topics" tab. Lazy-load both tab contents with React.lazy + Suspense. Persist selected tab via `useLocalStorage('flow-knowledge-tab', 'topics')`. | Agent 2 | PENDING | **P0** |
-| P4 | **Tab-aware URL state** — Support `/topics?tab=vault` query parameter so the Vault redirect lands on the correct tab. If `?tab=vault` is present, activate the Vault tab on mount. Tab switches update the URL query param without navigation. | Agent 2 | PENDING | **P1** |
+| P1 | **Refactor Topics.tsx to export `TopicsContent`** — Extract the Topics page content (tree view, search, CRUD, dialogs) into a named export `TopicsContent` without AppLayout wrapper. Default export preserved as thin wrapper with AppLayout. Follows the `TasksContent` pattern from Sprint 31. | Agent 2 | DONE | **P0** |
+| P2 | **Refactor Vault.tsx to export `VaultContent`** — Extract the Vault browser content (file tree, breadcrumbs, search, statistics, keyboard navigation, ARIA) into a named export `VaultContent` without AppLayout wrapper. Default export preserved as thin wrapper. | Agent 2 | DONE | **P0** |
+| P3 | **Build unified Knowledge page with tabs** — Rewrite Topics.tsx (or create Knowledge.tsx) with shadcn `<Tabs>`. Two tabs: "Topics" and "Vault". Default to "Topics" tab. Lazy-load both tab contents with React.lazy + Suspense. Persist selected tab via `useLocalStorage('flow-knowledge-tab', 'topics')`. | Agent 2 | DONE | **P0** |
+| P4 | **Tab-aware URL state** — Support `/topics?tab=vault` query parameter so the Vault redirect lands on the correct tab. If `?tab=vault` is present, activate the Vault tab on mount. Tab switches update the URL query param without navigation. | Agent 2 | DONE | **P1** |
 
 ### Track 2: Navigation & Routing
 
 | # | Parcel | Agent | Status | Priority |
 |---|---|---|---|---|
-| P5 | **Update sidebar** — Rename "Topics" entry to "Knowledge". Change icon from `FolderOpen` to `BookOpen` (or `Library`). Remove "Vault" entry. Sidebar goes from 8 to 7 items. | Agent 2 | PENDING | **P1** |
-| P6 | **Redirect `/vault` → `/topics?tab=vault`** — Add route redirect for backward compatibility. Any bookmarks or links to `/vault` land on the Vault tab of the Knowledge page. | Agent 2 | PENDING | **P1** |
-| P7 | **Update search/command palette** — Any search results or navigation that previously linked to `/vault` should now link to `/topics?tab=vault`. Vault-related search result categories remain functional. | Agent 2 | PENDING | **P2** |
-| P8 | **Update Today dashboard references** — If any Today widgets or links reference `/vault` directly, update them to `/topics?tab=vault`. | Agent 2 | PENDING | **P2** |
+| P5 | **Update sidebar** — Rename "Topics" entry to "Knowledge". Change icon from `FolderOpen` to `Library`. Remove "Vault" entry. Sidebar goes from 8 to 7 items. | Agent 2 | DONE | **P1** |
+| P6 | **Redirect `/vault` → `/topics?tab=vault`** — Add route redirect for backward compatibility. Any bookmarks or links to `/vault` land on the Vault tab of the Knowledge page. | Agent 2 | DONE | **P1** |
+| P7 | **Update search/command palette** — No `/vault` links found in search or command palette. No changes needed. | Agent 2 | DONE (no-op) | **P2** |
+| P8 | **Update Today dashboard references** — No `/vault` links found in Today widgets. No changes needed. | Agent 2 | DONE (no-op) | **P2** |
 
 ### Track 3: Polish & Consistency
 
 | # | Parcel | Agent | Status | Priority |
 |---|---|---|---|---|
-| P9 | **Breadcrumb consistency** — Topic detail breadcrumb currently reads "Topics > TopicName". Update to "Knowledge > TopicName" to match the new sidebar label. Vault breadcrumbs within the Vault tab should show the folder path (existing behavior, preserved). | Agent 2 | PENDING | **P2** |
-| P10 | **Page title and header updates** — Update the page `<title>` tag and any visible "Topics" or "Vault" page headers to reflect "Knowledge" branding. The tab labels remain "Topics" and "Vault" (descriptive of each view). | Agent 2 | PENDING | **P2** |
+| P9 | **Breadcrumb consistency** — Topic detail breadcrumb updated from "Back to Topics" / "Topics" to "Back to Knowledge" / "Knowledge". Vault breadcrumbs preserved (existing behavior). | Agent 2 | DONE | **P2** |
+| P10 | **Page title and header updates** — No per-page `<title>` tags exist (single global title in index.html). Tab labels "Topics" and "Vault" preserved as descriptive labels. No changes needed. | Agent 2 | DONE (no-op) | **P2** |
 
 ---
 
@@ -175,6 +175,73 @@ SIDEBAR                         KNOWLEDGE PAGE (/topics)
 | Wikilinks + backlinks | Backlog |
 | File type filtering in vault | Backlog |
 | Vault organization (move, sort, manual reorder) | Backlog |
+
+---
+
+## Quality Gates
+
+| Gate | Result |
+|---|---|
+| Lint | PASS (0 errors, 864 pre-existing warnings) |
+| Typecheck | PASS (clean) |
+| Unit Tests | PASS (265/265) |
+| Build | PASS (2.59s) |
+| Agent 7 Code Audit | PASS — 2 P1 issues found and fixed (tab state desync, Vault unmount on tab switch) |
+| Agent 11 Feature Integrity | PASS — 39/39 behaviors verified, 0 regressions |
+| 3-Agent Design Review | PASS — 1 issue fixed (HardDrive icon removed from VaultContent header) |
+| E2E Smoke Tests | PASS (4/4 against deploy preview) |
+| E2E Authenticated Tests | BLOCKED (stale test credentials — pre-existing, not Sprint 32) |
+| Sandbox (Web) | PASS — user approved deploy preview |
+
+---
+
+## Sprint Retrospective
+
+**Completed:** March 7, 2026
+**Parcels:** 10/10 (7 implemented, 3 no-op after investigation)
+**PR:** #19 — merged to main
+**Tag:** `post-sprint-32`
+
+### What Was Delivered
+
+Vault and Topics merged into a single "Knowledge" page at `/topics` with two tabs (Topics | Vault). Sidebar reduced from 8 to 7 entries. The tabs-merge pattern from Sprint 31 (Tasks + Projects) was successfully reapplied:
+
+- `TopicsContent` and `VaultContent` extracted as named exports (without AppLayout)
+- Unified Knowledge page with shadcn `<Tabs>`, `useLocalStorage` for tab persistence, `useSearchParams` for deep linking
+- `React.lazy` + `Suspense` for Vault tab code splitting
+- `forceMount` on Vault tab to prevent state loss on tab switch
+- `/vault` route redirects to `/topics?tab=vault`
+- Sidebar uses `Library` icon for "Knowledge" entry
+- Topic detail breadcrumbs updated to "Knowledge"
+- E2E tests updated for both Sprint 31 and Sprint 32 route changes
+
+### Verification Results
+
+- **Agent 7** found 2 P1 issues (both fixed before merge):
+  - Tab state desync: localStorage could show wrong tab when navigating to plain `/topics` — fixed by resetting to `topics` tab when no `?tab=vault` param
+  - Vault unmount on tab switch: Radix Tabs unmounts inactive content by default — fixed with `forceMount` + `hidden` attribute
+- **Agent 11**: 39/39 feature behaviors verified, 0 regressions
+- **Design review**: VaultContent header had inconsistent HardDrive icon — removed for consistency with TopicsContent pattern
+
+### Sandbox Findings
+
+No issues found during user acceptance testing on the Netlify deploy preview.
+
+### Deferred Items
+
+| Item | Reason |
+|---|---|
+| GuidedTour references "Vault" as standalone step | Low priority — tour is hidden by default |
+| Dead Vault default export in Vault.tsx | Kept for potential standalone use; remove when confirmed unused |
+| localStorage key prefix inconsistency (`flow-` vs `kaivoo-`) | Pre-existing — not Sprint 32 scope |
+| Tab behavior unit tests | No test framework for tab interaction; covered by E2E |
+| E2E authenticated tests (stale credentials) | Pre-existing — test user credentials in `.env.e2e` are invalid |
+
+### Key Learnings
+
+1. **The tabs-merge pattern is now proven twice** — Sprint 31 (Tasks+Projects) and Sprint 32 (Topics+Vault). The extraction formula (`FooContent` named export → lazy load in tabs → `forceMount` for stateful tabs) is reliable and repeatable.
+2. **`forceMount` is critical for stateful tabs** — Vault loads a file tree on mount. Without `forceMount`, every tab switch triggers a full reload. Agent 7 caught this during code audit.
+3. **URL-first tab state prevents desync** — Reading `?tab=vault` on mount (not localStorage) ensures deep links always work. localStorage is the persistence fallback, not the source of truth.
 
 ---
 
