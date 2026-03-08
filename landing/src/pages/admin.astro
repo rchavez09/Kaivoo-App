@@ -1,0 +1,596 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/global.css';
+---
+
+<Layout
+  title="Flow Admin — Launch Command Center"
+  description="Internal admin panel for Flow launch tracking."
+>
+  <main class="min-h-screen pt-8 pb-16 px-6">
+    <div class="max-w-4xl mx-auto">
+
+      <!-- Login Screen -->
+      <div id="login-screen">
+        <div class="max-w-sm mx-auto mt-24">
+          <h1 class="font-brand text-2xl font-medium text-navy dark:text-white text-center mb-2">Launch Command Center</h1>
+          <p class="text-sm text-storm dark:text-white/50 text-center mb-8">Sign in to manage your launch.</p>
+          <form id="login-form" class="space-y-4">
+            <input
+              type="email"
+              id="login-email"
+              required
+              placeholder="Email"
+              class="w-full px-4 py-3 rounded-lg border border-navy/15 dark:border-white/15 bg-white dark:bg-abyss-elevated text-navy dark:text-white placeholder:text-storm/50 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-teal/50 text-sm"
+            />
+            <input
+              type="password"
+              id="login-password"
+              required
+              placeholder="Password"
+              class="w-full px-4 py-3 rounded-lg border border-navy/15 dark:border-white/15 bg-white dark:bg-abyss-elevated text-navy dark:text-white placeholder:text-storm/50 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-teal/50 text-sm"
+            />
+            <button
+              type="submit"
+              class="w-full bg-teal text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-teal-hover transition-colors"
+            >
+              Sign in
+            </button>
+          </form>
+          <div id="login-message" class="mt-3 text-sm text-center"></div>
+        </div>
+      </div>
+
+      <!-- Admin Dashboard (hidden until authenticated) -->
+      <div id="admin-dashboard" class="hidden">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h1 class="font-brand text-2xl font-medium text-navy dark:text-white">Launch Command Center</h1>
+            <p class="text-sm text-storm dark:text-white/50 mt-1">April 14, 2026 &mdash; <span id="days-remaining"></span> days remaining</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              onclick="toggleTheme()"
+              class="w-9 h-9 rounded-lg border border-navy/10 dark:border-white/10 flex items-center justify-center text-storm dark:text-white/60 hover:bg-navy/5 dark:hover:bg-white/5 transition-colors"
+              aria-label="Toggle theme"
+            >
+              <svg class="w-4 h-4 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 8.002-4.248Z" />
+              </svg>
+              <svg class="w-4 h-4 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+              </svg>
+            </button>
+            <button
+              id="logout-btn"
+              class="text-sm text-storm dark:text-white/60 hover:text-navy dark:hover:text-white transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="rounded-xl border border-navy/10 dark:border-white/10 p-4 bg-white dark:bg-abyss-card">
+            <p class="text-xs text-storm dark:text-white/50 uppercase tracking-wider">Subscribers</p>
+            <p id="stat-subscribers" class="font-brand text-3xl font-medium text-navy dark:text-white mt-1">--</p>
+          </div>
+          <div class="rounded-xl border border-navy/10 dark:border-white/10 p-4 bg-white dark:bg-abyss-card">
+            <p class="text-xs text-storm dark:text-white/50 uppercase tracking-wider">Milestones</p>
+            <p id="stat-milestones" class="font-brand text-3xl font-medium text-navy dark:text-white mt-1">--</p>
+          </div>
+          <div class="rounded-xl border border-navy/10 dark:border-white/10 p-4 bg-white dark:bg-abyss-card">
+            <p class="text-xs text-storm dark:text-white/50 uppercase tracking-wider">Days Left</p>
+            <p id="stat-days" class="font-brand text-3xl font-medium text-navy dark:text-white mt-1">--</p>
+          </div>
+          <div class="rounded-xl border border-navy/10 dark:border-white/10 p-4 bg-white dark:bg-abyss-card">
+            <p class="text-xs text-storm dark:text-white/50 uppercase tracking-wider">Progress</p>
+            <p id="stat-progress" class="font-brand text-3xl font-medium text-teal mt-1">--</p>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-8">
+          <div class="w-full bg-navy/10 dark:bg-white/10 rounded-full h-4 overflow-hidden">
+            <div id="admin-progress-bar" class="depth-bar h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="grid md:grid-cols-2 gap-8">
+
+          <!-- Milestones Panel -->
+          <div class="rounded-xl border border-navy/10 dark:border-white/10 bg-white dark:bg-abyss-card p-6">
+            <h2 class="font-brand text-lg font-medium text-navy dark:text-white mb-4">Milestones</h2>
+            <p class="text-xs text-storm dark:text-white/40 mb-4">Toggle milestones as you complete sprints. Changes are live on the landing page instantly.</p>
+            <div id="admin-milestones" class="space-y-1">
+              <p class="text-sm text-storm dark:text-white/50">Loading...</p>
+            </div>
+          </div>
+
+          <!-- Subscribers Panel -->
+          <div class="rounded-xl border border-navy/10 dark:border-white/10 bg-white dark:bg-abyss-card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-brand text-lg font-medium text-navy dark:text-white">Subscribers</h2>
+              <button id="export-csv" class="text-xs text-teal hover:text-teal-hover transition-colors">Export CSV</button>
+            </div>
+            <p class="text-xs text-storm dark:text-white/40 mb-4">Everyone who signed up for launch notifications.</p>
+            <div id="admin-subscribers" class="space-y-1 max-h-80 overflow-y-auto">
+              <p class="text-sm text-storm dark:text-white/50">Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checklist Section -->
+        <div class="mt-8 rounded-xl border border-navy/10 dark:border-white/10 bg-white dark:bg-abyss-card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-brand text-lg font-medium text-navy dark:text-white">Launch Checklist</h2>
+            <button id="toggle-checklist" class="text-xs text-teal hover:text-teal-hover transition-colors">Show full checklist</button>
+          </div>
+          <div id="checklist-content" class="hidden max-w-none">
+            <!-- Week 1 -->
+            <h3 class="font-brand text-base font-medium text-navy dark:text-white mt-0">Week 1 — Foundation + Marketing Launch (Mar 9-15)</h3>
+
+            <h4 class="text-sm font-medium text-navy dark:text-white/80 mt-4 mb-2">Day 1 — Sunday, March 9</h4>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Dev</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 33 P1: Fix HTML rendering throughout app</li>
+              <li class="checklist-item">Sprint 33 P2: Fix Kanban board — all states functional</li>
+              <li class="checklist-item">Sprint 33 P9: Add .env to .gitignore</li>
+            </ul>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Marketing</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Choose landing page tool (Framer, Carrd, or custom)</li>
+              <li class="checklist-item">Draft landing page copy</li>
+              <li class="checklist-item">Create TikTok account</li>
+              <li class="checklist-item">Script first TikTok/short</li>
+            </ul>
+
+            <h4 class="text-sm font-medium text-navy dark:text-white/80 mt-4 mb-2">Day 2 — Monday, March 10</h4>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Dev</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 33 P3: Wiki-link rendering as clickable links</li>
+              <li class="checklist-item">Sprint 33 P4: Library sidebar icon → Folder</li>
+              <li class="checklist-item">Sprint 33 P5: Hide Gantt chart</li>
+            </ul>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Marketing</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Landing page LIVE with email capture + countdown</li>
+              <li class="checklist-item">Record and post first TikTok/YouTube short</li>
+              <li class="checklist-item">Create Twitter/X account — first thread posted</li>
+              <li class="checklist-item">Create Discord server</li>
+            </ul>
+
+            <h4 class="text-sm font-medium text-navy dark:text-white/80 mt-4 mb-2">Day 3 — Tuesday, March 11</h4>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Dev</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 33 P6: Remove hardcoded seed data</li>
+              <li class="checklist-item">Sprint 33 P7: to_tsquery sanitization</li>
+              <li class="checklist-item">Sprint 33 P8: Dead code + floating-point fix</li>
+              <li class="checklist-item">Sprint 33 quality gates: lint, typecheck, test, build</li>
+              <li class="checklist-item">Sprint 33 PR opened → merge to main</li>
+            </ul>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Marketing</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Post in r/selfhosted</li>
+              <li class="checklist-item">Post in r/ObsidianMD</li>
+              <li class="checklist-item">Second TikTok/short recorded and posted</li>
+            </ul>
+
+            <h4 class="text-sm font-medium text-navy dark:text-white/80 mt-4 mb-2">Day 4-7 — Wed-Sat, March 12-15</h4>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Dev</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 34: Full-page AI chat + conversation history</li>
+              <li class="checklist-item">Sprint 34 PR → merge</li>
+              <li class="checklist-item">Sprint 35-36: Fix top 7 execution tools</li>
+              <li class="checklist-item">Sprint 35-36: Wire up AI data awareness</li>
+              <li class="checklist-item">Sprint 37 start: Configurable Heartbeat</li>
+            </ul>
+            <p class="text-xs text-teal uppercase tracking-wider mb-1">Marketing</p>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Twitter thread: "I'm building OpenClaw for people who don't code"</li>
+              <li class="checklist-item">LinkedIn post: founder story</li>
+              <li class="checklist-item">Email welcome sequence drafted (3 emails)</li>
+              <li class="checklist-item">Week 1 metrics snapshot</li>
+            </ul>
+
+            <!-- Week 2 -->
+            <h3 class="font-brand text-base font-medium text-navy dark:text-white">Week 2 — Orchestrator UI (Mar 16-22)</h3>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 37: Heartbeat settings UI + notifications</li>
+              <li class="checklist-item">Sprint 38: Neuron Memory — tiered soul file</li>
+              <li class="checklist-item">Sprint 39-40: Orchestrator — Agents tab</li>
+              <li class="checklist-item">Sprint 41-42: Skills tab + AI skill creation</li>
+              <li class="checklist-item">YouTube: first longer video (3-5 min)</li>
+              <li class="checklist-item">Product Hunt page drafted</li>
+              <li class="checklist-item">Email signups target: 100+</li>
+            </ul>
+
+            <!-- Week 3 -->
+            <h3 class="font-brand text-base font-medium text-navy dark:text-white">Week 3 — Execution Engine + Artifacts (Mar 23-29)</h3>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 43-44: Workflows tab + triggers</li>
+              <li class="checklist-item">Sprint 45: MCPs tab — discover + connect</li>
+              <li class="checklist-item">Sprint 46-47: Workflow execution engine</li>
+              <li class="checklist-item">Sprint 48-49: Artifact preview panel + custom widgets</li>
+              <li class="checklist-item">Demo: PPT creation using multi-agent workflow</li>
+              <li class="checklist-item">Early access signup form on landing page</li>
+              <li class="checklist-item">Email signups target: 200+</li>
+            </ul>
+
+            <!-- Week 4 -->
+            <h3 class="font-brand text-base font-medium text-navy dark:text-white">Week 4 — Polish + Beta (Mar 30 - Apr 5)</h3>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 50: Safety layer</li>
+              <li class="checklist-item">Sprint 51: Thinking transparency</li>
+              <li class="checklist-item">Sprint 52-53: Integration testing</li>
+              <li class="checklist-item">Sprint 54: Polish pass</li>
+              <li class="checklist-item">Sprint 55: Build 4 demo scenarios</li>
+              <li class="checklist-item">Send beta invites to email list</li>
+              <li class="checklist-item">Product Hunt page finalized</li>
+              <li class="checklist-item">Record launch demo video</li>
+              <li class="checklist-item">Email signups target: 350+</li>
+            </ul>
+
+            <!-- Week 5 -->
+            <h3 class="font-brand text-base font-medium text-navy dark:text-white">Week 5 — Ship (Apr 6-13)</h3>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Sprint 56: Fix beta bugs</li>
+              <li class="checklist-item">Sprint 57: Code signing + EULA + deploy pipeline</li>
+              <li class="checklist-item">Sprint 58: Demo video + Product Hunt + landing page update</li>
+              <li class="checklist-item">Sprint 59: Buffer sprint</li>
+              <li class="checklist-item">CODE FREEZE — April 13</li>
+            </ul>
+
+            <!-- Launch Day -->
+            <h3 class="font-brand text-base font-medium text-teal">April 14, 2026 — LAUNCH DAY</h3>
+            <ul class="space-y-1 mb-3 list-none pl-0">
+              <li class="checklist-item">Product Hunt listing LIVE</li>
+              <li class="checklist-item">Email blast: "We're live"</li>
+              <li class="checklist-item">Twitter/X announcement thread</li>
+              <li class="checklist-item">TikTok + YouTube launch videos</li>
+              <li class="checklist-item">Reddit posts in target communities</li>
+              <li class="checklist-item">Respond to EVERY comment</li>
+              <li class="checklist-item">Celebrate. You shipped.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <style>
+    #checklist-content .checklist-item {
+      display: flex !important;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.8125rem;
+      color: #4A5E78;
+      padding: 0.25rem 0;
+      margin: 0 !important;
+      cursor: pointer;
+      user-select: none;
+      list-style: none !important;
+    }
+    #checklist-content .checklist-item::marker {
+      content: none;
+    }
+    .dark #checklist-content .checklist-item {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    #checklist-content .checklist-item:hover {
+      color: #1A1F2E;
+      background-color: rgba(26, 31, 46, 0.03);
+      border-radius: 4px;
+    }
+    .dark #checklist-content .checklist-item:hover {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+    }
+    .dark #checklist-content .checklist-item.checked:hover .checklist-label {
+      opacity: 0.7;
+    }
+    #checklist-content .checklist-check {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      border: 1.5px solid #1A1F2E30;
+      border-radius: 4px;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .dark #checklist-content .checklist-check {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    #checklist-content .checklist-item.checked .checklist-check {
+      background: #3B8C8C;
+      border-color: #3B8C8C;
+    }
+    #checklist-content .checklist-item.checked .checklist-label {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+    .milestone-toggle {
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .milestone-toggle:hover {
+      background-color: rgba(59, 140, 140, 0.05);
+    }
+    .dark .milestone-toggle:hover {
+      background-color: rgba(59, 140, 140, 0.1);
+    }
+  </style>
+
+  <script>
+    import { supabase } from '../lib/supabase';
+
+    const loginScreen = document.getElementById('login-screen')!;
+    const dashboard = document.getElementById('admin-dashboard')!;
+
+    // --- Auth ---
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        showDashboard();
+      }
+    }
+
+    function showDashboard() {
+      loginScreen.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      loadDashboard();
+    }
+
+    // Email/password login
+    document.getElementById('login-form')!.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (document.getElementById('login-email') as HTMLInputElement).value.trim();
+      const password = (document.getElementById('login-password') as HTMLInputElement).value;
+      const msgEl = document.getElementById('login-message')!;
+      const btn = (e.target as HTMLFormElement).querySelector('button')!;
+      msgEl.textContent = '';
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        msgEl.textContent = error.message;
+        msgEl.className = 'mt-3 text-sm text-center text-ember';
+      } else {
+        showDashboard();
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    });
+
+    // Logout
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      dashboard.classList.add('hidden');
+      loginScreen.classList.remove('hidden');
+    });
+
+    // --- Dashboard ---
+    async function loadDashboard() {
+      await Promise.all([loadStats(), loadMilestones(), loadSubscribers()]);
+    }
+
+    async function loadStats() {
+      const target = new Date('2026-04-14T09:00:00-07:00').getTime();
+      const daysLeft = Math.max(0, Math.ceil((target - Date.now()) / 86400000));
+
+      document.getElementById('stat-days')!.textContent = String(daysLeft);
+      document.getElementById('days-remaining')!.textContent = String(daysLeft);
+
+      // Subscriber count
+      const { count } = await supabase
+        .from('subscribers')
+        .select('*', { count: 'exact', head: true });
+      document.getElementById('stat-subscribers')!.textContent = String(count ?? 0);
+
+      // Milestones
+      const { data: milestones } = await supabase
+        .from('milestones')
+        .select('completed');
+      if (milestones) {
+        const total = milestones.length;
+        const completed = milestones.filter((m: any) => m.completed).length;
+        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+        document.getElementById('stat-milestones')!.textContent = `${completed}/${total}`;
+        document.getElementById('stat-progress')!.textContent = `${pct}%`;
+        const bar = document.getElementById('admin-progress-bar');
+        if (bar) bar.style.width = `${pct}%`;
+      }
+    }
+
+    async function loadMilestones() {
+      const container = document.getElementById('admin-milestones')!;
+      const { data, error } = await supabase
+        .from('milestones')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (error || !data) {
+        container.innerHTML = '<p class="text-sm text-ember">Failed to load milestones.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map((m: any) => `
+        <div
+          class="milestone-toggle flex items-center gap-3 py-2.5 px-3 rounded-lg"
+          data-id="${m.id}"
+          data-completed="${m.completed}"
+        >
+          <div class="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center ${
+            m.completed
+              ? 'bg-teal text-white'
+              : 'border-2 border-navy/20 dark:border-white/20'
+          }">
+            ${m.completed
+              ? '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>'
+              : ''
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-navy dark:text-white ${m.completed ? 'line-through opacity-60' : ''}">
+              ${m.title}
+            </p>
+            <p class="text-xs text-storm dark:text-white/40">${m.description || ''}${m.sprint_number ? ` · Sprint ${m.sprint_number}` : ''}</p>
+          </div>
+        </div>
+      `).join('');
+
+      // Click handlers for toggling
+      container.querySelectorAll('.milestone-toggle').forEach(el => {
+        el.addEventListener('click', async () => {
+          const id = el.getAttribute('data-id');
+          const wasCompleted = el.getAttribute('data-completed') === 'true';
+          const newCompleted = !wasCompleted;
+
+          const { error } = await supabase
+            .from('milestones')
+            .update({
+              completed: newCompleted,
+              completed_at: newCompleted ? new Date().toISOString() : null
+            })
+            .eq('id', id);
+
+          if (!error) {
+            await loadDashboard(); // Refresh everything
+          }
+        });
+      });
+    }
+
+    async function loadSubscribers() {
+      const container = document.getElementById('admin-subscribers')!;
+      const { data, error } = await supabase
+        .from('subscribers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error || !data) {
+        container.innerHTML = '<p class="text-sm text-ember">Failed to load subscribers.</p>';
+        return;
+      }
+
+      subscriberData = data;
+
+      if (data.length === 0) {
+        container.innerHTML = '<p class="text-sm text-storm dark:text-white/50">No subscribers yet. Share your landing page!</p>';
+        return;
+      }
+
+      container.innerHTML = data.map((s: any) => {
+        const date = new Date(s.created_at);
+        const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `
+          <div class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-navy/5 dark:hover:bg-white/5">
+            <div class="min-w-0">
+              <p class="text-sm text-navy dark:text-white truncate">${s.email}</p>
+            </div>
+            <div class="flex items-center gap-3 flex-shrink-0 ml-3">
+              <span class="text-xs px-2 py-0.5 rounded-full bg-navy/5 dark:bg-white/5 text-storm dark:text-white/50">${s.source}</span>
+              <span class="text-xs text-storm dark:text-white/40">${formatted}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Checklist toggle ---
+    document.getElementById('toggle-checklist')?.addEventListener('click', () => {
+      const content = document.getElementById('checklist-content')!;
+      const btn = document.getElementById('toggle-checklist')!;
+      const isHidden = content.classList.contains('hidden');
+      content.classList.toggle('hidden');
+      btn.textContent = isHidden ? 'Hide checklist' : 'Show full checklist';
+    });
+
+    // --- Interactive checklist items ---
+    const CHECKLIST_KEY = 'kaivoo-launch-checklist';
+
+    function getCheckedItems(): Set<string> {
+      try {
+        const stored = localStorage.getItem(CHECKLIST_KEY);
+        return stored ? new Set(JSON.parse(stored)) : new Set();
+      } catch { return new Set(); }
+    }
+
+    function saveCheckedItems(checked: Set<string>) {
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify([...checked]));
+    }
+
+    function initChecklist() {
+      const checked = getCheckedItems();
+      const items = document.querySelectorAll('.checklist-item');
+
+      items.forEach((item, index) => {
+        const text = item.textContent?.trim() || '';
+        const key = `cl-${index}-${text.slice(0, 40)}`;
+
+        // Inject checkbox span before text
+        const label = item.textContent || '';
+        item.innerHTML = `<span class="checklist-check">${checked.has(key) ? '<svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>' : ''}</span><span class="checklist-label">${label}</span>`;
+
+        if (checked.has(key)) {
+          item.classList.add('checked');
+        }
+
+        item.addEventListener('click', () => {
+          const currentChecked = getCheckedItems();
+          const checkEl = item.querySelector('.checklist-check')!;
+
+          if (currentChecked.has(key)) {
+            currentChecked.delete(key);
+            item.classList.remove('checked');
+            checkEl.innerHTML = '';
+          } else {
+            currentChecked.add(key);
+            item.classList.add('checked');
+            checkEl.innerHTML = '<svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>';
+          }
+
+          saveCheckedItems(currentChecked);
+        });
+      });
+    }
+
+    // --- CSV Export ---
+    let subscriberData: any[] = [];
+
+    document.getElementById('export-csv')?.addEventListener('click', () => {
+      if (subscriberData.length === 0) return;
+
+      const headers = ['email', 'source', 'created_at'];
+      const rows = subscriberData.map(s =>
+        headers.map(h => `"${String(s[h] || '').replace(/"/g, '""')}"`).join(',')
+      );
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kaivoo-subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // --- Init ---
+    checkSession();
+    initChecklist();
+  </script>
+</Layout>
