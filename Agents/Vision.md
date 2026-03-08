@@ -512,7 +512,7 @@ Every 1st-party module passes through the same packaging checks that marketplace
 
 **The Solopreneur** — Runs one or more ventures. Currently duct-taping Notion + Google Calendar + spreadsheet CRM + a separate AI chat. Wants one AI-powered place that replaces the stack. Willing to pay $29-49/mo for the tool that runs their whole operation.
 
-**The Agency Owner** — Runs a marketing agency, consulting firm, or creative studio. Uses One Workflow as their operational hub — client meetings, deliverables, project tracking — with business widgets to execute work directly from their dashboard. High willingness-to-pay.
+**The Agency Owner** — Runs a marketing agency, consulting firm, or creative studio. Uses Flow as their operational hub — client meetings, deliverables, project tracking — with business widgets to execute work directly from their dashboard. High willingness-to-pay.
 
 **The Small Team** — 2-25 people who want shared AI-powered productivity without HubSpot/Salesforce complexity or pricing. Shared tasks, shared calendars, role-based access. One tool for the whole team.
 
@@ -676,14 +676,22 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | AI settings page + BYO API key wizard — choose provider, enter keys, test connection | **DONE** (Sprint 23) | Must-have |
 | AI chat concierge — in-app conversational AI | **DONE** (Sprint 23 — in-app chat) | Must-have |
 | Soul file — persistent AI memory (SQLite `ai_memories` table, fact extraction pipeline, user-editable memory UI, app context injection, conversation summaries). The concierge learns, remembers, and sees your data. | **DONE** (Sprint 24) | Must-have |
-| Pre-compaction memory flush — before context truncation in long conversations, concierge writes lasting notes to memory. Prevents context loss. | PLANNED | Should-have |
-| Deterministic context assembly — ensure soul/memory injection is compiled from structured data, not AI-generated. Prevents personality drift. | PLANNED | Should-have |
+| Pre-compaction memory flush — before context truncation in long conversations, concierge writes lasting notes to memory. Prevents context loss. | **DONE** (Sprint 30) | Must-have |
+| Deterministic context assembly — ensure soul/memory injection is compiled from structured data, not AI-generated. Prevents personality drift. | **DONE** (Sprint 30) | Must-have |
 | Setup wizard + Concierge Hatching — vault folder selection, AI config, Obsidian import (file copy), concierge hatching, guided tour | **DONE** (Sprint 23) | Must-have |
 | License key system — activation, tier validation, commercial distribution | **DONE** (Sprint 25 — Ed25519 offline verification, Stripe checkout, activation UX) | Must-have |
-| Landing page & marketing site | PLANNED | Must-have |
+| Landing page & marketing site | PLANNED (Week 1) | Must-have |
 | Stripe integration — one-time payment flow | **DONE** (Sprint 25 — $49/$99 Checkout, Edge Functions) | Must-have |
-| EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED | Must-have |
-| Product Hunt launch | PLANNED | Must-have |
+| EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED (Sprint 57) | Must-have |
+| Product Hunt launch | PLANNED (April 14, 2026) | Must-have |
+| **Full-page AI Chat** — `/chat` route, conversation list, persistent history, model selector | PLANNED (Sprint 34) | **Must-have** |
+| **Configurable Heartbeat** — proactive AI that acts without being asked. Background timer, morning briefing, evening summary, custom intervals. Reads tasks, calendar, journal, soul file. | PLANNED (Sprint 37) | **Must-have** |
+| **Neuron Memory V1** — tiered soul file (Core Identity + Active Context + Episodic Memory), memory consolidation during heartbeat (dedup, summarize, prune, promote), context-aware loading (~3500 token budget). Solves soul file bloat. | PLANNED (Sprint 38) | **Must-have** |
+| **Orchestrator Page** — 4-tab page: Agents (CRUD, model assignment, permissions), Skills (CRUD, AI skill creation), Workflows (step builder, triggers, approval gates), MCPs (discover, connect, manage). Users define their own AI agent teams and workflows. | PLANNED (Sprints 39-45) | **Must-have** |
+| **Workflow Execution Engine** — multi-model routing, context passing between steps, approval gates, action logging, rate limiting. The orchestrator actually runs workflows autonomously. | PLANNED (Sprints 46-47) | **Must-have** |
+| **Artifact System** — sandboxed iframe widgets. AI generates HTML/CSS/JS, renders in split-pane preview. Persistent custom widgets saveable to library. Addable to Today page and project pages. Export to vault. Editable via conversation. | PLANNED (Sprints 48-49) | **Must-have** |
+| **Safety Layer** — confirmation gates, skill permissions, workflow approval gates, rollback, rate limiting. Safe autonomy as a product principle. | PLANNED (Sprint 50) | **Must-have** |
+| **Thinking Transparency** — visible AI reasoning during workflows and heartbeat. Action log accessible in-app. | PLANNED (Sprint 51) | **Must-have** |
 | Google Calendar integration — OAuth, two-way sync (investigate MCP for faster delivery) | PLANNED | Post-launch fast-follow |
 | Gmail integration — read, send, organize email within the app (investigate MCP for faster delivery) | PLANNED | Post-launch fast-follow |
 | White-label config layer — logo, colors, app name as settings (not hardcoded) | PLANNED | Should-have |
@@ -691,25 +699,26 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | PWA (installable, offline read) | PLANNED | Should-have |
 | Notifications & reminders | PLANNED | Should-have |
 
-### Phase B: One Workflow Cloud Platform + Orchestrator
-*Two revenue streams: One Workflow subscriptions for solopreneurs/teams + Kaivoo Orchestrator for builders. ARR engine. Target $1M.*
+### Phase B: Flow Cloud Platform + Orchestrator V2
+*Two revenue streams: Flow subscriptions for solopreneurs/teams + Orchestrator V2 for builders. ARR engine. Target $1M.*
 
-#### Orchestrator (Product 2)
+**Note:** Orchestrator V1 moved to Phase A per CEO Session #13. Phase B expands the orchestrator with advanced features.
+
+#### Orchestrator V2 (Expansion)
 
 | Milestone | Status |
 |---|---|
-| Productize agent system — markdown specs → executable agent templates | PLANNED |
 | Orchestrator dashboard — sprint completions, production connections, sandbox, deployment status | PLANNED |
-| Multi-model routing engine — assign models to roles, API key management, cost tracking | PLANNED |
+| Advanced multi-model routing — cost tracking, per-agent budgets, model performance comparison | PLANNED |
 | Companion app concierge — message your AI from the companion app, same brain/memory, remote task execution | PLANNED |
 | Exec approval system — confirmation flows for remote-triggered actions, unique approval IDs, timeouts, audit trail | PLANNED |
 | "New Project" wizard — concierge generates Vision, agent roster, first sprint from conversation | PLANNED |
+| MCP marketplace — browse, rate, review community MCPs | PLANNED |
 | Productization sprint — clean templates, strip Kaivoo-specific content, blank-slate onboarding | PLANNED |
-| Security model — auth for remote-triggered execution, blast-radius controls, sandboxed agent execution | PLANNED |
-| Orchestrator-as-addon — toggle for existing productivity app users to add builder capabilities | PLANNED |
+| Advanced security model — auth for remote-triggered execution, blast-radius controls, sandboxed agent execution | PLANNED |
 | Orchestrator subscription billing — premium pricing, Stripe recurring | PLANNED |
 
-#### One Workflow Cloud
+#### Flow Cloud
 
 | Milestone | Status |
 |---|---|
@@ -724,7 +733,7 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | Team onboarding — invite, set roles, configure shared workspaces | PLANNED |
 | AI Concierge Level 2 — proactive suggestions, "I can do that for you" prompts | PLANNED |
 | Skills & integration architecture — plugin API, module SDK, documentation-first skill manifests | PLANNED |
-| Integration: Slack/Teams — connect (not rebuild), messages flow through One Workflow | PLANNED |
+| Integration: Slack/Teams — connect (not rebuild), messages flow through Flow | PLANNED |
 | Marketing widget — content creation, social media, campaign planning | PLANNED |
 | Sales dashboard widget — pipeline tracking, contact management, lightweight CRM | PLANNED |
 | Document management widget — upload, organize, share, version | PLANNED |
@@ -737,10 +746,10 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | Subscription billing — Stripe recurring payments, tier management | PLANNED |
 | Monitoring & observability for production users | PLANNED |
 | Analytics & insights dashboard rebuild | PLANNED |
-| "One Workflow" branding & marketing site (oneworkflow.ai) | PLANNED |
+| ~~"One Workflow" branding & marketing site~~ — **Superseded by CEO Session #9: Flow by Kaivoo (kaivoo.com)** | **SUPERSEDED** |
 
 ### Phase C: Platform & Marketplace
-*Open the ecosystem. Let users and developers build on top of One Workflow.*
+*Open the ecosystem. Let users and developers build on top of Flow.*
 
 | Milestone | Status |
 |---|---|
@@ -809,7 +818,7 @@ These run in parallel with sprint work, not blocking it.
 | Competitive pricing teardown (productivity) | Agent 8 | HubSpot, Monday, Notion, Asana, Sunsama pricing analysis — where the floor is for SMBs. Focus on what users get at the $8-12/mo tier across competitors | PLANNED |
 | Addon pricing model | Agent 8 | Per-seat vs. per-workspace vs. usage-based analysis with widget addon tiers | PLANNED |
 | Legal / EULA research | Agent 5 | EULA template, redistribution terms, privacy policy framework — to be reviewed by attorney | PLANNED |
-| "One Workflow" positioning validation | Agent 8 | Does the name resonate? Does "replace your stack" land with target personas? | PLANNED |
+| ~~"One Workflow" positioning validation~~ | ~~Agent 8~~ | ~~Superseded by CEO Session #9 — product renamed to "Flow by Kaivoo"~~ | **SUPERSEDED** |
 | Marketplace model analysis | Agent 8 | Shopify Apps, Figma Community, Notion Templates — commission structures, quality control, creator incentives | PLANNED |
 | Sandboxed module runtime | Agent 3 | Evaluate iframe sandboxing, Web Components, controlled runtimes for user-built modules — security vs. capability | PLANNED |
 | Companion app architecture | Agent 3 | Stripped-down mobile app: concierge chat, today view, quick capture, notifications. PWA vs. native. Session scoping for multi-surface concierge (one brain, many mouths). | PLANNED |
@@ -1061,7 +1070,7 @@ Why Kaivoo wins where others don't:
 
 ## How This Document Is Used
 
-1. **The CEO** owns this document philosophically — is Kaivoo/One Workflow solving the right problem?
+1. **The CEO** owns this document philosophically — is Flow by Kaivoo solving the right problem?
 2. **The Director** reads this before every sprint planning session
 3. **All agents** can reference this for product context
 4. **Agent 8 (Product Manager)** uses this to align business strategy with engineering reality
