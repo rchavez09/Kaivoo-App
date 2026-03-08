@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 
 /**
  * License Key Generation Edge Function — Sprint 25 P5
@@ -13,17 +13,16 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
  *   STRIPE_SECRET_KEY — Stripe secret key (for retrieving session details)
  */
 
-import { createClient } from "jsr:@supabase/supabase-js@2";
-import { ed25519 } from "npm:@noble/curves@1/ed25519";
-import { hmac } from "npm:@noble/hashes@1/hmac";
-import { sha256 } from "npm:@noble/hashes@1/sha256";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { ed25519 } from 'npm:@noble/curves@1/ed25519';
+import { hmac } from 'npm:@noble/hashes@1/hmac';
+import { sha256 } from 'npm:@noble/hashes@1/sha256';
 
-const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") || "*";
+const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') || '*';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, stripe-signature",
+  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
 };
 
 // ─── Stripe Webhook Signature Verification ───
@@ -38,28 +37,21 @@ function hexToBytes(hex: string): Uint8Array {
 
 function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 function toBase64Url(bytes: Uint8Array): string {
   const binary = Array.from(bytes)
     .map((b) => String.fromCharCode(b))
-    .join("");
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .join('');
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-async function verifyStripeSignature(
-  payload: string,
-  sigHeader: string,
-  secret: string,
-): Promise<boolean> {
-  const parts = sigHeader.split(",");
-  const timestamp = parts.find((p) => p.startsWith("t="))?.slice(2);
-  const v1Sig = parts.find((p) => p.startsWith("v1="))?.slice(3);
+async function verifyStripeSignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
+  const parts = sigHeader.split(',');
+  const timestamp = parts.find((p) => p.startsWith('t='))?.slice(2);
+  const v1Sig = parts.find((p) => p.startsWith('v1='))?.slice(3);
   if (!timestamp || !v1Sig) return false;
 
   // Stripe signs: timestamp + "." + payload
@@ -87,14 +79,11 @@ function hashEmail(email: string): string {
   return bytesToHex(hash).substring(0, 8);
 }
 
-function buildLicensePayload(
-  tier: "founding" | "standard",
-  email: string,
-): LicensePayload {
+function buildLicensePayload(tier: 'founding' | 'standard', email: string): LicensePayload {
   const daysSinceEpoch = Math.floor(Date.now() / (86400 * 1000));
   return {
     v: 1,
-    t: tier === "founding" ? 0 : 1,
+    t: tier === 'founding' ? 0 : 1,
     i: daysSinceEpoch,
     e: hashEmail(email),
     f: 0,
@@ -117,17 +106,17 @@ function signLicense(payload: LicensePayload, privateKeyHex: string): string {
   const encoded = toBase64Url(combined);
 
   // Format as Kaivoo license block
-  const tierLabel = payload.t === 0 ? "Founding Member" : "Standard";
+  const tierLabel = payload.t === 0 ? 'Founding Member' : 'Standard';
   const lines: string[] = [];
-  lines.push("----- BEGIN KAIVOO LICENSE -----");
+  lines.push('----- BEGIN KAIVOO LICENSE -----');
   lines.push(`Kaivoo ${tierLabel} - Single User License`);
   // Split encoded key into 48-char lines
   for (let i = 0; i < encoded.length; i += 48) {
     lines.push(encoded.substring(i, i + 48));
   }
-  lines.push("----- END KAIVOO LICENSE -----");
+  lines.push('----- END KAIVOO LICENSE -----');
 
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 // ─── Stripe Helpers ───
@@ -141,16 +130,10 @@ interface StripeSession {
   amount_total: number;
 }
 
-async function getStripeSession(
-  sessionId: string,
-  stripeKey: string,
-): Promise<StripeSession> {
-  const res = await fetch(
-    `https://api.stripe.com/v1/checkout/sessions/${sessionId}`,
-    {
-      headers: { Authorization: `Bearer ${stripeKey}` },
-    },
-  );
+async function getStripeSession(sessionId: string, stripeKey: string): Promise<StripeSession> {
+  const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
+    headers: { Authorization: `Bearer ${stripeKey}` },
+  });
   if (!res.ok) throw new Error(`Stripe API error: ${res.status}`);
   return res.json();
 }
@@ -158,80 +141,76 @@ async function getStripeSession(
 // ─── Main Handler ───
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", {
+  if (req.method !== 'POST') {
+    return new Response('Method not allowed', {
       status: 405,
       headers: corsHeaders,
     });
   }
 
-  const signingKey = Deno.env.get("LICENSE_SIGNING_KEY");
-  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const signingKey = Deno.env.get('LICENSE_SIGNING_KEY');
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!signingKey || !webhookSecret || !stripeKey || !supabaseUrl || !supabaseServiceKey) {
-    return new Response(
-      JSON.stringify({ error: "Server misconfigured — missing secrets" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Server misconfigured — missing secrets' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
     const body = await req.text();
-    const sigHeader = req.headers.get("stripe-signature");
+    const sigHeader = req.headers.get('stripe-signature');
 
     if (!sigHeader) {
-      return new Response(
-        JSON.stringify({ error: "Missing stripe-signature header" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ error: 'Missing stripe-signature header' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Verify Stripe webhook signature
     const valid = await verifyStripeSignature(body, sigHeader, webhookSecret);
     if (!valid) {
-      return new Response(
-        JSON.stringify({ error: "Invalid signature" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const event = JSON.parse(body);
 
     // Only process checkout.session.completed
-    if (event.type !== "checkout.session.completed") {
-      return new Response(
-        JSON.stringify({ received: true, skipped: event.type }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+    if (event.type !== 'checkout.session.completed') {
+      return new Response(JSON.stringify({ received: true, skipped: event.type }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const session: StripeSession = event.data.object;
-    const email =
-      session.customer_email ||
-      session.customer_details?.email ||
-      "";
+    const email = session.customer_email || session.customer_details?.email || '';
 
     if (!email) {
-      console.error("No email found in Stripe session:", session.id);
-      return new Response(
-        JSON.stringify({ error: "No customer email in session" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      console.error('No email found in Stripe session:', session.id);
+      return new Response(JSON.stringify({ error: 'No customer email in session' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Determine tier from metadata or amount
-    const tier: "founding" | "standard" =
-      session.metadata?.tier === "standard" ||
-      (session.amount_total && session.amount_total >= 9900)
-        ? "standard"
-        : "founding";
+    const tier: 'founding' | 'standard' =
+      session.metadata?.tier === 'standard' || (session.amount_total && session.amount_total >= 9900)
+        ? 'standard'
+        : 'founding';
 
     // Generate license key
     const payload = buildLicensePayload(tier, email);
@@ -239,7 +218,7 @@ Deno.serve(async (req: Request) => {
 
     // Store license record in Supabase
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { error: dbError } = await supabase.from("licenses").insert({
+    const { error: dbError } = await supabase.from('licenses').insert({
       email_hash: payload.e,
       tier,
       stripe_session_id: session.id,
@@ -248,7 +227,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (dbError) {
-      console.error("Failed to store license:", dbError);
+      console.error('Failed to store license:', dbError);
       // Still return success — key was generated, just not stored
     }
 
@@ -266,15 +245,15 @@ Deno.serve(async (req: Request) => {
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },
     );
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Unknown error";
-    console.error("License keygen error:", message);
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    const message = e instanceof Error ? e.message : 'Unknown error';
+    console.error('License keygen error:', message);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

@@ -404,116 +404,114 @@ export const VaultContent = () => {
       {/* Header */}
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-foreground">
-            Vault
-          </h1>
-            <p className="text-sm text-muted-foreground">
-              {totalFolders} folder{totalFolders !== 1 ? 's' : ''}, {totalFiles} file
-              {totalFiles !== 1 ? 's' : ''}
+          <h1 className="mb-1 text-2xl font-semibold text-foreground">Vault</h1>
+          <p className="text-sm text-muted-foreground">
+            {totalFolders} folder{totalFolders !== 1 ? 's' : ''}, {totalFiles} file
+            {totalFiles !== 1 ? 's' : ''}
+          </p>
+        </div>
+      </header>
+
+      {/* Breadcrumbs */}
+      {currentPath && (
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="cursor-pointer" onClick={() => setCurrentPath('')}>
+                Vault
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {breadcrumbSegments.map((segment, i) => {
+              const isLast = i === breadcrumbSegments.length - 1;
+              const segmentPath = breadcrumbSegments.slice(0, i + 1).join('/');
+              return (
+                <span key={segmentPath} className="contents">
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    {isLast ? (
+                      <BreadcrumbPage>{segment}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink className="cursor-pointer" onClick={() => setCurrentPath(segmentPath)}>
+                        {segment}
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </span>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
+      )}
+
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search vault..."
+          className="pl-9"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          aria-label="Search vault"
+        />
+      </div>
+
+      {/* File Tree */}
+      <div className="widget-card">
+        {loading ? (
+          <div className="space-y-3 p-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className={`h-4 rounded ${i % 2 === 0 ? 'w-32' : 'w-48'}`} />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="py-12 text-center">
+            <HardDrive className="mx-auto mb-4 h-12 w-12 text-destructive/30" />
+            <h3 className="mb-2 text-lg font-medium text-foreground">Failed to load vault</h3>
+            <p className="mx-auto max-w-sm text-sm text-muted-foreground">{error}</p>
+          </div>
+        ) : !tree || !currentNode ? (
+          <div className="py-12 text-center">
+            <HardDrive className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+            <h3 className="mb-2 text-lg font-medium text-foreground">Vault not available</h3>
+            <p className="mx-auto max-w-sm text-sm text-muted-foreground">Sign in to access your Knowledge Vault.</p>
+          </div>
+        ) : visibleRootChildren.length > 0 ? (
+          <div role="tree" aria-label="Vault files" className="space-y-0.5">
+            {visibleRootChildren.map((child, index) => (
+              <TreeNode
+                key={child.path}
+                node={child}
+                depth={0}
+                level={1}
+                posinset={index + 1}
+                setsize={visibleRootChildren.length}
+                expanded={expanded}
+                onToggle={toggleNode}
+                onNavigate={handleNodeClick}
+                searchQuery={searchQuery.toLowerCase()}
+                focusedPath={focusedPath}
+                onFocusChange={setFocusedPath}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="py-12 text-center">
+            <FolderOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+            <h3 className="mb-2 text-lg font-medium text-foreground">
+              {searchQuery ? 'No results found' : 'Empty vault'}
+            </h3>
+            <p className="mx-auto max-w-sm text-sm text-muted-foreground">
+              {searchQuery
+                ? 'Try a different search term.'
+                : 'Your vault will populate as you create journal entries, topics, and captures.'}
             </p>
           </div>
-        </header>
-
-        {/* Breadcrumbs */}
-        {currentPath && (
-          <Breadcrumb className="mb-4">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink className="cursor-pointer" onClick={() => setCurrentPath('')}>
-                  Vault
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              {breadcrumbSegments.map((segment, i) => {
-                const isLast = i === breadcrumbSegments.length - 1;
-                const segmentPath = breadcrumbSegments.slice(0, i + 1).join('/');
-                return (
-                  <span key={segmentPath} className="contents">
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      {isLast ? (
-                        <BreadcrumbPage>{segment}</BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink className="cursor-pointer" onClick={() => setCurrentPath(segmentPath)}>
-                          {segment}
-                        </BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                  </span>
-                );
-              })}
-            </BreadcrumbList>
-          </Breadcrumb>
         )}
-
-        {/* Search */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search vault..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            aria-label="Search vault"
-          />
-        </div>
-
-        {/* File Tree */}
-        <div className="widget-card">
-          {loading ? (
-            <div className="space-y-3 p-2">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <Skeleton className="h-4 w-4 rounded" />
-                  <Skeleton className={`h-4 rounded ${i % 2 === 0 ? 'w-32' : 'w-48'}`} />
-                </div>
-              ))}
-            </div>
-          ) : error ? (
-            <div className="py-12 text-center">
-              <HardDrive className="mx-auto mb-4 h-12 w-12 text-destructive/30" />
-              <h3 className="mb-2 text-lg font-medium text-foreground">Failed to load vault</h3>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">{error}</p>
-            </div>
-          ) : !tree || !currentNode ? (
-            <div className="py-12 text-center">
-              <HardDrive className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-              <h3 className="mb-2 text-lg font-medium text-foreground">Vault not available</h3>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">Sign in to access your Knowledge Vault.</p>
-            </div>
-          ) : visibleRootChildren.length > 0 ? (
-            <div role="tree" aria-label="Vault files" className="space-y-0.5">
-              {visibleRootChildren.map((child, index) => (
-                <TreeNode
-                  key={child.path}
-                  node={child}
-                  depth={0}
-                  level={1}
-                  posinset={index + 1}
-                  setsize={visibleRootChildren.length}
-                  expanded={expanded}
-                  onToggle={toggleNode}
-                  onNavigate={handleNodeClick}
-                  searchQuery={searchQuery.toLowerCase()}
-                  focusedPath={focusedPath}
-                  onFocusChange={setFocusedPath}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="py-12 text-center">
-              <FolderOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-              <h3 className="mb-2 text-lg font-medium text-foreground">
-                {searchQuery ? 'No results found' : 'Empty vault'}
-              </h3>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-                {searchQuery
-                  ? 'Try a different search term.'
-                  : 'Your vault will populate as you create journal entries, topics, and captures.'}
-              </p>
-            </div>
-          )}
-        </div>
       </div>
+    </div>
   );
 };
 

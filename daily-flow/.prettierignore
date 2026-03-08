@@ -1,0 +1,5 @@
+src-tauri/target
+src-tauri/gen
+coverage
+dist
+node_modules

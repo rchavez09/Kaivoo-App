@@ -1,8 +1,8 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface TopicContext {
@@ -59,7 +59,7 @@ function extractYouTubeVideoId(url: string): string | null {
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
     /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
   ];
-  
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match) return match[1];
@@ -70,9 +70,9 @@ function extractYouTubeVideoId(url: string): string | null {
 // Extract audio URL using Cobalt API (works for YouTube, TikTok, Vimeo, Instagram, Twitter, etc.)
 async function extractAudioWithCobalt(
   videoUrl: string,
-  opts?: { platform?: 'youtube' | 'tiktok' | 'vimeo' | 'instagram' | 'twitter' | 'unknown' }
+  opts?: { platform?: 'youtube' | 'tiktok' | 'vimeo' | 'instagram' | 'twitter' | 'unknown' },
 ): Promise<{ audioUrl: string; filename?: string; cobaltStatus?: string } | null> {
-  const COBALT_API_URL = Deno.env.get("COBALT_API_URL")?.trim();
+  const COBALT_API_URL = Deno.env.get('COBALT_API_URL')?.trim();
 
   if (!COBALT_API_URL) {
     console.log('COBALT_API_URL not configured - audio extraction disabled');
@@ -97,11 +97,7 @@ async function extractAudioWithCobalt(
   let lastErrorText = '';
 
   // Inner helper to call Cobalt with specific alwaysProxy flag
-  const callCobalt = async (
-    endpoint: string,
-    version: 'v10' | 'legacy',
-    alwaysProxy: boolean
-  ) => {
+  const callCobalt = async (endpoint: string, version: 'v10' | 'legacy', alwaysProxy: boolean) => {
     const isYouTube = opts?.platform === 'youtube';
     const requestBody =
       version === 'v10'
@@ -158,7 +154,11 @@ async function extractAudioWithCobalt(
 
     if (data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel') {
       console.log(`Got ${data.status} response from Cobalt`);
-      return { audioUrl: data.url as string, filename: data.filename as string | undefined, cobaltStatus: data.status as string };
+      return {
+        audioUrl: data.url as string,
+        filename: data.filename as string | undefined,
+        cobaltStatus: data.status as string,
+      };
     }
 
     if (data.status === 'picker' && data.picker?.length > 0) {
@@ -217,12 +217,13 @@ async function getYouTubeTitle(videoId: string): Promise<string> {
   try {
     const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
     });
-    
+
     if (!response.ok) return 'Video';
-    
+
     const html = await response.text();
     const titleMatch = html.match(/<title>([^<]+)<\/title>/);
     return titleMatch ? titleMatch[1].replace(' - YouTube', '').trim() : 'Video';
@@ -236,20 +237,21 @@ async function fetchYouTubeTranscript(videoId: string): Promise<{ transcript: st
   try {
     const videoPageResponse = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
       },
     });
-    
+
     if (!videoPageResponse.ok) {
       return null;
     }
-    
+
     const html = await videoPageResponse.text();
-    
+
     const titleMatch = html.match(/<title>([^<]+)<\/title>/);
     const title = titleMatch ? titleMatch[1].replace(' - YouTube', '').trim() : 'Unknown Video';
-    
+
     // Note: YouTube pages vary a lot. Don't early-return if we can't find a "captions" block;
     // we still might find timedtext URLs or captionTracks in ytInitialPlayerResponse.
     const captionMatch = html.match(/"captions":\s*(\{[^}]+\})/);
@@ -261,20 +263,20 @@ async function fetchYouTubeTranscript(videoId: string): Promise<{ transcript: st
     const timedtextMatch = html.match(/https:\/\/www\.youtube\.com\/api\/timedtext[^"]+/);
     if (timedtextMatch) {
       let captionUrl = timedtextMatch[0].replace(/\\u0026/g, '&');
-      
+
       // Fetch the caption
       const captionResponse = await fetch(captionUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         },
       });
-      
+
       if (captionResponse.ok) {
         const captionData = await captionResponse.text();
-        
+
         // Parse XML or JSON captions
         const segments: TranscriptSegment[] = [];
-        
+
         // Try XML format
         const textMatches = captionData.matchAll(/<text[^>]*>([^<]*)<\/text>/g);
         for (const match of textMatches) {
@@ -286,14 +288,14 @@ async function fetchYouTubeTranscript(videoId: string): Promise<{ transcript: st
             .replace(/&quot;/g, '"')
             .replace(/&#39;/g, "'")
             .replace(/\n/g, ' ');
-          
+
           if (text.trim()) {
             segments.push({ text: text.trim() });
           }
         }
-        
+
         if (segments.length > 0) {
-          const transcript = segments.map(s => s.text).join(' ');
+          const transcript = segments.map((s) => s.text).join(' ');
           console.log(`Got ${segments.length} caption segments`);
           return { transcript, title };
         }
@@ -306,26 +308,26 @@ async function fetchYouTubeTranscript(videoId: string): Promise<{ transcript: st
       try {
         const playerData = JSON.parse(playerResponseMatch[1]);
         const captionTracks = playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-        
+
         if (captionTracks && captionTracks.length > 0) {
           // Prefer English
-          const englishTrack = captionTracks.find((t: { languageCode: string }) => 
-            t.languageCode === 'en' || t.languageCode?.startsWith('en')
+          const englishTrack = captionTracks.find(
+            (t: { languageCode: string }) => t.languageCode === 'en' || t.languageCode?.startsWith('en'),
           );
           const captionTrack = englishTrack || captionTracks[0];
-          
+
           if (captionTrack.baseUrl) {
             const captionResponse = await fetch(captionTrack.baseUrl, {
               headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
               },
             });
-            
+
             if (captionResponse.ok) {
               const captionXml = await captionResponse.text();
               const segments: TranscriptSegment[] = [];
               const textMatches = captionXml.matchAll(/<text[^>]*>([^<]*)<\/text>/g);
-              
+
               for (const match of textMatches) {
                 let text = match[1];
                 text = text
@@ -335,14 +337,14 @@ async function fetchYouTubeTranscript(videoId: string): Promise<{ transcript: st
                   .replace(/&quot;/g, '"')
                   .replace(/&#39;/g, "'")
                   .replace(/\n/g, ' ');
-                
+
                 if (text.trim()) {
                   segments.push({ text: text.trim() });
                 }
               }
-              
+
               if (segments.length > 0) {
-                const transcript = segments.map(s => s.text).join(' ');
+                const transcript = segments.map((s) => s.text).join(' ');
                 console.log(`Got ${segments.length} caption segments from player response`);
                 return { transcript, title };
               }
@@ -353,7 +355,7 @@ async function fetchYouTubeTranscript(videoId: string): Promise<{ transcript: st
         console.log('Could not parse player response:', e);
       }
     }
-    
+
     console.log('No captions found');
     return null;
   } catch (error) {
@@ -363,7 +365,7 @@ async function fetchYouTubeTranscript(videoId: string): Promise<{ transcript: st
 }
 
 // Helper to sleep for a given number of milliseconds
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Max audio size we'll attempt (ElevenLabs limit ~25MB, but we cap lower for edge memory)
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024; // 15MB limit for edge function safety
@@ -420,41 +422,45 @@ async function readResponseBytesStreaming(resp: Response, maxBytes: number): Pro
   return buffer.subarray(0, offset);
 }
 
-async function downloadAudioBytes(url: string, opts?: { referer?: string; isTunnel?: boolean }): Promise<Uint8Array | null> {
+async function downloadAudioBytes(
+  url: string,
+  opts?: { referer?: string; isTunnel?: boolean },
+): Promise<Uint8Array | null> {
   const maxAttempts = opts?.isTunnel ? 4 : 2;
   // Use the global constant for memory safety
   const maxDownloadBytes = MAX_AUDIO_BYTES;
-  
+
   const fetchOnce = async (attempt: number, urlToFetch: string) => {
     console.log(`Fetching audio (attempt ${attempt}):`, urlToFetch);
-    
+
     try {
       // For tunnel URLs, use specific headers to force streaming
       const headers: Record<string, string> = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'audio/mpeg, audio/mp4, audio/*, */*',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'audio/mpeg, audio/mp4, audio/*, */*',
         'Accept-Encoding': 'identity', // Disable compression to get raw bytes
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
+        Pragma: 'no-cache',
       };
-      
+
       if (opts?.referer) {
         headers['Referer'] = opts.referer;
       }
-      
-       // Some tunnel endpoints return 0 bytes unless the request looks like a real download.
-       // Start with an open-ended range from byte 0.
-       if (opts?.isTunnel) {
-         if (attempt === 1) headers['Range'] = 'bytes=0-';
-         if (attempt === 2) headers['Range'] = 'bytes=0-1048575';
-         if (attempt >= 3) headers['Range'] = 'bytes=0-';
-       }
+
+      // Some tunnel endpoints return 0 bytes unless the request looks like a real download.
+      // Start with an open-ended range from byte 0.
+      if (opts?.isTunnel) {
+        if (attempt === 1) headers['Range'] = 'bytes=0-';
+        if (attempt === 2) headers['Range'] = 'bytes=0-1048575';
+        if (attempt >= 3) headers['Range'] = 'bytes=0-';
+      }
 
       const resp = await fetch(urlToFetch, {
         redirect: 'follow',
         headers,
-         cache: 'no-store',
+        cache: 'no-store',
       });
 
       console.log('Audio fetch status:', resp.status, resp.statusText);
@@ -467,24 +473,24 @@ async function downloadAudioBytes(url: string, opts?: { referer?: string; isTunn
         return null;
       }
 
-       const debugClone = resp.clone();
-       const bytes = await readResponseBytesStreaming(resp, maxDownloadBytes);
-       if (!bytes) {
-         console.error('Audio too large for edge function memory');
-         return null;
-       }
-       console.log(`Downloaded ${bytes.length} bytes of audio`);
+      const debugClone = resp.clone();
+      const bytes = await readResponseBytesStreaming(resp, maxDownloadBytes);
+      if (!bytes) {
+        console.error('Audio too large for edge function memory');
+        return null;
+      }
+      console.log(`Downloaded ${bytes.length} bytes of audio`);
 
-       if (bytes.length === 0) {
-         // Helpful for diagnosing cases where the tunnel returns an HTML error page
-         // but hides it behind odd headers.
-         try {
-           const preview = await debugClone.text();
-           console.log('0-byte audio response preview:', preview.slice(0, 300));
-         } catch {
-           // ignore
-         }
-       }
+      if (bytes.length === 0) {
+        // Helpful for diagnosing cases where the tunnel returns an HTML error page
+        // but hides it behind odd headers.
+        try {
+          const preview = await debugClone.text();
+          console.log('0-byte audio response preview:', preview.slice(0, 300));
+        } catch {
+          // ignore
+        }
+      }
 
       return bytes;
     } catch (error) {
@@ -493,12 +499,12 @@ async function downloadAudioBytes(url: string, opts?: { referer?: string; isTunn
     }
   };
 
-   // For tunnel URLs, add delays between attempts to let the stream buffer
+  // For tunnel URLs, add delays between attempts to let the stream buffer
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-     // Warm-up delay for tunnel URLs: sometimes the tunnel is created before the stream is ready.
-     if (attempt === 1 && opts?.isTunnel) {
-       await sleep(1200);
-     }
+    // Warm-up delay for tunnel URLs: sometimes the tunnel is created before the stream is ready.
+    if (attempt === 1 && opts?.isTunnel) {
+      await sleep(1200);
+    }
 
     // Add delay before retry (not on first attempt)
     if (attempt > 1) {
@@ -506,7 +512,7 @@ async function downloadAudioBytes(url: string, opts?: { referer?: string; isTunn
       console.log(`Waiting ${delayMs}ms before retry...`);
       await sleep(delayMs);
     }
-    
+
     // Add cache-busting on retries
     let urlToFetch = url;
     // IMPORTANT: don't modify signed /tunnel URLs (extra query params can invalidate signatures)
@@ -514,7 +520,7 @@ async function downloadAudioBytes(url: string, opts?: { referer?: string; isTunn
       const separator = url.includes('?') ? '&' : '?';
       urlToFetch = `${url}${separator}cb=${Date.now()}`;
     }
-    
+
     const result = await fetchOnce(attempt, urlToFetch);
     if (result && result.length > 0) return result;
   }
@@ -524,17 +530,20 @@ async function downloadAudioBytes(url: string, opts?: { referer?: string; isTunn
 }
 
 // Transcribe audio using ElevenLabs Scribe API
-async function transcribeWithElevenLabs(audioData: string | Uint8Array, mimeType: string = 'audio/mpeg'): Promise<string | null> {
-  const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-  
+async function transcribeWithElevenLabs(
+  audioData: string | Uint8Array,
+  mimeType: string = 'audio/mpeg',
+): Promise<string | null> {
+  const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
+
   if (!ELEVENLABS_API_KEY) {
-    console.log("ElevenLabs API key not configured");
+    console.log('ElevenLabs API key not configured');
     return null;
   }
-  
+
   try {
     let bytes: Uint8Array;
-    
+
     if (typeof audioData === 'string') {
       const binaryString = atob(audioData);
       bytes = new Uint8Array(binaryString.length);
@@ -544,26 +553,26 @@ async function transcribeWithElevenLabs(audioData: string | Uint8Array, mimeType
     } else {
       bytes = audioData;
     }
-    
+
     const formData = new FormData();
     const arrayBuffer = new ArrayBuffer(bytes.length);
     new Uint8Array(arrayBuffer).set(bytes);
     const audioBlob = new Blob([arrayBuffer], { type: mimeType });
-    
+
     let extension = 'mp3';
     if (mimeType.includes('mp4') || mimeType.includes('m4a')) {
       extension = 'm4a';
     } else if (mimeType.includes('webm') || mimeType.includes('opus')) {
       extension = 'webm';
     }
-    
+
     formData.append('file', audioBlob, `audio.${extension}`);
     formData.append('model_id', 'scribe_v2');
     formData.append('tag_audio_events', 'false');
     formData.append('diarize', 'false');
-    
+
     console.log(`Sending ${bytes.length} bytes to ElevenLabs STT...`);
-    
+
     const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
       headers: {
@@ -571,13 +580,13 @@ async function transcribeWithElevenLabs(audioData: string | Uint8Array, mimeType
       },
       body: formData,
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('ElevenLabs STT error:', response.status, errorText);
       return null;
     }
-    
+
     const result = await response.json();
     return result.text || null;
   } catch (error) {
@@ -587,9 +596,12 @@ async function transcribeWithElevenLabs(audioData: string | Uint8Array, mimeType
 }
 
 // Extract audio with Cobalt and transcribe with ElevenLabs
-async function extractAndTranscribe(videoUrl: string, platform: string): Promise<{ transcript: string; title: string } | null> {
+async function extractAndTranscribe(
+  videoUrl: string,
+  platform: string,
+): Promise<{ transcript: string; title: string } | null> {
   console.log(`Extracting audio for ${platform} video...`);
-  
+
   // Get title for YouTube
   let title = 'Video';
   if (platform === 'youtube') {
@@ -598,7 +610,7 @@ async function extractAndTranscribe(videoUrl: string, platform: string): Promise
       title = await getYouTubeTitle(videoId);
     }
   }
-  
+
   // Extract audio with Cobalt + download + transcribe.
   // If the tunnel URL returns a 0-byte body (often transient), retry once to obtain a fresh tunnel URL.
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -614,9 +626,9 @@ async function extractAndTranscribe(videoUrl: string, platform: string): Promise
     const isTunnel = audioInfo.cobaltStatus === 'tunnel' || audioInfo.audioUrl.includes('/tunnel');
 
     try {
-      const audioBytes = await downloadAudioBytes(audioInfo.audioUrl, { 
-        referer: videoUrl, 
-        isTunnel 
+      const audioBytes = await downloadAudioBytes(audioInfo.audioUrl, {
+        referer: videoUrl,
+        isTunnel,
       });
       if (!audioBytes) {
         console.error('Failed to download audio bytes');
@@ -649,22 +661,30 @@ async function extractAndTranscribe(videoUrl: string, platform: string): Promise
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { url, instruction, transcript: userTranscript, audioBase64, topics, tags, currentDate }: RequestBody = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+    const {
+      url,
+      instruction,
+      transcript: userTranscript,
+      audioBase64,
+      topics,
+      tags,
+      currentDate,
+    }: RequestBody = await req.json();
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
     const platform = detectPlatform(url);
     let transcript: string | null = null;
     let videoTitle = 'Video';
-    const hasElevenLabs = !!Deno.env.get("ELEVENLABS_API_KEY");
+    const hasElevenLabs = !!Deno.env.get('ELEVENLABS_API_KEY');
 
     // Priority 1: User provided transcript
     if (userTranscript && userTranscript.trim()) {
@@ -677,12 +697,12 @@ serve(async (req) => {
       transcript = await transcribeWithElevenLabs(audioBase64);
       if (!transcript) {
         return new Response(
-          JSON.stringify({ 
-            error: "Failed to transcribe audio", 
+          JSON.stringify({
+            error: 'Failed to transcribe audio',
             needsTranscript: true,
-            message: "Could not transcribe the audio file. Please paste the transcript manually."
+            message: 'Could not transcribe the audio file. Please paste the transcript manually.',
           }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
     }
@@ -690,100 +710,104 @@ serve(async (req) => {
     else if (platform === 'youtube') {
       const videoId = extractYouTubeVideoId(url);
       if (!videoId) {
-        return new Response(
-          JSON.stringify({ error: "Invalid YouTube URL", needsTranscript: true }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: 'Invalid YouTube URL', needsTranscript: true }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
-      
+
       // Try captions first (faster, no API cost)
       console.log('Attempting to fetch YouTube captions...');
       const captionResult = await fetchYouTubeTranscript(videoId);
-      
+
       if (captionResult) {
         console.log('Got captions from YouTube');
         transcript = captionResult.transcript;
         videoTitle = captionResult.title;
-      } 
+      }
       // No captions - try Cobalt + ElevenLabs
       else if (hasElevenLabs) {
         console.log('No captions, using Cobalt + ElevenLabs...');
         const sttResult = await extractAndTranscribe(url, platform);
-        
+
         if (sttResult) {
           console.log('Successfully transcribed via Cobalt + ElevenLabs');
           transcript = sttResult.transcript;
           videoTitle = sttResult.title;
         } else {
           return new Response(
-            JSON.stringify({ 
-              error: "Could not extract audio", 
+            JSON.stringify({
+              error: 'Could not extract audio',
               needsTranscript: true,
               platform: 'youtube',
               canUploadAudio: true,
-              message: "Could not automatically transcribe this video. Please upload an audio file or paste the transcript manually."
+              message:
+                'Could not automatically transcribe this video. Please upload an audio file or paste the transcript manually.',
             }),
-            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
           );
         }
       } else {
         return new Response(
-          JSON.stringify({ 
-            error: "Could not retrieve captions", 
+          JSON.stringify({
+            error: 'Could not retrieve captions',
             needsTranscript: true,
             platform: 'youtube',
             canUploadAudio: false,
-            message: "This video doesn't have available captions. Please paste the transcript manually."
+            message: "This video doesn't have available captions. Please paste the transcript manually.",
           }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
-    } 
+    }
     // Priority 4: Other platforms - try Cobalt + ElevenLabs
     else if (hasElevenLabs && platform !== 'unknown') {
       console.log(`Using Cobalt + ElevenLabs for ${platform}...`);
       const sttResult = await extractAndTranscribe(url, platform);
-      
+
       if (sttResult) {
         console.log('Successfully transcribed via Cobalt + ElevenLabs');
         transcript = sttResult.transcript;
         videoTitle = sttResult.title || `${platform.charAt(0).toUpperCase() + platform.slice(1)} Video`;
       } else {
         return new Response(
-          JSON.stringify({ 
-            error: `Could not extract audio from ${platform}`, 
+          JSON.stringify({
+            error: `Could not extract audio from ${platform}`,
             needsTranscript: true,
             platform,
             canUploadAudio: true,
-            message: "Could not automatically transcribe this video. Please upload an audio file or paste the transcript manually."
+            message:
+              'Could not automatically transcribe this video. Please upload an audio file or paste the transcript manually.',
           }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
     }
     // Priority 5: Unknown platform or no ElevenLabs
     else {
       return new Response(
-        JSON.stringify({ 
-          error: `${platform === 'unknown' ? 'Unknown platform' : platform.charAt(0).toUpperCase() + platform.slice(1)} requires manual input`, 
+        JSON.stringify({
+          error: `${platform === 'unknown' ? 'Unknown platform' : platform.charAt(0).toUpperCase() + platform.slice(1)} requires manual input`,
           needsTranscript: true,
           platform,
           canUploadAudio: hasElevenLabs,
-          message: hasElevenLabs 
-            ? "Upload an audio file to transcribe, or paste the transcript manually."
-            : "Please paste the video transcript manually."
+          message: hasElevenLabs
+            ? 'Upload an audio file to transcribe, or paste the transcript manually.'
+            : 'Please paste the video transcript manually.',
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
 
     // Build topic and tag context for AI
-    const topicList = topics.map(t => {
-      const pages = t.pages?.map(p => `  - ${t.name}/${p.name}`).join('\n') || '';
-      return `- ${t.name}${pages ? '\n' + pages : ''}`;
-    }).join('\n');
+    const topicList = topics
+      .map((t) => {
+        const pages = t.pages?.map((p) => `  - ${t.name}/${p.name}`).join('\n') || '';
+        return `- ${t.name}${pages ? '\n' + pages : ''}`;
+      })
+      .join('\n');
 
-    const tagList = tags.map(t => `#${t.name}`).join(', ');
+    const tagList = tags.map((t) => `#${t.name}`).join(', ');
 
     // Process with AI
     const systemPrompt = `You are an AI assistant for Kaivoo, a personal productivity app. Your job is to process video transcripts and turn them into structured, useful notes.
@@ -834,76 +858,79 @@ OUTPUT FORMAT (JSON):
 
 The tasks array can be empty if no actionable items are in the content.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: 'google/gemini-3-flash-preview',
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Here is the video transcript to process:\n\n${transcript}` },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Here is the video transcript to process:\n\n${transcript}` },
         ],
-        response_format: { type: "json_object" },
+        response_format: { type: 'json_object' },
       }),
     });
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue using AI features." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue using AI features.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      return new Response(
-        JSON.stringify({ error: "Failed to process with AI" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error('AI gateway error:', response.status, errorText);
+      return new Response(JSON.stringify({ error: 'Failed to process with AI' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
-      return new Response(
-        JSON.stringify({ error: "No response from AI" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: 'No response from AI' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     let parsed;
     try {
       parsed = JSON.parse(content);
     } catch (e) {
-      console.error("Failed to parse AI response:", content);
-      return new Response(
-        JSON.stringify({ error: "Invalid AI response format" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error('Failed to parse AI response:', content);
+      return new Response(JSON.stringify({ error: 'Invalid AI response format' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    return new Response(JSON.stringify({
-      ...parsed,
-      videoTitle,
-      platform,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    console.error("AI video capture error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        ...parsed,
+        videoTitle,
+        platform,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
+  } catch (e) {
+    console.error('AI video capture error:', e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

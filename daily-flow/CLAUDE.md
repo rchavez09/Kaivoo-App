@@ -6,16 +6,16 @@ React 18 + TypeScript + Vite + Supabase + Tailwind CSS + shadcn/ui
 
 ## Architecture
 
-| Layer | Location | Pattern |
-|---|---|---|
-| Pages | `src/pages/` | Lazy-loaded via React Router 6 |
-| Components | `src/components/` | PascalCase files, props via interfaces |
-| Stores | `src/stores/` | Zustand with `useXyzStore` naming, `persist` middleware for localStorage |
-| Services | `src/services/` | `xyz.service.ts` — DB row → app type converters + CRUD functions |
-| Hooks | `src/hooks/` | `useXyz` naming. Query hooks in `hooks/queries/` (React Query) |
-| Types | `src/types/` | Centralized interfaces in `index.ts`. PascalCase. Union types for enums |
-| Utilities | `src/lib/` | `utils.ts` (cn helper), `dateUtils.ts` (date-fns), `task-config.tsx` |
-| Tests | `src/test/` | Vitest. `*.test.ts(x)` suffix. Mocked Supabase via `vi.hoisted()` + `vi.mock()` |
+| Layer      | Location          | Pattern                                                                         |
+| ---------- | ----------------- | ------------------------------------------------------------------------------- |
+| Pages      | `src/pages/`      | Lazy-loaded via React Router 6                                                  |
+| Components | `src/components/` | PascalCase files, props via interfaces                                          |
+| Stores     | `src/stores/`     | Zustand with `useXyzStore` naming, `persist` middleware for localStorage        |
+| Services   | `src/services/`   | `xyz.service.ts` — DB row → app type converters + CRUD functions                |
+| Hooks      | `src/hooks/`      | `useXyz` naming. Query hooks in `hooks/queries/` (React Query)                  |
+| Types      | `src/types/`      | Centralized interfaces in `index.ts`. PascalCase. Union types for enums         |
+| Utilities  | `src/lib/`        | `utils.ts` (cn helper), `dateUtils.ts` (date-fns), `task-config.tsx`            |
+| Tests      | `src/test/`       | Vitest. `*.test.ts(x)` suffix. Mocked Supabase via `vi.hoisted()` + `vi.mock()` |
 
 ## Coding Standards
 
