@@ -2,7 +2,7 @@
 
 All strategic decisions made during CEO Mode sessions, preserved as a historical record. Referenced by Vision.md and phase roadmaps.
 
-**Updated:** March 6, 2026 (CEO Session #9 added)
+**Updated:** March 7, 2026 (CEO Session #11 added)
 
 ---
 
@@ -119,12 +119,142 @@ All strategic decisions made during CEO Mode sessions, preserved as a historical
 - **Sprints 30–32 unchanged:** Tasks+Projects merge, Knowledge Unification, Ship Prep — original scope preserved.
 - **MVP scope reconfirmed:** All four remaining sprints (29–32) ship before launch. No compression. "Ship something you're proud of."
 
+## CEO Session #10 — March 7, 2026
+
+**Context:** All 7 Tier 2 pricing research parcels completed. CEO reviewed cost models + competitive teardown and made final pricing decisions.
+
+- **Tier 2 pricing approved:** $9/mo annual ($108/yr) / $12/mo monthly. Two tiers — Starter (10 GB, 50 AI msgs/day) and Pro (100 GB, 100 AI msgs/day + model choice).
+- **Managed AI: Bundle it.** AI included in subscription (smart-routed, $0.62/user/mo blended cost). BYO Keys option available at same price for developers who want unlimited AI with their own API keys.
+- **Free trial: CC required.** 14-day trial with credit card upfront. Higher conversion rate (~40-60%) over no-CC variant. 25 AI messages during trial, 500 MB storage.
+- **Storage strategy: Play A (Workflow Hub).** Tiered storage up to 100 GB max. Kaivoo stores workflow data (scripts, plans, notes, images, docs). Large media files (video, raw footage) stay in Google Drive/Dropbox/NAS — Kaivoo links to them. Do NOT compete on raw storage with Google ($9.99/2TB).
+- **No 1-2 TB tiers.** Margins collapse at TB scale (27-34%). Can't out-storage Google. If demand proves wrong, add Play B tiers in Phase B/C with Cloudflare R2 architecture.
+- **Gross margins:** Starter 81-86%, Pro 72-78%, BYO Keys 88-91%. Blended cost ~$1.70/user/mo.
+- **Break-even:** 3 users at $10/mo covers Supabase Pro base.
+
+**Research documents:**
+- `Agents/Research/Agent-5-Docs/Research-Brief-Supabase-Cost-Per-User.md`
+- `Agents/Research/Agent-5-Docs/Research-Brief-Managed-AI-Cost-Model.md`
+- `Agents/Research/Agent-5-Docs/Research-Brief-Storage-Tier-Model.md`
+- `Agents/Research/Agent-5-Docs/Research-Brief-Free-Trial-Cost-Model.md`
+- `Agents/Product/Agent-8-Docs/Competitive-Pricing-Teardown.md`
+- `Agents/Product/Agent-8-Docs/Tier-2-Pricing-Recommendation.md`
+
+## CEO Session #11 — March 7, 2026
+
+**Context:** CEO reviewed the Play A (Workflow Hub) storage strategy and asked how external file linking works for desktop-only users and at what phase MCP integrations should land.
+
+- **MCP file linking: Moved from Phase D to Phase B.** External file access via MCP (Google Drive, Dropbox, OneDrive) is too valuable to defer to Phase D. Ships in Phase B alongside subscription infrastructure.
+- **Don't reinvent — plug in.** Google Drive, Dropbox, and OneDrive all have production-ready MCP servers already (Anthropic official, Dropbox official, Microsoft official). Kaivoo builds MCP *client* support, not custom integrations. Every service with an MCP server becomes available automatically.
+- **Desktop-only file linking works.** MCP servers run locally on the user's machine with their own OAuth tokens. Desktop (Tier 1) users get the same file linking as subscribers — zero cost to Kaivoo. The subscription upgrade pitch: "Your file links work great on desktop. Want them synced to your phone and web? That's Tier 2."
+- **Phase A: Manual URL pasting.** Simple URL field on attachments. Functional but not the headline feature. File linking becomes a headline in Phase B when MCP makes it seamless.
+- **Research parcel added:** MCP file-linking ecosystem evaluation — test top 3-5 existing MCP servers for compatibility, stability, and UX quality. Must complete before Phase B scoping.
+
+## CEO Session #12 — March 7, 2026
+
+**Context:** Pre-launch product audit. CEO did a deep dive across the entire app and surfaced ~15 items spanning bugs, unfinished features, and new requirements. Strategic triage separated launch blockers from Phase B deferrals.
+
+### Decisions Made
+
+- **Vault architecture elevated to pre-launch.** Individual `.md` files per entry (not merged `date.md`). Filing logic: topic assigned → `Topics/{topic-name}/`, no topic → `Notes/{Year}/{Month}/`. "Journal" folder renamed to "Notes." Core Principle #1 ("you own your data") demands the vault be correct at launch.
+- **AI Chat Page elevated to pre-launch.** Full-page chat interface with conversation history (SQLite), navigable conversation list, model selection (BYO keys). The AI concierge is the product — a sidebar-only experience undersells it.
+- **AI Data Awareness elevated to pre-launch.** Context injection (today's tasks, upcoming deadlines, active projects, recent notes). Read tools (query tasks, notes, projects). Write tools (create tasks, update status, create notes). Summarization. "What's due this week?" must work on day one.
+- **Gantt Chart: Hide until Phase B.** Current implementation is superficial (colored lines only). Evaluate `frappe-gantt` (MIT) for Phase B rebuild with proper zoom, dependencies, milestones, and drag interactions.
+- **Pages = Projects UX unification: Phase B.** Universal "entity page" template is the right direction but a major redesign. Deferred.
+- **Privacy toggle (hide from AI): Phase B.** Important trust feature but not launch-blocking.
+- **Deep Insights/Analytics: Phase B.** Needs 30-90 days of user data to design around.
+- **Custom Kanban states: Phase B.** Fix existing states pre-launch; user-created states later.
+
+### Pre-Launch Bug Fixes Confirmed
+
+- HTML rendering bugs throughout the app (content displaying as raw HTML)
+- Kanban board — fix all existing states (currently only Todo→Done works)
+- Wiki-link rendering — `[[Page]]` should render as clickable highlighted links like hashtags
+- Library icon → use Folder icon (current icon looks like Insights)
+- "Journal" → "Notes" folder rename in vault
+- Remove AI features toggle in Settings (vestigial)
+- Remove or clarify "Inbox" (undefined purpose)
+- Topic/Project color settings
+- Settings audit (quick pass)
+
+### Phase B Roadmap Items (from this session)
+
+- Pages = Projects UX unification (universal entity page template)
+- Gantt Chart upgrade (frappe-gantt, proper implementation)
+- Calendar view on Projects page
+- Privacy toggle on Topics/Projects (hide from AI)
+- Deep Insights/Analytics dashboard
+- Custom Kanban states (user-created)
+- AI Chat: multi-model routing, file attachments, voice input
+- AI Data Awareness: calendar events, routine/habit management, file operations, proactive notifications
+
+### Sprint Sequencing Recommendation (for Director)
+
+1. Sprint 33: Bug bash + vault architecture + hide Gantt + settings audit
+2. Sprint 34: AI Chat Page + AI data awareness (context injection + read tools)
+3. Sprint 35: AI data awareness (write tools + summarization + testing)
+4. Sprint 36: Integration testing, polish, ship prep
+
 ---
+
+## CEO Session #13 — March 8, 2026
+
+**Context:** Strategic pivot session. Honest product/code audit revealed strong technical foundation but zero distribution. Deep research into OpenClaw (214K GitHub stars, autonomous AI agent) revealed the market gap: nobody has shipped a polished, consumer-facing, local-first autonomous AI agent platform as a desktop app. The multi-agent system used to build Kaivoo (12+ agents, sprint protocol, CEO/Director structure) IS the product — turned inward.
+
+### Strategic Pivot
+
+- **Product redefined:** Flow is not a productivity app with AI chat. Flow is a **personal AI agent orchestration platform** — the accessible, safe version of what OpenClaw does for developers.
+- **The launch story:** "I built this app using the app's own multi-agent system. 33 sprints, 12 agents, CEO sessions, sprint protocols. The git history is the proof. Now that system is in your hands."
+- **Primary positioning:** "OpenClaw for everyone" — autonomous AI agent capabilities, safe and accessible, wrapped in a polished app.
+- **Anti-positioning:** NOT "another Notion alternative." NOT "AI chatbot in a productivity app."
+
+### V1 Definition — Locked (No Scope Changes Until Post-Launch)
+
+**Launch Date: April 14, 2026**
+
+**What ships:**
+1. **Core App** — Bug fixes only. HTML rendering, Kanban all states, wiki-links, hide Gantt, remove seed data, search sanitization. NO new productivity features.
+2. **AI Chat Page** — Full-page `/chat` with conversation history, persistent storage, soul file integration, continuous memory.
+3. **Configurable Heartbeat** — Background timer, settings (morning briefing, evening summary, custom interval, off), proactive insights from tasks/calendar/journal.
+4. **Orchestrator Page** — 4 tabs:
+   - **Agents:** CRUD, model assignment (Claude/Gemini/GPT/Codex/local), system prompt, permissions. Pre-loaded starters.
+   - **Skills:** CRUD, AI skill creation from user request. Pre-loaded starters.
+   - **Workflows:** Ordered step builder (agent + skill + approval gate), triggers (manual/scheduled/event), execution view with thinking transparency.
+   - **MCPs:** Discover (AI-powered search of MCP ecosystem), Connect (one-click with auth), Manage (widget cards, toggle). Connect-not-create model. Ships with File System + Flow Data MCPs built-in.
+5. **Artifact System** — Sandboxed iframe widgets. AI generates HTML/CSS/JS, renders in preview. Persistent custom widgets saveable to library. Addable to Today page and project pages alongside built-in widgets. Template/guardrails (name, icon, description). Export/download to vault. Editable via conversation.
+6. **Neuron Memory (V1)** — Tiered soul file: Core Identity (~500 tokens, always loaded) + Active Context (~1000 tokens, always loaded) + Episodic Memory (individual entries, loaded by relevance, ~2000 token budget). Memory consolidation during heartbeat (dedup, summarize, prune, promote). Solves soul file bloat without requiring full vector search infrastructure.
+7. **Thinking Transparency** — Visible AI reasoning during workflows and heartbeat. Action log.
+8. **Safety Layer** — Confirmation gates, skill permissions, workflow approval gates, rollback, rate limiting.
+9. **Ship Requirements** — Landing page, EULA, code signing (attempted), beta testers (5-7 days), Product Hunt, demo video.
+
+**What does NOT ship (post-launch, no exceptions):**
+- Vault architecture overhaul, color pickers, settings audit, dark mode contrast, Pages=Projects unification, Gantt rebuild, calendar on Projects, privacy toggles, deep insights, custom Kanban states, AI voice/file attachments, mobile companion, full MCP marketplace, self-building React components, multi-user/team features.
+
+### Organizational Change
+
+- **Director** (`Agents/Director.md`) renamed to **Dev Director** — owns engineering sprints, code quality, feature delivery.
+- **Marketing Director** created (`Agents/Marketing/Director-Marketing.md`) — owns distribution, audience building, content strategy, launch coordination. Runs in parallel with Dev Director.
+- Both directors report to the CEO. Both tracks run simultaneously starting March 9.
+
+### Timeline
+
+- **Week 1 (Mar 9-15):** Bug bash + AI foundation + marketing launch (landing page, first content)
+- **Week 2 (Mar 16-22):** Orchestrator UI (Agents/Skills/Workflows/MCPs tabs) + content cadence
+- **Week 3 (Mar 23-29):** Workflow execution engine + artifact system + demo videos
+- **Week 4 (Mar 30-Apr 5):** Neuron memory + polish + beta testers (early access from email list)
+- **Week 5 (Apr 6-13):** Ship prep + bug fixes from beta + launch sequence
+- **April 14:** LAUNCH
+
+### Market Research Findings
+
+- **OpenClaw:** 214K GitHub stars, 700+ skills, 50+ integrations. Autonomous AI agent. But: 512 vulnerabilities, 135K exposed instances, bulk-deleted researcher's emails, steep learning curve, breaks when third-party apps update. Developer-only tool.
+- **AI Personal OS market:** $35.7B by 2030 at 19% CAGR. CosmOS (Humane→HP, $116M acquisition) is hardware-first. OpenDAN is early-stage. Nobody has shipped a polished consumer-facing desktop version.
+- **AI Agent Orchestration market:** Projected $8.5B by 2026, $35B by 2030. Enterprise-focused (UiPath, Microsoft AutoGen, CrewAI). No consumer-facing orchestration platform exists.
+- **Distribution gap identified:** Zero audience, no waitlist, no email list, no social following. Marketing track running in parallel is non-negotiable.
 
 ## Key Decisions Ahead
 
 - ~~**"One Workflow" rebrand** — Still planned for Phase B? Needs decision.~~ **RESOLVED — CEO Session #9: Flow by Kaivoo.**
-- **Phase B subscription pricing** — Pending Tier 2 pricing research parcels
+- ~~**Phase B subscription pricing** — Pending Tier 2 pricing research parcels~~ **RESOLVED — CEO Session #10: $9/$12 approved**
 - **File watching mechanism** — How does the app detect manual file changes on disk? (Agent 3)
 - **Desktop auto-update** — Update distribution mechanism (Agent 9)
 - **Skills store architecture** — MCP-based vs. custom plugin API (Agent 3, Phase B)

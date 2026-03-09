@@ -7,10 +7,7 @@
     "core:default",
     {
       "identifier": "shell:allow-open",
-      "allow": [
-        { "url": "^https?://.+" },
-        { "url": "^file://.+" }
-      ]
+      "allow": [{ "url": "^https?://.+" }, { "url": "^file://.+" }]
     },
     "sql:default",
     "sql:allow-execute",
@@ -97,10 +94,7 @@
     },
     {
       "identifier": "opener:allow-open-path",
-      "allow": [
-        { "path": "$APPDATA/**" },
-        { "path": "$APPDATA/vault/.attachments/**" }
-      ]
+      "allow": [{ "path": "$APPDATA/**" }, { "path": "$APPDATA/vault/.attachments/**" }]
     },
     "updater:default",
     "process:allow-restart",

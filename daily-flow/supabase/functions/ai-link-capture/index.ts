@@ -1,8 +1,8 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface TopicContext {
@@ -27,55 +27,75 @@ interface RequestBody {
 // Detect content type from URL
 function detectContentType(url: string): 'recipe' | 'article' | 'general' {
   const lowerUrl = url.toLowerCase();
-  
+
   // Recipe sites
   const recipeSites = [
-    'allrecipes.com', 'food.com', 'epicurious.com', 'bonappetit.com',
-    'tasty.co', 'delish.com', 'foodnetwork.com', 'simplyrecipes.com',
-    'seriouseats.com', 'kingarthurbaking.com', 'budgetbytes.com',
-    'cookinglight.com', 'myrecipes.com', 'eatingwell.com', 'yummly.com',
-    'recipe', 'cooking', 'food', 'baking'
+    'allrecipes.com',
+    'food.com',
+    'epicurious.com',
+    'bonappetit.com',
+    'tasty.co',
+    'delish.com',
+    'foodnetwork.com',
+    'simplyrecipes.com',
+    'seriouseats.com',
+    'kingarthurbaking.com',
+    'budgetbytes.com',
+    'cookinglight.com',
+    'myrecipes.com',
+    'eatingwell.com',
+    'yummly.com',
+    'recipe',
+    'cooking',
+    'food',
+    'baking',
   ];
-  
-  if (recipeSites.some(site => lowerUrl.includes(site))) {
+
+  if (recipeSites.some((site) => lowerUrl.includes(site))) {
     return 'recipe';
   }
-  
+
   // Article/News sites
   const articleSites = [
-    'medium.com', 'substack.com', 'notion.so', 'dev.to',
-    'hackernoon.com', 'towardsdatascience.com', 'blog', 'article'
+    'medium.com',
+    'substack.com',
+    'notion.so',
+    'dev.to',
+    'hackernoon.com',
+    'towardsdatascience.com',
+    'blog',
+    'article',
   ];
-  
-  if (articleSites.some(site => lowerUrl.includes(site))) {
+
+  if (articleSites.some((site) => lowerUrl.includes(site))) {
     return 'article';
   }
-  
+
   return 'general';
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { url, instruction, topics, tags, currentDate }: RequestBody = await req.json();
-    
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
-    
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
+
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
-    
+
     if (!FIRECRAWL_API_KEY) {
       return new Response(
-        JSON.stringify({ 
-          error: "Firecrawl is not configured. Please connect Firecrawl in Settings.",
-          needsSetup: true
+        JSON.stringify({
+          error: 'Firecrawl is not configured. Please connect Firecrawl in Settings.',
+          needsSetup: true,
         }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
 
@@ -91,7 +111,7 @@ serve(async (req) => {
     const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -105,12 +125,12 @@ serve(async (req) => {
       const errorData = await scrapeResponse.json();
       console.error('Firecrawl error:', errorData);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: errorData.error || `Failed to scrape page (${scrapeResponse.status})`,
           needsManualInput: true,
-          message: "Couldn't access this page. You can paste the content manually."
+          message: "Couldn't access this page. You can paste the content manually.",
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
 
@@ -120,12 +140,12 @@ serve(async (req) => {
 
     if (!pageContent) {
       return new Response(
-        JSON.stringify({ 
-          error: "No content found on page",
+        JSON.stringify({
+          error: 'No content found on page',
           needsManualInput: true,
-          message: "Couldn't extract content. You can paste it manually."
+          message: "Couldn't extract content. You can paste it manually.",
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
 
@@ -135,12 +155,14 @@ serve(async (req) => {
     const contentType = detectContentType(formattedUrl);
 
     // Build topic and tag context for AI
-    const topicList = topics.map(t => {
-      const pages = t.pages?.map(p => `  - ${t.name}/${p.name}`).join('\n') || '';
-      return `- ${t.name}${pages ? '\n' + pages : ''}`;
-    }).join('\n');
+    const topicList = topics
+      .map((t) => {
+        const pages = t.pages?.map((p) => `  - ${t.name}/${p.name}`).join('\n') || '';
+        return `- ${t.name}${pages ? '\n' + pages : ''}`;
+      })
+      .join('\n');
 
-    const tagList = tags.map(t => `#${t.name}`).join(', ');
+    const tagList = tags.map((t) => `#${t.name}`).join(', ');
 
     // Build content-specific instructions
     let contentInstructions = '';
@@ -218,81 +240,83 @@ OUTPUT FORMAT (JSON):
 The tasks array can be empty if no actionable items are in the content.`;
 
     // Truncate content if too long (keep first 15k chars)
-    const truncatedContent = pageContent.length > 15000 
-      ? pageContent.substring(0, 15000) + '\n\n[Content truncated...]'
-      : pageContent;
+    const truncatedContent =
+      pageContent.length > 15000 ? pageContent.substring(0, 15000) + '\n\n[Content truncated...]' : pageContent;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: 'google/gemini-3-flash-preview',
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Here is the web page content to process:\n\n${truncatedContent}` },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Here is the web page content to process:\n\n${truncatedContent}` },
         ],
-        response_format: { type: "json_object" },
+        response_format: { type: 'json_object' },
       }),
     });
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
       if (aiResponse.status === 402) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue using AI features." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue using AI features.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
       const errorText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errorText);
-      return new Response(
-        JSON.stringify({ error: "Failed to process with AI" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error('AI gateway error:', aiResponse.status, errorText);
+      return new Response(JSON.stringify({ error: 'Failed to process with AI' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content;
 
     if (!content) {
-      return new Response(
-        JSON.stringify({ error: "No response from AI" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: 'No response from AI' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     let parsed;
     try {
       parsed = JSON.parse(content);
     } catch (e) {
-      console.error("Failed to parse AI response:", content);
-      return new Response(
-        JSON.stringify({ error: "Invalid AI response format" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error('Failed to parse AI response:', content);
+      return new Response(JSON.stringify({ error: 'Invalid AI response format' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    return new Response(JSON.stringify({
-      ...parsed,
-      pageTitle,
-      contentType,
-      sourceUrl: formattedUrl,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    console.error("AI link capture error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        ...parsed,
+        pageTitle,
+        contentType,
+        sourceUrl: formattedUrl,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
+  } catch (e) {
+    console.error('AI link capture error:', e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

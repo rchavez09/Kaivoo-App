@@ -267,130 +267,130 @@ export const TopicsContent = () => {
       <header className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="mb-1 text-2xl font-semibold text-foreground">Topics</h1>
-            <p className="text-sm text-muted-foreground">
-              {topics.length} topic{topics.length !== 1 ? 's' : ''}, {topicPages.length} page
-              {topicPages.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-
-          <Dialog
-            open={createTopicOpen}
-            onOpenChange={(open) => {
-              setCreateTopicOpen(open);
-              if (!open) setNewTopicParentId(undefined);
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                New Topic
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{newTopicParentId ? 'Create Subtopic' : 'Create New Topic'}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                {newTopicParentId && (
-                  <p className="text-sm text-muted-foreground">
-                    Under: {topics.find((t) => t.id === newTopicParentId)?.name}
-                  </p>
-                )}
-                <Input
-                  placeholder={newTopicParentId ? 'Subtopic name' : 'Topic name (e.g., NUWAVE, Personal)'}
-                  value={newTopicName}
-                  onChange={(e) => setNewTopicName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleCreateTopic()}
-                  autoFocus
-                />
-                <Button onClick={handleCreateTopic} className="w-full">
-                  {newTopicParentId ? 'Create Subtopic' : 'Create Topic'}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </header>
-
-        {/* Search */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search topics and pages..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            aria-label="Search topics and pages"
-          />
+          <p className="text-sm text-muted-foreground">
+            {topics.length} topic{topics.length !== 1 ? 's' : ''}, {topicPages.length} page
+            {topicPages.length !== 1 ? 's' : ''}
+          </p>
         </div>
 
-        {/* Topic Tree */}
-        <div className="widget-card">
-          {filteredRootTopics.length > 0 ? (
-            <div className="space-y-1">{filteredRootTopics.map((topic) => renderTopic(topic, 0))}</div>
-          ) : (
-            <div className="py-12 text-center">
-              <FolderOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-              <h3 className="mb-2 text-lg font-medium text-foreground">
-                {searchQuery ? 'No topics found' : 'No topics yet'}
-              </h3>
-              <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-                {searchQuery
-                  ? 'Try a different search term'
-                  : 'Create your first topic to organize your captures and tasks.'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Create Page Dialog */}
-        <Dialog open={createPageOpen} onOpenChange={setCreatePageOpen}>
+        <Dialog
+          open={createTopicOpen}
+          onOpenChange={(open) => {
+            setCreateTopicOpen(open);
+            if (!open) setNewTopicParentId(undefined);
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Topic
+            </Button>
+          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Page</DialogTitle>
+              <DialogTitle>{newTopicParentId ? 'Create Subtopic' : 'Create New Topic'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
+              {newTopicParentId && (
+                <p className="text-sm text-muted-foreground">
+                  Under: {topics.find((t) => t.id === newTopicParentId)?.name}
+                </p>
+              )}
               <Input
-                placeholder="Page name (e.g., Amani, Strategy)"
-                value={newPageName}
-                onChange={(e) => setNewPageName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreatePage()}
+                placeholder={newTopicParentId ? 'Subtopic name' : 'Topic name (e.g., NUWAVE, Personal)'}
+                value={newTopicName}
+                onChange={(e) => setNewTopicName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateTopic()}
+                autoFocus
               />
-              <Button onClick={handleCreatePage} className="w-full">
-                Create Page
+              <Button onClick={handleCreateTopic} className="w-full">
+                {newTopicParentId ? 'Create Subtopic' : 'Create Topic'}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
+      </header>
 
-        {/* Delete Topic Confirmation */}
-        <AlertDialog
-          open={!!deleteTopicId}
-          onOpenChange={(open) => {
-            if (!open) setDeleteTopicId(null);
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete &ldquo;{deleteTopicName}&rdquo;?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete this topic and all its pages. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => {
-                  if (deleteTopicId) void deleteTopic(deleteTopicId);
-                  setDeleteTopicId(null);
-                }}
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search topics and pages..."
+          className="pl-9"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          aria-label="Search topics and pages"
+        />
       </div>
+
+      {/* Topic Tree */}
+      <div className="widget-card">
+        {filteredRootTopics.length > 0 ? (
+          <div className="space-y-1">{filteredRootTopics.map((topic) => renderTopic(topic, 0))}</div>
+        ) : (
+          <div className="py-12 text-center">
+            <FolderOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+            <h3 className="mb-2 text-lg font-medium text-foreground">
+              {searchQuery ? 'No topics found' : 'No topics yet'}
+            </h3>
+            <p className="mx-auto max-w-sm text-sm text-muted-foreground">
+              {searchQuery
+                ? 'Try a different search term'
+                : 'Create your first topic to organize your captures and tasks.'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Create Page Dialog */}
+      <Dialog open={createPageOpen} onOpenChange={setCreatePageOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Page</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <Input
+              placeholder="Page name (e.g., Amani, Strategy)"
+              value={newPageName}
+              onChange={(e) => setNewPageName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreatePage()}
+            />
+            <Button onClick={handleCreatePage} className="w-full">
+              Create Page
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Topic Confirmation */}
+      <AlertDialog
+        open={!!deleteTopicId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTopicId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete &ldquo;{deleteTopicName}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this topic and all its pages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTopicId) void deleteTopic(deleteTopicId);
+                setDeleteTopicId(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 };
 
@@ -434,12 +434,7 @@ const Topics = () => {
           <TopicsContent />
         </TabsContent>
 
-        <TabsContent
-          value="vault"
-          className="mt-0 flex-1"
-          forceMount
-          hidden={topTab !== 'vault'}
-        >
+        <TabsContent value="vault" className="mt-0 flex-1" forceMount hidden={topTab !== 'vault'}>
           <Suspense
             fallback={
               <div className="flex items-center justify-center py-12">

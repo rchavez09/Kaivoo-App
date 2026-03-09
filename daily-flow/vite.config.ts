@@ -1,27 +1,27 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
+import { componentTagger } from 'lovable-tagger';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   clearScreen: false,
   server: {
-    host: "::",
+    host: '::',
     port: 8080,
     strictPort: true,
     hmr: {
       overlay: false,
     },
     watch: {
-      ignored: ["**/src-tauri/**"],
+      ignored: ['**/src-tauri/**'],
     },
   },
-  envPrefix: ["VITE_", "TAURI_ENV_*"],
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  envPrefix: ['VITE_', 'TAURI_ENV_*'],
+  plugins: [react(), mode === 'development' && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
@@ -30,13 +30,7 @@ export default defineConfig(({ mode }) => ({
       external: ['@tauri-apps/plugin-dialog'],
       output: {
         manualChunks: {
-          'vendor-core': [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            '@tanstack/react-query',
-            'zustand',
-          ],
+          'vendor-core': ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', 'zustand'],
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-radix': [
             '@radix-ui/react-accordion',
@@ -76,11 +70,7 @@ export default defineConfig(({ mode }) => ({
             '@tiptap/extension-placeholder',
             '@tiptap/extension-bubble-menu',
           ],
-          'vendor-dnd': [
-            '@dnd-kit/core',
-            '@dnd-kit/sortable',
-            '@dnd-kit/utilities',
-          ],
+          'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
           'vendor-motion': ['motion'],
           'vendor-markdown': ['react-markdown', 'remark-gfm'],
         },

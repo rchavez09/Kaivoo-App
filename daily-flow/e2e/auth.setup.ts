@@ -7,35 +7,35 @@
  * Requires E2E_EMAIL and E2E_PASSWORD env vars (or uses defaults).
  */
 
-import { test as setup } from "@playwright/test";
-import path from "path";
-import { fileURLToPath } from "url";
+import { test as setup } from '@playwright/test';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://qfumextzhucozitrvekv.supabase.co";
-const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
-const PROJECT_REF = "qfumextzhucozitrvekv";
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://qfumextzhucozitrvekv.supabase.co';
+const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+const PROJECT_REF = 'qfumextzhucozitrvekv';
 
-export const STORAGE_STATE = path.join(__dirname, ".auth", "user.json");
+export const STORAGE_STATE = path.join(__dirname, '.auth', 'user.json');
 
-setup("authenticate", async ({ page }) => {
+setup('authenticate', async ({ page }) => {
   const email = process.env.E2E_EMAIL;
   const password = process.env.E2E_PASSWORD;
 
   if (!email || !password) {
     throw new Error(
-      "E2E_EMAIL and E2E_PASSWORD env vars are required for authenticated E2E tests.\n" +
-      "Set them in .env.e2e or pass them to the test command."
+      'E2E_EMAIL and E2E_PASSWORD env vars are required for authenticated E2E tests.\n' +
+        'Set them in .env.e2e or pass them to the test command.',
     );
   }
 
   // Sign in via Supabase REST API (faster than UI login)
   const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       apikey: SUPABASE_KEY,
     },
     body: JSON.stringify({ email, password }),
@@ -49,7 +49,7 @@ setup("authenticate", async ({ page }) => {
   const session = await response.json();
 
   // Navigate to the app first so we can set localStorage on the correct origin
-  const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8080";
+  const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:8080';
   await page.goto(baseURL);
 
   // Inject the Supabase session into localStorage
@@ -68,7 +68,7 @@ setup("authenticate", async ({ page }) => {
     ([key, value]) => {
       localStorage.setItem(key, value);
     },
-    [storageKey, storageValue]
+    [storageKey, storageValue],
   );
 
   // Save the browser state for reuse

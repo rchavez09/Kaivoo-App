@@ -11,8 +11,11 @@
 ### The CEO
 `Agents/CEO.md` — Strategic layer above all operations. Activated with **"CEO mode"** prefix. Brainstorms market opportunities, challenges assumptions, synthesizes scattered ideas into strategic themes, and hands direction to the Director. This is the strategy room — not for sprint planning.
 
-### The Director
-`Agents/Director.md` — The operational orchestrator (COO role). Activated with **"Director mode"** prefix, or by default for sprint planning. Sits above all departments. Translates strategic direction from CEO sessions into executable sprints. When you need to plan a sprint or coordinate agents, start here.
+### The Dev Director
+`Agents/Director.md` — The engineering orchestrator (VP Engineering role). Activated with **"Director mode"** or **"Dev Director mode"** prefix, or by default for sprint planning. Sits above Engineering, Design, Quality, DevOps, and Research departments. Translates strategic direction from CEO sessions into executable engineering sprints. When you need to plan a sprint or coordinate engineering agents, start here.
+
+### The Marketing Director
+`Agents/Marketing/Director-Marketing.md` — The distribution orchestrator (CMO role). Activated with **"Marketing Director mode"** prefix, or by default for marketing, content, landing pages, social media, email lists, or launch planning. Coordinates the Marketing department. Peer to the Dev Director — neither reports to the other.
 
 ### Vision
 `Agents/Vision.md` — The North Star. A living roadmap that all sprints lead toward. Updated as phases complete.
@@ -26,8 +29,8 @@
 | DevOps | `Agents/DevOps/` | Agent 9 (DevOps Engineer) |
 | Quality | `Agents/Quality/` | Agent 7 (Code Reviewer), Agent 10 (QA Architect — activates Sprint 4+), Agent 11 (Feature Integrity Guardian) |
 | Design | `Agents/Design/` | Visual Design Agent, Accessibility & Theming Agent, UX Completeness Agent |
-| Research | `Agents/Research/` | Agent 5 (Research Analyst) |
-| Marketing | `Agents/Marketing/` | Content Strategist & SEO, Sales Page Copywriter, Growth Strategist |
+| Research | `Agents/Research/` | Agent 5 (Research Analyst — shared resource, serves both Dev Director and Marketing Director) |
+| Marketing | `Agents/Marketing/` | Content Strategist & SEO, Sales Page Copywriter, Growth Strategist, Community Manager, PR & Newsletter Pitcher, Marketing Creative |
 
 ### Sprint System
 - Protocol: `Agents/Sprints/Sprint-Protocol.md`
@@ -63,7 +66,7 @@ npm run typecheck    # TypeScript type check (tsc --noEmit)
 3. **Agent spec files** contain ONLY role/spec/instructions — never sprint-specific content
 4. **Sprint files** are never deleted — they are historical records
 5. **Agent documents** are archived (`ARCHIVED-` prefix), never deleted
-6. **The Director** orchestrates all sprint planning through `Vision.md` and `Sprint-Protocol.md`
+6. **The Dev Director** orchestrates all engineering sprint planning through `Vision.md` and `Sprint-Protocol.md`. **The Marketing Director** orchestrates all marketing/distribution work independently as a peer.
 7. **Sprint work** happens on dedicated branches (`sprint/N-theme`), never directly on `main` — see Sprint Protocol v1.9
 8. **Before merging to main**, Phase 4 gates (Agent 7 + Agent 11 + design agents + E2E) AND Phase 5 sandbox approval must pass. Use `/sprint-verify` to enforce the gate sequence.
 9. **Sprint retrospective** is written AFTER merge (not before) — reflects the full sprint including sandbox findings

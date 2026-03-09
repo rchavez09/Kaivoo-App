@@ -7,3 +7,10 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Temporary pre-launch redirect — remove on April 14, 2026
+[[redirects]]
+  from = "/"
+  to = "/launch"
+  status = 302
+  force = true
