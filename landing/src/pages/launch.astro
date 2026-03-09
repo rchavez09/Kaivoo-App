@@ -4,8 +4,8 @@ import '../styles/global.css';
 ---
 
 <Layout
-  title="Flow by Kaivoo — Your AI team is almost ready."
-  description="A personal AI agent orchestration platform. Built by 12 AI agents across 33+ sprints. Launching April 14, 2026."
+  title="Flow by Kaivoo. Your AI team is almost ready."
+  description="AI agents that actually work for you. Multi-agent orchestration, persistent memory, and safe autonomy. Your machine. Your models. Your data. Launching April 14, 2026."
 >
   <!-- Nav -->
   <nav aria-label="Main navigation" class="fixed top-0 left-0 right-0 z-50 bg-sand/90 dark:bg-abyss-canvas/90 backdrop-blur-sm border-b border-navy/5 dark:border-white/5 transition-colors">
@@ -30,7 +30,7 @@ import '../styles/global.css';
           href="#notify"
           class="bg-teal text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-teal-hover transition-colors"
         >
-          Join the waitlist
+          Get early access
         </a>
       </div>
     </div>
@@ -45,10 +45,10 @@ import '../styles/global.css';
       <div class="max-w-content mx-auto text-center">
         <p class="text-sm font-medium text-teal uppercase tracking-wider mb-4">Launching April 14, 2026</p>
         <h1 class="font-brand text-display-mobile md:text-display font-medium text-navy dark:text-white max-w-4xl mx-auto">
-          Your AI team.<br class="hidden md:block" /> Your machine. Your rules.
+          A team of AI agents built this app.<br class="hidden md:block" /> Now they work for you.
         </h1>
         <p class="mt-6 text-lg md:text-xl text-storm dark:text-white/60 max-w-2xl mx-auto leading-relaxed">
-          Flow is a personal AI agent orchestration platform &mdash; built by its own 12-agent system across 33+ sprints. The git history is the proof. Now that system is in your hands.
+          Your own AI team. Any model, including local ones. Persistent memory you can actually read. Buy once, and it's yours forever.
         </p>
 
         <!-- Countdown -->
@@ -84,28 +84,48 @@ import '../styles/global.css';
             />
             <button
               type="submit"
-              class="bg-teal text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-teal-hover transition-colors whitespace-nowrap"
+              class="bg-teal text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-teal-hover transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Notify me
+              Get early access
             </button>
           </form>
           <div class="form-message mt-3 text-sm"></div>
-          <p class="mt-3 text-xs text-storm/60 dark:text-white/30">
-            Be first to know when Flow launches. No spam. Unsubscribe anytime.
+          <p id="subscriber-count" class="mt-3 text-xs text-storm/80 dark:text-white/50">&nbsp;</p>
+          <p class="mt-1 text-xs text-storm/80 dark:text-white/50">
+            No spam. Unsubscribe anytime.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- What's Coming -->
+    <!-- The Shift — OAR framing -->
     <section class="py-16 md:py-24 px-6 bg-white dark:bg-abyss-card transition-colors">
+      <div class="max-w-2xl mx-auto">
+        <p class="text-sm font-medium text-teal uppercase tracking-wider mb-6 text-center">The shift</p>
+        <p class="text-storm dark:text-white/60 text-lg leading-relaxed">
+          AI crossed a line this year. It stopped suggesting and started <strong class="text-navy dark:text-white font-medium">doing</strong>. Building presentations, managing workflows, writing and reviewing code. Remembering your preferences across every conversation.
+        </p>
+        <p class="mt-4 text-storm dark:text-white/60 text-lg leading-relaxed">
+          The people using this right now are mostly developers with terminal access and $200/month in API costs. That kind of power shouldn&rsquo;t require a CS degree.
+        </p>
+        <p class="mt-4 text-storm dark:text-white/60 text-lg leading-relaxed">
+          Flow puts autonomous AI agents in a polished app anyone can use. Pick any model, including free local ones running on your own machine. Your AI remembers you, and you can read every word of its memory. Safety controls keep it accountable.
+        </p>
+        <p class="mt-6 text-navy dark:text-white text-xl font-medium leading-relaxed">
+          One purchase. Yours forever. <strong>You</strong> own everything.
+        </p>
+      </div>
+    </section>
+
+    <!-- What's Coming -->
+    <section class="py-16 md:py-24 px-6">
       <div class="max-w-content mx-auto">
         <p class="text-sm font-medium text-teal uppercase tracking-wider mb-3 text-center">What you get</p>
         <h2 class="font-brand text-headline-mobile md:text-headline font-medium text-navy dark:text-white text-center max-w-2xl mx-auto">
-          An AI that works for you &mdash; safely.
+          Four things no other AI app gives you.
         </h2>
         <p class="mt-4 text-storm dark:text-white/60 text-lg text-center max-w-xl mx-auto">
-          Define your own AI agents, teach them skills, chain them into workflows, and watch them build things. All on your machine. All under your control.
+          A real AI team with roles, skills, memory, and safety rails. Any model. Your machine. Not another chatbot.
         </p>
 
         <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -118,7 +138,7 @@ import '../styles/global.css';
             </div>
             <h3 class="font-brand text-lg font-medium text-navy dark:text-white">Agent orchestrator</h3>
             <p class="mt-2 text-storm dark:text-white/60 text-sm leading-relaxed">
-              Build your own AI team. Assign models, define roles, chain agents into workflows with approval gates.
+              Build your own AI team. Assign any model, define roles, chain agents into workflows with approval gates.
             </p>
           </div>
 
@@ -131,7 +151,7 @@ import '../styles/global.css';
             </div>
             <h3 class="font-brand text-lg font-medium text-navy dark:text-white">AI artifacts</h3>
             <p class="mt-2 text-storm dark:text-white/60 text-sm leading-relaxed">
-              Your AI builds real things &mdash; widgets, dashboards, reports. Rendered live in a sandbox. Save them to your library.
+              Your AI builds real things. Widgets, dashboards, reports. Rendered live in a sandbox. Save them to your library.
             </p>
           </div>
 
@@ -157,7 +177,7 @@ import '../styles/global.css';
             </div>
             <h3 class="font-brand text-lg font-medium text-navy dark:text-white">Neuron memory</h3>
             <p class="mt-2 text-storm dark:text-white/60 text-sm leading-relaxed">
-              Your AI remembers you &mdash; and you can read every word. A tiered memory system you own and control.
+              Your AI remembers you, and you can read every word. No black box. A tiered memory system you own and control.
             </p>
           </div>
         </div>
@@ -192,6 +212,22 @@ import '../styles/global.css';
       </div>
     </section>
 
+    <!-- Founder Story -->
+    <section class="py-16 md:py-24 px-6 bg-white dark:bg-abyss-card transition-colors">
+      <div class="max-w-2xl mx-auto text-center">
+        <p class="text-sm font-medium text-teal uppercase tracking-wider mb-3">The story</p>
+        <h2 class="font-brand text-headline-mobile md:text-headline font-medium text-navy dark:text-white">
+          I built this app using the app.
+        </h2>
+        <p class="mt-6 text-storm dark:text-white/60 text-lg leading-relaxed">
+          33 sprints. 12 AI agents. Zero employees. Flow was built by a solo founder and a team of AI agents working together. Not a marketing claim. The entire git history proves it. Every feature, every bug fix, every design decision was orchestrated through the same agent system that ships with the product.
+        </p>
+        <p class="mt-4 text-storm dark:text-white/60 text-lg leading-relaxed">
+          If this system can build software, imagine what it can do for your daily work. Now I&rsquo;m putting it in your hands.
+        </p>
+      </div>
+    </section>
+
     <!-- Bottom CTA -->
     <section id="notify" class="py-16 md:py-24 px-6 bg-abyss-canvas text-white">
       <div class="max-w-content mx-auto text-center">
@@ -199,7 +235,7 @@ import '../styles/global.css';
           Be there on day one.
         </h2>
         <p class="mt-4 text-white/60 text-lg max-w-xl mx-auto">
-          Founding members get early access and the best price. Join the waitlist.
+          Founding members get early access and a price that locks in forever. Use any model, including free local ones. Pay once, own it for life.
         </p>
         <div class="mt-10 max-w-md mx-auto">
           <form class="email-form flex flex-col sm:flex-row gap-3">
@@ -211,12 +247,13 @@ import '../styles/global.css';
             />
             <button
               type="submit"
-              class="bg-teal text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-teal-hover transition-colors whitespace-nowrap"
+              class="bg-teal text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-teal-hover transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Notify me
+              Get early access
             </button>
           </form>
           <div class="form-message mt-3 text-sm"></div>
+          <p id="subscriber-count-bottom" class="mt-3 text-xs text-white/50">&nbsp;</p>
         </div>
       </div>
     </section>
@@ -228,7 +265,7 @@ import '../styles/global.css';
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
           <span class="font-brand text-lg font-medium text-navy dark:text-white">Flow <span class="text-sm font-normal text-storm dark:text-white/50">by Kaivoo</span></span>
-          <p class="mt-1 text-sm text-storm dark:text-white/60">Personal AI agent orchestration.</p>
+          <p class="mt-1 text-sm text-storm dark:text-white/60">Your own AI team. Your machine. Your data.</p>
         </div>
         <div class="flex flex-wrap gap-6 text-sm text-storm dark:text-white/60">
           <a href="/privacy" class="hover:text-navy dark:hover:text-white transition-colors">Privacy Policy</a>
@@ -256,7 +293,7 @@ import '../styles/global.css';
         const now = Date.now();
         const diff = target - now;
         if (diff <= 0) {
-          el.innerHTML = '<a href="/" class="inline-block bg-teal text-white px-8 py-3.5 rounded-lg text-base font-medium hover:bg-teal-hover transition-colors">We\'re live &mdash; get Flow</a>';
+          el.innerHTML = '<a href="/" class="inline-block bg-teal text-white px-8 py-3.5 rounded-lg text-base font-medium hover:bg-teal-hover transition-colors">We\'re live. Get Flow</a>';
           return;
         }
         const days = Math.floor(diff / 86400000);
@@ -301,7 +338,7 @@ import '../styles/global.css';
           if (!email) return;
 
           btn.disabled = true;
-          btn.textContent = 'Joining...';
+          btn.textContent = 'Securing your spot...';
           if (msg) msg.textContent = '';
 
           const { error } = await supabase
@@ -322,14 +359,15 @@ import '../styles/global.css';
             }
           } else {
             if (msg) {
-              msg.textContent = "You're in. We'll email you on launch day.";
+              msg.textContent = "You're in. Early access is yours.";
               msg.className = 'form-message mt-3 text-sm text-teal';
             }
             input.value = '';
           }
 
           btn.disabled = false;
-          btn.textContent = 'Notify me';
+          btn.textContent = 'Get early access';
+          loadSubscriberCount();
         });
       });
     }
@@ -384,11 +422,31 @@ import '../styles/global.css';
       `).join('');
     }
 
+    // --- Subscriber Count ---
+    async function loadSubscriberCount() {
+      const els = [
+        document.getElementById('subscriber-count'),
+        document.getElementById('subscriber-count-bottom'),
+      ].filter(Boolean) as HTMLElement[];
+      if (els.length === 0) return;
+
+      const { count } = await supabase
+        .from('subscribers')
+        .select('*', { count: 'exact', head: true });
+
+      const text = count && count > 0
+        ? `Join ${count} ${count === 1 ? 'other' : 'others'} waiting for launch day.`
+        : 'Be the first to get early access.';
+
+      els.forEach(el => { el.textContent = text; });
+    }
+
     // --- Init ---
     document.addEventListener('DOMContentLoaded', () => {
       startCountdown();
       setupEmailForms();
       loadMilestones();
+      loadSubscriberCount();
     });
   </script>
 </Layout>

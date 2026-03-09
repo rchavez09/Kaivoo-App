@@ -8,7 +8,9 @@
 
 **Date:** February 2026
 **Status:** ACTIVE — Ongoing research mandate
-**Reports to:** System Architect (Agent 3) and Design Agent
+**Reports to:** Shared resource — serves both Dev Director (`Agents/Director.md`) and Marketing Director (`Agents/Marketing/Director-Marketing.md`)
+**Engineering requests via:** System Architect (Agent 3) — technical feasibility, architecture options, competitive feature analysis
+**Marketing requests via:** Marketing Director — audience demographics, competitor positioning, channel effectiveness, pricing sensitivity, community landscape, newsletter/publication research
 
 ---
 
