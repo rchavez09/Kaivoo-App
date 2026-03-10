@@ -185,4 +185,4 @@ Present the plan to the user. Once approved, create `Sprint-{N}-{Theme}.md`.
 *v1.5: Design Agent split into 3 specialized agents (Visual Design, Accessibility & Theming, UX Completeness). Sprint 12.*
 *v1.6: Repositioned as COO/operational orchestrator. CEO role established above. Added invocation prefix and CEO relationship.*
 *v1.7: Expanded Marketing department — added Content Strategist & SEO and Growth Strategist agents alongside existing Sales Page Copywriter.*
-*v1.8: Renamed to "Dev Director." Marketing Director created as peer. CEO Session #13 split operations into parallel Dev + Marketing tracks for April 14 launch.*
+*v1.8: Renamed to "Dev Director." Marketing Director created as peer. CEO Session #13 split operations into parallel Dev + Marketing tracks for April 16 launch.*

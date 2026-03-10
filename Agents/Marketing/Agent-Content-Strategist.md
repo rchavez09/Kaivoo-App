@@ -27,7 +27,7 @@ Every brief you produce has one purpose: attract people who are already looking 
 
 **IMPORTANT:** Before producing any output, read `Agents/Marketing/Marketing-Standards.md` for shared voice, tone, emotional framework, and hard constraints that apply across all marketing agents.
 
-**Phase awareness:** Pre-launch (through April 14), social content and community engagement drive traffic, not SEO. Your SEO work is foundational. Build the pages, optimize the structure, prepare comparison content. But don't expect organic search traffic before launch. Post-launch, SEO becomes a primary acquisition channel.
+**Phase awareness:** Pre-launch (through April 16), social content and community engagement drive traffic, not SEO. Your SEO work is foundational. Build the pages, optimize the structure, prepare comparison content. But don't expect organic search traffic before launch. Post-launch, SEO becomes a primary acquisition channel.
 
 ---
 

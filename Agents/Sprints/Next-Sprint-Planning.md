@@ -1,10 +1,10 @@
 # Next Sprint Planning
 
-**Updated:** March 8, 2026
+**Updated:** March 9, 2026
 **Last completed:** Sprint 32 (Knowledge Unification)
 **Current sprint:** Sprint 33 (Bug Bash) — IN PROGRESS
-**Source:** CEO Session #13, V1 Launch Definition, OpenClaw market research, Sprint 32 deferred items
-**Launch date:** April 14, 2026
+**Source:** CEO Session #13, V1 Launch Definition, OpenClaw market research, Sprint 32 deferred items, CEO Session #14 (timeline adjustment)
+**Launch date:** April 16, 2026
 
 ---
 
@@ -18,7 +18,7 @@
 
 ---
 
-## Week 1: Foundation + Marketing Launch (Mar 9-15)
+## Week 1: Foundation + Marketing Infrastructure (Mar 9-15)
 
 ### Dev Track (~8 sprints)
 
@@ -85,9 +85,18 @@
 
 ### Marketing Track (Parallel)
 
-- [ ] Landing page live (Framer/Carrd) with email capture + countdown to April 14
-- [ ] First 2-3 TikTok/YouTube shorts posted
-- [ ] Twitter/X account active, first threads
+#### Days 1-2 (Mar 9-10): Infrastructure Setup
+- [ ] Kit account created + email capture wired to landing page (PRIORITY — no lost signups)
+- [ ] TikTok account created + profile/branding set up
+- [ ] YouTube channel created + branding
+- [ ] Office recording setup (lighting, camera angle, background)
+- [ ] Twitter/X account active (text-only posts can start immediately)
+
+#### Days 3-7 (Mar 11-15): Content Launch
+- [ ] Landing page email capture verified end-to-end (test signup → Kit confirmation)
+- [ ] Landing page countdown updated to April 16
+- [ ] First 2-3 TikTok/YouTube shorts recorded and posted
+- [ ] First Twitter/X threads posted
 - [ ] Reddit: first posts in r/selfhosted, r/ObsidianMD, r/LocalLLaMA, r/artificial
 - [ ] Discord server created with basic channels
 
@@ -252,7 +261,7 @@
 
 ---
 
-## Week 5: Ship (Apr 6-13)
+## Week 5: Ship (Apr 6-15)
 
 ### Dev Track (~4 sprints)
 
@@ -290,7 +299,7 @@
 
 ---
 
-## April 14, 2026 — LAUNCH DAY
+## April 16, 2026 — LAUNCH DAY (Thursday)
 
 - Product Hunt launch
 - Email blast to full list
@@ -337,4 +346,4 @@
 
 ---
 
-*Next Sprint Planning — Updated March 8, 2026 — CEO Session #13 strategic pivot. V1 redefined as AI agent orchestration platform. 5-week launch plan targeting April 14, 2026. Parallel Dev + Marketing tracks. Scope LOCKED.*
+*Next Sprint Planning — Updated March 9, 2026 — CEO Session #14: launch date moved to April 16 (Thursday). Marketing Week 1 split into infrastructure setup (Days 1-2) and content launch (Days 3-7). Extra 2 days added to Week 5 buffer/beta window. Dev track unchanged.*

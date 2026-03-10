@@ -46,7 +46,7 @@ Not a chatbot. Not another subscription. A team of AI agents that work for you, 
 Here's what you can expect from me:
 
 - A few emails over the next few weeks showing you what I'm building and why
-- Early access before anyone else on launch day (April 14)
+- Early access before anyone else on launch day (April 16)
 - Founding member pricing that locks in forever
 
 I'm building this solo with a team of 12 AI agents. Not a metaphor. The app was built by its own agent system. 33 sprints of proof in the git history.

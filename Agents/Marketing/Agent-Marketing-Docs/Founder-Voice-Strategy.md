@@ -207,7 +207,7 @@ Flow is never the topic. Flow is the evidence. Here's how it appears across thre
 2. Flow appears as proof, not as pitch. "I know this because I built it" not "you should buy this."
 3. If removing the Flow mention makes the post worse, it belongs. If it makes no difference, cut it.
 4. Never say "check out my product" or "link in bio" in a thought leadership post. People will find it if the ideas are good enough.
-5. The bio does the selling: "Building Flow by Kaivoo. AI agents for everyone. Launching April 14."
+5. The bio does the selling: "Building Flow by Kaivoo. AI agents for everyone. Launching April 16."
 
 ---
 

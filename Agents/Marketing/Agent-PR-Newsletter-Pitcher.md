@@ -116,7 +116,7 @@ The part that surprises people: the app was built by its own agent system.
 33 sprints, 12 AI agents coordinating architecture, code review, QA,
 and deployment. The entire git history proves it.
 
-We launch on Product Hunt on April 14. I'd love to share a demo or
+We launch on Product Hunt on April 16. I'd love to share a demo or
 give you early access if it's something you'd consider covering.
 
 Either way, happy to be a source on AI agent orchestration or AI safety
@@ -139,10 +139,10 @@ Ricky
 1. **Confirm interested editors.** Follow up with anyone who engaged with the warm pitch.
 2. **Send press kit.** (See Press Kit section below.)
 3. **Offer exclusives strategically.** One newsletter gets a "first look" — this incentivizes coverage.
-4. **Coordinate timing.** Ideal: newsletter feature on April 14-15 to amplify the Product Hunt launch.
+4. **Coordinate timing.** Ideal: newsletter feature on April 16-15 to amplify the Product Hunt launch.
 5. **Prepare founder quotes and stats** for editors who need them.
 
-### Phase 4: Launch Day Push (April 14)
+### Phase 4: Launch Day Push (April 16)
 
 1. **Send launch notification to all engaged editors.** Short, direct: "We're live on Product Hunt. Here's the link."
 2. **Share Product Hunt link + key stats** (signups so far, demo video, one-line pitch).
@@ -175,7 +175,7 @@ using the app's own multi-agent system.
 "OpenClaw for everyone."
 
 ### Key Facts
-- Launch date: April 14, 2026
+- Launch date: April 16, 2026
 - Founder: Ricky Chavez (solo founder)
 - Built with: 33 sprints, 12 AI agents, 0 employees
 - Unique angle: The app was built using the app's own agent system

@@ -64,7 +64,7 @@ That's happening right now. Early adopters are building their own internal tools
 
 This is how people are going to thrive at work. Not by fighting the tools. By becoming the person in the room who knows how to build with them.
 
-Give me a follow if you like this kind of thinking. And check out my project. We're launching April 14th and I'm excited to share a better way forward.
+Give me a follow if you like this kind of thinking. And check out my project. We're launching April 16th and I'm excited to share a better way forward.
 
 **~55 seconds.**
 
