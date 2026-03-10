@@ -67,6 +67,9 @@ setup('authenticate', async ({ page }) => {
   await page.evaluate(
     ([key, value]) => {
       localStorage.setItem(key, value);
+      // Bypass setup wizard and guided tour so authenticated tests land on the main app
+      localStorage.setItem('kaivoo-setup-complete', 'true');
+      localStorage.setItem('kaivoo-tour-complete', 'true');
     },
     [storageKey, storageValue],
   );
