@@ -26,7 +26,21 @@ import { Toggle } from '@/components/ui/toggle';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+
+/**
+ * Convert plain-text [[path]] patterns into <span data-wiki-link> elements
+ * so the WikiLinkNode parseHTML rule can pick them up on load.
+ * Skips patterns already inside a data-wiki-link span to avoid double-conversion.
+ */
+function preprocessWikiLinks(html: string): string {
+  if (!html || !html.includes('[[')) return html;
+  // Match [[...]] that is NOT already inside a data-wiki-link attribute value
+  return html.replace(/(<span[^>]*data-wiki-link[^>]*>.*?<\/span>)|\[\[([^\]]+)\]\]/g, (match, existing, path) => {
+    if (existing) return existing; // already a wiki-link span, keep as-is
+    return `<span data-wiki-link="${path}" class="wiki-link" role="link" tabindex="0">[[${path}]]</span>`;
+  });
+}
 
 const MAX_IMAGE_BYTES = 200_000; // 200KB target
 
@@ -106,6 +120,8 @@ const RichTextEditor = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const insertImageRef = useRef<(file: File) => void>(() => {});
 
+  const processedContent = useMemo(() => preprocessWikiLinks(content), [content]);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -128,7 +144,7 @@ const RichTextEditor = ({
       }),
       WikiLinkNode,
     ],
-    content,
+    content: processedContent,
     editable,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -254,10 +270,10 @@ const RichTextEditor = ({
 
   // Update content when prop changes externally
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+    if (editor && processedContent !== editor.getHTML()) {
+      editor.commands.setContent(processedContent);
     }
-  }, [content, editor]);
+  }, [processedContent, editor]);
 
   if (!editor) {
     return null;

@@ -28,6 +28,19 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { EntryHeaderNode } from './EntryHeaderNode';
 import { WikiLinkNode } from './WikiLinkNode';
+
+/**
+ * Convert plain-text [[path]] patterns into <span data-wiki-link> elements
+ * so the WikiLinkNode parseHTML rule can pick them up on load.
+ * Skips patterns already inside a data-wiki-link span to avoid double-conversion.
+ */
+function preprocessWikiLinks(html: string): string {
+  if (!html || !html.includes('[[')) return html;
+  return html.replace(/(<span[^>]*data-wiki-link[^>]*>.*?<\/span>)|\[\[([^\]]+)\]\]/g, (match, existing, path) => {
+    if (existing) return existing;
+    return `<span data-wiki-link="${path}" class="wiki-link" role="link" tabindex="0">[[${path}]]</span>`;
+  });
+}
 import SplitToNewEntryMenu from './SplitToNewEntryMenu';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
@@ -85,7 +98,7 @@ function composeHTML(
       const collapsed = collapseState?.get(entry.id) ?? false;
       const labelAttr = entry.label ? ` data-label="${entry.label}"` : '';
       const divider = `<div data-timestamp-divider="" data-timestamp="${ts.toISOString()}" data-entry-id="${entry.id}" data-collapsed="${collapsed}"${labelAttr} contenteditable="false" class="timestamp-divider">${displayLabel}</div>`;
-      return divider + (entry.content || '<p></p>');
+      return divider + preprocessWikiLinks(entry.content || '<p></p>');
     })
     .join('');
 }
