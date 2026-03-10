@@ -5,6 +5,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
+import { WikiLinkNode } from './WikiLinkNode';
 import {
   Bold,
   Italic,
@@ -46,16 +47,15 @@ async function compressImage(file: File): Promise<File> {
   ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 
-  // Try progressively lower quality until under budget
-  for (let quality = 0.8; quality >= 0.3; quality -= 0.1) {
-    const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality });
-    if (blob.size <= MAX_IMAGE_BYTES || quality <= 0.3) {
-      const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
-      return new File([blob], name, { type: 'image/jpeg' });
+  // Try progressively lower quality until under budget (integer loop avoids float drift)
+  for (let q = 8; q >= 3; q -= 1) {
+    const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: q / 10 });
+    if (blob.size <= MAX_IMAGE_BYTES || q === 3) {
+      return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
     }
   }
 
-  // Shouldn't reach here, but return last attempt
+  // Unreachable (loop always returns at q === 3) but satisfies TypeScript
   const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.3 });
   return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
 }
@@ -90,6 +90,8 @@ interface RichTextEditorProps {
   editable?: boolean;
   /** Upload an image file and return its public URL. When provided, images are uploaded to storage instead of embedded as base64. */
   onImageUpload?: (file: File) => Promise<string>;
+  /** Called when a [[wiki-link]] is clicked. Receives the path text (e.g., "Topic" or "Topic/Page"). */
+  onWikiLinkClick?: (path: string) => void;
 }
 
 const RichTextEditor = ({
@@ -99,6 +101,7 @@ const RichTextEditor = ({
   className,
   editable = true,
   onImageUpload,
+  onWikiLinkClick,
 }: RichTextEditorProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const insertImageRef = useRef<(file: File) => void>(() => {});
@@ -123,6 +126,7 @@ const RichTextEditor = ({
         inline: true,
         allowBase64: true,
       }),
+      WikiLinkNode,
     ],
     content,
     editable,
@@ -155,6 +159,18 @@ const RichTextEditor = ({
             insertImageRef.current(file);
             return true;
           }
+        }
+        return false;
+      },
+      handleClick: (_view, _pos, event) => {
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('wiki-link') && onWikiLinkClick) {
+          const path = target.getAttribute('data-wiki-link');
+          if (path) {
+            event.preventDefault();
+            onWikiLinkClick(path);
+          }
+          return true;
         }
         return false;
       },
@@ -463,6 +479,25 @@ const RichTextEditor = ({
           height: auto;
           border-radius: 0.375rem;
           margin: 0.5rem 0;
+        }
+        .ProseMirror .wiki-link {
+          display: inline;
+          padding: 0.125rem 0.375rem;
+          border-radius: 0.25rem;
+          background: hsl(var(--secondary));
+          color: hsl(var(--primary));
+          font-size: 0.8125rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.15s;
+        }
+        .ProseMirror .wiki-link:hover {
+          background: hsl(var(--secondary) / 0.8);
+          text-decoration: underline;
+        }
+        .ProseMirror .wiki-link:focus-visible {
+          outline: 2px solid hsl(var(--primary));
+          outline-offset: 2px;
         }
       `}</style>
     </div>

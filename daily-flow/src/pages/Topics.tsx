@@ -50,7 +50,7 @@ export const TopicsContent = () => {
   const getCapturesByTopic = useKaivooStore((s) => s.getCapturesByTopic);
   const getTasksByTopic = useKaivooStore((s) => s.getTasksByTopic);
   const { addTopic, addTopicPage, deleteTopic } = useKaivooActions();
-  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(['topic-1']));
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set<string>());
   const [searchQuery, setSearchQuery] = useState('');
   const [newTopicName, setNewTopicName] = useState('');
   const [newTopicParentId, setNewTopicParentId] = useState<string | undefined>(undefined);

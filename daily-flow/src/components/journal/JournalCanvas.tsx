@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -26,6 +27,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { EntryHeaderNode } from './EntryHeaderNode';
+import { WikiLinkNode } from './WikiLinkNode';
 import SplitToNewEntryMenu from './SplitToNewEntryMenu';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { useKaivooActions } from '@/hooks/useKaivooActions';
@@ -195,6 +197,8 @@ const JournalCanvas = ({
   onActiveEntryChange,
 }: JournalCanvasProps) => {
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  const navigate = useNavigate();
+  const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
 
   const { addJournalEntry, updateJournalEntry } = useKaivooActions();
 
@@ -321,6 +325,7 @@ const JournalCanvas = ({
       TextStyle,
       Color,
       EntryHeaderNode,
+      WikiLinkNode,
       Placeholder.configure({
         placeholder: 'Start writing...',
         emptyEditorClass: 'is-editor-empty',
@@ -414,6 +419,23 @@ const JournalCanvas = ({
         class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3',
         role: 'textbox',
         'aria-label': 'Notes canvas editor',
+      },
+      handleClick: (_view, _pos, event) => {
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('wiki-link')) {
+          const path = target.getAttribute('data-wiki-link');
+          if (path) {
+            event.preventDefault();
+            const ids = resolveTopicPath(path);
+            if (ids) {
+              navigate(ids.length === 2 ? `/topics/${ids[0]}/pages/${ids[1]}` : `/topics/${ids[0]}`);
+            } else {
+              toast.error(`Topic "${path}" not found`);
+            }
+          }
+          return true;
+        }
+        return false;
       },
     },
   });
@@ -890,6 +912,25 @@ const JournalCanvas = ({
           opacity: 0.5;
           pointer-events: none;
           height: 0;
+        }
+        .ProseMirror .wiki-link {
+          display: inline;
+          padding: 0.125rem 0.375rem;
+          border-radius: 0.25rem;
+          background: hsl(var(--secondary));
+          color: hsl(var(--primary));
+          font-size: 0.8125rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.15s;
+        }
+        .ProseMirror .wiki-link:hover {
+          background: hsl(var(--secondary) / 0.8);
+          text-decoration: underline;
+        }
+        .ProseMirror .wiki-link:focus-visible {
+          outline: 2px solid hsl(var(--primary));
+          outline-offset: 2px;
         }
       `}</style>
     </div>

@@ -47,12 +47,17 @@ function getEntityPath(result: SearchResult): string {
   }
 }
 
+/** Strip characters that break PostgreSQL to_tsquery: ()&|!:*\<>' */
+function sanitizeSearchQuery(query: string): string {
+  return query.replace(/[()&|!:*\\<>']/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 export async function searchAll(query: string, limit = 50): Promise<(SearchResult & { path: string })[]> {
-  const trimmed = query.trim();
-  if (!trimmed) return [];
+  const sanitized = sanitizeSearchQuery(query.trim());
+  if (!sanitized) return [];
 
   const { data, error } = await supabase.rpc('search_all', {
-    search_query: trimmed,
+    search_query: sanitized,
     result_limit: limit,
   });
 

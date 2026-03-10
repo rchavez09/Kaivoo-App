@@ -8,6 +8,10 @@ coverage
 /playwright/.cache/
 e2e/.auth/
 
+# Environment variables
+.env
+.env.local
+
 # E2E test credentials
 .env.e2e
 # Logs
