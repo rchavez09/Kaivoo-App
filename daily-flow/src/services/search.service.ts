@@ -49,7 +49,10 @@ function getEntityPath(result: SearchResult): string {
 
 /** Strip characters that break PostgreSQL to_tsquery: ()&|!:*\<>' */
 function sanitizeSearchQuery(query: string): string {
-  return query.replace(/[()&|!:*\\<>']/g, ' ').replace(/\s+/g, ' ').trim();
+  return query
+    .replace(/[()&|!:*\\<>']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export async function searchAll(query: string, limit = 50): Promise<(SearchResult & { path: string })[]> {
