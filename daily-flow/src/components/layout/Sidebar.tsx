@@ -12,6 +12,7 @@ import {
   Briefcase,
   Repeat,
   FolderOpen,
+  MessageCircle,
 } from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 import { cn } from '@/lib/utils';
@@ -61,6 +62,11 @@ const navItems = [
     path: '/topics',
     label: 'Knowledge',
     icon: FolderOpen,
+  },
+  {
+    path: '/chat',
+    label: 'Chat',
+    icon: MessageCircle,
   },
   {
     path: '/insights',
