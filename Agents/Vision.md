@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.6
-**Last Updated:** March 7, 2026
+**Version:** 7.7
+**Last Updated:** March 9, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -1081,7 +1081,8 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v7.5 — March 7, 2026*
+*Vision v7.6 — March 9, 2026*
+*v7.6: Sprint 33 (Bug Bash) complete. 10/10 parcels. All user-facing bugs from CEO #12 audit fixed: HTML rendering in content surfaces (DayReview + TopicCapturesWidget), Kanban all-column drag-and-drop, wiki-link `[[Topic/Page]]` rendering as clickable links (custom Tiptap WikiLinkNode + preprocessor for existing content), Library sidebar icon → FolderOpen, Gantt view hidden. Cleanup: seed data removed from store, `to_tsquery` sanitized, compressImage float fix, `.env` in .gitignore. 6 P1s caught by verification agents + 2 sandbox issues, all fixed. E2E infrastructure repaired (22/22 pass). Process improvements: format-first quality gates, E2E in sprint gate chain. Ready for AI feature sprints (Sprint 34+). See `Sprints/Sprint-33-Bug-Bash-Vault.md`.*
 *v7.5: Sprint 31 (Tasks + Projects Merge) complete. 14/14 parcels. Unified `/projects` page with top-level tabs (All Tasks | Projects), lazy-loaded TasksContent, `/tasks` redirect, project detail tabbed sub-nav (Tasks/Documents/Notes/Chat), Inbox virtual project, sidebar Tasks entry removed, all navigation updated. Post-audit: O(N+M) stats optimization, settings moved to gear icon dialog, ARIA improvements (aria-pressed, focus-visible rings), hover translate pattern. 265 tests. Current position updated.*
 *v7.4: Sprint 30 (Bug Bash + Concierge Hardening) complete. 15/15 parcels. 7 bugs fixed (2 P0 data-loss), concierge memory architecture hardened (pre-compaction flush, deterministic context assembly, coherence monitoring), upload polish, AI conversations moved to adapter pattern (localStorage→SQLite/Supabase), desktop vault fixed (VirtualVaultAdapter for browsing). 265 tests. Current position updated.*
 *v7.3: Sprint 29 (Flow Rebrand) complete. Product renamed from "Kaivoo" to "Flow by Kaivoo." In-app rename (all user-visible text), landing page rebuilt with Flow identity, EULA + Privacy Policy updated, Product Hunt listing rewritten, strategic docs updated. Internal identifiers preserved. Sign-out hidden on desktop. Agent 7 caught 6 missed renames — all fixed. Screenshots deferred to Sprint 33. Rebrand decision updated. Current position updated.*

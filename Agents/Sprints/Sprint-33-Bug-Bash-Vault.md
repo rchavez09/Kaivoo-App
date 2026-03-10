@@ -255,4 +255,48 @@ See `Next-Sprint-Planning.md` for full 5-week plan → April 16 launch.
 
 ---
 
-*Sprint 33 — Bug Bash — Originally compiled March 7, 2026. Rescoped March 8, 2026 per CEO Session #13.*
+## Retrospective
+
+**Written:** March 9, 2026 (post-merge)
+**Tag:** `post-sprint-33`
+**PR:** #21 (squash-merged, sha: 894a11b)
+
+### What Went Well
+
+- **Clean sweep:** 10/10 parcels completed, all deterministic gates passed first try (265 tests, 0 lint errors, clean typecheck, 2.54s build).
+- **3-tier verification caught real issues:** Agent 7 found 2 P1s (stale seed ref in Topics.tsx, timeline viewMode guard in Tasks.tsx). Design agents found 4 P1s (wiki-link a11y, color consistency, focus-visible, missing toast feedback). All fixed before sandbox.
+- **Sandbox review caught 2 more issues:** Wiki-links in existing content not rendering (pre-existing content stored as plain text), raw HTML tags visible in TopicCapturesWidget. Both fixed in-session — the multi-pass review model (automated + human) is proving out.
+- **E2E infrastructure now works end-to-end:** Fixed setup wizard bypass in auth.setup.ts. 22/22 tests pass. This unblocks future sprints from E2E regression.
+
+### What Didn't Go Well
+
+- **E2E was nearly skipped:** Initially claimed no E2E suite existed — user corrected this. The E2E setup was broken (stale credentials, setup wizard blocking auth tests) and would have been missed without the user pushing back. Added E2E to CLAUDE.md and memory to prevent this.
+- **Prettier formatting caused a CI failure:** `search.service.ts` wasn't formatted before commit. Added `npm run format` as the first step in the quality gate chain in CLAUDE.md.
+- **P1 (HTML rendering) was incomplete:** The original P1 fix only addressed DayReview.tsx captures. Sandbox revealed TopicCapturesWidget still rendered raw HTML tags. The original audit missed this surface.
+
+### Process Improvements Made
+
+1. **CLAUDE.md updated:** `npm run format` added as first step in pre-commit quality gates. E2E commands added for deploy preview and local testing.
+2. **Memory updated:** Full gate sequence documented (format → lint → typecheck → test → build → PR + CI → E2E → sandbox → merge). E2E credential requirements documented.
+3. **auth.setup.ts fixed:** Setup wizard and guided tour bypassed in E2E auth setup. Future sprints won't hit the onboarding wall.
+4. **Tauri desktop dev verified:** Desktop dev environment runs cleanly for sandbox review. HMR works for rapid iteration during review.
+
+### Scope Discipline
+
+Sprint held to scope lock per CEO Session #13. No feature creep. Vault overhaul, settings audit, color pickers, and dark mode contrast all correctly deferred. The two sandbox fixes (wiki-link preprocessing, HTML stripping) were extensions of existing parcels (P3, P1), not new scope.
+
+### Key Numbers
+
+| Metric | Value |
+|---|---|
+| Parcels | 10/10 |
+| Verification P1s found/fixed | 6 (2 Agent 7, 4 Design) |
+| Sandbox issues found/fixed | 2 |
+| E2E tests | 22/22 |
+| Unit tests | 265/265 |
+| Commits on branch | 8 |
+| Time: execution → merge | ~1 day (rescoped March 8, merged March 9) |
+
+---
+
+*Sprint 33 — Bug Bash — Originally compiled March 7, 2026. Rescoped March 8, 2026 per CEO Session #13. Merged March 9, 2026.*
