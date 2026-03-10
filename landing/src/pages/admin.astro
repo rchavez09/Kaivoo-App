@@ -48,7 +48,7 @@ import '../styles/global.css';
         <div class="flex items-center justify-between mb-8">
           <div>
             <h1 class="font-brand text-2xl font-medium text-navy dark:text-white">Launch Command Center</h1>
-            <p class="text-sm text-storm dark:text-white/50 mt-1">April 14, 2026 &mdash; <span id="days-remaining"></span> days remaining</p>
+            <p class="text-sm text-storm dark:text-white/50 mt-1">April 16, 2026 &mdash; <span id="days-remaining"></span> days remaining</p>
           </div>
           <div class="flex items-center gap-3">
             <button
@@ -236,17 +236,17 @@ import '../styles/global.css';
             </ul>
 
             <!-- Week 5 -->
-            <h3 class="font-brand text-base font-medium text-navy dark:text-white">Week 5 — Ship (Apr 6-13)</h3>
+            <h3 class="font-brand text-base font-medium text-navy dark:text-white">Week 5 — Ship (Apr 6-15)</h3>
             <ul class="space-y-1 mb-3 list-none pl-0">
               <li class="checklist-item">Sprint 56: Fix beta bugs</li>
               <li class="checklist-item">Sprint 57: Code signing + EULA + deploy pipeline</li>
               <li class="checklist-item">Sprint 58: Demo video + Product Hunt + landing page update</li>
               <li class="checklist-item">Sprint 59: Buffer sprint</li>
-              <li class="checklist-item">CODE FREEZE — April 13</li>
+              <li class="checklist-item">CODE FREEZE — April 15</li>
             </ul>
 
             <!-- Launch Day -->
-            <h3 class="font-brand text-base font-medium text-teal">April 14, 2026 — LAUNCH DAY</h3>
+            <h3 class="font-brand text-base font-medium text-teal">April 16, 2026 — LAUNCH DAY</h3>
             <ul class="space-y-1 mb-3 list-none pl-0">
               <li class="checklist-item">Product Hunt listing LIVE</li>
               <li class="checklist-item">Email blast: "We're live"</li>
@@ -389,7 +389,7 @@ import '../styles/global.css';
     }
 
     async function loadStats() {
-      const target = new Date('2026-04-14T09:00:00-07:00').getTime();
+      const target = new Date('2026-04-16T09:00:00-07:00').getTime();
       const daysLeft = Math.max(0, Math.ceil((target - Date.now()) / 86400000));
 
       document.getElementById('stat-days')!.textContent = String(daysLeft);

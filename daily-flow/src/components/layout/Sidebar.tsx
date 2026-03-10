@@ -11,7 +11,7 @@ import {
   BookOpen,
   Briefcase,
   Repeat,
-  Library,
+  FolderOpen,
 } from 'lucide-react';
 import kaivooLogo from '@/assets/kaivoo-logo.png';
 import { cn } from '@/lib/utils';
@@ -60,7 +60,7 @@ const navItems = [
   {
     path: '/topics',
     label: 'Knowledge',
-    icon: Library,
+    icon: FolderOpen,
   },
   {
     path: '/insights',

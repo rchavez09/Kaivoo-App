@@ -91,6 +91,24 @@ const TopicPage = () => {
     setEditorContent(page?.content ?? topic?.content ?? '');
   }, [topicId, pageId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const resolveTopicPath = useKaivooStore((s) => s.resolveTopicPath);
+
+  const handleWikiLinkClick = useCallback(
+    (path: string) => {
+      const ids = resolveTopicPath(path);
+      if (!ids) {
+        toast.error(`Topic "${path}" not found`);
+        return;
+      }
+      if (ids.length === 2) {
+        navigate(`/topics/${ids[0]}/pages/${ids[1]}`);
+      } else {
+        navigate(`/topics/${ids[0]}`);
+      }
+    },
+    [resolveTopicPath, navigate],
+  );
+
   const handleContentChange = useCallback(
     (html: string) => {
       setEditorContent(html);
@@ -374,6 +392,7 @@ const TopicPage = () => {
             onChange={handleContentChange}
             placeholder={isPage ? 'Write page content...' : 'Write topic content...'}
             onImageUpload={handleImageUpload}
+            onWikiLinkClick={handleWikiLinkClick}
           />
         </section>
 

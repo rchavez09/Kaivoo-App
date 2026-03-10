@@ -227,7 +227,7 @@ const DayReview = ({
                   </span>
                 </div>
                 <p className="line-clamp-4 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                  {capture.content}
+                  {stripHtml(capture.content)}
                 </p>
                 {(capture.tags.length > 0 || capture.topicIds.length > 0) && (
                   <div className="mt-2 flex flex-wrap gap-1">

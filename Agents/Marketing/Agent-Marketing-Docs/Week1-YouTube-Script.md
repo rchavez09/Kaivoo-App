@@ -83,7 +83,7 @@ It's an AI agent platform. Not a chatbot. Not another blank textbox. A team of A
 
 And the part that still blows my mind: the app was built by its own agent system. 33 sprints. 12 AI agents. The entire git history proves it. The system that built the product is the product.
 
-I'm not saying this to sell you something today. We launch April 14th. But I wanted to share the thinking behind it. Because I think we're at one of those rare moments where the ground is shifting and the people who notice have a real chance to build something meaningful.
+I'm not saying this to sell you something today. We launch April 16th. But I wanted to share the thinking behind it. Because I think we're at one of those rare moments where the ground is shifting and the people who notice have a real chance to build something meaningful.
 
 The volcano is smoking. Most people haven't looked up yet.
 

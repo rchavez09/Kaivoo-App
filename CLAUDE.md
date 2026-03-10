@@ -53,7 +53,7 @@ npm run format       # Prettier fix
 npm run typecheck    # TypeScript type check (tsc --noEmit)
 ```
 
-**Pre-commit quality check:** `cd daily-flow && npm run lint && npm run typecheck && npm run test && npm run build`
+**Pre-commit quality check:** `cd daily-flow && npm run format && npm run lint && npm run typecheck && npm run test && npm run build`
 
 **Deploy to production:** Merge PR to `main` on GitHub → Netlify auto-deploys via `netlify.toml`
 **Deploy previews:** Open PR from sprint branch → Netlify generates a preview URL automatically

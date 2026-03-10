@@ -8,7 +8,13 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Temporary pre-launch redirect — remove on April 14, 2026
+# Temporary preview route for post-launch page — remove on April 16, 2026
+[[redirects]]
+  from = "/preview"
+  to = "/index.html"
+  status = 200
+
+# Temporary pre-launch redirect — remove on April 16, 2026
 [[redirects]]
   from = "/"
   to = "/launch"

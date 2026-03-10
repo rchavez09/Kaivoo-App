@@ -683,7 +683,7 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | Landing page & marketing site | PLANNED (Week 1) | Must-have |
 | Stripe integration — one-time payment flow | **DONE** (Sprint 25 — $49/$99 Checkout, Edge Functions) | Must-have |
 | EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED (Sprint 57) | Must-have |
-| Product Hunt launch | PLANNED (April 14, 2026) | Must-have |
+| Product Hunt launch | PLANNED (April 16, 2026) | Must-have |
 | **Full-page AI Chat** — `/chat` route, conversation list, persistent history, model selector | PLANNED (Sprint 34) | **Must-have** |
 | **Configurable Heartbeat** — proactive AI that acts without being asked. Background timer, morning briefing, evening summary, custom intervals. Reads tasks, calendar, journal, soul file. | PLANNED (Sprint 37) | **Must-have** |
 | **Neuron Memory V1** — tiered soul file (Core Identity + Active Context + Episodic Memory), memory consolidation during heartbeat (dedup, summarize, prune, promote), context-aware loading (~3500 token budget). Solves soul file bloat. | PLANNED (Sprint 38) | **Must-have** |

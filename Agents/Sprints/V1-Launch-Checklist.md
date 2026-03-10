@@ -1,6 +1,6 @@
 # V1 Launch Checklist — Daily Tracker
 
-**Launch Date:** April 14, 2026
+**Launch Date:** April 16, 2026
 **Start Date:** March 9, 2026
 **Tracks:** Dev (engineering) + Marketing (distribution) running in parallel
 
@@ -16,7 +16,7 @@
 
 **Marketing:**
 - [ ] Choose landing page tool (Framer, Carrd, or custom)
-- [ ] Draft landing page copy: headline, subhead, email capture, countdown to April 14
+- [ ] Draft landing page copy: headline, subhead, email capture, countdown to April 16
 - [ ] Create TikTok account (if not existing)
 - [ ] Script first TikTok/short: "Your AI has a memory. You've never read it."
 
@@ -448,9 +448,10 @@
 
 ---
 
-## DAY 37 — Monday, April 14 — LAUNCH DAY
+## DAY 39 — Thursday, April 16 — LAUNCH DAY
 
 ### Morning (6-8 AM)
+- [ ] Remove `/preview` rewrite and `/` → `/launch` redirect from `landing/netlify.toml`, then redeploy (`/deploy-landing`)
 - [ ] Product Hunt listing goes LIVE
 - [ ] Email blast sent: "We're live"
 - [ ] Twitter/X announcement thread posted
@@ -504,4 +505,4 @@
 
 ---
 
-*V1 Launch Checklist — Created March 8, 2026 — CEO Session #13. April 14 launch. Scope LOCKED.*
+*V1 Launch Checklist — Created March 8, 2026 — CEO Session #13. April 16 launch. Scope LOCKED.*

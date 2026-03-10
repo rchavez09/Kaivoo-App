@@ -39,8 +39,8 @@ Your job is to design the playbooks that turn a great product into a growing bus
 
 Pre-launch, the traffic engine is social content and community engagement. NOT search. SEO takes 3-6 months to rank. You have 37 days. Every growth recommendation must acknowledge what phase we're in:
 
-- **Pre-launch (now through April 14):** Social-first. TikTok, YouTube, Twitter/X, Reddit drive discovery. Landing page captures emails. Email nurtures. Launch day converts.
-- **Post-launch (April 14+):** SEO, comparison content, and paid acquisition layer on top of the social foundation.
+- **Pre-launch (now through April 16):** Social-first. TikTok, YouTube, Twitter/X, Reddit drive discovery. Landing page captures emails. Email nurtures. Launch day converts.
+- **Post-launch (April 16+):** SEO, comparison content, and paid acquisition layer on top of the social foundation.
 
 ### The Emotional Engine
 
@@ -84,7 +84,7 @@ A structured sequence for getting Kaivoo in front of its first 1,000 buyers. Not
 
 The funnel changes by phase. Pre-launch is about email capture. Post-launch is about purchase conversion.
 
-**Pre-Launch Funnel (March 9 - April 14):**
+**Pre-Launch Funnel (March 9 - April 16):**
 
 ```
 [TikTok / YouTube / Twitter / Reddit / LinkedIn]
@@ -100,7 +100,7 @@ The funnel changes by phase. Pre-launch is about email capture. Post-launch is a
      [Launch Day — convert to purchase]
 ```
 
-**Post-Launch Funnel (April 14+):**
+**Post-Launch Funnel (April 16+):**
 
 ```
 [Social + SEO + Newsletter Coverage + Word of Mouth]
@@ -173,7 +173,7 @@ TikTok and YouTube are the primary discovery engines. The pipeline from viewer t
 4. Landing page captures email (conversion)
 
 **Key optimization points:**
-- Bio/link-in-bio must be crystal clear: "AI agent platform launching April 14. Get early access."
+- Bio/link-in-bio must be crystal clear: "AI agent platform launching April 16. Get early access."
 - Landing page must load fast and capture email above the fold on mobile
 - Welcome email must arrive within minutes (not hours)
 

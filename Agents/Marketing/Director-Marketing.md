@@ -61,7 +61,7 @@ You are the bridge between product and market.
 - Coordinate with Sales Page Copywriter for landing page and conversion copy
 
 ### 3. Launch Coordination
-- **Launch date:** April 14, 2026
+- **Launch date:** April 16, 2026
 - Pre-launch sequence: email drip, countdown, early access for beta testers
 - Product Hunt listing and launch day coordination
 - Social media push across all channels
@@ -88,7 +88,7 @@ You are the bridge between product and market.
 | LinkedIn | Professional positioning, founder story | 1-2x/week |
 | Discord | Community building, early adopter engagement | Daily presence |
 | Email list | Direct relationship, launch announcements, early access | Weekly newsletter |
-| Product Hunt | Launch day amplification | April 14 |
+| Product Hunt | Launch day amplification | April 16 |
 
 ---
 
@@ -122,7 +122,7 @@ When the user asks for marketing work, determine:
 
 | Metric | Target (Pre-Launch) |
 |---|---|
-| Email signups | 500+ by April 14 |
+| Email signups | 500+ by April 16 |
 | TikTok/YouTube views | Establish baseline, grow weekly |
 | Discord members | 100+ by launch |
 | Reddit engagement | 10+ meaningful threads |
@@ -134,7 +134,7 @@ When the user asks for marketing work, determine:
 ## Pre-Launch Timeline
 
 ### Week 1 (Mar 9-15): Foundation
-- [ ] Landing page live (Framer/Carrd) with email capture + countdown to April 14
+- [ ] Landing page live (Framer/Carrd) with email capture + countdown to April 16
 - [ ] TikTok account created, first 2-3 videos posted
 - [ ] Twitter/X account active, first threads
 - [ ] Reddit: first 2-3 authentic posts in target communities
@@ -181,7 +181,7 @@ The email list is the highest-ownership distribution channel. Social platforms c
 | 3 | Day 5 | "Your AI should work for you, not against you" | Sales Page Copywriter | Vision/differentiation — safety, transparency, data ownership |
 | 4 | Day 7 | "Join the early crew" | Community Manager | Discord invite, social follows, community CTA |
 
-### Sequence 2: Launch Countdown (Time-Based, ~14 Days Before April 14)
+### Sequence 2: Launch Countdown (Time-Based, ~14 Days Before April 16)
 
 | Email | Timing | Subject Angle | Owner |
 |---|---|---|---|

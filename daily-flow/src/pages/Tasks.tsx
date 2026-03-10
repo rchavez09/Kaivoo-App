@@ -15,7 +15,6 @@ import {
   Columns3,
   ChevronDown,
   ArrowUpDown,
-  GanttChart,
 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
@@ -40,13 +39,14 @@ import { Task, TaskStatus, TaskPriority } from '@/types';
 import TaskDetailsDrawer from '@/components/TaskDetailsDrawer';
 import BulkActionBar from '@/components/BulkActionBar';
 import KanbanBoard from '@/components/KanbanBoard';
-import TimelineView from '@/components/timeline/TimelineView';
+// TimelineView hidden until Phase B (Sprint 33 P5) — component preserved for rebuild
+// import TimelineView from '@/components/timeline/TimelineView';
 import { isToday, isTomorrow, isThisWeek } from '@/lib/dateUtils';
 import { statusConfig, priorityConfig, statusOrder } from '@/lib/task-config';
 import { toast } from 'sonner';
 
 type ViewTab = 'open' | 'today' | 'tomorrow' | 'week' | 'completed';
-type ViewMode = 'list' | 'kanban' | 'timeline';
+type ViewMode = 'list' | 'kanban';
 type SortOption = 'created' | 'due' | 'priority' | 'title' | 'status';
 type SortDirection = 'asc' | 'desc';
 
@@ -83,7 +83,7 @@ export const TasksContent = () => {
   const [prefs, setPrefs] = useLocalStorage<TasksViewPrefs>(TASKS_VIEW_PREFS_KEY, DEFAULT_PREFS);
 
   const [activeTab, setActiveTab] = useState<ViewTab>(prefs.activeTab);
-  const [viewMode, setViewMode] = useState<ViewMode>(prefs.viewMode);
+  const [viewMode, setViewMode] = useState<ViewMode>(prefs.viewMode === 'kanban' ? 'kanban' : 'list');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TaskStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'all'>('all');
@@ -478,18 +478,6 @@ export const TasksContent = () => {
               >
                 <Columns3 className="h-4 w-4" />
               </button>
-              <button
-                onClick={() => handleSetViewMode('timeline')}
-                className={cn(
-                  'rounded-md p-1.5 transition-all',
-                  viewMode === 'timeline'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
-                )}
-                title="Timeline view"
-              >
-                <GanttChart className="h-4 w-4" />
-              </button>
             </div>
             <Button className="gap-2" onClick={() => setShowNewTaskInput(true)}>
               <Plus className="h-4 w-4" />
@@ -784,9 +772,7 @@ export const TasksContent = () => {
         )}
 
         {/* Task views */}
-        {viewMode === 'timeline' ? (
-          <TimelineView />
-        ) : viewMode === 'kanban' ? (
+        {viewMode === 'kanban' ? (
           <KanbanBoard tasks={filteredTasks} onTaskClick={handleOpenTask} />
         ) : (
           <div className="widget-card">

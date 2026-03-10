@@ -219,7 +219,7 @@ Thoughts? Drop feedback in #feedback
 
 | Metric | Target (Pre-Launch) |
 |---|---|
-| Discord members | 100+ by April 14 |
+| Discord members | 100+ by April 16 |
 | Reddit karma from target communities | Positive, growing weekly |
 | Meaningful Reddit threads | 10+ where Kaivoo is mentioned naturally |
 | Twitter/X followers | Establish baseline, grow weekly |

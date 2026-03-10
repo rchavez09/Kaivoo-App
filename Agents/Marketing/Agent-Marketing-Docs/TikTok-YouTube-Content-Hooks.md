@@ -31,7 +31,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "AI agents that actually DO things are locked behind developer tools."
 **Tension:** "Not chatbots. Not autocomplete. Real AI agents that work for you, remember you, and act on your behalf. Right now, you either need to code or pay for expensive subscriptions to access them."
 **Reveal:** "So I built an AI agent platform anyone can use. Any model, including free local ones. Buy once, own it forever. No subscriptions. No terminal required."
-**CTA:** "Link in bio. Launching April 14."
+**CTA:** "Link in bio. Launching April 16."
 
 **Text overlay:** "AI agents for everyone."
 
@@ -42,7 +42,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "How many AI subscriptions are you paying for right now?"
 **Tension:** "One for chat. One for writing. One for coding. Maybe another for search. And none of them can actually do things for you. They just talk."
 **Reveal:** [Show phone with subscription list, then show Kaivoo] "I built one platform. Any AI model, including free local ones. Buy once, own it forever. No more stacking subscriptions."
-**CTA:** "Follow for the launch. April 14."
+**CTA:** "Follow for the launch. April 16."
 
 **Text overlay:** "Subscriptions → ownership"
 
@@ -69,7 +69,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 4. (2:30) Walk through what developer tools give you: real agents, but you need a VPS, Docker, terminal
 5. (3:30) "So what exists for normal people who want AI agents? Nothing. Until now."
 6. (4:30) "That's why I built this." [Show Flow orchestrator: agents, skills, workflows, MCPs]
-7. (5:30) "Any model. Your machine. Buy once, own it forever. Launching April 14."
+7. (5:30) "Any model. Your machine. Buy once, own it forever. Launching April 16."
 8. (6:00) CTA: Link to landing page, email signup
 
 **Thumbnail:** "AI agents are locked. I'm opening the door."
@@ -81,7 +81,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "Could my mom use an AI agent? Let's find out."
 **Tension:** "I tried to get her to use OpenClaw. She closed the laptop. I tried ChatGPT. She said 'it just talks.' I tried Kaivoo."
 **Reveal:** [Screen recording of simple orchestrator interaction] "She set up an agent, gave it a task, and watched it work. Zero coding. Zero confusion."
-**CTA:** "AI agents for everyone. Not just developers. April 14."
+**CTA:** "AI agents for everyone. Not just developers. April 16."
 
 ---
 
@@ -92,7 +92,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "Your AI has a memory. You've never read it."
 **Tension:** "ChatGPT remembers things about you. Preferences, habits, personal details. But you can't see the full picture. You can't edit it. You don't know what it's using or why."
 **Reveal:** [Screen recording of Kaivoo Neuron Memory — scrolling through readable markdown layers] "This is what my AI knows about me. Every word, readable. Every layer, editable. Because your AI's memory should be yours."
-**CTA:** "Link in bio. This launches April 14."
+**CTA:** "Link in bio. This launches April 16."
 
 **Text overlay:** "Your AI's memory: 🔒 vs. 📖"
 
@@ -129,7 +129,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 5. (3:30) "Now let me show you something different." [Demo Kaivoo Neuron Memory]
 6. (4:30) Walk through the tiers — each layer, what it stores, how you read and edit it
 7. (5:30) "This is what transparent AI looks like. Your memory, readable. Your data, on your machine."
-8. (6:30) "If you think AI memory should be yours to read, Kaivoo launches April 14."
+8. (6:30) "If you think AI memory should be yours to read, Kaivoo launches April 16."
 
 ---
 
@@ -149,7 +149,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "33 sprints. 12 AI agents. Zero employees. Here's what I built."
 **Tension:** "I'm a solo founder. I don't have a team. I have an AI team. A code reviewer, an architect, a security auditor, a QA engineer, a product manager — all AI agents I built and orchestrated."
 **Reveal:** [Quick montage of the agent system, sprint files, git history] "And the system that coordinates them? That's the product. I'm putting it in your hands."
-**CTA:** "Launching April 14. Follow the build."
+**CTA:** "Launching April 16. Follow the build."
 
 **Text overlay:** "12 AI agents. 0 employees."
 
@@ -169,7 +169,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "I'm a solo founder and I'm terrified to launch. Here's why I'm doing it anyway."
 **Tension:** [Voice-over, raw and honest. B-roll: late night desk, code on screen, coffee, hands typing] "I've been building this for months. Alone. With AI. And in 3 weeks, I'm putting it in front of the world."
 **Reveal:** "Because this tech is too important to keep locked behind developer tools. Everyone deserves an AI team that works for them."
-**CTA:** "April 14. Be there."
+**CTA:** "April 16. Be there."
 
 **Note:** This one should be raw. Real emotion in the voice. Pair with moody b-roll of the workspace.
 
@@ -186,7 +186,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 5. (6:00) The recursive proof — the orchestrator that built the product IS the product
 6. (8:00) What this means for you — "If this system can build software, what can it do for your daily life?"
 7. (10:00) Demo the product — quick walkthrough of the key features
-8. (11:00) Launch announcement: April 14. Founding members get early access and a price locked in forever. Link to sign up.
+8. (11:00) Launch announcement: April 16. Founding members get early access and a price locked in forever. Link to sign up.
 
 **This is the origin story video. It gets linked everywhere.**
 
@@ -197,7 +197,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "A day in my life as a solo founder with an AI dev team."
 **Tension:** [Morning routine, coffee, sitting down at desk] "First thing: I check what my agents did overnight."
 **Reveal:** [Show sprint progress, code reviews completed, tests passing] "While I slept, my AI team reviewed 3 PRs, caught 2 bugs, and shipped a feature. Time to plan the next sprint."
-**CTA:** "This is what an AI team looks like. April 14."
+**CTA:** "This is what an AI team looks like. April 16."
 
 ---
 
@@ -208,7 +208,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "Watch my AI orchestrate three agents to build a presentation."
 **Tension:** "Agent 1: Research the topic. Agent 2: Write the outline. Agent 3: Design the slides. All coordinated. No human in the loop."
 **Reveal:** [Screen recording of the orchestrator coordinating the workflow, showing handoffs between agents, final artifact rendered]
-**CTA:** "This is multi-agent orchestration. Any model. Your machine. Launching April 14."
+**CTA:** "This is multi-agent orchestration. Any model. Your machine. Launching April 16."
 
 ---
 
@@ -240,7 +240,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 4. (2:30) Workflows tab — show multi-agent chains, approval gates
 5. (3:30) MCPs tab — show MCP connections, tool integration
 6. (4:30) Live demo — run a real workflow end-to-end
-7. (5:30) "All on your machine. Any model. Buy once, own it forever. April 14."
+7. (5:30) "All on your machine. Any model. Buy once, own it forever. April 16."
 
 ---
 
@@ -260,7 +260,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 **Hook:** "Everyone's talking about AI agents. Nobody's talking about AI agent safety."
 **Tension:** "We're giving AI more autonomy every day. Browsing the web. Writing code. Managing files. But where are the guardrails? Where's the audit trail?"
 **Reveal:** "I built a safety layer into my AI agent platform. Approval gates. Thinking transparency. Skill-level permissions. Because power without accountability isn't progress."
-**CTA:** "Safe AI agents. April 14."
+**CTA:** "Safe AI agents. April 16."
 
 ---
 
@@ -274,7 +274,7 @@ For YouTube, hooks expand into 3-8 minute scripts. For TikTok, everything is 30-
 4. (2:30) The Obsidian model: they proved buy-once works. I'm taking it further with AI agents.
 5. (3:30) The real differentiator: with local models, your ongoing cost after purchase is literally zero. No API keys needed. No subscription to any AI company.
 6. (4:30) "Your machine. Your models. Your data. Owned by you. Forever."
-7. (5:00) CTA: landing page, email signup, April 14
+7. (5:00) CTA: landing page, email signup, April 16
 
 ---
 

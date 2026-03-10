@@ -2,7 +2,7 @@
 
 All strategic decisions made during CEO Mode sessions, preserved as a historical record. Referenced by Vision.md and phase roadmaps.
 
-**Updated:** March 7, 2026 (CEO Session #11 added)
+**Updated:** March 9, 2026 (CEO Session #14 added)
 
 ---
 
@@ -209,7 +209,7 @@ All strategic decisions made during CEO Mode sessions, preserved as a historical
 
 ### V1 Definition — Locked (No Scope Changes Until Post-Launch)
 
-**Launch Date: April 14, 2026**
+**Launch Date: ~~April 14, 2026~~ → April 16, 2026 (CEO Session #14)**
 
 **What ships:**
 1. **Core App** — Bug fixes only. HTML rendering, Kanban all states, wiki-links, hide Gantt, remove seed data, search sanitization. NO new productivity features.
@@ -242,7 +242,7 @@ All strategic decisions made during CEO Mode sessions, preserved as a historical
 - **Week 3 (Mar 23-29):** Workflow execution engine + artifact system + demo videos
 - **Week 4 (Mar 30-Apr 5):** Neuron memory + polish + beta testers (early access from email list)
 - **Week 5 (Apr 6-13):** Ship prep + bug fixes from beta + launch sequence
-- **April 14:** LAUNCH
+- **April 16:** LAUNCH (Thursday — moved from Apr 14, CEO Session #14)
 
 ### Market Research Findings
 
@@ -250,6 +250,21 @@ All strategic decisions made during CEO Mode sessions, preserved as a historical
 - **AI Personal OS market:** $35.7B by 2030 at 19% CAGR. CosmOS (Humane→HP, $116M acquisition) is hardware-first. OpenDAN is early-stage. Nobody has shipped a polished consumer-facing desktop version.
 - **AI Agent Orchestration market:** Projected $8.5B by 2026, $35B by 2030. Enterprise-focused (UiPath, Microsoft AutoGen, CrewAI). No consumer-facing orchestration platform exists.
 - **Distribution gap identified:** Zero audience, no waitlist, no email list, no social following. Marketing track running in parallel is non-negotiable.
+
+## CEO Session #14 — March 9, 2026
+
+**Context:** Founder was ready to begin content recording (4 TikToks + 1 YouTube video planned for Week 1) but returned from a dentist appointment with facial numbness — unable to record on-camera content. Additionally identified two unaccounted-for blockers: office recording setup and email marketing infrastructure (Kit, TikTok account, YouTube account not yet created).
+
+### Decisions Made
+
+- **Launch date moved from April 14 (Tuesday) to April 16 (Thursday).** Two-day shift. Thursday is a stronger Product Hunt launch day (higher traffic than Tuesday). Dev track is unaffected — extra 2 days absorb into Week 5 buffer sprint (Sprint 59) and extend beta testing window from ~5-7 days to ~7-9 days.
+- **Week 1 marketing track restructured.** Original plan assumed Day 1 = recording. Reality: accounts and recording setup must happen first. Week 1 now split into:
+  - **Days 1-2 (Mar 9-10):** Infrastructure — Kit account, TikTok account, YouTube channel, office setup, email capture wired to landing page. Twitter/X can start immediately (text-only).
+  - **Days 3-7 (Mar 11-15):** Content launch — first TikToks/shorts recorded and posted, Twitter threads, Reddit posts, Discord server.
+- **Email capture is highest-priority setup task.** Landing page with broken/unwired email form loses signups permanently. Kit → landing page integration must be verified end-to-end before any traffic is driven.
+- **No scope change to dev track or marketing deliverables.** Same content output by end of Week 1, just sequenced realistically. Same sprint plan, same feature scope.
+
+---
 
 ## Key Decisions Ahead
 

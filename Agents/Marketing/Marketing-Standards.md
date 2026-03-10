@@ -102,7 +102,7 @@ Never use as sentence starters: "Additionally," "Moreover," "Furthermore," "It's
 
 ---
 
-## Pre-Launch Funnel (March 9 - April 14)
+## Pre-Launch Funnel (March 9 - April 16)
 
 The current goal is EMAIL CAPTURE, not sales. Every piece of content should drive toward the landing page email signup.
 

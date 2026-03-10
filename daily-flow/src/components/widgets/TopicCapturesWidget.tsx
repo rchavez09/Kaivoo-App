@@ -8,6 +8,12 @@ import { Button } from '@/components/ui/button';
 import CaptureEditDialog from '@/components/CaptureEditDialog';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 
+/** Strip HTML tags and decode entities for plain-text display. */
+function stripHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
+}
+
 interface TopicCapturesWidgetProps {
   entries: JournalEntry[];
   captures?: Capture[];
@@ -120,22 +126,25 @@ const TopicCapturesWidget = ({ entries, captures = [], topicName, selectedTag }:
                     <BookOpen className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                   )}
                   <div className="min-w-0 flex-1">
-                    {isMarkdown(item.content) ? (
-                      <div
-                        className={`prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-3 prose-headings:mb-2 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-foreground prose-strong:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline max-w-none text-sm leading-relaxed text-foreground [&>*:first-child]:mt-0 ${!isExpanded && needsExpansion ? 'relative max-h-32 overflow-hidden' : ''}`}
-                      >
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
-                        {!isExpanded && needsExpansion && (
-                          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-secondary/30 to-transparent" />
-                        )}
-                      </div>
-                    ) : (
-                      <p
-                        className={`text-sm leading-relaxed text-foreground ${!isExpanded && needsExpansion ? 'line-clamp-4' : ''}`}
-                      >
-                        {item.content}
-                      </p>
-                    )}
+                    {(() => {
+                      const plainText = stripHtml(item.content);
+                      return isMarkdown(plainText) ? (
+                        <div
+                          className={`prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-3 prose-headings:mb-2 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-foreground prose-strong:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline max-w-none text-sm leading-relaxed text-foreground [&>*:first-child]:mt-0 ${!isExpanded && needsExpansion ? 'relative max-h-32 overflow-hidden' : ''}`}
+                        >
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{plainText}</ReactMarkdown>
+                          {!isExpanded && needsExpansion && (
+                            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-secondary/30 to-transparent" />
+                          )}
+                        </div>
+                      ) : (
+                        <p
+                          className={`text-sm leading-relaxed text-foreground ${!isExpanded && needsExpansion ? 'line-clamp-4' : ''}`}
+                        >
+                          {plainText}
+                        </p>
+                      );
+                    })()}
 
                     {needsExpansion && (
                       <Button

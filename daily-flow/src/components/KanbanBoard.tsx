@@ -7,6 +7,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   DragStartEvent,
   DragEndEvent,
 } from '@dnd-kit/core';
@@ -250,9 +251,16 @@ interface KanbanColumnProps {
 
 const KanbanColumn = ({ status, tasks, onTaskClick }: KanbanColumnProps) => {
   const config = statusConfig[status];
+  const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
-    <div className="flex w-[280px] min-w-[280px] flex-col rounded-xl bg-secondary/30">
+    <div
+      ref={setNodeRef}
+      className={cn(
+        'flex w-[280px] min-w-[280px] flex-col rounded-xl bg-secondary/30 transition-colors',
+        isOver && 'bg-secondary/50 ring-2 ring-primary/20',
+      )}
+    >
       {/* Column header */}
       <div className={cn('flex items-center gap-2 rounded-t-xl px-3 py-2.5', config.bgHeader)}>
         <span className={config.color}>{config.icon}</span>
@@ -316,21 +324,23 @@ const KanbanBoard = ({ tasks, onTaskClick }: KanbanBoardProps) => {
 
     if (!over) return;
 
-    const activeTask = tasks.find((t) => t.id === active.id);
-    if (!activeTask) return;
+    const draggedTask = tasks.find((t) => t.id === active.id);
+    if (!draggedTask) return;
 
-    // Check if dropped over a column (status)
-    const newStatus = COLUMNS.find((status) => {
-      const columnTasks = tasksByStatus[status];
-      return columnTasks.some((t) => t.id === over.id) || over.id === status;
-    });
+    // Determine target status: dropped on a column (status ID) or on a task within a column
+    let finalStatus: TaskStatus | undefined;
 
-    // Also check if dropped in empty column area
-    const droppedOnTask = tasks.find((t) => t.id === over.id);
-    const finalStatus = droppedOnTask ? droppedOnTask.status : newStatus;
+    if (COLUMNS.includes(over.id as TaskStatus)) {
+      // Dropped directly on a column droppable zone
+      finalStatus = over.id as TaskStatus;
+    } else {
+      // Dropped on a task — use that task's status
+      const targetTask = tasks.find((t) => t.id === over.id);
+      finalStatus = targetTask?.status;
+    }
 
-    if (finalStatus && finalStatus !== activeTask.status) {
-      void updateTask(activeTask.id, {
+    if (finalStatus && finalStatus !== draggedTask.status) {
+      void updateTask(draggedTask.id, {
         status: finalStatus,
         completedAt: finalStatus === 'done' ? new Date() : undefined,
       });
