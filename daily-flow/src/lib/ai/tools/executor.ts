@@ -145,7 +145,7 @@ function validateString(args: Record<string, unknown>, field: string): string | 
 function validateEnum(args: Record<string, unknown>, field: string, allowed: string[]): string | null {
   const val = args[field];
   if (val !== undefined && (typeof val !== 'string' || !allowed.includes(val))) {
-    return `Parameter "${field}" must be one of: ${allowed.join(', ')}. Got "${val}".`;
+    return `Parameter "${field}" must be one of: ${allowed.join(', ')}. Got "${String(val)}".`;
   }
   return null;
 }
