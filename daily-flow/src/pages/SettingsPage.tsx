@@ -2,7 +2,9 @@ import { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { User, Bell, Palette, Database, Keyboard, Bot, Key, ChevronLeft } from 'lucide-react';
 import AISettingsCard from '@/components/AISettingsCard';
+import HeartbeatSettingsCard from '@/components/HeartbeatSettingsCard';
 import AIProviderSettings from '@/components/settings/AIProviderSettings';
+import HeartbeatSettings from '@/components/settings/HeartbeatSettings';
 import LicenseSettings from '@/components/settings/LicenseSettings';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
@@ -19,6 +21,7 @@ type SettingsSection =
   | 'shortcuts'
   | 'data'
   | 'ai-provider'
+  | 'heartbeat'
   | 'license';
 
 const settingsSections = [
@@ -43,6 +46,8 @@ const SettingsPage = () => {
     switch (activeSection) {
       case 'ai-provider':
         return <AIProviderSettings />;
+      case 'heartbeat':
+        return <HeartbeatSettings />;
       case 'license':
         return <LicenseSettings />;
       case 'profile':
@@ -76,7 +81,10 @@ const SettingsPage = () => {
               {/* AI Settings */}
               <section>
                 <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">AI Features</h2>
-                <AISettingsCard />
+                <div className="space-y-2">
+                  <AISettingsCard />
+                  <HeartbeatSettingsCard onExpand={() => setActiveSection('heartbeat')} />
+                </div>
               </section>
 
               {/* General Settings */}
