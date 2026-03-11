@@ -82,24 +82,21 @@ pub fn stop_heartbeat() -> Result<String, String> {
 }
 
 fn stop_heartbeat_internal() {
-    // Set stop flag
-    {
-        let global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
-        let mut flag = global_flag.lock().unwrap();
-        *flag = true;
-    }
-
-    // Wait for thread to finish (with timeout)
+    // Take the handle first to prevent concurrent stops (Agent 7 P1-2)
     let handle = {
         let mut global_handle = HEARTBEAT_HANDLE.lock().unwrap();
         global_handle.take()
     };
 
+    // Only set stop flag if we actually have a thread to stop
+    if handle.is_some() {
+        let global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
+        let mut flag = global_flag.lock().unwrap();
+        *flag = true;
+    }
+
     if let Some(h) = handle {
-        // Give it 2 seconds to finish gracefully
         println!("[Heartbeat] Waiting for background thread to stop...");
-        // Note: JoinHandle doesn't have a timeout, so we just join
-        // The stop flag ensures the thread will exit on next iteration
         if h.join().is_err() {
             eprintln!("[Heartbeat] Thread panicked during shutdown");
         }

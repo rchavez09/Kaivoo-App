@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useKaivooQueries } from '@/hooks/queries';
 import { loadPersistedApiKey } from '@/lib/ai/settings';
-import { startHeartbeat } from '@/lib/heartbeat/heartbeat-service';
+import { startHeartbeat, stopHeartbeat } from '@/lib/heartbeat/heartbeat-service';
 
 interface DataLoaderProps {
   children: React.ReactNode;
@@ -20,6 +20,11 @@ const DataLoader = ({ children }: DataLoaderProps) => {
   // Start heartbeat timer if enabled (Sprint 37 P1)
   useEffect(() => {
     void startHeartbeat();
+
+    // Cleanup: stop heartbeat when component unmounts (Agent 7 P1-1)
+    return () => {
+      void stopHeartbeat();
+    };
   }, []);
 
   return <>{children}</>;

@@ -167,6 +167,13 @@ async function onHeartbeatTick(): Promise<void> {
     }
   } catch (e) {
     console.error('[Heartbeat] Tick failed:', e);
+
+    // Agent 7 P1-3: Show user-facing error notification for critical failures
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+    if (errorMessage.includes('API key') || errorMessage.includes('unauthorized') || errorMessage.includes('401')) {
+      // Critical: API key issue — notify immediately
+      await showErrorNotification('Heartbeat failed: Check your AI settings');
+    }
   }
 }
 
@@ -239,7 +246,9 @@ async function storeInsight(insight: string, appContext: unknown): Promise<void>
     } else {
       // Web: use Supabase
       const { supabase } = await import('@/integrations/supabase/client');
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         console.warn('[Heartbeat] No user authenticated, skipping insight storage');
@@ -341,6 +350,39 @@ async function showHeartbeatNotification(insight: string): Promise<void> {
       }
     } catch (e) {
       console.error('[Heartbeat] Failed to send web notification:', e);
+    }
+  }
+}
+
+/**
+ * Show an error notification for heartbeat failures (Agent 7 P1-3)
+ */
+async function showErrorNotification(message: string): Promise<void> {
+  const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+  if (isTauri) {
+    // Desktop: Use Tauri notification
+    try {
+      const { sendNotification } = await import('@tauri-apps/plugin-notification');
+      await sendNotification({
+        title: 'Proactive Insights Error',
+        body: message,
+      });
+    } catch (e) {
+      console.error('[Heartbeat] Failed to send error notification:', e);
+    }
+  } else {
+    // Web: Use browser Notification API (if permission granted)
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Proactive Insights Error', {
+          body: message,
+          icon: '/icon-192.png',
+          tag: 'heartbeat-error',
+        });
+      }
+    } catch (e) {
+      console.error('[Heartbeat] Failed to send web error notification:', e);
     }
   }
 }
