@@ -16,7 +16,8 @@ import type { ToolCall, MemoryCategory } from '../types';
 import type { Task, Meeting, JournalEntry, Capture, Project, RoutineItem, Habit } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { addMemory, getMemories } from '../memory-service';
-import { format, addDays, parse } from 'date-fns';
+import { format, addDays, parse, isBefore, startOfDay } from 'date-fns';
+import { parseDate } from '@/lib/dateUtils';
 
 // ─── Types ───
 
@@ -39,6 +40,7 @@ export interface ExecutorActions {
   addCapture: (data: Omit<Capture, 'id' | 'createdAt'>) => Promise<Capture | undefined>;
   addTopicPage: (data: { topicId: string; name: string }) => Promise<{ id: string } | undefined>;
   toggleRoutineCompletion: (routineId: string, date?: string) => Promise<void>;
+  toggleHabitCompletion: (habitId: string, date?: string) => Promise<void>;
   logAction?: (actionType: string, actionData: Record<string, unknown>, sourceInput: string) => Promise<string | null>;
 }
 
@@ -46,8 +48,9 @@ export interface ExecutorActions {
 
 function resolveDate(dateStr?: string): string {
   if (!dateStr) return format(new Date(), 'yyyy-MM-dd');
-  if (dateStr === 'today') return format(new Date(), 'yyyy-MM-dd');
-  if (dateStr === 'tomorrow') return format(addDays(new Date(), 1), 'yyyy-MM-dd');
+  const lower = dateStr.toLowerCase().trim();
+  if (lower === 'today') return format(new Date(), 'yyyy-MM-dd');
+  if (lower === 'tomorrow') return format(addDays(new Date(), 1), 'yyyy-MM-dd');
   // Try to parse as YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
   // Try natural parsing
@@ -102,6 +105,54 @@ function findTopic(name: string) {
   return store.topics.find((t) => fuzzyMatch(name, t.name));
 }
 
+// ─── Validation Helpers ───
+
+const VALID_TOOL_NAMES = new Set([
+  'create_task',
+  'create_journal_entry',
+  'create_calendar_event',
+  'create_capture',
+  'create_note',
+  'search',
+  'get_tasks',
+  'get_journal',
+  'get_calendar',
+  'get_routines',
+  'get_notes',
+  'get_captures',
+  'get_projects',
+  'complete_task',
+  'update_task',
+  'log_routine',
+  'log_habit',
+  'remember_user_fact',
+]);
+
+function validateRequired(args: Record<string, unknown>, fields: string[]): string | null {
+  for (const field of fields) {
+    if (args[field] === undefined || args[field] === null || args[field] === '') {
+      return `Missing required parameter "${field}".`;
+    }
+  }
+  return null;
+}
+
+function validateString(args: Record<string, unknown>, field: string): string | null {
+  if (args[field] !== undefined && typeof args[field] !== 'string') {
+    return `Parameter "${field}" must be a string, got ${typeof args[field]}.`;
+  }
+  return null;
+}
+
+function validateEnum(args: Record<string, unknown>, field: string, allowed: string[]): string | null {
+  const val = args[field];
+  if (val !== undefined && (typeof val !== 'string' || !allowed.includes(val))) {
+    const display = typeof val === 'string' ? val : typeof val;
+    return `Parameter "${field}" must be one of: ${allowed.join(', ')}. Got "${display}".`;
+  }
+  return null;
+}
+
 // ─── Tool Execution ───
 
 let toolCallCount = 0;
@@ -124,11 +175,24 @@ export async function executeTool(
   const args = toolCall.arguments;
   const name = toolCall.name;
 
+  if (import.meta.env.DEV) {
+    console.log(`[executeTool] ${name}`, JSON.stringify(args));
+  }
+
   try {
     switch (name) {
       // ─── Create Tools ───
       case 'create_task': {
-        const dueDate = resolveDate(args.due_date as string | undefined);
+        const reqErr = validateRequired(args, ['title']);
+        if (reqErr) return { success: false, message: reqErr };
+        const titleErr = validateString(args, 'title');
+        if (titleErr) return { success: false, message: titleErr };
+        const prioErr = validateEnum(args, 'priority', ['low', 'medium', 'high']);
+        if (prioErr) return { success: false, message: prioErr };
+        const resolvedDate = resolveDate(args.due_date as string | undefined);
+        const todayISO = format(new Date(), 'yyyy-MM-dd');
+        // Use 'Today' literal when the date resolves to today — matches UI convention
+        const dueDate = resolvedDate === todayISO ? 'Today' : resolvedDate;
         const project = args.project_name ? findProject(args.project_name as string) : undefined;
         const task = await actions.addTask({
           title: args.title as string,
@@ -153,6 +217,8 @@ export async function executeTool(
       }
 
       case 'create_journal_entry': {
+        const reqErr5 = validateRequired(args, ['content']);
+        if (reqErr5) return { success: false, message: reqErr5 };
         const date = resolveDate(args.date as string | undefined);
         const label = (args.label as string) || undefined;
         const entry = await actions.addJournalEntry({
@@ -175,6 +241,8 @@ export async function executeTool(
       }
 
       case 'create_calendar_event': {
+        const reqErr4 = validateRequired(args, ['title', 'start_time']);
+        if (reqErr4) return { success: false, message: reqErr4 };
         const date = resolveDate(args.date as string);
         const startTime = args.start_time as string;
         const endTime =
@@ -208,6 +276,8 @@ export async function executeTool(
       }
 
       case 'create_capture': {
+        const reqErr6 = validateRequired(args, ['content']);
+        if (reqErr6) return { success: false, message: reqErr6 };
         const tags = args.tags ? (args.tags as string).split(',').map((t: string) => t.trim()) : [];
         const capture = await actions.addCapture({
           content: args.content as string,
@@ -224,6 +294,8 @@ export async function executeTool(
       }
 
       case 'create_note': {
+        const reqErr7 = validateRequired(args, ['title']);
+        if (reqErr7) return { success: false, message: reqErr7 };
         const topicName = args.topic_name as string | undefined;
         let topicId: string | undefined;
         if (topicName) {
@@ -298,6 +370,10 @@ export async function executeTool(
       }
 
       case 'get_tasks': {
+        const statusErr = validateEnum(args, 'status', ['backlog', 'todo', 'doing', 'blocked', 'done', 'all']);
+        if (statusErr) return { success: false, message: statusErr };
+        const prioErr2 = validateEnum(args, 'priority', ['low', 'medium', 'high']);
+        if (prioErr2) return { success: false, message: prioErr2 };
         const store = useKaivooStore.getState();
         let tasks = [...store.tasks];
         const status = args.status as string | undefined;
@@ -308,8 +384,39 @@ export async function executeTool(
         if (status && status !== 'all') tasks = tasks.filter((t) => t.status === status);
         if (priority) tasks = tasks.filter((t) => t.priority === priority);
         if (dueDate) {
-          const resolved = resolveDate(dueDate);
-          tasks = tasks.filter((t) => t.dueDate === resolved);
+          const dueLower = dueDate.toLowerCase().trim();
+          const todayISO = format(new Date(), 'yyyy-MM-dd');
+          const todayStart = startOfDay(new Date());
+
+          if (dueLower === 'overdue') {
+            // Tasks with due dates before today that aren't done
+            tasks = tasks.filter((t) => {
+              if (t.status === 'done' || !t.dueDate) return false;
+              const due = parseDate(t.dueDate);
+              if (!due) return false;
+              return isBefore(startOfDay(due), todayStart);
+            });
+          } else if (dueLower === 'this_week' || dueLower === 'week') {
+            // Tasks due within the next 7 days (including today)
+            const weekEnd = addDays(todayStart, 7);
+            tasks = tasks.filter((t) => {
+              if (!t.dueDate) return false;
+              const due = parseDate(t.dueDate);
+              if (!due) return false;
+              const dueDay = startOfDay(due);
+              return dueDay >= todayStart && isBefore(dueDay, weekEnd);
+            });
+          } else {
+            const resolved = resolveDate(dueDate);
+            tasks = tasks.filter((t) => {
+              if (!t.dueDate) return false;
+              // Compare parsed dates so all storage formats match
+              const due = parseDate(t.dueDate);
+              const target = parseDate(resolved);
+              if (!due || !target) return false;
+              return startOfDay(due).getTime() === startOfDay(target).getTime();
+            });
+          }
         }
         if (projectName) {
           const project = findProject(projectName);
@@ -355,7 +462,7 @@ export async function executeTool(
       case 'get_calendar': {
         const store = useKaivooStore.getState();
         const date = resolveDate(args.date as string | undefined);
-        const meetings = store.getMeetingsForDate(date);
+        const meetings = store.getMeetingsForDate(new Date(date + 'T00:00:00'));
         const summary = meetings.map((m) => ({
           title: m.title,
           startTime: m.startTime,
@@ -437,6 +544,8 @@ export async function executeTool(
       }
 
       case 'get_projects': {
+        const statusErr2 = validateEnum(args, 'status', ['planning', 'active', 'paused', 'completed', 'all']);
+        if (statusErr2) return { success: false, message: statusErr2 };
         const store = useKaivooStore.getState();
         let projects = [...store.projects];
         const status = args.status as string | undefined;
@@ -458,6 +567,10 @@ export async function executeTool(
 
       // ─── Update/Complete Tools ───
       case 'complete_task': {
+        const reqErr2 = validateRequired(args, ['task_title']);
+        if (reqErr2) return { success: false, message: reqErr2 };
+        const ttErr = validateString(args, 'task_title');
+        if (ttErr) return { success: false, message: ttErr };
         const taskTitle = args.task_title as string;
         const task = findTask(taskTitle);
         if (!task) {
@@ -472,6 +585,12 @@ export async function executeTool(
       }
 
       case 'update_task': {
+        const reqErr3 = validateRequired(args, ['task_title']);
+        if (reqErr3) return { success: false, message: reqErr3 };
+        const prioErr3 = validateEnum(args, 'priority', ['low', 'medium', 'high']);
+        if (prioErr3) return { success: false, message: prioErr3 };
+        const statusErr3 = validateEnum(args, 'status', ['backlog', 'todo', 'doing', 'blocked', 'done']);
+        if (statusErr3) return { success: false, message: statusErr3 };
         const taskTitle2 = args.task_title as string;
         const task = findTask(taskTitle2);
         if (!task) {
@@ -515,8 +634,8 @@ export async function executeTool(
         if (store.isHabitCompleted(habit.id, date)) {
           return { success: true, message: `"${habit.name}" is already logged for ${date}.` };
         }
-        // Habits use the same toggle mechanism as routines
-        store.toggleHabitCompletion(habit.id, date);
+        // Use injected action for optimistic update + persistence
+        await actions.toggleHabitCompletion(habit.id, date);
         await actions.logAction?.('habit_logged', { habitId: habit.id, name: habit.name, date }, userMessage);
         return { success: true, message: `Logged "${habit.name}" for ${date}.` };
       }
@@ -546,7 +665,10 @@ export async function executeTool(
       }
 
       default:
-        return { success: false, message: `Unknown tool: ${name}` };
+        return {
+          success: false,
+          message: `Unknown tool "${name}". Available tools: ${[...VALID_TOOL_NAMES].join(', ')}.`,
+        };
     }
   } catch (e) {
     console.error(`[executeTool] ${name} failed:`, e);

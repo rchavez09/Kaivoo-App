@@ -99,7 +99,10 @@ export const useTaskStore = create<TaskStore>()(
 
       getTasksByTag: (tagName) => get().tasks.filter((t) => t.tags.includes(tagName.toLowerCase())),
 
-      getTasksDueToday: () => get().tasks.filter((t) => t.dueDate === 'Today' && t.status !== 'done'),
+      getTasksDueToday: () => {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        return get().tasks.filter((t) => (t.dueDate === today || t.dueDate === 'Today') && t.status !== 'done');
+      },
 
       getTasksForDate: (date) => {
         const isToday = isSameDay(date, new Date());

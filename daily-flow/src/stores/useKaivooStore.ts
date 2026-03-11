@@ -592,7 +592,8 @@ export const useKaivooStore = create<KaivooStore>()(
       },
 
       getTasksDueToday: () => {
-        return get().tasks.filter((t) => t.dueDate === 'Today' && t.status !== 'done');
+        const today = getTodayStorageDate();
+        return get().tasks.filter((t) => (t.dueDate === today || t.dueDate === 'Today') && t.status !== 'done');
       },
 
       getTasksForDate: (date) => {

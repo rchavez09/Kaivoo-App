@@ -9,8 +9,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, addDays, isBefore, parseISO, isValid, startOfDay } from 'date-fns';
 import { getAISettings, getSoulConfig } from '@/lib/ai/settings';
+import { providerSupportsTools } from '@/lib/ai/providers';
 import { streamChat, createConversation } from '@/lib/ai/chat-service';
 import type { Conversation, ConversationMessage, ToolCall } from '@/lib/ai/types';
 import { assembleConciergeContext } from '@/lib/ai/prompt-assembler';
@@ -27,6 +28,37 @@ import { useKaivooActions } from '@/hooks/useKaivooActions';
 import { useAIActionLog } from '@/hooks/useAIActionLog';
 
 const MAX_TOOL_ROUNDS = 5;
+
+/**
+ * Fallback: Extract tool calls written as text by models that don't use structured APIs.
+ * Handles patterns like: <tool_call>{"name":"get_tasks","arguments":{...}}</tool_call>
+ */
+function extractTextToolCalls(text: string): { toolCalls: ToolCall[]; cleanedText: string } {
+  const toolCalls: ToolCall[] = [];
+  let cleanedText = text;
+
+  // Match <tool_call>...</tool_call> tags (case-insensitive, multiline)
+  const tagRegex = /<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/gi;
+  let match;
+  while ((match = tagRegex.exec(text)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      const name = parsed.name || parsed.function;
+      const args = parsed.arguments || parsed.parameters || parsed.input || {};
+      if (name && typeof name === 'string') {
+        toolCalls.push({ id: `text-${crypto.randomUUID()}`, name, arguments: args });
+      }
+    } catch {
+      // Skip unparseable tool calls
+    }
+    cleanedText = cleanedText.replace(match[0], '');
+  }
+
+  // Also handle [Calling tool_name ...] display patterns — strip but don't execute
+  cleanedText = cleanedText.replace(/\[Calling \w+[^\]]*\]/g, '');
+
+  return { toolCalls, cleanedText: cleanedText.trim() };
+}
 
 export interface UseConciergeChatOptions {
   /** Called after creating a new conversation (e.g. switch to chat view) */
@@ -133,34 +165,78 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
 
   const buildAppContext = useCallback((): AppContext => {
     const store = useKaivooStore.getState();
-    const today = format(new Date(), 'yyyy-MM-dd');
+    const now = new Date();
+    const today = format(now, 'yyyy-MM-dd');
+    const todayStart = startOfDay(now);
 
+    // Helper: resolve task dueDate to a Date for comparison
+    const parseDueDate = (dueDate: string | undefined): Date | null => {
+      if (!dueDate) return null;
+      if (dueDate === 'Today') return todayStart;
+      if (dueDate === 'Tomorrow') return addDays(todayStart, 1);
+      if (/^\d{4}-\d{2}-\d{2}/.test(dueDate)) {
+        const parsed = parseISO(dueDate);
+        return isValid(parsed) ? startOfDay(parsed) : null;
+      }
+      return null;
+    };
+
+    // Tasks due today (ISO format OR 'Today' literal)
     const tasksDueToday = store.tasks
-      .filter((t) => t.dueDate === today)
+      .filter((t) => (t.dueDate === today || t.dueDate === 'Today') && t.status !== 'done')
       .map((t) => ({ title: t.title, priority: t.priority, status: t.status }));
 
+    // Overdue tasks (due before today, not done)
+    const overdueTasks = store.tasks
+      .filter((t) => {
+        if (t.status === 'done' || !t.dueDate || t.dueDate === 'Today') return false;
+        const due = parseDueDate(t.dueDate);
+        return due ? isBefore(due, todayStart) : false;
+      })
+      .map((t) => ({ title: t.title, priority: t.priority, dueDate: t.dueDate || '' }));
+
+    // Upcoming tasks (next 7 days, excluding today, not done)
+    const weekEnd = addDays(todayStart, 7);
+    const upcomingTasks = store.tasks
+      .filter((t) => {
+        if (t.status === 'done' || !t.dueDate) return false;
+        const due = parseDueDate(t.dueDate);
+        if (!due) return false;
+        return due > todayStart && isBefore(due, weekEnd);
+      })
+      .map((t) => ({ title: t.title, priority: t.priority, dueDate: t.dueDate || '' }));
+
     const todaysMeetings = store
-      .getMeetingsForDate(new Date())
+      .getMeetingsForDate(now)
       .map((m) => ({ title: m.title, startTime: m.startTime.toISOString(), endTime: m.endTime.toISOString() }));
 
     const journalEntriesToday = store.getJournalEntriesForDate(today).length;
 
     const activeProjects = store.projects
       .filter((p) => p.status === 'active')
-      .map((p) => ({ name: p.name, status: p.status }));
+      .map((p) => ({ name: p.name, status: p.status, description: p.description?.slice(0, 80) }));
 
     const routinesTotal = store.routines.length + store.habits.length;
     const routinesCompletedToday =
       store.routines.filter((r) => store.isRoutineCompleted(r.id, today)).length +
       store.habits.filter((h) => store.isHabitCompleted(h.id, today)).length;
 
+    // Recent captures (last 5)
+    const recentCaptures = [...store.captures]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5)
+      .map((c) => ({ content: c.content.slice(0, 100), date: c.date }));
+
     return {
       tasksDueToday,
+      upcomingTasks,
+      overdueTasks,
       todaysMeetings,
       journalEntriesToday,
       activeProjects,
       routinesCompletedToday,
       routinesTotal,
+      recentCaptures,
     };
   }, []);
 
@@ -173,6 +249,7 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
       addCapture: actions.addCapture,
       addTopicPage: actions.addTopicPage,
       toggleRoutineCompletion: actions.toggleRoutineCompletion,
+      toggleHabitCompletion: actions.toggleHabitCompletion,
       logAction,
     }),
     [actions, logAction],
@@ -225,7 +302,8 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
       }
 
       const appContext = buildAppContext();
-      const systemPrompt = await assembleConciergeContext(appContext);
+      const hasTools = providerSupportsTools(settings.provider);
+      const systemPrompt = await assembleConciergeContext(appContext, hasTools);
 
       let titleSuggestion: string | undefined;
       const executorActions = buildExecutorActions();
@@ -237,7 +315,7 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
 
         const stream = streamChat(workingMessages, {
           systemPrompt,
-          tools: ALL_TOOLS,
+          tools: hasTools ? ALL_TOOLS : undefined,
           onTitleSuggestion: (title) => {
             titleSuggestion = title;
           },
@@ -253,11 +331,24 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
           }
         }
 
+        // Fallback: if no structured tool calls arrived but text contains
+        // tool_call tags (some models write them as text), try to extract them
+        if (toolCalls.length === 0 && hasTools && fullContent.includes('<tool_call>')) {
+          const extracted = extractTextToolCalls(fullContent);
+          if (extracted.toolCalls.length > 0) {
+            toolCalls.push(...extracted.toolCalls);
+            fullContent = extracted.cleanedText;
+            setStreamedContent(fullContent);
+          }
+        }
+
         if (toolCalls.length === 0) {
+          // Strip leftover [Calling ...] display artifacts from text
+          const cleaned = fullContent.replace(/\[Calling \w+[^\]]*\]/g, '').trim();
           const assistantMessage: ConversationMessage = {
             id: crypto.randomUUID(),
             role: 'assistant',
-            content: fullContent,
+            content: cleaned || fullContent,
             timestamp: new Date().toISOString(),
           };
           workingMessages = [...workingMessages, assistantMessage];
@@ -274,8 +365,14 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
         workingMessages = [...workingMessages, assistantMessage];
 
         for (const tc of toolCalls) {
+          if (import.meta.env.DEV) {
+            console.log(`[useConciergeChat] executing tool: ${tc.name}`, tc.arguments);
+          }
           setToolStatus(`Running: ${tc.name.replace(/_/g, ' ')}...`);
           const result = await executeTool(tc, executorActions, text);
+          if (import.meta.env.DEV) {
+            console.log(`[useConciergeChat] tool result: ${tc.name}`, result.success, result.message);
+          }
 
           const toolMessage: ConversationMessage = {
             id: crypto.randomUUID(),
@@ -298,7 +395,15 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
         updatedAt: new Date().toISOString(),
       };
 
+      // Clear ALL streaming state BEFORE committing the final message to prevent
+      // a brief flash where the "thinking" indicator reappears during persistence.
+      setStreaming(false);
+      setStreamedContent('');
+      setToolStatus(null);
       setConversation(finalConv);
+
+      // Re-focus the input so the user can keep typing immediately
+      setTimeout(() => textareaRef.current?.focus(), 50);
 
       // Persist
       const existingIds = conversations.map((c) => c.id);
@@ -316,8 +421,6 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
       }
       const convos = await dataAdapter.conversations.fetchAll();
       setConversations(convos);
-      setStreamedContent('');
-      setToolStatus(null);
 
       // Post-conversation processing (fire-and-forget)
       const lastAssistant = workingMessages.filter((m) => m.role === 'assistant').pop();

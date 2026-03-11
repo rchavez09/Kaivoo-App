@@ -18,6 +18,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-...',
+    supportsTools: true,
   },
   {
     id: 'anthropic',
@@ -28,6 +29,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-ant-...',
+    supportsTools: true,
   },
   {
     id: 'google',
@@ -39,6 +41,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'AIza...',
+    supportsTools: true,
   },
   {
     id: 'groq',
@@ -50,6 +53,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'gsk_...',
+    supportsTools: true,
   },
   {
     id: 'mistral',
@@ -61,6 +65,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: '',
+    supportsTools: true,
   },
   {
     id: 'deepseek',
@@ -71,6 +76,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-...',
+    supportsTools: true,
   },
   {
     id: 'openrouter',
@@ -86,18 +92,20 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-or-...',
+    supportsTools: true,
   },
   {
     id: 'ollama',
     name: 'Ollama (Local)',
     models: [
-      { id: 'llama3', name: 'Llama 3' },
+      { id: 'qwen3:8b', name: 'Qwen 3 8B' },
+      { id: 'llama3.1:8b', name: 'Llama 3.1 8B' },
       { id: 'mistral', name: 'Mistral' },
-      { id: 'gemma', name: 'Gemma' },
-      { id: 'phi3', name: 'Phi-3' },
+      { id: 'phi4', name: 'Phi-4' },
     ],
     requiresApiKey: false,
     placeholder: '',
+    supportsTools: true,
   },
   {
     id: 'openai-compatible',
@@ -106,9 +114,16 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     requiresApiKey: true,
     placeholder: 'sk-...',
     baseUrl: '',
+    supportsTools: true,
   },
 ];
 
 export function getProviderConfig(providerId: string): AIProviderConfig | undefined {
   return AI_PROVIDERS.find((p) => p.id === providerId);
+}
+
+/** Check if the current provider supports tool use / function calling. */
+export function providerSupportsTools(providerId: string): boolean {
+  const config = getProviderConfig(providerId);
+  return config?.supportsTools ?? false;
 }

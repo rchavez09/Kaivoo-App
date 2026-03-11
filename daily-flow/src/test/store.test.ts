@@ -184,15 +184,27 @@ describe('useKaivooStore', () => {
   // ==========================================
   describe('Task Filtering', () => {
     it('getTasksDueToday returns only tasks due today that are not done', () => {
+      const todayISO = format(new Date(), 'yyyy-MM-dd');
       useKaivooStore.setState({
         ...emptyState,
         tasks: [
           {
             id: 't1',
-            title: 'Due today',
+            title: 'Due today (relative)',
             status: 'todo',
             priority: 'medium',
             dueDate: 'Today',
+            tags: [],
+            topicIds: [],
+            subtasks: [],
+            createdAt: new Date(),
+          },
+          {
+            id: 't1b',
+            title: 'Due today (ISO)',
+            status: 'todo',
+            priority: 'medium',
+            dueDate: todayISO,
             tags: [],
             topicIds: [],
             subtasks: [],
@@ -203,7 +215,7 @@ describe('useKaivooStore', () => {
             title: 'Done today',
             status: 'done',
             priority: 'medium',
-            dueDate: 'Today',
+            dueDate: todayISO,
             tags: [],
             topicIds: [],
             subtasks: [],
@@ -224,8 +236,8 @@ describe('useKaivooStore', () => {
       });
 
       const result = useKaivooStore.getState().getTasksDueToday();
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('t1');
+      expect(result).toHaveLength(2);
+      expect(result.map((t: any) => t.id).sort()).toEqual(['t1', 't1b']);
     });
 
     it('getCompletedTasksThisWeek returns tasks completed this week', () => {

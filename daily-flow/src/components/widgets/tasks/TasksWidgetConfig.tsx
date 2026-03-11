@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Settings,
   GripVertical,
@@ -114,7 +114,7 @@ export const DEFAULT_SETTINGS: TasksWidgetSettings = {
   hideEmptySections: false,
   showCompletedTasks: true,
   collapseCompletedByDefault: false,
-  collapseSectionsByDefault: true,
+  collapseSectionsByDefault: false,
 };
 
 const WIDGET_KEY = 'tasks-widget';
@@ -126,6 +126,15 @@ export function useTasksWidgetSettings() {
     updateSettings: patchSettings,
     replaceSettings,
   } = useWidgetSettings<TasksWidgetSettings>(WIDGET_KEY, DEFAULT_SETTINGS);
+
+  // One-time migration: fix stale collapseSectionsByDefault=true from before Sprint 35
+  useEffect(() => {
+    const migrated = localStorage.getItem('tasks-widget-collapse-migrated');
+    if (!migrated && raw.collapseSectionsByDefault === true) {
+      patchSettings({ collapseSectionsByDefault: false });
+      localStorage.setItem('tasks-widget-collapse-migrated', '1');
+    }
+  }, [raw.collapseSectionsByDefault, patchSettings]);
 
   // Ensure sections array is present (fallback for first-time or corrupted data)
   const settings: TasksWidgetSettings = useMemo(

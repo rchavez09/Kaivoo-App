@@ -32,6 +32,7 @@ export interface AIProviderConfig {
   requiresApiKey: boolean;
   placeholder: string;
   baseUrl?: string;
+  supportsTools?: boolean;
 }
 
 export interface AISettings {
@@ -90,7 +91,7 @@ export interface SoulConfig {
 }
 
 export type MemoryCategory = 'preference' | 'fact' | 'goal' | 'relationship' | 'pattern';
-export type MemorySource = 'hatching' | 'user_edit' | 'extraction' | 'explicit';
+export type MemorySource = 'hatching' | 'user_edit' | 'extraction' | 'explicit' | 'pre_compaction_flush';
 
 export interface AIMemory {
   id: string;

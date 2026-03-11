@@ -248,11 +248,18 @@ function transformMessagesForAnthropic(messages: ChatMessage[]): any[] {
         content.push({ type: 'text', text: msg.content });
       }
       for (const tc of msg.tool_calls) {
+        // Handle OpenAI format (tc.function.name) and legacy format (tc.name)
+        const tcName = tc.function?.name || tc.name;
+        const tcArgs = tc.function?.arguments
+          ? typeof tc.function.arguments === 'string'
+            ? JSON.parse(tc.function.arguments)
+            : tc.function.arguments
+          : tc.arguments || {};
         content.push({
           type: 'tool_use',
           id: tc.id,
-          name: tc.name,
-          input: tc.arguments || {},
+          name: tcName,
+          input: tcArgs,
         });
       }
       result.push({ role: 'assistant', content });
@@ -348,11 +355,57 @@ async function handleChat(body: ChatRequest): Promise<Response> {
       body: JSON.stringify(requestBody),
     });
   } else if (provider === 'google') {
-    // Google Gemini uses a different API format — non-streaming for now with tool support
-    const geminiMessages = messages.map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
+    // Google Gemini uses a different API format
+    // Transform messages including tool calls/results to Gemini format
+    // Build a map of tool_call_id → function name for resolving tool results
+    const toolCallIdToName: Record<string, string> = {};
+    for (const m of messages) {
+      if (m.tool_calls) {
+        for (const tc of m.tool_calls) {
+          const tcName = tc.function?.name || tc.name;
+          if (tc.id && tcName) toolCallIdToName[tc.id] = tcName;
+        }
+      }
+    }
+    // deno-lint-ignore no-explicit-any
+    const geminiMessages: any[] = [];
+    for (const m of messages) {
+      if (m.role === 'assistant' && m.tool_calls?.length) {
+        // Assistant message with tool calls → model role with functionCall parts
+        // deno-lint-ignore no-explicit-any
+        const parts: any[] = [];
+        if (m.content) parts.push({ text: m.content });
+        for (const tc of m.tool_calls) {
+          const tcName = tc.function?.name || tc.name;
+          const tcArgs = tc.function?.arguments
+            ? typeof tc.function.arguments === 'string'
+              ? JSON.parse(tc.function.arguments)
+              : tc.function.arguments
+            : tc.arguments || {};
+          parts.push({ functionCall: { name: tcName, args: tcArgs } });
+        }
+        geminiMessages.push({ role: 'model', parts });
+      } else if (m.role === 'tool') {
+        // Tool result → user role with functionResponse part
+        // Gemini needs the function name, not the tool_call_id
+        const funcName = toolCallIdToName[m.tool_call_id || ''] || 'unknown';
+        let responseData;
+        try {
+          responseData = JSON.parse(m.content);
+        } catch {
+          responseData = { result: m.content };
+        }
+        geminiMessages.push({
+          role: 'user',
+          parts: [{ functionResponse: { name: funcName, response: responseData } }],
+        });
+      } else {
+        geminiMessages.push({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content || '' }],
+        });
+      }
+    }
 
     // deno-lint-ignore no-explicit-any
     const requestBody: any = {
@@ -380,15 +433,20 @@ async function handleChat(body: ChatRequest): Promise<Response> {
       },
     );
   } else if (provider === 'ollama') {
+    // Use Ollama's OpenAI-compatible endpoint for unified tool support
     const base = ollamaBaseUrl || 'http://localhost:11434';
-    upstream = await fetch(`${base}/api/chat`, {
+    // deno-lint-ignore no-explicit-any
+    const requestBody: any = {
+      model,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      stream: true,
+    };
+    if (openaiTools) requestBody.tools = openaiTools;
+
+    upstream = await fetch(`${base}/v1/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'system', content: systemPrompt }, ...messages],
-        stream: true,
-      }),
+      body: JSON.stringify(requestBody),
     });
   } else {
     return jsonResponse({ error: 'Unknown provider' }, 400);
@@ -480,37 +538,52 @@ function extractEvent(
   line: string,
   pendingToolCalls: Record<number, { id: string; name: string; arguments: string }>,
 ): SSEEvent | null {
-  if (provider === 'ollama') {
-    if (!line.trim()) return null;
-    try {
-      const data = JSON.parse(line);
-      if (data.message?.content) return { text: data.message.content };
-    } catch {
-      return null;
-    }
-    return null;
-  }
-
   if (provider === 'google') {
     if (!line.startsWith('data: ')) return null;
     const raw = line.slice(6).trim();
     try {
       const parsed = JSON.parse(raw);
-      // Text content
-      const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) return { text };
-      // Tool call
-      const fc = parsed.candidates?.[0]?.content?.parts?.[0]?.functionCall;
-      if (fc) {
-        return { tool_call: { id: `gemini-${Date.now()}`, name: fc.name, arguments: fc.args || {} } };
+      const parts = parsed.candidates?.[0]?.content?.parts;
+      if (!parts || !Array.isArray(parts)) return null;
+
+      // Iterate ALL parts for text and function calls
+      let textContent = '';
+      for (const part of parts) {
+        if (part.text) textContent += part.text;
+        if (part.functionCall) {
+          const fc = part.functionCall;
+          const idx = Object.keys(pendingToolCalls).length;
+          pendingToolCalls[idx] = {
+            id: `gemini-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            name: fc.name,
+            arguments: JSON.stringify(fc.args || {}),
+          };
+        }
       }
+
+      // Emit first pending tool call if any (rest flushed at stream end)
+      const keys = Object.keys(pendingToolCalls).map(Number);
+      if (keys.length > 0 && !textContent) {
+        const firstKey = keys[0];
+        const tc = pendingToolCalls[firstKey];
+        let parsedArgs: Record<string, unknown> = {};
+        try {
+          parsedArgs = JSON.parse(tc.arguments || '{}');
+        } catch {
+          /* empty */
+        }
+        delete pendingToolCalls[firstKey];
+        return { tool_call: { id: tc.id, name: tc.name, arguments: parsedArgs } };
+      }
+
+      if (textContent) return { text: textContent };
     } catch {
       return null;
     }
     return null;
   }
 
-  // OpenAI-compatible and Anthropic use SSE format
+  // OpenAI-compatible (incl. Ollama) and Anthropic use SSE format
   if (!line.startsWith('data: ')) return null;
   const raw = line.slice(6).trim();
   if (raw === '[DONE]') return null;
@@ -518,22 +591,21 @@ function extractEvent(
   try {
     const parsed = JSON.parse(raw);
 
-    // OpenAI-compatible format
+    // OpenAI-compatible format (includes Ollama via /v1/chat/completions)
     if (
       provider === 'openai' ||
       provider === 'groq' ||
       provider === 'deepseek' ||
       provider === 'mistral' ||
+      provider === 'openrouter' ||
+      provider === 'ollama' ||
       provider === 'openai-compatible'
     ) {
       const delta = parsed.choices?.[0]?.delta;
-      if (!delta) return null;
+      const finishReason = parsed.choices?.[0]?.finish_reason;
 
-      // Text content
-      if (delta.content) return { text: delta.content };
-
-      // Tool calls (streamed incrementally)
-      if (delta.tool_calls) {
+      // Accumulate tool call deltas
+      if (delta?.tool_calls) {
         for (const tc of delta.tool_calls) {
           const idx = tc.index ?? 0;
           if (!pendingToolCalls[idx]) {
@@ -543,28 +615,47 @@ function extractEvent(
           if (tc.function?.name) pendingToolCalls[idx].name = tc.function.name;
           if (tc.function?.arguments) pendingToolCalls[idx].arguments += tc.function.arguments;
         }
+      }
 
-        // Check if finish_reason indicates tool calls are complete
-        const finishReason = parsed.choices?.[0]?.finish_reason;
-        if (finishReason === 'tool_calls') {
-          const events: SSEEvent[] = [];
-          for (const tc of Object.values(pendingToolCalls)) {
-            let args: Record<string, unknown> = {};
+      // Emit tool calls when finish_reason signals completion
+      // (finish_reason may arrive in a chunk without delta.tool_calls)
+      if (finishReason === 'tool_calls' || finishReason === 'function_call') {
+        const keys = Object.keys(pendingToolCalls).map(Number);
+        if (keys.length > 0) {
+          const firstKey = keys[0];
+          const firstTc = pendingToolCalls[firstKey];
+          let firstArgs: Record<string, unknown> = {};
+          try {
+            firstArgs = JSON.parse(firstTc.arguments || '{}');
+          } catch {
+            /* empty */
+          }
+          delete pendingToolCalls[firstKey];
+          return { tool_call: { id: firstTc.id, name: firstTc.name, arguments: firstArgs } };
+        }
+      }
+
+      // Some providers (OpenRouter) send finish_reason: "stop" even with pending tool calls
+      if (finishReason === 'stop') {
+        const keys = Object.keys(pendingToolCalls).map(Number);
+        if (keys.length > 0) {
+          const firstKey = keys[0];
+          const firstTc = pendingToolCalls[firstKey];
+          if (firstTc.name) {
+            let firstArgs: Record<string, unknown> = {};
             try {
-              args = JSON.parse(tc.arguments || '{}');
+              firstArgs = JSON.parse(firstTc.arguments || '{}');
             } catch {
               /* empty */
             }
-            events.push({ tool_call: { id: tc.id, name: tc.name, arguments: args } });
+            delete pendingToolCalls[firstKey];
+            return { tool_call: { id: firstTc.id, name: firstTc.name, arguments: firstArgs } };
           }
-          // Clear pending after emitting
-          for (const key of Object.keys(pendingToolCalls)) {
-            delete pendingToolCalls[Number(key)];
-          }
-          // Return the first tool call; rest will be flushed at stream end
-          if (events.length > 0) return events[0];
         }
       }
+
+      // Text content
+      if (delta?.content) return { text: delta.content };
 
       return null;
     }
