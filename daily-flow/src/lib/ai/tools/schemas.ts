@@ -38,7 +38,7 @@ export const CREATE_TASK: ToolSchema = {
         type: 'string',
         description: 'Due date. Use "today" for today, "tomorrow" for tomorrow, or YYYY-MM-DD format.',
       },
-      priority: { type: 'string', description: 'Task priority', enum: ['low', 'medium', 'high', 'urgent'] },
+      priority: { type: 'string', description: 'Task priority', enum: ['low', 'medium', 'high'] },
       project_name: { type: 'string', description: 'Name of an existing project to assign this task to' },
     },
     required: ['title'],
@@ -138,8 +138,12 @@ export const GET_TASKS: ToolSchema = {
   parameters: {
     type: 'object',
     properties: {
-      status: { type: 'string', description: 'Filter by status', enum: ['todo', 'in_progress', 'done', 'all'] },
-      priority: { type: 'string', description: 'Filter by priority', enum: ['low', 'medium', 'high', 'urgent'] },
+      status: {
+        type: 'string',
+        description: 'Filter by status',
+        enum: ['backlog', 'todo', 'doing', 'blocked', 'done', 'all'],
+      },
+      priority: { type: 'string', description: 'Filter by priority', enum: ['low', 'medium', 'high'] },
       due_date: {
         type: 'string',
         description:
@@ -270,8 +274,8 @@ export const UPDATE_TASK: ToolSchema = {
       task_title: { type: 'string', description: 'Title or partial title of the task to update' },
       new_title: { type: 'string', description: 'New title' },
       due_date: { type: 'string', description: 'New due date (YYYY-MM-DD, "today", or "tomorrow")' },
-      priority: { type: 'string', description: 'New priority', enum: ['low', 'medium', 'high', 'urgent'] },
-      status: { type: 'string', description: 'New status', enum: ['todo', 'in_progress', 'done'] },
+      priority: { type: 'string', description: 'New priority', enum: ['low', 'medium', 'high'] },
+      status: { type: 'string', description: 'New status', enum: ['backlog', 'todo', 'doing', 'blocked', 'done'] },
     },
     required: ['task_title'],
     additionalProperties: false,

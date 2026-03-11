@@ -185,7 +185,7 @@ export async function executeTool(
         if (reqErr) return { success: false, message: reqErr };
         const titleErr = validateString(args, 'title');
         if (titleErr) return { success: false, message: titleErr };
-        const prioErr = validateEnum(args, 'priority', ['low', 'medium', 'high', 'urgent']);
+        const prioErr = validateEnum(args, 'priority', ['low', 'medium', 'high']);
         if (prioErr) return { success: false, message: prioErr };
         const resolvedDate = resolveDate(args.due_date as string | undefined);
         const todayISO = format(new Date(), 'yyyy-MM-dd');
@@ -360,9 +360,9 @@ export async function executeTool(
       }
 
       case 'get_tasks': {
-        const statusErr = validateEnum(args, 'status', ['todo', 'in_progress', 'done', 'all']);
+        const statusErr = validateEnum(args, 'status', ['backlog', 'todo', 'doing', 'blocked', 'done', 'all']);
         if (statusErr) return { success: false, message: statusErr };
-        const prioErr2 = validateEnum(args, 'priority', ['low', 'medium', 'high', 'urgent']);
+        const prioErr2 = validateEnum(args, 'priority', ['low', 'medium', 'high']);
         if (prioErr2) return { success: false, message: prioErr2 };
         const store = useKaivooStore.getState();
         let tasks = [...store.tasks];
@@ -568,9 +568,9 @@ export async function executeTool(
       case 'update_task': {
         const reqErr3 = validateRequired(args, ['task_title']);
         if (reqErr3) return { success: false, message: reqErr3 };
-        const prioErr3 = validateEnum(args, 'priority', ['low', 'medium', 'high', 'urgent']);
+        const prioErr3 = validateEnum(args, 'priority', ['low', 'medium', 'high']);
         if (prioErr3) return { success: false, message: prioErr3 };
-        const statusErr3 = validateEnum(args, 'status', ['todo', 'in_progress', 'done']);
+        const statusErr3 = validateEnum(args, 'status', ['backlog', 'todo', 'doing', 'blocked', 'done']);
         if (statusErr3) return { success: false, message: statusErr3 };
         const taskTitle2 = args.task_title as string;
         const task = findTask(taskTitle2);
