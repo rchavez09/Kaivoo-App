@@ -66,29 +66,41 @@ function buildContextSummary(ctx: AppContext | null): string {
 
   // Overdue (highest priority)
   if (ctx.overdueTasks.length > 0) {
-    const overdueList = ctx.overdueTasks.slice(0, 3).map((t) => `${t.title} (${t.dueDate})`).join(', ');
+    const overdueList = ctx.overdueTasks
+      .slice(0, 3)
+      .map((t) => `${t.title} (${t.dueDate})`)
+      .join(', ');
     lines.push(`**Overdue (${ctx.overdueTasks.length}):** ${overdueList}${ctx.overdueTasks.length > 3 ? '...' : ''}`);
   }
 
   // Tasks due today
   const pendingToday = ctx.tasksDueToday.filter((t) => t.status !== 'done');
   if (pendingToday.length > 0) {
-    const todayList = pendingToday.slice(0, 3).map((t) => t.title).join(', ');
+    const todayList = pendingToday
+      .slice(0, 3)
+      .map((t) => t.title)
+      .join(', ');
     lines.push(`**Due today (${pendingToday.length}):** ${todayList}${pendingToday.length > 3 ? '...' : ''}`);
   }
 
   // Upcoming (next 3 days)
   if (ctx.upcomingTasks.length > 0) {
-    const upcomingList = ctx.upcomingTasks.slice(0, 2).map((t) => `${t.title} (${t.dueDate})`).join(', ');
+    const upcomingList = ctx.upcomingTasks
+      .slice(0, 2)
+      .map((t) => `${t.title} (${t.dueDate})`)
+      .join(', ');
     lines.push(`**Upcoming:** ${upcomingList}`);
   }
 
   // Meetings
   if (ctx.todaysMeetings.length > 0) {
-    const meetingList = ctx.todaysMeetings.slice(0, 2).map((m) => {
-      const start = m.startTime ? format(new Date(m.startTime), 'h:mm a') : '?';
-      return `${m.title} (${start})`;
-    }).join(', ');
+    const meetingList = ctx.todaysMeetings
+      .slice(0, 2)
+      .map((m) => {
+        const start = m.startTime ? format(new Date(m.startTime), 'h:mm a') : '?';
+        return `${m.title} (${start})`;
+      })
+      .join(', ');
     lines.push(`**Meetings (${ctx.todaysMeetings.length}):** ${meetingList}`);
   }
 
@@ -104,7 +116,10 @@ function buildContextSummary(ctx: AppContext | null): string {
 
   // Projects
   if (ctx.activeProjects.length > 0) {
-    const projectList = ctx.activeProjects.slice(0, 2).map((p) => p.name).join(', ');
+    const projectList = ctx.activeProjects
+      .slice(0, 2)
+      .map((p) => p.name)
+      .join(', ');
     lines.push(`**Projects:** ${projectList}`);
   }
 

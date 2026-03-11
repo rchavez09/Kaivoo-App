@@ -67,7 +67,11 @@ export default function HeartbeatSettings() {
           </Label>
           <p className="text-xs text-muted-foreground">AI runs in background at scheduled intervals</p>
         </div>
-        <Switch id="heartbeat-enabled" checked={settings.enabled} onCheckedChange={(enabled) => void updateSettings({ enabled })} />
+        <Switch
+          id="heartbeat-enabled"
+          checked={settings.enabled}
+          onCheckedChange={(enabled) => void updateSettings({ enabled })}
+        />
       </div>
 
       {/* Frequency */}
@@ -147,8 +151,9 @@ export default function HeartbeatSettings() {
       {/* Info box */}
       <div className="rounded-lg bg-secondary/30 p-4">
         <p className="text-xs text-muted-foreground">
-          <strong>How it works:</strong> The heartbeat reads your tasks, calendar, journal, and soul file to identify urgent items,
-          scheduling conflicts, patterns, or proactive suggestions. If something actionable is found, you'll receive a notification.
+          <strong>How it works:</strong> The heartbeat reads your tasks, calendar, journal, and soul file to identify
+          urgent items, scheduling conflicts, patterns, or proactive suggestions. If something actionable is found,
+          you'll receive a notification.
         </p>
       </div>
     </div>
