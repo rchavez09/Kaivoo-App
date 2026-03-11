@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       // Optional Tauri plugins — not installed for web builds
-      external: ['@tauri-apps/plugin-dialog'],
+      external: ['@tauri-apps/plugin-dialog', '@tauri-apps/plugin-notification'],
       output: {
         manualChunks: {
           'vendor-core': ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', 'zustand'],
