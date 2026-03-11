@@ -157,7 +157,11 @@ async function onHeartbeatTick(): Promise<void> {
 
     if (insight) {
       console.log('[Heartbeat] Insight generated:', insight);
-      // P4: Trigger notification if settings.notificationsEnabled
+
+      // Trigger notification if enabled
+      if (settings.notificationsEnabled) {
+        await showHeartbeatNotification(insight);
+      }
     } else {
       console.log('[Heartbeat] No actionable insights found (NO_ACTION)');
     }
@@ -278,5 +282,65 @@ function shouldRunNow(settings: HeartbeatSettings): boolean {
     case 'off':
     default:
       return false;
+  }
+}
+
+/**
+ * Show a system notification with the heartbeat insight.
+ * Desktop: Tauri notification API
+ * Web: Browser Notification API (with permission request)
+ */
+async function showHeartbeatNotification(insight: string): Promise<void> {
+  const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+  if (isTauri) {
+    // Desktop: Use Tauri notification
+    try {
+      const { sendNotification } = await import('@tauri-apps/plugin-notification');
+      await sendNotification({
+        title: 'Proactive Insight',
+        body: insight,
+      });
+      console.log('[Heartbeat] Desktop notification sent');
+    } catch (e) {
+      console.error('[Heartbeat] Failed to send desktop notification:', e);
+    }
+  } else {
+    // Web: Use browser Notification API
+    try {
+      // Check if notifications are supported
+      if (!('Notification' in window)) {
+        console.warn('[Heartbeat] Browser does not support notifications');
+        return;
+      }
+
+      // Request permission if needed
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          console.log('[Heartbeat] Notification permission denied');
+          return;
+        }
+      }
+
+      // Show notification if permission granted
+      if (Notification.permission === 'granted') {
+        const notification = new Notification('Proactive Insight', {
+          body: insight,
+          icon: '/icon-192.png', // App icon (assuming it exists in public/)
+          tag: 'heartbeat', // Replace previous heartbeat notifications
+        });
+
+        // Navigate to chat when clicked
+        notification.onclick = () => {
+          window.focus();
+          window.location.href = '/chat';
+        };
+
+        console.log('[Heartbeat] Web notification sent');
+      }
+    } catch (e) {
+      console.error('[Heartbeat] Failed to send web notification:', e);
+    }
   }
 }
