@@ -355,11 +355,57 @@ async function handleChat(body: ChatRequest): Promise<Response> {
       body: JSON.stringify(requestBody),
     });
   } else if (provider === 'google') {
-    // Google Gemini uses a different API format — non-streaming for now with tool support
-    const geminiMessages = messages.map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
+    // Google Gemini uses a different API format
+    // Transform messages including tool calls/results to Gemini format
+    // Build a map of tool_call_id → function name for resolving tool results
+    const toolCallIdToName: Record<string, string> = {};
+    for (const m of messages) {
+      if (m.tool_calls) {
+        for (const tc of m.tool_calls) {
+          const tcName = tc.function?.name || tc.name;
+          if (tc.id && tcName) toolCallIdToName[tc.id] = tcName;
+        }
+      }
+    }
+    // deno-lint-ignore no-explicit-any
+    const geminiMessages: any[] = [];
+    for (const m of messages) {
+      if (m.role === 'assistant' && m.tool_calls?.length) {
+        // Assistant message with tool calls → model role with functionCall parts
+        // deno-lint-ignore no-explicit-any
+        const parts: any[] = [];
+        if (m.content) parts.push({ text: m.content });
+        for (const tc of m.tool_calls) {
+          const tcName = tc.function?.name || tc.name;
+          const tcArgs = tc.function?.arguments
+            ? typeof tc.function.arguments === 'string'
+              ? JSON.parse(tc.function.arguments)
+              : tc.function.arguments
+            : tc.arguments || {};
+          parts.push({ functionCall: { name: tcName, args: tcArgs } });
+        }
+        geminiMessages.push({ role: 'model', parts });
+      } else if (m.role === 'tool') {
+        // Tool result → user role with functionResponse part
+        // Gemini needs the function name, not the tool_call_id
+        const funcName = toolCallIdToName[m.tool_call_id || ''] || 'unknown';
+        let responseData;
+        try {
+          responseData = JSON.parse(m.content);
+        } catch {
+          responseData = { result: m.content };
+        }
+        geminiMessages.push({
+          role: 'user',
+          parts: [{ functionResponse: { name: funcName, response: responseData } }],
+        });
+      } else {
+        geminiMessages.push({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content || '' }],
+        });
+      }
+    }
 
     // deno-lint-ignore no-explicit-any
     const requestBody: any = {

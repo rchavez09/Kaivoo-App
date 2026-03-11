@@ -40,6 +40,7 @@ export interface ExecutorActions {
   addCapture: (data: Omit<Capture, 'id' | 'createdAt'>) => Promise<Capture | undefined>;
   addTopicPage: (data: { topicId: string; name: string }) => Promise<{ id: string } | undefined>;
   toggleRoutineCompletion: (routineId: string, date?: string) => Promise<void>;
+  toggleHabitCompletion: (habitId: string, date?: string) => Promise<void>;
   logAction?: (actionType: string, actionData: Record<string, unknown>, sourceInput: string) => Promise<string | null>;
 }
 
@@ -216,6 +217,8 @@ export async function executeTool(
       }
 
       case 'create_journal_entry': {
+        const reqErr5 = validateRequired(args, ['content']);
+        if (reqErr5) return { success: false, message: reqErr5 };
         const date = resolveDate(args.date as string | undefined);
         const label = (args.label as string) || undefined;
         const entry = await actions.addJournalEntry({
@@ -238,6 +241,8 @@ export async function executeTool(
       }
 
       case 'create_calendar_event': {
+        const reqErr4 = validateRequired(args, ['title', 'start_time']);
+        if (reqErr4) return { success: false, message: reqErr4 };
         const date = resolveDate(args.date as string);
         const startTime = args.start_time as string;
         const endTime =
@@ -271,6 +276,8 @@ export async function executeTool(
       }
 
       case 'create_capture': {
+        const reqErr6 = validateRequired(args, ['content']);
+        if (reqErr6) return { success: false, message: reqErr6 };
         const tags = args.tags ? (args.tags as string).split(',').map((t: string) => t.trim()) : [];
         const capture = await actions.addCapture({
           content: args.content as string,
@@ -287,6 +294,8 @@ export async function executeTool(
       }
 
       case 'create_note': {
+        const reqErr7 = validateRequired(args, ['title']);
+        if (reqErr7) return { success: false, message: reqErr7 };
         const topicName = args.topic_name as string | undefined;
         let topicId: string | undefined;
         if (topicName) {
@@ -625,8 +634,8 @@ export async function executeTool(
         if (store.isHabitCompleted(habit.id, date)) {
           return { success: true, message: `"${habit.name}" is already logged for ${date}.` };
         }
-        // Habits use the same toggle mechanism as routines
-        store.toggleHabitCompletion(habit.id, date);
+        // Use injected action for optimistic update + persistence
+        await actions.toggleHabitCompletion(habit.id, date);
         await actions.logAction?.('habit_logged', { habitId: habit.id, name: habit.name, date }, userMessage);
         return { success: true, message: `Logged "${habit.name}" for ${date}.` };
       }

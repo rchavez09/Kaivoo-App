@@ -249,6 +249,7 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
       addCapture: actions.addCapture,
       addTopicPage: actions.addTopicPage,
       toggleRoutineCompletion: actions.toggleRoutineCompletion,
+      toggleHabitCompletion: actions.toggleHabitCompletion,
       logAction,
     }),
     [actions, logAction],

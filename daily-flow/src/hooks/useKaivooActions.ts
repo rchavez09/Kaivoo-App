@@ -329,6 +329,24 @@ export const useKaivooActions = () => {
     }
   };
 
+  // --- Habits ---
+
+  const toggleHabitCompletion = async (habitId: string, date?: string) => {
+    const dateStr = date || format(new Date(), 'yyyy-MM-dd');
+    const isCompleted = getStore().isHabitCompleted(habitId, dateStr);
+    getStore().toggleHabitCompletion(habitId, dateStr);
+    if (user) {
+      try {
+        await db.toggleHabitCompletion(habitId, dateStr, isCompleted);
+        invalidate('habitCompletions');
+      } catch (e) {
+        getStore().toggleHabitCompletion(habitId, dateStr);
+        toast.error('Failed to update habit.');
+        console.error('[toggleHabitCompletion]', e);
+      }
+    }
+  };
+
   // --- Topics ---
 
   const addTopic = async (topicData: Omit<Topic, 'id' | 'createdAt'>) => {
@@ -635,6 +653,7 @@ export const useKaivooActions = () => {
     updateCapture,
     deleteCapture,
     toggleRoutineCompletion,
+    toggleHabitCompletion,
     addTopic,
     updateTopic,
     addTopicPage,
