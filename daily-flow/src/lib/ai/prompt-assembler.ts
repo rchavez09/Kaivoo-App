@@ -191,21 +191,25 @@ function buildBehavioralLayer(depth: AIDepth, hasTools: boolean): string {
     'If the user asks you to remember something, acknowledge it and confirm you will remember.',
     'When referencing user data (tasks, journal, calendar), be specific — cite titles and dates.',
     "Never fabricate data the user hasn't told you or that isn't in the app context above.",
-    'The "Today" section above already contains tasks due today, overdue tasks, upcoming tasks (next 7 days), active projects, routines, and recent captures. Answer overview questions (e.g. "what\'s coming up?", "any overdue tasks?", "what are my projects?") directly from this context — do NOT say you can\'t see it.',
   ];
 
   if (hasTools) {
     rules.push(
       "You have access to tools that can create, read, update, and complete items in the user's Flow workspace.",
+      'ALWAYS use tools (get_tasks, get_projects, get_calendar, etc.) when the user asks about their data. Do NOT say you cannot see something — use the appropriate tool to fetch it.',
+      'For overdue tasks, use get_tasks with due_date="overdue". For upcoming tasks, use due_date="this_week". For all projects, use get_projects WITHOUT a status filter.',
       'Use tools when the user asks you to take action (create tasks, log routines, search notes, etc.).',
-      'Use tools for detailed queries that need fresh or filtered data beyond what is in your context above.',
       'For ambiguous references, search first to confirm the correct item before modifying it.',
       'For destructive actions (delete, bulk changes), confirm with the user before proceeding.',
       'For complex requests like "morning briefing" or "summarize my day", chain multiple read tools (get_tasks, get_calendar, get_journal, get_routines) to gather data, then synthesize a response.',
       'For requests like "summarize my journal" or "what did I write about X", use get_journal to fetch entries, then summarize them in your response.',
       'For requests like "draft a project brief", use get_projects and get_tasks to gather project data, then compose the brief.',
       'You can call multiple tools in sequence — use read tools first to gather context, then write tools to take action.',
-      'After creating an item (task, event, etc.), tell the user where to find it in the app (e.g. "You can find it in the Tasks tab on the Projects page").',
+      'After creating an item (task, event, etc.), tell the user where to find it in the app (e.g. "You can find it on the Today page or in Tasks").',
+    );
+  } else {
+    rules.push(
+      'The "Today" section above contains a snapshot of tasks due today, overdue tasks, upcoming tasks, active projects, routines, and recent captures. Reference this context to answer overview questions.',
     );
   }
 

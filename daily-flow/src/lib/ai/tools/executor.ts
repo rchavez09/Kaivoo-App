@@ -16,7 +16,7 @@ import type { ToolCall, MemoryCategory } from '../types';
 import type { Task, Meeting, JournalEntry, Capture, Project, RoutineItem, Habit } from '@/types';
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { addMemory, getMemories } from '../memory-service';
-import { format, addDays, parse } from 'date-fns';
+import { format, addDays, parse, isBefore, startOfDay } from 'date-fns';
 
 // ─── Types ───
 
@@ -129,7 +129,10 @@ export async function executeTool(
     switch (name) {
       // ─── Create Tools ───
       case 'create_task': {
-        const dueDate = resolveDate(args.due_date as string | undefined);
+        const resolvedDate = resolveDate(args.due_date as string | undefined);
+        const todayISO = format(new Date(), 'yyyy-MM-dd');
+        // Use 'Today' literal when the date resolves to today — matches UI convention
+        const dueDate = resolvedDate === todayISO ? 'Today' : resolvedDate;
         const project = args.project_name ? findProject(args.project_name as string) : undefined;
         const task = await actions.addTask({
           title: args.title as string,
@@ -309,10 +312,30 @@ export async function executeTool(
         if (status && status !== 'all') tasks = tasks.filter((t) => t.status === status);
         if (priority) tasks = tasks.filter((t) => t.priority === priority);
         if (dueDate) {
-          const resolved = resolveDate(dueDate);
-          tasks = tasks.filter(
-            (t) => t.dueDate === resolved || (resolved === format(new Date(), 'yyyy-MM-dd') && t.dueDate === 'Today'),
-          );
+          const dueLower = dueDate.toLowerCase().trim();
+          const todayISO = format(new Date(), 'yyyy-MM-dd');
+          const todayStart = startOfDay(new Date());
+
+          if (dueLower === 'overdue') {
+            // Tasks with due dates before today that aren't done
+            tasks = tasks.filter((t) => {
+              if (t.status === 'done' || !t.dueDate || t.dueDate === 'Today') return false;
+              const resolved = resolveDate(t.dueDate);
+              return isBefore(startOfDay(new Date(resolved + 'T00:00:00')), todayStart);
+            });
+          } else if (dueLower === 'this_week' || dueLower === 'week') {
+            // Tasks due within the next 7 days (including today)
+            const weekEnd = addDays(todayStart, 7);
+            tasks = tasks.filter((t) => {
+              if (!t.dueDate) return false;
+              const resolved = resolveDate(t.dueDate);
+              const dueDay = startOfDay(new Date(resolved + 'T00:00:00'));
+              return dueDay >= todayStart && isBefore(dueDay, weekEnd);
+            });
+          } else {
+            const resolved = resolveDate(dueDate);
+            tasks = tasks.filter((t) => t.dueDate === resolved || (resolved === todayISO && t.dueDate === 'Today'));
+          }
         }
         if (projectName) {
           const project = findProject(projectName);

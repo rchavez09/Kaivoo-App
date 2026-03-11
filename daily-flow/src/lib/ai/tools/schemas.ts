@@ -120,13 +120,17 @@ export const SEARCH: ToolSchema = {
 export const GET_TASKS: ToolSchema = {
   name: 'get_tasks',
   description:
-    'Get tasks with optional filters. Use when the user asks about their tasks, todos, or what they need to do.',
+    'Get tasks with optional filters. Use when the user asks about their tasks, todos, or what they need to do. Supports date ranges like "overdue" and "this_week".',
   parameters: {
     type: 'object',
     properties: {
       status: { type: 'string', description: 'Filter by status', enum: ['todo', 'in_progress', 'done', 'all'] },
       priority: { type: 'string', description: 'Filter by priority', enum: ['low', 'medium', 'high', 'urgent'] },
-      due_date: { type: 'string', description: 'Filter by due date (YYYY-MM-DD). Use "today" or "tomorrow".' },
+      due_date: {
+        type: 'string',
+        description:
+          'Filter by due date. Use "today", "tomorrow", "overdue" (past due, not done), "this_week" (next 7 days), or a specific YYYY-MM-DD date.',
+      },
       project_name: { type: 'string', description: 'Filter by project name' },
     },
   },
@@ -192,13 +196,14 @@ export const GET_CAPTURES: ToolSchema = {
 export const GET_PROJECTS: ToolSchema = {
   name: 'get_projects',
   description:
-    'List projects with optional status filter. Returns ALL projects by default. Use when the user asks about their projects.',
+    'List ALL projects (planning, active, paused, completed). Do NOT pass a status filter unless the user explicitly asks for only one status. When the user says "my projects" or "all projects", call this with NO arguments.',
   parameters: {
     type: 'object',
     properties: {
       status: {
         type: 'string',
-        description: 'Filter by project status. Omit or use "all" to return every project regardless of status.',
+        description:
+          'ONLY use this to filter by a single status when the user explicitly asks. Omit this parameter to return ALL projects.',
         enum: ['planning', 'active', 'paused', 'completed', 'all'],
       },
     },
