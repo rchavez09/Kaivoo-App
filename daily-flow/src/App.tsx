@@ -25,6 +25,7 @@ const Auth = lazy(() => import('./pages/Auth'));
 const SetupWizard = lazy(() => import('./pages/SetupWizard'));
 const GuidedTour = lazy(() => import('./components/GuidedTour'));
 const PurchaseSuccessPage = lazy(() => import('./pages/PurchaseSuccessPage'));
+const ChatPage = lazy(() => import('./pages/ChatPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const PageLoader = () => (
@@ -153,6 +154,14 @@ const App = () => (
                     element={
                       <ProtectedPage>
                         <TopicPage />
+                      </ProtectedPage>
+                    }
+                  />
+                  <Route
+                    path="/chat"
+                    element={
+                      <ProtectedPage>
+                        <ChatPage />
                       </ProtectedPage>
                     }
                   />
