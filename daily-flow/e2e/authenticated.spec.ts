@@ -183,9 +183,10 @@ test.describe('Knowledge', () => {
     const input = page.locator('input[placeholder*="Topic name"]');
     await expect(input).toBeVisible({ timeout: 5000 });
 
-    // Close the dialog by pressing Escape
+    // Ensure focus is inside the dialog, then close with Escape
+    await input.click();
     await page.keyboard.press('Escape');
-    await expect(input).not.toBeVisible();
+    await expect(input).not.toBeVisible({ timeout: 5000 });
   });
 
   test('switching to Vault tab shows vault content', async ({ page }) => {
