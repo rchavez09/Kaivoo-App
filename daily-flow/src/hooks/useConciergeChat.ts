@@ -29,6 +29,37 @@ import { useAIActionLog } from '@/hooks/useAIActionLog';
 
 const MAX_TOOL_ROUNDS = 5;
 
+/**
+ * Fallback: Extract tool calls written as text by models that don't use structured APIs.
+ * Handles patterns like: <tool_call>{"name":"get_tasks","arguments":{...}}</tool_call>
+ */
+function extractTextToolCalls(text: string): { toolCalls: ToolCall[]; cleanedText: string } {
+  const toolCalls: ToolCall[] = [];
+  let cleanedText = text;
+
+  // Match <tool_call>...</tool_call> tags (case-insensitive, multiline)
+  const tagRegex = /<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/gi;
+  let match;
+  while ((match = tagRegex.exec(text)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      const name = parsed.name || parsed.function;
+      const args = parsed.arguments || parsed.parameters || parsed.input || {};
+      if (name && typeof name === 'string') {
+        toolCalls.push({ id: `text-${crypto.randomUUID()}`, name, arguments: args });
+      }
+    } catch {
+      // Skip unparseable tool calls
+    }
+    cleanedText = cleanedText.replace(match[0], '');
+  }
+
+  // Also handle [Calling tool_name ...] display patterns — strip but don't execute
+  cleanedText = cleanedText.replace(/\[Calling \w+[^\]]*\]/g, '');
+
+  return { toolCalls, cleanedText: cleanedText.trim() };
+}
+
 export interface UseConciergeChatOptions {
   /** Called after creating a new conversation (e.g. switch to chat view) */
   onNewConversation?: () => void;
@@ -299,11 +330,24 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
           }
         }
 
+        // Fallback: if no structured tool calls arrived but text contains
+        // tool_call tags (some models write them as text), try to extract them
+        if (toolCalls.length === 0 && hasTools && fullContent.includes('<tool_call>')) {
+          const extracted = extractTextToolCalls(fullContent);
+          if (extracted.toolCalls.length > 0) {
+            toolCalls.push(...extracted.toolCalls);
+            fullContent = extracted.cleanedText;
+            setStreamedContent(fullContent);
+          }
+        }
+
         if (toolCalls.length === 0) {
+          // Strip leftover [Calling ...] display artifacts from text
+          const cleaned = fullContent.replace(/\[Calling \w+[^\]]*\]/g, '').trim();
           const assistantMessage: ConversationMessage = {
             id: crypto.randomUUID(),
             role: 'assistant',
-            content: fullContent,
+            content: cleaned || fullContent,
             timestamp: new Date().toISOString(),
           };
           workingMessages = [...workingMessages, assistantMessage];

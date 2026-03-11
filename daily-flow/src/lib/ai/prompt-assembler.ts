@@ -196,6 +196,7 @@ function buildBehavioralLayer(depth: AIDepth, hasTools: boolean): string {
   if (hasTools) {
     rules.push(
       "You have access to tools that can create, read, update, and complete items in the user's Flow workspace.",
+      'IMPORTANT: Use the structured tool-calling API to invoke tools. NEVER write tool calls as text, XML tags, JSON, or any other format in your response — they will not execute.',
       'ALWAYS use tools (get_tasks, get_projects, get_calendar, etc.) when the user asks about their data. Do NOT say you cannot see something — use the appropriate tool to fetch it.',
       'For overdue tasks, use get_tasks with due_date="overdue". For upcoming tasks, use due_date="this_week". For all projects, use get_projects WITHOUT a status filter.',
       'Use tools when the user asks you to take action (create tasks, log routines, search notes, etc.).',

@@ -114,7 +114,7 @@ export const DEFAULT_SETTINGS: TasksWidgetSettings = {
   hideEmptySections: false,
   showCompletedTasks: true,
   collapseCompletedByDefault: false,
-  collapseSectionsByDefault: true,
+  collapseSectionsByDefault: false,
 };
 
 const WIDGET_KEY = 'tasks-widget';

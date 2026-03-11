@@ -524,16 +524,14 @@ function extractEvent(
       provider === 'groq' ||
       provider === 'deepseek' ||
       provider === 'mistral' ||
+      provider === 'openrouter' ||
       provider === 'openai-compatible'
     ) {
       const delta = parsed.choices?.[0]?.delta;
-      if (!delta) return null;
+      const finishReason = parsed.choices?.[0]?.finish_reason;
 
-      // Text content
-      if (delta.content) return { text: delta.content };
-
-      // Tool calls (streamed incrementally)
-      if (delta.tool_calls) {
+      // Accumulate tool call deltas
+      if (delta?.tool_calls) {
         for (const tc of delta.tool_calls) {
           const idx = tc.index ?? 0;
           if (!pendingToolCalls[idx]) {
@@ -543,28 +541,33 @@ function extractEvent(
           if (tc.function?.name) pendingToolCalls[idx].name = tc.function.name;
           if (tc.function?.arguments) pendingToolCalls[idx].arguments += tc.function.arguments;
         }
+      }
 
-        // Check if finish_reason indicates tool calls are complete
-        const finishReason = parsed.choices?.[0]?.finish_reason;
-        if (finishReason === 'tool_calls') {
-          const events: SSEEvent[] = [];
-          for (const tc of Object.values(pendingToolCalls)) {
-            let args: Record<string, unknown> = {};
-            try {
-              args = JSON.parse(tc.arguments || '{}');
-            } catch {
-              /* empty */
-            }
-            events.push({ tool_call: { id: tc.id, name: tc.name, arguments: args } });
+      // Emit tool calls when finish_reason signals completion
+      // (finish_reason may arrive in a chunk without delta.tool_calls)
+      if (finishReason === 'tool_calls' || finishReason === 'function_call') {
+        const keys = Object.keys(pendingToolCalls).map(Number);
+        if (keys.length > 0) {
+          // Emit first tool call as return value; enqueue the rest directly
+          const firstKey = keys[0];
+          const firstTc = pendingToolCalls[firstKey];
+          let firstArgs: Record<string, unknown> = {};
+          try {
+            firstArgs = JSON.parse(firstTc.arguments || '{}');
+          } catch {
+            /* empty */
           }
-          // Clear pending after emitting
-          for (const key of Object.keys(pendingToolCalls)) {
-            delete pendingToolCalls[Number(key)];
-          }
-          // Return the first tool call; rest will be flushed at stream end
-          if (events.length > 0) return events[0];
+          delete pendingToolCalls[firstKey];
+
+          // Remaining tool calls — leave in pendingToolCalls for stream-end flush
+          // (we can only return one event from extractEvent)
+
+          return { tool_call: { id: firstTc.id, name: firstTc.name, arguments: firstArgs } };
         }
       }
+
+      // Text content
+      if (delta?.content) return { text: delta.content };
 
       return null;
     }
