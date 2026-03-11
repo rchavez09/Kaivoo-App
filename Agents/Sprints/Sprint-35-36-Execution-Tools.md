@@ -180,9 +180,9 @@ Found and fixed during sandbox testing rounds:
 [x] npm run build (PASS)
 [x] PR opened to main (#23), CI passes
 □ E2E tests pass against deploy preview URL
-□ Agent 7 code audit
-□ Agent 11 feature integrity check
-□ 3-agent design review
+[x] Agent 7 code audit — 0 P0s, 9 P1s, 10 P2s. Top 3 P1s fixed (P1-4, P1-8, P1-9).
+[x] Agent 11 feature integrity check — PASS, no regressions
+□ 3-agent design review (skipped — no UI-focused changes this sprint)
 □ Sandbox: verify tools work live in chat
 □ Merge PR to main
 ```
@@ -193,14 +193,15 @@ Found and fixed during sandbox testing rounds:
 
 | File | Changes |
 |------|---------|
-| `supabase/functions/ai-chat/index.ts` | Ollama → OpenAI-compat endpoint, Gemini multi-part, OpenRouter stop handler, Anthropic transformer handles OpenAI format. Deployed as v9. |
+| `supabase/functions/ai-chat/index.ts` | Ollama → OpenAI-compat endpoint, Gemini multi-part + functionCall/functionResponse transform, OpenRouter stop handler, Anthropic transformer handles OpenAI format. Deployed as v10. |
 | `src/lib/ai/chat-service.ts` | Tool_calls formatted in OpenAI wire format (`type: "function"`, nested function object, stringified args) |
 | `src/lib/ai/tools/schemas.ts` | `additionalProperties: false`, enriched descriptions, aligned enums with actual types, `required: []` |
-| `src/lib/ai/tools/executor.ts` | Validation helpers, `parseDate()` for stored dates, aligned enum validation, dev logging |
+| `src/lib/ai/tools/executor.ts` | Validation helpers, `parseDate()` for stored dates, aligned enum validation, validateRequired on all create tools, dev logging |
 | `src/lib/ai/providers.ts` | `supportsTools: true` for Ollama + openai-compatible, updated model lists |
 | `src/components/ai/ConciergeChat.tsx` | Three-dot animation, blank bubble guard |
 | `src/pages/ChatPage.tsx` | Three-dot animation, blank bubble guard |
-| `src/hooks/useConciergeChat.ts` | Streaming state fix, auto-focus after response |
+| `src/hooks/useConciergeChat.ts` | Streaming state fix, auto-focus after response, toggleHabitCompletion wired to executor |
+| `src/hooks/useKaivooActions.ts` | Added `toggleHabitCompletion` action (optimistic update + persistence + rollback) |
 
 ---
 
@@ -227,7 +228,7 @@ Found and fixed during sandbox testing rounds:
 | Tests pass | Yes | 265/265 |
 | E2E pass | Yes | Pending |
 | Tools working (of 7) | 7/7 | 7/7 |
-| Edge function version | — | v9 |
+| Edge function version | — | v10 |
 
 ---
 
