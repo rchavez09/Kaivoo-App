@@ -7,6 +7,8 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Bot,
   Send,
@@ -83,6 +85,7 @@ const ChatPage = () => {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const navigate = useNavigate();
 
@@ -92,12 +95,20 @@ const ChatPage = () => {
     return () => clearTimeout(timer);
   }, [conversation.id, textareaRef]);
 
-  // Focus rename input when entering rename mode
+  // Focus rename input when entering rename mode (300ms to avoid DropdownMenu focus race)
   useEffect(() => {
     if (!renamingId) return;
-    const timer = setTimeout(() => renameInputRef.current?.focus(), 50);
+    const timer = setTimeout(() => renameInputRef.current?.focus(), 300);
     return () => clearTimeout(timer);
   }, [renamingId]);
+
+  // Auto-resize textarea as user types
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [input, textareaRef]);
 
   // ─── ChatPage-specific handlers ───
 
@@ -205,7 +216,10 @@ const ChatPage = () => {
                         ref={renameInputRef}
                         value={renamingTitle}
                         onChange={(e) => setRenamingTitle(e.target.value)}
-                        onBlur={handleFinishRename}
+                        onFocus={() => clearTimeout(blurTimeoutRef.current)}
+                        onBlur={() => {
+                          blurTimeoutRef.current = setTimeout(handleFinishRename, 200);
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleFinishRename();
                           if (e.key === 'Escape') setRenamingId(null);
@@ -219,7 +233,12 @@ const ChatPage = () => {
                         onClick={() => handleSelectConversation(conv)}
                       >
                         <p className="truncate text-sm font-medium text-foreground">{conv.title}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p
+                          className={cn(
+                            'text-xs',
+                            conv.id === conversation.id ? 'text-foreground/60' : 'text-muted-foreground',
+                          )}
+                        >
                           {(() => {
                             const count = conv.messages.filter((m) => m.role !== 'tool').length;
                             return `${count} message${count !== 1 ? 's' : ''}`;
@@ -326,13 +345,19 @@ const ChatPage = () => {
                   <div key={msg.id}>
                     <div
                       className={cn(
-                        'whitespace-pre-wrap rounded-xl px-4 py-3 text-sm',
+                        'isolate select-text overflow-hidden rounded-xl px-4 py-3 text-sm',
                         msg.role === 'user'
-                          ? 'ml-auto max-w-[80%] bg-primary text-primary-foreground'
+                          ? 'ml-auto max-w-[80%] whitespace-pre-wrap bg-primary text-primary-foreground'
                           : 'max-w-[85%] bg-secondary text-foreground',
                       )}
                     >
-                      {msg.content}
+                      {msg.role === 'user' ? (
+                        msg.content
+                      ) : (
+                        <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                        </div>
+                      )}
                     </div>
                     {msg.toolCalls && msg.toolCalls.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
@@ -360,8 +385,12 @@ const ChatPage = () => {
 
                 {/* Streaming content */}
                 {streaming && !toolStatus && (
-                  <div className="max-w-[85%] whitespace-pre-wrap rounded-xl bg-secondary px-4 py-3 text-sm text-foreground">
-                    {streamedContent || (
+                  <div className="isolate max-w-[85%] select-text overflow-hidden rounded-xl bg-secondary px-4 py-3 text-sm text-foreground">
+                    {streamedContent ? (
+                      <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamedContent}</ReactMarkdown>
+                      </div>
+                    ) : (
                       <span className="flex items-center gap-2 text-muted-foreground">
                         <Loader2 className="h-3 w-3 animate-spin" />
                         Thinking...
@@ -390,7 +419,7 @@ const ChatPage = () => {
                   }
                 }}
                 disabled={!isConfigured || streaming}
-                className="max-h-40 min-h-[44px] resize-none text-sm"
+                className="max-h-[200px] min-h-[44px] resize-none overflow-y-auto text-sm"
                 rows={1}
               />
               <Button

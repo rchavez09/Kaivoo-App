@@ -11,6 +11,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings, Wrench, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -54,6 +56,14 @@ const ConciergeChat = () => {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
   }, [isOpen, textareaRef]);
+
+  // Auto-resize textarea as user types
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, [input, textareaRef]);
 
   const handleRefreshAndShowList = useCallback(() => {
     setView('list');
@@ -170,13 +180,19 @@ const ConciergeChat = () => {
                     <div key={msg.id}>
                       <div
                         className={cn(
-                          'max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm',
+                          'isolate max-w-[85%] select-text overflow-hidden rounded-xl px-3 py-2 text-sm',
                           msg.role === 'user'
-                            ? 'ml-auto bg-primary text-primary-foreground'
+                            ? 'ml-auto whitespace-pre-wrap bg-primary text-primary-foreground'
                             : 'bg-secondary text-foreground',
                         )}
                       >
-                        {msg.content}
+                        {msg.role === 'user' ? (
+                          msg.content
+                        ) : (
+                          <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                          </div>
+                        )}
                       </div>
                       {/* Show tool call badges for assistant messages with tool calls */}
                       {msg.toolCalls && msg.toolCalls.length > 0 && (
@@ -205,8 +221,12 @@ const ConciergeChat = () => {
 
                   {/* Streaming content */}
                   {streaming && !toolStatus && (
-                    <div className="max-w-[85%] whitespace-pre-wrap rounded-xl bg-secondary px-3 py-2 text-sm text-foreground">
-                      {streamedContent || (
+                    <div className="isolate max-w-[85%] select-text overflow-hidden rounded-xl bg-secondary px-3 py-2 text-sm text-foreground">
+                      {streamedContent ? (
+                        <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamedContent}</ReactMarkdown>
+                        </div>
+                      ) : (
                         <span className="flex items-center gap-2 text-muted-foreground">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           Thinking...
@@ -249,7 +269,7 @@ const ConciergeChat = () => {
                       }
                     }}
                     disabled={!isConfigured || streaming}
-                    className="max-h-32 min-h-[36px] resize-none text-sm"
+                    className="max-h-[160px] min-h-[36px] resize-none overflow-y-auto text-sm"
                     rows={1}
                   />
                   <Button
