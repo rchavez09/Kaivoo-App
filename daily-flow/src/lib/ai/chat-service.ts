@@ -86,7 +86,18 @@ export async function* streamChat(
       return { role: 'tool' as const, content: m.content, tool_call_id: m.toolCallId };
     }
     if (m.toolCalls?.length) {
-      return { role: m.role, content: m.content, tool_calls: m.toolCalls };
+      return {
+        role: m.role,
+        content: m.content || null,
+        tool_calls: m.toolCalls.map((tc) => ({
+          id: tc.id,
+          type: 'function' as const,
+          function: {
+            name: tc.name,
+            arguments: typeof tc.arguments === 'string' ? tc.arguments : JSON.stringify(tc.arguments),
+          },
+        })),
+      };
     }
     return { role: m.role, content: m.content };
   });

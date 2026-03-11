@@ -248,11 +248,18 @@ function transformMessagesForAnthropic(messages: ChatMessage[]): any[] {
         content.push({ type: 'text', text: msg.content });
       }
       for (const tc of msg.tool_calls) {
+        // Handle OpenAI format (tc.function.name) and legacy format (tc.name)
+        const tcName = tc.function?.name || tc.name;
+        const tcArgs = tc.function?.arguments
+          ? typeof tc.function.arguments === 'string'
+            ? JSON.parse(tc.function.arguments)
+            : tc.function.arguments
+          : tc.arguments || {};
         content.push({
           type: 'tool_use',
           id: tc.id,
-          name: tc.name,
-          input: tc.arguments || {},
+          name: tcName,
+          input: tcArgs,
         });
       }
       result.push({ role: 'assistant', content });
