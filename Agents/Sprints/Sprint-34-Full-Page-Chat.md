@@ -2,7 +2,7 @@
 
 **Theme:** Give the concierge a real home.
 **Branch:** `sprint/34-full-page-chat`
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 **Compiled by:** Dev Director
 **Date:** March 10, 2026
 
@@ -153,13 +153,57 @@ Keep floating chat button as quick-access. Add "Open full chat" link that naviga
 
 | Metric | Target | Actual |
 |---|---|---|
-| Parcels | 5 | |
-| Build passes | Yes | |
-| Lint clean | Yes | |
-| Typecheck clean | Yes | |
-| Tests pass | Yes | |
-| New tests added | Yes | |
+| Parcels | 5 | 5/5 |
+| Build passes | Yes | Yes (2.56s) |
+| Lint clean | Yes | 0 errors |
+| Typecheck clean | Yes | Clean |
+| Tests pass | Yes | 265/265 |
+| E2E pass | Yes | 22/22 on deploy preview |
 
 ---
 
-*Sprint 34 — Full-Page AI Chat — Compiled March 10, 2026*
+## Retrospective
+
+### What Shipped
+
+Sprint 34 delivered the full-page AI chat experience plus significant UX polish found during sandbox testing. Two commits merged via PR #22:
+
+1. **Core delivery** (`de1fccc`): ChatPage, useConciergeChat shared hook, /chat route, sidebar nav, floating chat coordination
+2. **Sandbox fixes** (`1b3c6a7`): Markdown rendering, rename focus race fix, auto-expanding textarea, desktop text selection containment, message count color
+
+**Key architecture wins:**
+- **Shared hook extraction** — `useConciergeChat` consolidates ~290 lines of chat state/streaming/tool-loop/persistence logic that was previously duplicated between ConciergeChat (floating) and ChatPage. Both components now consume the same hook with an options/callbacks pattern (`UseConciergeChatOptions`) to handle component-specific behavior. Uses `callbacksRef` to keep `handleSend` stable.
+- **Zero deferred debt** — Founder explicitly requested no deferrals given the tight launch timeline. The shared hook was extracted during Sprint 34 rather than deferred to 35.
+- **Code-split correctly** — ChatPage chunk is 10.21 KB / 3.52 KB gzipped. Shared hook chunk (57.90 KB / 15.63 KB gzipped) is loaded by both chat surfaces.
+
+### Sandbox Findings (All Fixed)
+
+| Finding | Root Cause | Fix |
+|---|---|---|
+| Rename locks immediately after appearing | DropdownMenu focus return races with rename input focus (50ms delay too short) | Increased focus delay to 300ms; added blur timeout (200ms) with onFocus cancel |
+| Message count invisible on active conversation | `text-muted-foreground` too dim against `bg-accent` | Conditional `text-foreground/60` for active state |
+| Textarea doesn't expand for long messages | Fixed height, no auto-resize | `useEffect` watching `input` — auto-sizes up to 200px (ChatPage) / 160px (floating) |
+| Responses render as raw markdown text | `{msg.content}` rendered plain text | `ReactMarkdown` + `remarkGfm` with prose classes for assistant messages and streaming |
+| Text selection bleeds outside bubble on desktop | WebKit selection rendering in Tauri | `isolate` + `select-text` + `overflow-hidden` on message bubbles |
+| Task lookup failed (AI couldn't find tasks due today) | **Pre-existing** date format mismatch: `getTasksDueToday()` compares against literal `'Today'` string but tasks stored as `yyyy-MM-dd` | Flagged for Sprint 35 — not a Sprint 34 regression |
+
+### Velocity
+
+- Planning → merge: ~4 hours (including Agent 7 review, shared hook extraction, sandbox testing, 6 bug fixes)
+- No deferrals to future sprints (first time enforced this policy)
+- Quality gates passed on every iteration
+
+### What Went Well
+
+- Founder caught 6 real issues during sandbox testing on Tauri desktop — validates the sandbox step
+- `react-markdown` + `remark-gfm` were already in `package.json` — zero new dependencies for rich text rendering
+- The shared hook pattern pays off immediately: sandbox bug fixes applied once, fixed in both surfaces
+
+### What to Watch
+
+- **Task date format inconsistency** is a real bug affecting AI tool execution. `getTasksDueToday()` uses `'Today'` literal vs `yyyy-MM-dd` used everywhere else. Should be fixed early in Sprint 35-36.
+- **Pre-existing lint warnings** remain at 863. Not blocking but worth a cleanup sprint post-launch.
+
+---
+
+*Sprint 34 Retrospective — Written March 10, 2026, after merge to main*
