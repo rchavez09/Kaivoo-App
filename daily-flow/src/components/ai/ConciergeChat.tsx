@@ -13,7 +13,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Bot, Send, Plus, Trash2, ChevronLeft, Loader2, Settings, Wrench, Maximize2 } from 'lucide-react';
+import { Bot, Send, Plus, Trash2, ChevronLeft, Settings, Wrench, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -178,22 +178,24 @@ const ConciergeChat = () => {
                 <div className="space-y-3">
                   {visibleMessages.map((msg) => (
                     <div key={msg.id}>
-                      <div
-                        className={cn(
-                          'isolate max-w-[85%] select-text overflow-hidden rounded-xl px-3 py-2 text-sm',
-                          msg.role === 'user'
-                            ? 'ml-auto whitespace-pre-wrap bg-primary text-primary-foreground'
-                            : 'bg-secondary text-foreground',
-                        )}
-                      >
-                        {msg.role === 'user' ? (
-                          msg.content
-                        ) : (
-                          <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                          </div>
-                        )}
-                      </div>
+                      {(msg.role === 'user' || msg.content.trim()) && (
+                        <div
+                          className={cn(
+                            'isolate max-w-[85%] select-text overflow-hidden rounded-xl px-3 py-2 text-sm',
+                            msg.role === 'user'
+                              ? 'ml-auto whitespace-pre-wrap bg-primary text-primary-foreground'
+                              : 'bg-secondary text-foreground',
+                          )}
+                        >
+                          {msg.role === 'user' ? (
+                            msg.content
+                          ) : (
+                            <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {/* Show tool call badges for assistant messages with tool calls */}
                       {msg.toolCalls && msg.toolCalls.length > 0 && (
                         <div className="mt-1 flex flex-wrap gap-1">
@@ -227,9 +229,16 @@ const ConciergeChat = () => {
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamedContent}</ReactMarkdown>
                         </div>
                       ) : (
-                        <span className="flex items-center gap-2 text-muted-foreground">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          Thinking...
+                        <span className="flex items-center gap-1 py-1">
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60" />
+                          <span
+                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60"
+                            style={{ animationDelay: '150ms' }}
+                          />
+                          <span
+                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60"
+                            style={{ animationDelay: '300ms' }}
+                          />
                         </span>
                       )}
                     </div>

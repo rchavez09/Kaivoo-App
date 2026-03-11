@@ -14,7 +14,6 @@ import {
   Send,
   Plus,
   Trash2,
-  Loader2,
   Wrench,
   MoreHorizontal,
   Pencil,
@@ -343,22 +342,24 @@ const ChatPage = () => {
               <div className="space-y-4">
                 {visibleMessages.map((msg) => (
                   <div key={msg.id}>
-                    <div
-                      className={cn(
-                        'isolate select-text overflow-hidden rounded-xl px-4 py-3 text-sm',
-                        msg.role === 'user'
-                          ? 'ml-auto max-w-[80%] whitespace-pre-wrap bg-primary text-primary-foreground'
-                          : 'max-w-[85%] bg-secondary text-foreground',
-                      )}
-                    >
-                      {msg.role === 'user' ? (
-                        msg.content
-                      ) : (
-                        <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                        </div>
-                      )}
-                    </div>
+                    {(msg.role === 'user' || msg.content.trim()) && (
+                      <div
+                        className={cn(
+                          'isolate select-text overflow-hidden rounded-xl px-4 py-3 text-sm',
+                          msg.role === 'user'
+                            ? 'ml-auto max-w-[80%] whitespace-pre-wrap bg-primary text-primary-foreground'
+                            : 'max-w-[85%] bg-secondary text-foreground',
+                        )}
+                      >
+                        {msg.role === 'user' ? (
+                          msg.content
+                        ) : (
+                          <div className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-h1:text-base prose-h2:text-sm prose-h3:text-xs prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-foreground prose-a:text-primary max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {msg.toolCalls && msg.toolCalls.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {msg.toolCalls.map((tc) => (
@@ -391,9 +392,16 @@ const ChatPage = () => {
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamedContent}</ReactMarkdown>
                       </div>
                     ) : (
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Thinking...
+                      <span className="flex items-center gap-1 py-1">
+                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60" />
+                        <span
+                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60"
+                          style={{ animationDelay: '150ms' }}
+                        />
+                        <span
+                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60"
+                          style={{ animationDelay: '300ms' }}
+                        />
                       </span>
                     )}
                   </div>

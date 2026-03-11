@@ -394,11 +394,15 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
         updatedAt: new Date().toISOString(),
       };
 
-      // Clear streaming state BEFORE committing the final message to prevent
-      // a brief flash where both the streaming bubble and the committed message render.
+      // Clear ALL streaming state BEFORE committing the final message to prevent
+      // a brief flash where the "thinking" indicator reappears during persistence.
+      setStreaming(false);
       setStreamedContent('');
       setToolStatus(null);
       setConversation(finalConv);
+
+      // Re-focus the input so the user can keep typing immediately
+      setTimeout(() => textareaRef.current?.focus(), 50);
 
       // Persist
       const existingIds = conversations.map((c) => c.id);
