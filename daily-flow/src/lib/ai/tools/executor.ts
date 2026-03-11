@@ -17,6 +17,7 @@ import type { Task, Meeting, JournalEntry, Capture, Project, RoutineItem, Habit 
 import { useKaivooStore } from '@/stores/useKaivooStore';
 import { addMemory, getMemories } from '../memory-service';
 import { format, addDays, parse, isBefore, startOfDay } from 'date-fns';
+import { parseDate } from '@/lib/dateUtils';
 
 // ─── Types ───
 
@@ -381,22 +382,31 @@ export async function executeTool(
           if (dueLower === 'overdue') {
             // Tasks with due dates before today that aren't done
             tasks = tasks.filter((t) => {
-              if (t.status === 'done' || !t.dueDate || t.dueDate === 'Today') return false;
-              const resolved = resolveDate(t.dueDate);
-              return isBefore(startOfDay(new Date(resolved + 'T00:00:00')), todayStart);
+              if (t.status === 'done' || !t.dueDate) return false;
+              const due = parseDate(t.dueDate);
+              if (!due) return false;
+              return isBefore(startOfDay(due), todayStart);
             });
           } else if (dueLower === 'this_week' || dueLower === 'week') {
             // Tasks due within the next 7 days (including today)
             const weekEnd = addDays(todayStart, 7);
             tasks = tasks.filter((t) => {
               if (!t.dueDate) return false;
-              const resolved = resolveDate(t.dueDate);
-              const dueDay = startOfDay(new Date(resolved + 'T00:00:00'));
+              const due = parseDate(t.dueDate);
+              if (!due) return false;
+              const dueDay = startOfDay(due);
               return dueDay >= todayStart && isBefore(dueDay, weekEnd);
             });
           } else {
             const resolved = resolveDate(dueDate);
-            tasks = tasks.filter((t) => t.dueDate === resolved || (resolved === todayISO && t.dueDate === 'Today'));
+            tasks = tasks.filter((t) => {
+              if (!t.dueDate) return false;
+              // Compare parsed dates so all storage formats match
+              const due = parseDate(t.dueDate);
+              const target = parseDate(resolved);
+              if (!due || !target) return false;
+              return startOfDay(due).getTime() === startOfDay(target).getTime();
+            });
           }
         }
         if (projectName) {
