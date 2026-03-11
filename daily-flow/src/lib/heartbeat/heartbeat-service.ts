@@ -141,7 +141,6 @@ function getIntervalSeconds(settings: HeartbeatSettings): number {
 
 /**
  * Handle heartbeat tick — this is where the magic happens
- * P3 will implement the actual AI inference logic
  */
 async function onHeartbeatTick(): Promise<void> {
   const settings = getHeartbeatSettings();
@@ -153,16 +152,108 @@ async function onHeartbeatTick(): Promise<void> {
   }
 
   try {
-    // P3: This will call the heartbeat AI inference
-    console.log('[Heartbeat] Would run AI inference here (P3 implementation)');
+    console.log('[Heartbeat] Running AI inference...');
+    const insight = await runHeartbeatInference();
 
-    // Placeholder: In P3, we'll:
-    // 1. Read user context (tasks, calendar, journal, soul file)
-    // 2. Run AI inference with heartbeat prompt
-    // 3. Store insight in heartbeat_insights table
-    // 4. If actionable, trigger notification (P4)
+    if (insight) {
+      console.log('[Heartbeat] Insight generated:', insight);
+      // P4: Trigger notification if settings.notificationsEnabled
+    } else {
+      console.log('[Heartbeat] No actionable insights found (NO_ACTION)');
+    }
   } catch (e) {
     console.error('[Heartbeat] Tick failed:', e);
+  }
+}
+
+/**
+ * Run AI inference to generate a proactive insight.
+ * Returns the insight text if actionable, or null if NO_ACTION.
+ */
+async function runHeartbeatInference(): Promise<string | null> {
+  try {
+    // Import dependencies
+    const { buildHeartbeatPrompt } = await import('./heartbeat-prompt');
+    const { getSoulConfig, getAISettings } = await import('../ai/settings');
+    const { assembleAppContext } = await import('../ai/prompt-assembler');
+    const { callAI } = await import('../ai/chat-service');
+
+    // Get AI settings
+    const aiSettings = getAISettings();
+    if (!aiSettings.apiKey) {
+      console.warn('[Heartbeat] No API key configured, skipping inference');
+      return null;
+    }
+
+    // Assemble context
+    const soul = getSoulConfig();
+    const appContext = await assembleAppContext();
+    const prompt = buildHeartbeatPrompt({ soul, appContext });
+
+    // Call AI with heartbeat-optimized settings
+    const response = await callAI({
+      messages: [{ role: 'user', content: prompt }],
+      provider: aiSettings.provider,
+      model: aiSettings.model,
+      apiKey: aiSettings.apiKey,
+      temperature: 0.3, // Deterministic, not creative
+      maxTokens: 150, // Keep it concise
+      ollamaBaseUrl: aiSettings.ollamaBaseUrl,
+    });
+
+    const insight = response.content.trim();
+
+    // Check if actionable
+    if (insight === 'NO_ACTION' || insight.length === 0) {
+      return null;
+    }
+
+    // Store insight in database
+    await storeInsight(insight, appContext);
+
+    return insight;
+  } catch (e) {
+    console.error('[Heartbeat] Inference failed:', e);
+    return null;
+  }
+}
+
+/**
+ * Store the generated insight in the database
+ */
+async function storeInsight(insight: string, appContext: unknown): Promise<void> {
+  try {
+    const settings = getHeartbeatSettings();
+
+    // Check if we have Supabase client
+    const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+    if (isTauri) {
+      // Desktop: use SQLite via Tauri SQL plugin
+      // For now, just log (full SQLite integration is Phase B)
+      console.log('[Heartbeat] Would store to SQLite:', insight);
+    } else {
+      // Web: use Supabase
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.warn('[Heartbeat] No user authenticated, skipping insight storage');
+        return;
+      }
+
+      await supabase.from('heartbeat_insights').insert({
+        user_id: user.id,
+        insight,
+        is_actionable: true,
+        context_snapshot: appContext,
+        frequency_setting: settings.frequency,
+      });
+
+      console.log('[Heartbeat] Insight stored to database');
+    }
+  } catch (e) {
+    console.error('[Heartbeat] Failed to store insight:', e);
   }
 }
 
