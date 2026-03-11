@@ -46,8 +46,9 @@ export interface ExecutorActions {
 
 function resolveDate(dateStr?: string): string {
   if (!dateStr) return format(new Date(), 'yyyy-MM-dd');
-  if (dateStr === 'today') return format(new Date(), 'yyyy-MM-dd');
-  if (dateStr === 'tomorrow') return format(addDays(new Date(), 1), 'yyyy-MM-dd');
+  const lower = dateStr.toLowerCase().trim();
+  if (lower === 'today') return format(new Date(), 'yyyy-MM-dd');
+  if (lower === 'tomorrow') return format(addDays(new Date(), 1), 'yyyy-MM-dd');
   // Try to parse as YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
   // Try natural parsing

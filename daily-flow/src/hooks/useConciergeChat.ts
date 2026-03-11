@@ -344,6 +344,10 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
         updatedAt: new Date().toISOString(),
       };
 
+      // Clear streaming state BEFORE committing the final message to prevent
+      // a brief flash where both the streaming bubble and the committed message render.
+      setStreamedContent('');
+      setToolStatus(null);
       setConversation(finalConv);
 
       // Persist
@@ -362,8 +366,6 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
       }
       const convos = await dataAdapter.conversations.fetchAll();
       setConversations(convos);
-      setStreamedContent('');
-      setToolStatus(null);
 
       // Post-conversation processing (fire-and-forget)
       const lastAssistant = workingMessages.filter((m) => m.role === 'assistant').pop();

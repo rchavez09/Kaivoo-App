@@ -191,13 +191,14 @@ export const GET_CAPTURES: ToolSchema = {
 
 export const GET_PROJECTS: ToolSchema = {
   name: 'get_projects',
-  description: 'List projects with optional status filter. Use when the user asks about their projects.',
+  description:
+    'List projects with optional status filter. Returns ALL projects by default. Use when the user asks about their projects.',
   parameters: {
     type: 'object',
     properties: {
       status: {
         type: 'string',
-        description: 'Filter by project status',
+        description: 'Filter by project status. Omit or use "all" to return every project regardless of status.',
         enum: ['planning', 'active', 'paused', 'completed', 'all'],
       },
     },
