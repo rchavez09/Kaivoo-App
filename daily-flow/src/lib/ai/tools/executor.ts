@@ -103,6 +103,53 @@ function findTopic(name: string) {
   return store.topics.find((t) => fuzzyMatch(name, t.name));
 }
 
+// ─── Validation Helpers ───
+
+const VALID_TOOL_NAMES = new Set([
+  'create_task',
+  'create_journal_entry',
+  'create_calendar_event',
+  'create_capture',
+  'create_note',
+  'search',
+  'get_tasks',
+  'get_journal',
+  'get_calendar',
+  'get_routines',
+  'get_notes',
+  'get_captures',
+  'get_projects',
+  'complete_task',
+  'update_task',
+  'log_routine',
+  'log_habit',
+  'remember_user_fact',
+]);
+
+function validateRequired(args: Record<string, unknown>, fields: string[]): string | null {
+  for (const field of fields) {
+    if (args[field] === undefined || args[field] === null || args[field] === '') {
+      return `Missing required parameter "${field}".`;
+    }
+  }
+  return null;
+}
+
+function validateString(args: Record<string, unknown>, field: string): string | null {
+  if (args[field] !== undefined && typeof args[field] !== 'string') {
+    return `Parameter "${field}" must be a string, got ${typeof args[field]}.`;
+  }
+  return null;
+}
+
+function validateEnum(args: Record<string, unknown>, field: string, allowed: string[]): string | null {
+  const val = args[field];
+  if (val !== undefined && (typeof val !== 'string' || !allowed.includes(val))) {
+    return `Parameter "${field}" must be one of: ${allowed.join(', ')}. Got "${val}".`;
+  }
+  return null;
+}
+
 // ─── Tool Execution ───
 
 let toolCallCount = 0;
@@ -125,10 +172,20 @@ export async function executeTool(
   const args = toolCall.arguments;
   const name = toolCall.name;
 
+  if (import.meta.env.DEV) {
+    console.log(`[executeTool] ${name}`, JSON.stringify(args));
+  }
+
   try {
     switch (name) {
       // ─── Create Tools ───
       case 'create_task': {
+        const reqErr = validateRequired(args, ['title']);
+        if (reqErr) return { success: false, message: reqErr };
+        const titleErr = validateString(args, 'title');
+        if (titleErr) return { success: false, message: titleErr };
+        const prioErr = validateEnum(args, 'priority', ['low', 'medium', 'high', 'urgent']);
+        if (prioErr) return { success: false, message: prioErr };
         const resolvedDate = resolveDate(args.due_date as string | undefined);
         const todayISO = format(new Date(), 'yyyy-MM-dd');
         // Use 'Today' literal when the date resolves to today — matches UI convention
@@ -302,6 +359,10 @@ export async function executeTool(
       }
 
       case 'get_tasks': {
+        const statusErr = validateEnum(args, 'status', ['todo', 'in_progress', 'done', 'all']);
+        if (statusErr) return { success: false, message: statusErr };
+        const prioErr2 = validateEnum(args, 'priority', ['low', 'medium', 'high', 'urgent']);
+        if (prioErr2) return { success: false, message: prioErr2 };
         const store = useKaivooStore.getState();
         let tasks = [...store.tasks];
         const status = args.status as string | undefined;
@@ -463,6 +524,8 @@ export async function executeTool(
       }
 
       case 'get_projects': {
+        const statusErr2 = validateEnum(args, 'status', ['planning', 'active', 'paused', 'completed', 'all']);
+        if (statusErr2) return { success: false, message: statusErr2 };
         const store = useKaivooStore.getState();
         let projects = [...store.projects];
         const status = args.status as string | undefined;
@@ -484,6 +547,10 @@ export async function executeTool(
 
       // ─── Update/Complete Tools ───
       case 'complete_task': {
+        const reqErr2 = validateRequired(args, ['task_title']);
+        if (reqErr2) return { success: false, message: reqErr2 };
+        const ttErr = validateString(args, 'task_title');
+        if (ttErr) return { success: false, message: ttErr };
         const taskTitle = args.task_title as string;
         const task = findTask(taskTitle);
         if (!task) {
@@ -498,6 +565,12 @@ export async function executeTool(
       }
 
       case 'update_task': {
+        const reqErr3 = validateRequired(args, ['task_title']);
+        if (reqErr3) return { success: false, message: reqErr3 };
+        const prioErr3 = validateEnum(args, 'priority', ['low', 'medium', 'high', 'urgent']);
+        if (prioErr3) return { success: false, message: prioErr3 };
+        const statusErr3 = validateEnum(args, 'status', ['todo', 'in_progress', 'done']);
+        if (statusErr3) return { success: false, message: statusErr3 };
         const taskTitle2 = args.task_title as string;
         const task = findTask(taskTitle2);
         if (!task) {
@@ -572,7 +645,10 @@ export async function executeTool(
       }
 
       default:
-        return { success: false, message: `Unknown tool: ${name}` };
+        return {
+          success: false,
+          message: `Unknown tool "${name}". Available tools: ${[...VALID_TOOL_NAMES].join(', ')}.`,
+        };
     }
   } catch (e) {
     console.error(`[executeTool] ${name} failed:`, e);

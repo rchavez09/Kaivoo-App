@@ -380,15 +380,20 @@ async function handleChat(body: ChatRequest): Promise<Response> {
       },
     );
   } else if (provider === 'ollama') {
+    // Use Ollama's OpenAI-compatible endpoint for unified tool support
     const base = ollamaBaseUrl || 'http://localhost:11434';
-    upstream = await fetch(`${base}/api/chat`, {
+    // deno-lint-ignore no-explicit-any
+    const requestBody: any = {
+      model,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      stream: true,
+    };
+    if (openaiTools) requestBody.tools = openaiTools;
+
+    upstream = await fetch(`${base}/v1/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'system', content: systemPrompt }, ...messages],
-        stream: true,
-      }),
+      body: JSON.stringify(requestBody),
     });
   } else {
     return jsonResponse({ error: 'Unknown provider' }, 400);
@@ -480,37 +485,52 @@ function extractEvent(
   line: string,
   pendingToolCalls: Record<number, { id: string; name: string; arguments: string }>,
 ): SSEEvent | null {
-  if (provider === 'ollama') {
-    if (!line.trim()) return null;
-    try {
-      const data = JSON.parse(line);
-      if (data.message?.content) return { text: data.message.content };
-    } catch {
-      return null;
-    }
-    return null;
-  }
-
   if (provider === 'google') {
     if (!line.startsWith('data: ')) return null;
     const raw = line.slice(6).trim();
     try {
       const parsed = JSON.parse(raw);
-      // Text content
-      const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) return { text };
-      // Tool call
-      const fc = parsed.candidates?.[0]?.content?.parts?.[0]?.functionCall;
-      if (fc) {
-        return { tool_call: { id: `gemini-${Date.now()}`, name: fc.name, arguments: fc.args || {} } };
+      const parts = parsed.candidates?.[0]?.content?.parts;
+      if (!parts || !Array.isArray(parts)) return null;
+
+      // Iterate ALL parts for text and function calls
+      let textContent = '';
+      for (const part of parts) {
+        if (part.text) textContent += part.text;
+        if (part.functionCall) {
+          const fc = part.functionCall;
+          const idx = Object.keys(pendingToolCalls).length;
+          pendingToolCalls[idx] = {
+            id: `gemini-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            name: fc.name,
+            arguments: JSON.stringify(fc.args || {}),
+          };
+        }
       }
+
+      // Emit first pending tool call if any (rest flushed at stream end)
+      const keys = Object.keys(pendingToolCalls).map(Number);
+      if (keys.length > 0 && !textContent) {
+        const firstKey = keys[0];
+        const tc = pendingToolCalls[firstKey];
+        let parsedArgs: Record<string, unknown> = {};
+        try {
+          parsedArgs = JSON.parse(tc.arguments || '{}');
+        } catch {
+          /* empty */
+        }
+        delete pendingToolCalls[firstKey];
+        return { tool_call: { id: tc.id, name: tc.name, arguments: parsedArgs } };
+      }
+
+      if (textContent) return { text: textContent };
     } catch {
       return null;
     }
     return null;
   }
 
-  // OpenAI-compatible and Anthropic use SSE format
+  // OpenAI-compatible (incl. Ollama) and Anthropic use SSE format
   if (!line.startsWith('data: ')) return null;
   const raw = line.slice(6).trim();
   if (raw === '[DONE]') return null;
@@ -518,13 +538,14 @@ function extractEvent(
   try {
     const parsed = JSON.parse(raw);
 
-    // OpenAI-compatible format
+    // OpenAI-compatible format (includes Ollama via /v1/chat/completions)
     if (
       provider === 'openai' ||
       provider === 'groq' ||
       provider === 'deepseek' ||
       provider === 'mistral' ||
       provider === 'openrouter' ||
+      provider === 'ollama' ||
       provider === 'openai-compatible'
     ) {
       const delta = parsed.choices?.[0]?.delta;
@@ -548,7 +569,6 @@ function extractEvent(
       if (finishReason === 'tool_calls' || finishReason === 'function_call') {
         const keys = Object.keys(pendingToolCalls).map(Number);
         if (keys.length > 0) {
-          // Emit first tool call as return value; enqueue the rest directly
           const firstKey = keys[0];
           const firstTc = pendingToolCalls[firstKey];
           let firstArgs: Record<string, unknown> = {};
@@ -558,11 +578,26 @@ function extractEvent(
             /* empty */
           }
           delete pendingToolCalls[firstKey];
-
-          // Remaining tool calls — leave in pendingToolCalls for stream-end flush
-          // (we can only return one event from extractEvent)
-
           return { tool_call: { id: firstTc.id, name: firstTc.name, arguments: firstArgs } };
+        }
+      }
+
+      // Some providers (OpenRouter) send finish_reason: "stop" even with pending tool calls
+      if (finishReason === 'stop') {
+        const keys = Object.keys(pendingToolCalls).map(Number);
+        if (keys.length > 0) {
+          const firstKey = keys[0];
+          const firstTc = pendingToolCalls[firstKey];
+          if (firstTc.name) {
+            let firstArgs: Record<string, unknown> = {};
+            try {
+              firstArgs = JSON.parse(firstTc.arguments || '{}');
+            } catch {
+              /* empty */
+            }
+            delete pendingToolCalls[firstKey];
+            return { tool_call: { id: firstTc.id, name: firstTc.name, arguments: firstArgs } };
+          }
         }
       }
 

@@ -364,8 +364,14 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
         workingMessages = [...workingMessages, assistantMessage];
 
         for (const tc of toolCalls) {
+          if (import.meta.env.DEV) {
+            console.log(`[useConciergeChat] executing tool: ${tc.name}`, tc.arguments);
+          }
           setToolStatus(`Running: ${tc.name.replace(/_/g, ' ')}...`);
           const result = await executeTool(tc, executorActions, text);
+          if (import.meta.env.DEV) {
+            console.log(`[useConciergeChat] tool result: ${tc.name}`, result.success, result.message);
+          }
 
           const toolMessage: ConversationMessage = {
             id: crypto.randomUUID(),

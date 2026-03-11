@@ -146,6 +146,9 @@ export async function* streamChat(
           if (parsed.error) throw new Error(parsed.error);
           if (parsed.text) yield { type: 'text', text: parsed.text };
           if (parsed.tool_call) {
+            if (import.meta.env.DEV) {
+              console.log('[streamChat] tool_call received:', parsed.tool_call.name, parsed.tool_call.arguments);
+            }
             yield {
               type: 'tool_call',
               toolCall: {
