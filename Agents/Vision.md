@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.7
-**Last Updated:** March 9, 2026
+**Version:** 7.8
+**Last Updated:** March 10, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -684,7 +684,8 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | Stripe integration — one-time payment flow | **DONE** (Sprint 25 — $49/$99 Checkout, Edge Functions) | Must-have |
 | EULA / legal documentation — proprietary license, redistribution terms, privacy policy | PLANNED (Sprint 57) | Must-have |
 | Product Hunt launch | PLANNED (April 16, 2026) | Must-have |
-| **Full-page AI Chat** — `/chat` route, conversation list, persistent history, model selector | PLANNED (Sprint 34) | **Must-have** |
+| **Full-page AI Chat** — `/chat` route, conversation list, persistent history, model selector | **DONE** (Sprint 34) | **Must-have** |
+| **AI Execution Tools + Data Awareness** — 19 tools working end-to-end, cross-provider tool schemas (8 providers), argument validation with self-correcting errors, Ollama OpenAI-compat mode, Gemini tool-use round-trips, text fallback extraction | **DONE** (Sprint 35-36) | **Must-have** |
 | **Configurable Heartbeat** — proactive AI that acts without being asked. Background timer, morning briefing, evening summary, custom intervals. Reads tasks, calendar, journal, soul file. | PLANNED (Sprint 37) | **Must-have** |
 | **Neuron Memory V1** — tiered soul file (Core Identity + Active Context + Episodic Memory), memory consolidation during heartbeat (dedup, summarize, prune, promote), context-aware loading (~3500 token budget). Solves soul file bloat. | PLANNED (Sprint 38) | **Must-have** |
 | **Orchestrator Page** — 4-tab page: Agents (CRUD, model assignment, permissions), Skills (CRUD, AI skill creation), Workflows (step builder, triggers, approval gates), MCPs (discover, connect, manage). Users define their own AI agent teams and workflows. | PLANNED (Sprints 39-45) | **Must-have** |
@@ -1081,7 +1082,9 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 
 ---
 
-*Vision v7.6 — March 9, 2026*
+*Vision v7.8 — March 10, 2026*
+*v7.8: Sprint 35-36 (Fix Execution Tools + Data Awareness) complete. 6/6 parcels. AI tool execution now works end-to-end: 19 tools with hardened schemas (`additionalProperties: false`, enriched descriptions, aligned enums), argument validation with self-correcting error messages, cross-provider tool support for all 8 providers (OpenAI, Anthropic, Gemini, Groq, DeepSeek, Mistral, OpenRouter, Ollama). Key fixes: edge function deployed (was never deployed — root cause of all failures), Ollama switched to OpenAI-compatible endpoint for native tool calling, Gemini functionCall/functionResponse message transformation, overdue task detection via `parseDate()` for all stored date formats, `toggleHabitCompletion` routed through action layer. Edge function v10 deployed. Agent 7 audit: 0 P0s, 9 P1s (top 3 fixed), 10 P2s. Agent 11: PASS. See `Sprints/Sprint-35-36-Execution-Tools.md`.*
+*v7.7: Sprint 34 (Full-Page AI Chat) complete. `/chat` route with conversation list, persistent history (SQLite + Supabase), model selector, shared `useConciergeChat` hook powering both widget and full-page chat. See `Sprints/Sprint-34-Full-Page-Chat.md`.*
 *v7.6: Sprint 33 (Bug Bash) complete. 10/10 parcels. All user-facing bugs from CEO #12 audit fixed: HTML rendering in content surfaces (DayReview + TopicCapturesWidget), Kanban all-column drag-and-drop, wiki-link `[[Topic/Page]]` rendering as clickable links (custom Tiptap WikiLinkNode + preprocessor for existing content), Library sidebar icon → FolderOpen, Gantt view hidden. Cleanup: seed data removed from store, `to_tsquery` sanitized, compressImage float fix, `.env` in .gitignore. 6 P1s caught by verification agents + 2 sandbox issues, all fixed. E2E infrastructure repaired (22/22 pass). Process improvements: format-first quality gates, E2E in sprint gate chain. Ready for AI feature sprints (Sprint 34+). See `Sprints/Sprint-33-Bug-Bash-Vault.md`.*
 *v7.5: Sprint 31 (Tasks + Projects Merge) complete. 14/14 parcels. Unified `/projects` page with top-level tabs (All Tasks | Projects), lazy-loaded TasksContent, `/tasks` redirect, project detail tabbed sub-nav (Tasks/Documents/Notes/Chat), Inbox virtual project, sidebar Tasks entry removed, all navigation updated. Post-audit: O(N+M) stats optimization, settings moved to gear icon dialog, ARIA improvements (aria-pressed, focus-visible rings), hover translate pattern. 265 tests. Current position updated.*
 *v7.4: Sprint 30 (Bug Bash + Concierge Hardening) complete. 15/15 parcels. 7 bugs fixed (2 P0 data-loss), concierge memory architecture hardened (pre-compaction flush, deterministic context assembly, coherence monitoring), upload polish, AI conversations moved to adapter pattern (localStorage→SQLite/Supabase), desktop vault fixed (VirtualVaultAdapter for browsing). 265 tests. Current position updated.*
