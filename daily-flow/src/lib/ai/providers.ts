@@ -18,6 +18,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-...',
+    supportsTools: true,
   },
   {
     id: 'anthropic',
@@ -28,6 +29,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-ant-...',
+    supportsTools: true,
   },
   {
     id: 'google',
@@ -39,6 +41,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'AIza...',
+    supportsTools: true,
   },
   {
     id: 'groq',
@@ -50,6 +53,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'gsk_...',
+    supportsTools: true,
   },
   {
     id: 'mistral',
@@ -61,6 +65,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: '',
+    supportsTools: true,
   },
   {
     id: 'deepseek',
@@ -71,6 +76,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-...',
+    supportsTools: true,
   },
   {
     id: 'openrouter',
@@ -86,6 +92,7 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
     ],
     requiresApiKey: true,
     placeholder: 'sk-or-...',
+    supportsTools: true,
   },
   {
     id: 'ollama',
@@ -111,4 +118,10 @@ export const AI_PROVIDERS: AIProviderConfig[] = [
 
 export function getProviderConfig(providerId: string): AIProviderConfig | undefined {
   return AI_PROVIDERS.find((p) => p.id === providerId);
+}
+
+/** Check if the current provider supports tool use / function calling. */
+export function providerSupportsTools(providerId: string): boolean {
+  const config = getProviderConfig(providerId);
+  return config?.supportsTools ?? false;
 }

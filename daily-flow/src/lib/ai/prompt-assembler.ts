@@ -94,11 +94,14 @@ function buildConversationLayer(summaries: AIConversationSummary[]): string {
 
 export interface AppContext {
   tasksDueToday: Array<{ title: string; priority: string; status: string }>;
+  upcomingTasks: Array<{ title: string; priority: string; dueDate: string }>;
+  overdueTasks: Array<{ title: string; priority: string; dueDate: string }>;
   todaysMeetings: Array<{ title: string; startTime: string; endTime: string }>;
   journalEntriesToday: number;
-  activeProjects: Array<{ name: string; status: string }>;
+  activeProjects: Array<{ name: string; status: string; description?: string }>;
   routinesCompletedToday: number;
   routinesTotal: number;
+  recentCaptures: Array<{ content: string; date: string }>;
 }
 
 function buildAppContextLayer(ctx: AppContext | null): string {
@@ -107,7 +110,16 @@ function buildAppContextLayer(ctx: AppContext | null): string {
   const today = format(new Date(), 'EEEE, MMMM d, yyyy');
   const lines = [`## Today (${today})`];
 
-  // Tasks
+  // Overdue tasks
+  if (ctx.overdueTasks.length > 0) {
+    lines.push(`**Overdue tasks (${ctx.overdueTasks.length}):**`);
+    for (const t of ctx.overdueTasks.slice(0, 5)) {
+      lines.push(`- ${t.title} [${t.priority}] — was due ${t.dueDate}`);
+    }
+    if (ctx.overdueTasks.length > 5) lines.push(`  ...and ${ctx.overdueTasks.length - 5} more`);
+  }
+
+  // Tasks due today
   const pendingTasks = ctx.tasksDueToday.filter((t) => t.status !== 'done');
   if (pendingTasks.length > 0) {
     lines.push(`**Tasks due today (${pendingTasks.length}):**`);
@@ -117,6 +129,15 @@ function buildAppContextLayer(ctx: AppContext | null): string {
     if (pendingTasks.length > 10) lines.push(`  ...and ${pendingTasks.length - 10} more`);
   } else {
     lines.push('No tasks due today.');
+  }
+
+  // Upcoming tasks (next 7 days)
+  if (ctx.upcomingTasks.length > 0) {
+    lines.push(`**Upcoming tasks (next 7 days, ${ctx.upcomingTasks.length}):**`);
+    for (const t of ctx.upcomingTasks.slice(0, 8)) {
+      lines.push(`- ${t.title} [${t.priority}] — due ${t.dueDate}`);
+    }
+    if (ctx.upcomingTasks.length > 8) lines.push(`  ...and ${ctx.upcomingTasks.length - 8} more`);
   }
 
   // Meetings
@@ -141,7 +162,18 @@ function buildAppContextLayer(ctx: AppContext | null): string {
 
   // Active projects
   if (ctx.activeProjects.length > 0) {
-    lines.push(`**Active projects:** ${ctx.activeProjects.map((p) => p.name).join(', ')}`);
+    lines.push(`**Active projects (${ctx.activeProjects.length}):**`);
+    for (const p of ctx.activeProjects.slice(0, 5)) {
+      lines.push(`- ${p.name}${p.description ? `: ${p.description}` : ''}`);
+    }
+  }
+
+  // Recent captures
+  if (ctx.recentCaptures.length > 0) {
+    lines.push(`**Recent captures (${ctx.recentCaptures.length}):**`);
+    for (const c of ctx.recentCaptures.slice(0, 5)) {
+      lines.push(`- "${c.content}" (${c.date})`);
+    }
   }
 
   return lines.join('\n');
@@ -167,6 +199,10 @@ function buildBehavioralLayer(depth: AIDepth, hasTools: boolean): string {
       'Use tools when the user asks you to take action (create tasks, log routines, search notes, etc.).',
       'For ambiguous references, search first to confirm the correct item before modifying it.',
       'For destructive actions (delete, bulk changes), confirm with the user before proceeding.',
+      'For complex requests like "morning briefing" or "summarize my day", chain multiple read tools (get_tasks, get_calendar, get_journal, get_routines) to gather data, then synthesize a response.',
+      'For requests like "summarize my journal" or "what did I write about X", use get_journal to fetch entries, then summarize them in your response.',
+      'For requests like "draft a project brief", use get_projects and get_tasks to gather project data, then compose the brief.',
+      'You can call multiple tools in sequence — use read tools first to gather context, then write tools to take action.',
     );
   }
 
@@ -221,7 +257,7 @@ export function estimateTokens(prompt: string): number {
  *   - Conversation summaries (SQLite or localStorage)
  *   - App context (Zustand store snapshot)
  */
-export async function assembleConciergeContext(appContext: AppContext | null): Promise<string> {
+export async function assembleConciergeContext(appContext: AppContext | null, hasTools = true): Promise<string> {
   const soul = getSoulConfig();
   const settings = getAISettings();
   const allMemories = await getMemories();
@@ -234,6 +270,6 @@ export async function assembleConciergeContext(appContext: AppContext | null): P
     memories: activeMemories,
     summaries,
     appContext,
-    hasTools: true,
+    hasTools,
   });
 }

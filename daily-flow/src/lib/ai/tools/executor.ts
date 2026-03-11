@@ -309,7 +309,9 @@ export async function executeTool(
         if (priority) tasks = tasks.filter((t) => t.priority === priority);
         if (dueDate) {
           const resolved = resolveDate(dueDate);
-          tasks = tasks.filter((t) => t.dueDate === resolved);
+          tasks = tasks.filter(
+            (t) => t.dueDate === resolved || (resolved === format(new Date(), 'yyyy-MM-dd') && t.dueDate === 'Today'),
+          );
         }
         if (projectName) {
           const project = findProject(projectName);
@@ -355,7 +357,7 @@ export async function executeTool(
       case 'get_calendar': {
         const store = useKaivooStore.getState();
         const date = resolveDate(args.date as string | undefined);
-        const meetings = store.getMeetingsForDate(date);
+        const meetings = store.getMeetingsForDate(new Date(date + 'T00:00:00'));
         const summary = meetings.map((m) => ({
           title: m.title,
           startTime: m.startTime,

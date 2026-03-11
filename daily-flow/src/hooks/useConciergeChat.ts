@@ -9,8 +9,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, addDays, isBefore, parseISO, isValid, startOfDay } from 'date-fns';
 import { getAISettings, getSoulConfig } from '@/lib/ai/settings';
+import { providerSupportsTools } from '@/lib/ai/providers';
 import { streamChat, createConversation } from '@/lib/ai/chat-service';
 import type { Conversation, ConversationMessage, ToolCall } from '@/lib/ai/types';
 import { assembleConciergeContext } from '@/lib/ai/prompt-assembler';
@@ -133,34 +134,78 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
 
   const buildAppContext = useCallback((): AppContext => {
     const store = useKaivooStore.getState();
-    const today = format(new Date(), 'yyyy-MM-dd');
+    const now = new Date();
+    const today = format(now, 'yyyy-MM-dd');
+    const todayStart = startOfDay(now);
 
+    // Helper: resolve task dueDate to a Date for comparison
+    const parseDueDate = (dueDate: string | undefined): Date | null => {
+      if (!dueDate) return null;
+      if (dueDate === 'Today') return todayStart;
+      if (dueDate === 'Tomorrow') return addDays(todayStart, 1);
+      if (/^\d{4}-\d{2}-\d{2}/.test(dueDate)) {
+        const parsed = parseISO(dueDate);
+        return isValid(parsed) ? startOfDay(parsed) : null;
+      }
+      return null;
+    };
+
+    // Tasks due today (ISO format OR 'Today' literal)
     const tasksDueToday = store.tasks
-      .filter((t) => t.dueDate === today)
+      .filter((t) => (t.dueDate === today || t.dueDate === 'Today') && t.status !== 'done')
       .map((t) => ({ title: t.title, priority: t.priority, status: t.status }));
 
+    // Overdue tasks (due before today, not done)
+    const overdueTasks = store.tasks
+      .filter((t) => {
+        if (t.status === 'done' || !t.dueDate || t.dueDate === 'Today') return false;
+        const due = parseDueDate(t.dueDate);
+        return due ? isBefore(due, todayStart) : false;
+      })
+      .map((t) => ({ title: t.title, priority: t.priority, dueDate: t.dueDate || '' }));
+
+    // Upcoming tasks (next 7 days, excluding today, not done)
+    const weekEnd = addDays(todayStart, 7);
+    const upcomingTasks = store.tasks
+      .filter((t) => {
+        if (t.status === 'done' || !t.dueDate) return false;
+        const due = parseDueDate(t.dueDate);
+        if (!due) return false;
+        return due > todayStart && isBefore(due, weekEnd);
+      })
+      .map((t) => ({ title: t.title, priority: t.priority, dueDate: t.dueDate || '' }));
+
     const todaysMeetings = store
-      .getMeetingsForDate(new Date())
+      .getMeetingsForDate(now)
       .map((m) => ({ title: m.title, startTime: m.startTime.toISOString(), endTime: m.endTime.toISOString() }));
 
     const journalEntriesToday = store.getJournalEntriesForDate(today).length;
 
     const activeProjects = store.projects
       .filter((p) => p.status === 'active')
-      .map((p) => ({ name: p.name, status: p.status }));
+      .map((p) => ({ name: p.name, status: p.status, description: p.description?.slice(0, 80) }));
 
     const routinesTotal = store.routines.length + store.habits.length;
     const routinesCompletedToday =
       store.routines.filter((r) => store.isRoutineCompleted(r.id, today)).length +
       store.habits.filter((h) => store.isHabitCompleted(h.id, today)).length;
 
+    // Recent captures (last 5)
+    const recentCaptures = [...store.captures]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5)
+      .map((c) => ({ content: c.content.slice(0, 100), date: c.date }));
+
     return {
       tasksDueToday,
+      upcomingTasks,
+      overdueTasks,
       todaysMeetings,
       journalEntriesToday,
       activeProjects,
       routinesCompletedToday,
       routinesTotal,
+      recentCaptures,
     };
   }, []);
 
@@ -225,7 +270,8 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
       }
 
       const appContext = buildAppContext();
-      const systemPrompt = await assembleConciergeContext(appContext);
+      const hasTools = providerSupportsTools(settings.provider);
+      const systemPrompt = await assembleConciergeContext(appContext, hasTools);
 
       let titleSuggestion: string | undefined;
       const executorActions = buildExecutorActions();
@@ -237,7 +283,7 @@ export function useConciergeChat(options: UseConciergeChatOptions = {}) {
 
         const stream = streamChat(workingMessages, {
           systemPrompt,
-          tools: ALL_TOOLS,
+          tools: hasTools ? ALL_TOOLS : undefined,
           onTitleSuggestion: (title) => {
             titleSuggestion = title;
           },
