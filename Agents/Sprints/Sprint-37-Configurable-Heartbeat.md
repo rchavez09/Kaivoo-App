@@ -2,7 +2,7 @@
 
 **Theme:** Proactive AI — the concierge acts without being asked.
 **Branch:** `sprint/37-configurable-heartbeat`
-**Status:** COMPLETE
+**Status:** IN PROGRESS (Phase 5 scope expansion)
 **Compiled by:** Dev Director
 **Date:** March 11, 2026
 
@@ -202,6 +202,107 @@ Icon: App icon
 
 ---
 
+### Track 3 — Scheduling Flexibility (Phase 5 Expansion) (Agent 2, Design Agents)
+
+**Context:** During Phase 5 sandbox testing, user feedback identified a critical UX gap: no day-of-week selection (M-F scheduling) and limited time control. Research shows this aligns with industry best practices (Headspace, Todoist, Google Calendar all support weekday-specific scheduling).
+
+**Decision:** Expand Sprint 37 scope to include scheduling flexibility BEFORE merge. This prevents shipping incomplete UX and ensures design agent review happens before users see the feature.
+
+---
+
+#### P5: Design Agent Review for Scheduling UX
+**Source:** Phase 5 sandbox feedback
+**Status:** TODO
+**Agent:** UX Completeness Agent, Accessibility & Theming Agent
+**Depends on:** Research completed (done)
+
+Before implementing new scheduling UI, get design agent approval on:
+- Day-of-week selector pattern (toggle buttons vs checkboxes)
+- Time picker interface (native vs custom)
+- Simple vs Advanced mode toggle approach
+- New preset naming ("Morning Focus M-F" vs "Weekday Morning")
+
+**Definition of Done:**
+- [ ] UX Completeness Agent reviews research findings
+- [ ] Accessibility Agent validates day-of-week selector is keyboard navigable + screen reader friendly
+- [ ] Visual Design Agent approves component mockups
+- [ ] All design agents approve with 0 P0 issues
+
+---
+
+#### P6: Day-of-Week Selector Component
+**Source:** Phase 5 sandbox feedback + research
+**Status:** TODO
+**Agent:** Agent 2
+**Depends on:** P5 (design approval)
+
+Build reusable `<DayOfWeekSelector>` component that allows users to choose which days heartbeat runs.
+
+**Component spec:**
+```tsx
+<DayOfWeekSelector
+  value={[1,2,3,4,5]}  // Monday-Friday
+  onChange={(days) => updateSettings({ daysOfWeek: days })}
+/>
+```
+
+**UI pattern:**
+- 7 toggle buttons in a row: S M T W T F S
+- Quick presets above: [Weekdays] [Weekends] [Every day]
+- Filled = selected, outline = unselected
+- Keyboard navigable (Tab + Space/Enter)
+- Screen reader announces: "Monday, selected" / "Sunday, not selected"
+
+**Definition of Done:**
+- [ ] Component renders 7 day toggles + 3 quick presets
+- [ ] Clicking a day toggles selection
+- [ ] Quick presets update all 7 toggles
+- [ ] Value persists to settings store
+- [ ] Accessibility: keyboard navigation works, ARIA labels present
+- [ ] Visual design matches app theme (uses shadcn/ui Button variants)
+
+---
+
+#### P7: New Scheduling Presets (Morning Focus M-F, Work Hours M-F)
+**Source:** Phase 5 sandbox feedback + research
+**Status:** TODO
+**Agent:** Agent 2
+**Depends on:** P6 (day selector component exists)
+
+Update HeartbeatSettings UI with new presets that address user feedback:
+
+**New presets:**
+1. **Morning Focus** (M-F at 8am) — runs only on weekdays
+2. **Work Hours** (M-F at 8am, 12pm, 5pm) — 3x/day on weekdays
+3. **Custom schedule** (link/button) → shows day-of-week selector + time picker
+
+**Settings schema update:**
+```typescript
+interface HeartbeatSettings {
+  enabled: boolean;
+  frequency: 'off' | 'morning' | 'evening' | 'hourly' | 'morning-focus' | 'work-hours' | 'custom';
+  intervalSeconds: number; // for 'hourly' mode
+  daysOfWeek?: number[]; // [0-6] Sunday=0, Saturday=6
+  specificTimes?: string[]; // ["08:00", "12:00", "17:00"] for 'work-hours'
+  notificationsEnabled: boolean;
+}
+```
+
+**Backend changes:**
+- Update `shouldRunNow()` to check day-of-week match
+- Update `getIntervalSeconds()` to handle preset schedules
+- Store settings in Supabase (web) + SQLite (desktop)
+
+**Definition of Done:**
+- [ ] "Morning Focus (M-F at 8am)" preset works correctly
+- [ ] "Work Hours (M-F 8am/12pm/5pm)" preset works correctly
+- [ ] "Custom schedule" shows day-of-week selector
+- [ ] `shouldRunNow()` respects day-of-week settings
+- [ ] Settings persist across app restarts
+- [ ] Heartbeat only fires on selected days
+
+---
+
 ## Quality Gates
 
 ```
@@ -240,8 +341,11 @@ Icon: App icon
 
 ## Deliberately Deferred
 
-- Advanced scheduling logic (e.g., "only on weekdays", "quiet hours") → Phase B
-- Heartbeat history UI (view past insights) → Phase B
+- ~~Advanced scheduling logic (e.g., "only on weekdays", "quiet hours")~~ → **MOVED TO SPRINT 37 P5-P7** (Phase 5 expansion)
+- Quiet hours / Do Not Disturb mode → Sprint 38
+- Multiple time pickers (up to 3 custom times/day) → Sprint 38
+- Heartbeat history UI (view past insights) → Sprint 38
+- Notification batching (daily digest mode) → Sprint 39
 - Heartbeat learns from user feedback ("don't notify for this type of insight") → Phase B
 - Multi-agent heartbeat (different agents for different insight types) → Orchestrator phase
 - Web Worker implementation (web currently uses main thread `setInterval`) → Phase B optimization
