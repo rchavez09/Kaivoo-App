@@ -3,13 +3,17 @@
 // Background timer that emits 'heartbeat-tick' events at configurable intervals.
 // Runs independently of the UI using std::thread + tokio sleep.
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 use tauri::{AppHandle, Emitter};
 
 // Global state to track the running heartbeat task
 static HEARTBEAT_HANDLE: Mutex<Option<std::thread::JoinHandle<()>>> = Mutex::new(None);
-static HEARTBEAT_STOP_FLAG: Mutex<Arc<Mutex<bool>>> = Mutex::new(Arc::new(Mutex::new(false)));
+static HEARTBEAT_STOP_FLAG: OnceLock<Mutex<Arc<Mutex<bool>>>> = OnceLock::new();
+
+fn get_stop_flag() -> &'static Mutex<Arc<Mutex<bool>>> {
+    HEARTBEAT_STOP_FLAG.get_or_init(|| Mutex::new(Arc::new(Mutex::new(false))))
+}
 
 #[tauri::command]
 pub fn start_heartbeat(app: AppHandle, interval_seconds: u64) -> Result<String, String> {
@@ -23,7 +27,7 @@ pub fn start_heartbeat(app: AppHandle, interval_seconds: u64) -> Result<String, 
     // Reset stop flag
     let stop_flag = Arc::new(Mutex::new(false));
     {
-        let mut global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
+        let mut global_flag = get_stop_flag().lock().unwrap();
         *global_flag = Arc::clone(&stop_flag);
     }
 
@@ -90,7 +94,7 @@ fn stop_heartbeat_internal() {
 
     // Only set stop flag if we actually have a thread to stop
     if handle.is_some() {
-        let global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
+        let global_flag = get_stop_flag().lock().unwrap();
         let mut flag = global_flag.lock().unwrap();
         *flag = true;
     }
