@@ -146,6 +146,57 @@ THRESHOLDS:
   > 600 lines:    P1 (split immediately — blocking review)
 ```
 
+## 3.4 Rust/Tauri Code Checks
+
+**APPLIES TO:** Sprints that include Rust code in `daily-flow/src-tauri/`
+
+**Check:** Run cargo compilation checks before approving PR
+
+```
+REQUIRED COMMANDS:
+  cd daily-flow/src-tauri && cargo check    # Verify compilation succeeds
+  cd daily-flow/src-tauri && cargo clippy   # Rust linter (catch common mistakes)
+
+CRITICAL: Agent 7 MUST run these commands for any sprint modifying Rust code.
+Rust compilation errors only appear in CI desktop builds, which run AFTER
+the code audit. Catching Rust errors early prevents failed PRs.
+```
+
+**Check:** Rust static initialization patterns
+
+```
+ANTI-PATTERN:  static FLAG: Mutex<Arc<...>> = Mutex::new(Arc::new(...));
+               ❌ Cannot call Arc::new() in static initializer (E0015)
+
+CORRECT:       static FLAG: OnceLock<Mutex<Arc<...>>> = OnceLock::new();
+               fn get_flag() -> &'static Mutex<Arc<...>> {
+                   FLAG.get_or_init(|| Mutex::new(Arc::new(...)))
+               }
+               ✅ Use OnceLock for lazy static initialization
+```
+
+**Check:** Thread safety and lifetime management
+
+```
+RULE: Every spawned thread MUST have a corresponding shutdown mechanism:
+  - JoinHandle stored globally → joined on app exit
+  - Stop flag (Arc<Mutex<bool>>) for graceful termination
+  - No detached threads without explicit justification
+
+RULE: Mutex guards must be dropped before blocking operations:
+  - Acquire lock → read/write → drop guard → call blocking function
+  - Never hold a lock across await points or long-running operations
+```
+
+**Check:** Tauri command error handling
+
+```
+RULE: All #[tauri::command] functions return Result<T, String>:
+  - Never unwrap() or expect() in Tauri commands (can crash app)
+  - Convert errors to user-facing strings: .map_err(|e| e.to_string())
+  - Log errors to stderr with eprintln! before returning Err
+```
+
 ---
 
 # 4. Security Review Protocol

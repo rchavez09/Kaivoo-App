@@ -96,9 +96,12 @@ SAFETY:
 Before any sprint branch PR merges to main, ALL of the following must pass:
 
 ```
-□ Deterministic checks pass: npm run lint && npm run typecheck && npm run test && npm run build
+□ Deterministic checks pass:
+  - Web: cd daily-flow && npm run lint && npm run typecheck && npm run test && npm run build
+  - Desktop (if sprint includes Tauri work): cd daily-flow/src-tauri && cargo check && cargo clippy
 □ GitHub Actions CI passes on the PR (automated — same checks as above)
 □ Agent 7 code audit completed (no unresolved P0 issues)
+  - For Tauri sprints: Agent 7 MUST run cargo check + cargo clippy during audit
 □ Agent 11 feature integrity check passed (no regressions)
 □ 3-agent design review completed (for UI sprints): Visual Design + Accessibility & Theming + UX Completeness — all PASS, no unresolved P0 issues. Design review happens RIGHT BEFORE sandbox.
 □ Sprint file is current: all parcels have final status, quality gates checked off, metrics recorded
