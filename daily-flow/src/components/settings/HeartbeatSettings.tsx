@@ -5,12 +5,11 @@
  * Frequency options: off, morning, evening, hourly (1-12h), custom cron.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Activity } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { getHeartbeatSettings, saveHeartbeatSettings, type HeartbeatSettings } from '@/lib/ai/settings';
 import { restartHeartbeat } from '@/lib/heartbeat/heartbeat-service';
 import { DayOfWeekSelector } from './DayOfWeekSelector';
@@ -37,9 +36,7 @@ export default function HeartbeatSettings() {
     let intervalSeconds = settings.intervalSeconds;
 
     // Set sensible defaults based on frequency
-    if (freq === 'morning' || freq === 'evening' || freq === 'work-hours') {
-      intervalSeconds = 24 * 60 * 60; // 24 hours
-    } else if (freq === 'hourly') {
+    if (freq === 'hourly') {
       intervalSeconds = 3600; // 1 hour default
     } else if (freq === 'custom') {
       // Initialize custom schedule with current state
@@ -60,11 +57,21 @@ export default function HeartbeatSettings() {
     void updateSettings({ intervalSeconds });
   };
 
-  const handleSaveCustomSchedule = () => {
+  const handleCustomDaysChange = (days: number[]) => {
+    setCustomDays(days);
+    void updateSettings({
+      frequency: 'custom',
+      customDays: days,
+      customTimes: customTimes.sort(),
+    });
+  };
+
+  const handleCustomTimesChange = (times: string[]) => {
+    setCustomTimes(times);
     void updateSettings({
       frequency: 'custom',
       customDays,
-      customTimes: customTimes.sort(),
+      customTimes: times.sort(),
     });
   };
 
@@ -108,9 +115,6 @@ export default function HeartbeatSettings() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="off">Off</SelectItem>
-            <SelectItem value="morning">Morning Focus (M-F at 8am)</SelectItem>
-            <SelectItem value="evening">Evening Focus (Daily at 6pm)</SelectItem>
-            <SelectItem value="work-hours">Work Hours (M-F at 8am, 12pm, 5pm)</SelectItem>
             <SelectItem value="hourly">Every N hours</SelectItem>
             <SelectItem value="custom">Custom schedule</SelectItem>
           </SelectContent>
@@ -142,17 +146,9 @@ export default function HeartbeatSettings() {
           <div className="ml-0 mt-4 space-y-4 rounded-lg bg-muted/50 p-4">
             <div>
               <Label className="mb-3 block text-sm font-medium">Run on:</Label>
-              <DayOfWeekSelector value={customDays} onChange={setCustomDays} />
+              <DayOfWeekSelector value={customDays} onChange={handleCustomDaysChange} />
             </div>
-            <TimePickerList value={customTimes} onChange={setCustomTimes} maxTimes={3} />
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={handleSaveCustomSchedule}
-                className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Save Schedule
-              </button>
-            </div>
+            <TimePickerList value={customTimes} onChange={handleCustomTimesChange} maxTimes={3} />
           </div>
         )}
       </div>

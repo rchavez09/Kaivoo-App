@@ -122,11 +122,8 @@ function startWebHeartbeat(settings: HeartbeatSettings): void {
  */
 function getIntervalSeconds(settings: HeartbeatSettings): number {
   switch (settings.frequency) {
-    case 'morning':
-    case 'evening':
-    case 'work-hours':
     case 'custom':
-      // For time-based modes, check every minute for precise matching
+      // For custom schedule, check every minute for precise time matching
       return 60;
     case 'hourly':
       return settings.intervalSeconds;
@@ -282,21 +279,6 @@ function shouldRunNow(settings: HeartbeatSettings): boolean {
   const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
 
   switch (settings.frequency) {
-    case 'morning':
-      // M-F at 8:00 AM
-      return [1, 2, 3, 4, 5].includes(currentDay) && currentTime === '08:00';
-
-    case 'evening':
-      // Daily at 6:00 PM (UX P1-1: 6pm not 8pm)
-      return currentTime === '18:00';
-
-    case 'work-hours': {
-      // M-F at 8am, 12pm, 5pm
-      const isWeekday = [1, 2, 3, 4, 5].includes(currentDay);
-      const isWorkTime = ['08:00', '12:00', '17:00'].includes(currentTime);
-      return isWeekday && isWorkTime;
-    }
-
     case 'hourly':
       // Always run when timer fires (interval controls frequency)
       return true;

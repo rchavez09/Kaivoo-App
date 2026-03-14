@@ -67,7 +67,7 @@ const HEARTBEAT_KEY = 'kaivoo-heartbeat-settings';
 
 export interface HeartbeatSettings {
   enabled: boolean;
-  frequency: 'off' | 'morning' | 'evening' | 'hourly' | 'work-hours' | 'custom';
+  frequency: 'off' | 'hourly' | 'custom';
   intervalSeconds: number; // Used when frequency is 'hourly'
 
   // Custom mode (P6-P7):
