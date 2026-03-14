@@ -3,17 +3,13 @@
 // Background timer that emits 'heartbeat-tick' events at configurable intervals.
 // Runs independently of the UI using std::thread + tokio sleep.
 
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tauri::{AppHandle, Emitter};
 
 // Global state to track the running heartbeat task
 static HEARTBEAT_HANDLE: Mutex<Option<std::thread::JoinHandle<()>>> = Mutex::new(None);
-static HEARTBEAT_STOP_FLAG: OnceLock<Mutex<Arc<Mutex<bool>>>> = OnceLock::new();
-
-fn get_stop_flag() -> &'static Mutex<Arc<Mutex<bool>>> {
-    HEARTBEAT_STOP_FLAG.get_or_init(|| Mutex::new(Arc::new(Mutex::new(false))))
-}
+static HEARTBEAT_STOP_FLAG: Mutex<Option<Arc<Mutex<bool>>>> = Mutex::new(None);
 
 #[tauri::command]
 pub fn start_heartbeat(app: AppHandle, interval_seconds: u64) -> Result<String, String> {
@@ -27,35 +23,23 @@ pub fn start_heartbeat(app: AppHandle, interval_seconds: u64) -> Result<String, 
     // Reset stop flag
     let stop_flag = Arc::new(Mutex::new(false));
     {
-        let mut global_flag = get_stop_flag().lock().unwrap();
-        *global_flag = Arc::clone(&stop_flag);
+        let mut global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
+        *global_flag = Some(Arc::clone(&stop_flag));
     }
-
-    let interval = Duration::from_secs(interval_seconds);
 
     // Spawn background thread
     let handle = std::thread::spawn(move || {
         println!("[Heartbeat] Background thread started (interval: {}s)", interval_seconds);
 
         loop {
-            // Check stop flag
-            {
+            // Interruptible sleep: sleep in 1-second chunks and check stop flag
+            for _ in 0..interval_seconds {
+                std::thread::sleep(Duration::from_secs(1));
+
                 let should_stop = stop_flag.lock().unwrap();
                 if *should_stop {
-                    println!("[Heartbeat] Stop flag set, exiting thread");
-                    break;
-                }
-            }
-
-            // Sleep for the interval
-            std::thread::sleep(interval);
-
-            // Check stop flag again after sleep
-            {
-                let should_stop = stop_flag.lock().unwrap();
-                if *should_stop {
-                    println!("[Heartbeat] Stop flag set after sleep, exiting thread");
-                    break;
+                    println!("[Heartbeat] Stop flag set during sleep, exiting thread");
+                    return;
                 }
             }
 
@@ -66,8 +50,6 @@ pub fn start_heartbeat(app: AppHandle, interval_seconds: u64) -> Result<String, 
                 println!("[Heartbeat] Emitted heartbeat-tick");
             }
         }
-
-        println!("[Heartbeat] Background thread exited");
     });
 
     // Store the thread handle globally
@@ -92,11 +74,13 @@ fn stop_heartbeat_internal() {
         global_handle.take()
     };
 
-    // Only set stop flag if we actually have a thread to stop
+    // Set stop flag if we have a thread to stop
     if handle.is_some() {
-        let global_flag = get_stop_flag().lock().unwrap();
-        let mut flag = global_flag.lock().unwrap();
-        *flag = true;
+        let mut global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
+        if let Some(flag_arc) = global_flag.as_ref() {
+            let mut flag = flag_arc.lock().unwrap();
+            *flag = true;
+        }
     }
 
     if let Some(h) = handle {
@@ -104,5 +88,6 @@ fn stop_heartbeat_internal() {
         if h.join().is_err() {
             eprintln!("[Heartbeat] Thread panicked during shutdown");
         }
+        println!("[Heartbeat] Background thread stopped successfully");
     }
 }
