@@ -62,6 +62,33 @@ const DEFAULT_SETTINGS: AISettings = {
   depth: 'medium',
 };
 
+// Heartbeat settings — Sprint 37
+const HEARTBEAT_KEY = 'kaivoo-heartbeat-settings';
+
+export interface HeartbeatSettings {
+  enabled: boolean;
+  frequency: 'off' | 'hourly' | 'custom';
+  intervalSeconds: number; // Used when frequency is 'hourly'
+
+  // Custom mode (P6-P7):
+  customDays?: number[]; // [0-6] where 0=Sunday, 6=Saturday. e.g. [1,2,3,4,5] = M-F
+  customTimes?: string[]; // ["06:00", "12:00", "20:24"] - 24-hour format, sorted
+
+  // Deprecated (keep for backward compatibility):
+  customCron?: string;
+
+  notificationsEnabled: boolean;
+}
+
+const DEFAULT_HEARTBEAT: HeartbeatSettings = {
+  enabled: false,
+  frequency: 'off',
+  intervalSeconds: 3600, // 1 hour default
+  customDays: [1, 2, 3, 4, 5], // Weekdays default (M-F)
+  customTimes: ['08:00'], // 8:00 AM default
+  notificationsEnabled: true,
+};
+
 // In-memory cache so synchronous getAISettings() works after first async load
 let cachedApiKey = '';
 let keyLoaded = false;
@@ -190,4 +217,22 @@ export function buildSystemPrompt(soul: SoulConfig | null, depth: AIDepth): stri
   };
 
   return `You are ${name}, a ${tone} AI concierge for Flow — a personal knowledge operating system that helps users organize notes, tasks, topics, and daily journals. ${toneMap[tone]} ${depthMap[depth]}`;
+}
+
+// Heartbeat settings CRUD — Sprint 37
+
+export function getHeartbeatSettings(): HeartbeatSettings {
+  try {
+    const stored = localStorage.getItem(HEARTBEAT_KEY);
+    if (stored) {
+      return { ...DEFAULT_HEARTBEAT, ...(JSON.parse(stored) as Partial<HeartbeatSettings>) };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { ...DEFAULT_HEARTBEAT };
+}
+
+export function saveHeartbeatSettings(settings: HeartbeatSettings): void {
+  localStorage.setItem(HEARTBEAT_KEY, JSON.stringify(settings));
 }

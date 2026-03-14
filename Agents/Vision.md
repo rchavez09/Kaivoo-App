@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.8
-**Last Updated:** March 10, 2026
+**Version:** 7.9
+**Last Updated:** March 12, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -30,7 +30,7 @@ LONG-TERM     →  Personal OS (the intelligent layer between you and your digit
 
 - **Kaivoo Companion App** (requires Web Access subscription) — Mobile/tablet access. Concierge chat, today view, quick capture, notifications. The companion *needs* cloud sync to see your desktop data — this isn't an artificial gate, it's an architectural reality. **Your AI in your pocket.**
 
-- **Kaivoo Orchestrator** (premium subscription, pricing TBD) — AI agent orchestration for builders. Sprint management, multi-model routing, messaging-based control, autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can text from their couch.
+- **Kaivoo Orchestrator** (premium subscription, pricing TBD) — AI agent orchestration for builders. Flow orchestration, multi-model routing, autonomous Flows with per-Flow scheduling, sprint management, messaging-based control, autonomous build-review-test-push pipeline. For developers and solo builders who want an AI dev team they can text from their couch.
 
 **Phase A** ships Flow Desktop (the flagship). **Phase B** adds Web Access, Companion, and Orchestrator. **Phase C** opens the marketplace. **Phase D** builds the MCP foundation layer and personal OS trajectory.
 
@@ -107,6 +107,48 @@ These are non-negotiable. Every feature, sprint, and decision must align with th
 11. **MCP-native.** The Model Context Protocol is the backbone, not a bolt-on. Every data source, tool, and action in Kaivoo is exposed via MCP so any AI can access it with permission. This makes Kaivoo the foundation layer that AI agents talk to when they need to know about *you* — your files, your tasks, your calendar, your projects, your everything. Protocol-first architecture means the product improves as the MCP ecosystem grows.
 
 12. **Self-building.** The ultimate expression of an MCP-native platform: users can ask Kaivoo to build new capabilities for itself. "I wish we had a page for tracking client invoices" → the AI researches, plans, and builds it. The product isn't just a tool — it's a platform that evolves through conversation. The Core Foundation is immutable. Everything on top of it is fair game.
+
+---
+
+## The Flow Orchestration Model
+
+Flow is Kaivoo's orchestration platform — the system that lets you define autonomous processes that run automatically, powered by AI agents and reusable skills. This is the PRIMARY product direction, not a "Phase B maybe" — this is what we're building.
+
+### The Four-Layer Hierarchy
+
+```
+Flow → Agents + Skills + Apps
+```
+
+**Flows** are scheduled processes that run automatically. Think "Morning Briefing Flow" or "Weekly Report Generator Flow." Each Flow has a schedule (daily at 8am, every Monday, etc.), a series of steps, and optional approval gates. Flows orchestrate everything below them.
+
+**Agents** are specialized AI roles with specific capabilities. The PPT Generator agent knows how to create presentations. The Web Scraper agent knows how to extract data from websites. The Task Monitor agent watches your todos and surfaces insights. Each agent can be assigned a specific AI model (cheap model for simple tasks, Sonnet for complex work, Opus for creative writing) and has declared permissions (read calendar, write files, send emails). Agents execute the work within Flows.
+
+**Skills** are reusable actions that agents can perform. "Generate PPT from notes," "Summarize email thread," "Create task from calendar event," "Export project as PDF." Skills are the atomic units of capability. Agents use skills to do their work. Users can create custom skills through conversation with the AI — no code required.
+
+**Apps** are external platform connections via MCP (Model Context Protocol). PowerPoint, Google Calendar, Gmail, Slack, GitHub — all exposed as Apps that agents can interact with. Install an App, grant permissions, and your agents can read/write data across your entire digital workspace.
+
+### User-Facing Example: Morning Briefing Flow
+
+A user creates a "Morning Briefing Flow" that runs every weekday at 7:30am:
+
+1. **Task Monitor agent** reads today's tasks and surfaces priorities
+2. **Calendar agent** checks today's meetings and prep requirements
+3. **Email agent** scans overnight emails for urgent items
+4. **PPT Generator agent** creates a daily brief slide deck if presentation is due today
+5. **Notification agent** sends a summary to the user's phone via the Companion App
+
+All of this happens autonomously. The user wakes up to a prepared briefing. No prompts. No manual steps. Just outcomes.
+
+The same agents and skills used to build this Flow can be recombined into a "Weekly Report Flow," a "Client Onboarding Flow," or a "Content Publishing Flow." Infinite combinations. Same building blocks.
+
+### The Meta-Product Story
+
+**Flow was built using Flows.** The Sprint orchestration system managing Kaivoo's development right now — the Director coordinating agents, the build-review-test-push pipeline, the autonomous sprint execution — is built on the Flow model. This isn't vaporware. We're eating our own dog food.
+
+Now you can build your thing with Flows too. Your morning routine. Your client work. Your content factory. Your dev pipeline. The SAME SYSTEM that built Kaivoo is yours to configure for whatever you're building.
+
+This is the orchestration platform vision — and it's the primary product direction from Phase A forward.
 
 ---
 
@@ -370,7 +412,7 @@ Both products ship as **clean template systems**. No Kaivoo-specific content in 
 - **Sprint Protocol** → Generic framework, stripped of Kaivoo references
 - **First-run experience** → "Describe your project. What's your tech stack? What does your team look like?" — the concierge generates initial Vision, agent roster, and first sprint
 
-**The story:** "Kaivoo was built by this system. Now you can build your thing with it too."
+**The story:** "Flow was built using Flows. Now you can build your thing with Flows too."
 
 A productization sprint is required before the Orchestrator ships — clean templates, blank-slate onboarding, no user will accidentally clone Kaivoo's internal roadmap.
 
@@ -688,11 +730,11 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | **AI Execution Tools + Data Awareness** — 19 tools working end-to-end, cross-provider tool schemas (8 providers), argument validation with self-correcting errors, Ollama OpenAI-compat mode, Gemini tool-use round-trips, text fallback extraction | **DONE** (Sprint 35-36) | **Must-have** |
 | **Configurable Heartbeat** — proactive AI that acts without being asked. Background timer, morning briefing, evening summary, custom intervals. Reads tasks, calendar, journal, soul file. | PLANNED (Sprint 37) | **Must-have** |
 | **Neuron Memory V1** — tiered soul file (Core Identity + Active Context + Episodic Memory), memory consolidation during heartbeat (dedup, summarize, prune, promote), context-aware loading (~3500 token budget). Solves soul file bloat. | PLANNED (Sprint 38) | **Must-have** |
-| **Orchestrator Page** — 4-tab page: Agents (CRUD, model assignment, permissions), Skills (CRUD, AI skill creation), Workflows (step builder, triggers, approval gates), MCPs (discover, connect, manage). Users define their own AI agent teams and workflows. | PLANNED (Sprints 39-45) | **Must-have** |
-| **Workflow Execution Engine** — multi-model routing, context passing between steps, approval gates, action logging, rate limiting. The orchestrator actually runs workflows autonomously. | PLANNED (Sprints 46-47) | **Must-have** |
+| **Orchestrator Page** — 4-tab page: **Flows** (CRUD, scheduling, triggers, step builder), **Agents** (CRUD, model assignment, permissions, assign skills), **Skills** (CRUD, AI skill creation, reusable actions), **Apps** (discover MCPs, connect external platforms, manage credentials). Users define their own AI agent teams and Flows. | PLANNED (Sprints 39-45) | **Must-have** |
+| **Flow Execution Engine** — multi-model routing, context passing between steps, approval gates, action logging, rate limiting. The orchestrator actually runs Flows autonomously. | PLANNED (Sprints 46-47) | **Must-have** |
 | **Artifact System** — sandboxed iframe widgets. AI generates HTML/CSS/JS, renders in split-pane preview. Persistent custom widgets saveable to library. Addable to Today page and project pages. Export to vault. Editable via conversation. | PLANNED (Sprints 48-49) | **Must-have** |
-| **Safety Layer** — confirmation gates, skill permissions, workflow approval gates, rollback, rate limiting. Safe autonomy as a product principle. | PLANNED (Sprint 50) | **Must-have** |
-| **Thinking Transparency** — visible AI reasoning during workflows and heartbeat. Action log accessible in-app. | PLANNED (Sprint 51) | **Must-have** |
+| **Safety Layer** — confirmation gates, skill permissions, Flow approval gates, rollback, rate limiting. Safe autonomy as a product principle. | PLANNED (Sprint 50) | **Must-have** |
+| **Thinking Transparency** — visible AI reasoning during Flows and heartbeat. Action log accessible in-app. | PLANNED (Sprint 51) | **Must-have** |
 | Google Calendar integration — OAuth, two-way sync (investigate MCP for faster delivery) | PLANNED | Post-launch fast-follow |
 | Gmail integration — read, send, organize email within the app (investigate MCP for faster delivery) | PLANNED | Post-launch fast-follow |
 | White-label config layer — logo, colors, app name as settings (not hardcoded) | PLANNED | Should-have |
@@ -882,7 +924,7 @@ These run in parallel with sprint work, not blocking it.
 
 **Key decisions resolved (CEO Session — March 1, 2026):**
 - ~~Business model: one-time only vs. subscription~~ → **Two-phase strategy** (Phase A: $99/$49 one-time, Phase B: subscription ARR)
-- ~~Product positioning~~ → **AI-powered workflow OS** — guided, outcome-first AI, not blank chat boxes
+- ~~Product positioning~~ → **AI-powered Flow orchestration OS** — guided, outcome-first AI, not blank chat boxes
 - ~~Enterprise vs. SMB focus~~ → **SMB focus** — solopreneurs to small teams (1-25), no "enterprise" language
 - ~~Rebrand timing~~ → **Completed Sprint 29** — app renamed to "Flow by Kaivoo" (was "Kaivoo"). Shipped pre-launch, zero switching cost.
 - ~~White-label architecture~~ → **Build config layer now (Phase A), full white-label in Phase B**
@@ -1059,7 +1101,7 @@ Why Kaivoo wins where others don't:
 
 6. **AI that teaches you what it can do.** The concierge doesn't wait for instructions — it suggests actions based on your data. Every suggestion is a discovery moment. Users don't need to know what's possible because the AI shows them.
 
-7. **Grows with you.** Start personal, go professional. The same tool that manages your journal and habits also runs your team's projects and client work. No migration. No second tool. One workflow.
+7. **Grows with you.** Start personal, go professional. The same tool that manages your journal and habits also runs your team's projects and client work. No migration. No second tool. One Flow.
 
 8. **MCP-native from day one.** While everyone else bolts MCP onto existing products, Kaivoo is built protocol-first. Every data source is an MCP resource. Every action is an MCP tool. This means any AI — not just Kaivoo's concierge — can access your data with permission. As the MCP ecosystem grows, Kaivoo becomes more powerful automatically.
 
@@ -1090,6 +1132,7 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 *v7.4: Sprint 30 (Bug Bash + Concierge Hardening) complete. 15/15 parcels. 7 bugs fixed (2 P0 data-loss), concierge memory architecture hardened (pre-compaction flush, deterministic context assembly, coherence monitoring), upload polish, AI conversations moved to adapter pattern (localStorage→SQLite/Supabase), desktop vault fixed (VirtualVaultAdapter for browsing). 265 tests. Current position updated.*
 *v7.3: Sprint 29 (Flow Rebrand) complete. Product renamed from "Kaivoo" to "Flow by Kaivoo." In-app rename (all user-visible text), landing page rebuilt with Flow identity, EULA + Privacy Policy updated, Product Hunt listing rewritten, strategic docs updated. Internal identifiers preserved. Sign-out hidden on desktop. Agent 7 caught 6 missed renames — all fixed. Screenshots deferred to Sprint 33. Rebrand decision updated. Current position updated.*
 *v7.2: Sprint 28 (Launch Ready) complete. Landing page (Astro + Tailwind, 11 sections, dark/light toggle) deployed to Netlify. EULA and Privacy Policy drafts ready for attorney review. Product Hunt listing drafted. Revenue pipeline deferred to future sprint — user wants more features before launch. Custom domain pending DNS config. CTA buttons placeholder until Stripe configured. Current position updated.*
+*v7.9: Flow Orchestration Model — Added new "Flow Orchestration Model" section after Core Principles establishing the 4-layer hierarchy (Flows → Agents + Skills + Apps) as the PRIMARY product direction. Updated Orchestrator product description to explicitly mention "Flow orchestration, autonomous Flows with per-Flow scheduling." Updated Orchestrator Page milestone to use new 4-tab structure: Flows (CRUD, scheduling, triggers, step builder), Agents (model assignment, assign skills), Skills (reusable actions), Apps (MCP discovery). Renamed "Workflow Execution Engine" to "Flow Execution Engine." Updated marketing story to "Flow was built using Flows." Updated Safety Layer and Thinking Transparency to reference "Flows" instead of "workflows." Updated product positioning to "AI-powered Flow orchestration OS." Updated competitive edge tagline to "One Flow" (was "One workflow"). Updated version history references from "One Workflow" to "Flow Cloud." Terminology consistently updated: "Flow" (capitalized) for Kaivoo's orchestration feature, "workflow" (lowercase) for generic automation concepts.*
 *v7.1: CEO Session #8 — Desktop as flagship, web as premium. Pricing model clarified: desktop one-time ($49/$99) works because cost-to-serve is zero; web subscription ($8-12/mo) required because Supabase infrastructure costs per user per month. Free 14-day web trial added as top of funnel (full experience, time-limited not feature-limited). Companion App explicitly gated behind Tier 2 subscription (architectural necessity, not paywall). Launch sequence documented: web trial first (no cert dependency), desktop when Apple certs clear. Conversion funnel added: Free → Buy Desktop or Subscribe Web; Desktop owners → Add Web Sync. Cost-to-serve reasoning documented. Tier naming updated: "Kaivoo Desktop" (was Core), "Web Access + Sync + Companion" (was Cloud Companion). Tier 2 pricing research expanded: 7 new research parcels covering Supabase cost-per-user modeling, managed AI costs, storage tier modeling (Google Drive-style), free trial burn rate, cloud storage competitive teardown (Google Drive/iCloud/OneDrive/Dropbox/Obsidian Sync), subscription pricing recommendation, and productivity competitor pricing. Tiered storage pricing added as possibility ($8 base / higher tiers for more storage). Managed AI noted as potentially separate addon if cost modeling shows it's unsustainable at base subscription price. Obsidian model comparison strengthened — Kaivoo gets paid at the door AND on cloud add-ons.*
 *v7.0: Concierge Memory Architecture (7-layer cortex/hippocampus model). Companion app as communication layer (replaces Telegram). Hybrid memory search, coherence monitoring, sleep cycle consolidation, pre-compaction flush added to Phase B roadmap. Exec approval system for Orchestrator. Documentation-first module manifests confirmed. New research parcels: coherence signals, hybrid search architecture, memory consolidation pipeline, companion app sync costs, memory tier pricing. Informed by analysis of Adam Framework and OpenClaw Gateway.*
 *v6.1: Sprint 27 (Desktop Verification) complete. Verified all Sprint 26 features on Tauri desktop. Found and fixed 8 issues across code audit (2) and Track B sandbox testing (6): inline image URL protocol, data import auth gate, CSP for asset protocol, Tauri v2 dot-prefix glob scoping, dark mode cursor, native drag-drop interception, blob URLs for local files, Opener plugin for file opening. Key learning: Tauri v2 deny-by-default capabilities have non-obvious behaviors only discoverable at runtime. 5/5 parcels + 8-commit hotfix. See `Sprints/Sprint-27-Desktop-Verification.md`.*
@@ -1103,9 +1146,9 @@ When a milestone moves from PLANNED to DONE, update the Status and Sprint column
 *v4.5: CEO Strategic Brief — Phase A pricing revised ($99 standard / $49 founding member). Volume-over-margin strategy. AI features deferred to Phase B. Sprint 21 (Local-First Storage) started — SQLite persistence, adapter completion, FTS5 search, local auth. Sprint sequencing resolved through Sprint 24+. Revenue projections updated for new pricing. See `Research/Agent-5-Docs/CEO-Strategic-Brief-Phase-A-Pricing.md`.*
 *v4.4: Sprint 20 completion — Tauri 2.0 selected, DataAdapter pattern implemented, SQLite schema designed, 18 E2E tests, lint cleanup. See `Sprints/Sprint-20-Local-First-Foundation.md`.*
 *v4.3: CEO Session #4 — Local-First Knowledge OS. Topics elevated to single source of truth for all content and files (Topics > Projects > Tasks/Files hierarchy). Desktop packaging (Electron/Tauri) promoted to Phase A must-have. Data layer abstraction: LocalAdapter (SQLite + file system) for Phase A, CloudAdapter (Supabase) for Phase B, swappable backend, no codebase split. File attachments + image embedding promoted to must-have. Hashtags as virtual filters not folders. Convention-with-flexibility folder structure (opinionated default, permissive by nature). Obsidian import (file copy, not headline). Entry-to-file export. Setup wizard includes vault folder selection.*
-*v4.2: CEO Session #3 — Two-product architecture (Kaivoo Productivity + Kaivoo Orchestrator). Concierge scope boundary (productivity helper vs. builder). Modular toggle architecture (settings-driven module activation). Productization requirement (clean templates, no Kaivoo-specific content in shipped specs). Orchestrator as addon/integration for SMBs. Solo Builder target customer added. Phase B split into Orchestrator + One Workflow Cloud sections. Seven new research parcels assigned (messaging channel, agent productization, Solo Builder market, remote execution security, Orchestrator pricing, template design, multi-model overhead).*
+*v4.2: CEO Session #3 — Two-product architecture (Kaivoo Productivity + Kaivoo Orchestrator). Concierge scope boundary (productivity helper vs. builder). Modular toggle architecture (settings-driven module activation). Productization requirement (clean templates, no Kaivoo-specific content in shipped specs). Orchestrator as addon/integration for SMBs. Solo Builder target customer added. Phase B split into Orchestrator + Flow Cloud sections. Seven new research parcels assigned (messaging channel, agent productization, Solo Builder market, remote execution security, Orchestrator pricing, template design, multi-model overhead).*
 *v4.1: CEO Session #2 — Concierge Identity & Soul (naming, hatching, soul file). Concierge-as-Builder (personal customization Phase B, marketplace creation Phase C). 1st-party modules as marketplace templates (Page + Today Widget format). Phase B concierge-led onboarding wizard. New research parcels: marketplace model analysis (Agent 8), sandboxed module runtime (Agent 3).*
-*v4.0: CEO Session strategic pivot — Two-phase revenue strategy (Phase A: $249 productivity app, Phase B: One Workflow cloud subscription). New core principles: "Guided, not open-ended" and "Progressive autonomy." Autonomy Ladder (manual → concierge → autonomous). SMB focus, enterprise language dropped. White-label architecture. Skills/integration architecture elevated. Research parcels assigned. Competitive edge articulated.*
+*v4.0: CEO Session strategic pivot — Two-phase revenue strategy (Phase A: $249 productivity app, Phase B: Flow cloud subscription). New core principles: "Guided, not open-ended" and "Progressive autonomy." Autonomy Ladder (manual → concierge → autonomous). SMB focus, enterprise language dropped. White-label architecture. Skills/integration architecture elevated. Research parcels assigned. Competitive edge articulated.*
 *v3.7: Sprint 18 — Search + Calendar Week View + Keyboard Shortcuts. Phase 1 ~100%*
 *v3.6: Sprint 17 — Routines & Habits shipped*
 *v3.5: Sprint 16 — Calendar redesign*

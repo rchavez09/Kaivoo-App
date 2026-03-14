@@ -1,0 +1,93 @@
+// Heartbeat Timer — Sprint 37 P1
+//
+// Background timer that emits 'heartbeat-tick' events at configurable intervals.
+// Runs independently of the UI using std::thread + tokio sleep.
+
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+use tauri::{AppHandle, Emitter};
+
+// Global state to track the running heartbeat task
+static HEARTBEAT_HANDLE: Mutex<Option<std::thread::JoinHandle<()>>> = Mutex::new(None);
+static HEARTBEAT_STOP_FLAG: Mutex<Option<Arc<Mutex<bool>>>> = Mutex::new(None);
+
+#[tauri::command]
+pub fn start_heartbeat(app: AppHandle, interval_seconds: u64) -> Result<String, String> {
+    // Stop any existing heartbeat first
+    stop_heartbeat_internal();
+
+    if interval_seconds == 0 {
+        return Err("Interval must be > 0".to_string());
+    }
+
+    // Reset stop flag
+    let stop_flag = Arc::new(Mutex::new(false));
+    {
+        let mut global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
+        *global_flag = Some(Arc::clone(&stop_flag));
+    }
+
+    // Spawn background thread
+    let handle = std::thread::spawn(move || {
+        println!("[Heartbeat] Background thread started (interval: {}s)", interval_seconds);
+
+        loop {
+            // Interruptible sleep: sleep in 1-second chunks and check stop flag
+            for _ in 0..interval_seconds {
+                std::thread::sleep(Duration::from_secs(1));
+
+                let should_stop = stop_flag.lock().unwrap();
+                if *should_stop {
+                    println!("[Heartbeat] Stop flag set during sleep, exiting thread");
+                    return;
+                }
+            }
+
+            // Emit heartbeat-tick event to frontend
+            if let Err(e) = app.emit("heartbeat-tick", ()) {
+                eprintln!("[Heartbeat] Failed to emit tick event: {}", e);
+            } else {
+                println!("[Heartbeat] Emitted heartbeat-tick");
+            }
+        }
+    });
+
+    // Store the thread handle globally
+    {
+        let mut global_handle = HEARTBEAT_HANDLE.lock().unwrap();
+        *global_handle = Some(handle);
+    }
+
+    Ok(format!("Heartbeat started with interval {}s", interval_seconds))
+}
+
+#[tauri::command]
+pub fn stop_heartbeat() -> Result<String, String> {
+    stop_heartbeat_internal();
+    Ok("Heartbeat stopped".to_string())
+}
+
+fn stop_heartbeat_internal() {
+    // Take the handle first to prevent concurrent stops (Agent 7 P1-2)
+    let handle = {
+        let mut global_handle = HEARTBEAT_HANDLE.lock().unwrap();
+        global_handle.take()
+    };
+
+    // Set stop flag if we have a thread to stop
+    if handle.is_some() {
+        let mut global_flag = HEARTBEAT_STOP_FLAG.lock().unwrap();
+        if let Some(flag_arc) = global_flag.as_ref() {
+            let mut flag = flag_arc.lock().unwrap();
+            *flag = true;
+        }
+    }
+
+    if let Some(h) = handle {
+        println!("[Heartbeat] Waiting for background thread to stop...");
+        if h.join().is_err() {
+            eprintln!("[Heartbeat] Thread panicked during shutdown");
+        }
+        println!("[Heartbeat] Background thread stopped successfully");
+    }
+}
