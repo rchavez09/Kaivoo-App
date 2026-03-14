@@ -13,12 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { getHeartbeatSettings, saveHeartbeatSettings, type HeartbeatSettings } from '@/lib/ai/settings';
 import { restartHeartbeat } from '@/lib/heartbeat/heartbeat-service';
+import { DayOfWeekSelector } from './DayOfWeekSelector';
+import { TimePickerList } from './TimePickerList';
 
 export default function HeartbeatSettings() {
   const [settings, setSettings] = useState<HeartbeatSettings>(getHeartbeatSettings());
 
   // Derive hourly interval from intervalSeconds (for display)
   const hourlyInterval = Math.floor(settings.intervalSeconds / 3600);
+
+  // Custom schedule state (P6-P7)
+  const [customDays, setCustomDays] = useState<number[]>(settings.customDays || [1, 2, 3, 4, 5]);
+  const [customTimes, setCustomTimes] = useState<string[]>(settings.customTimes || ['08:00']);
 
   const updateSettings = async (partial: Partial<HeartbeatSettings>) => {
     const updated = { ...settings, ...partial };
@@ -31,10 +37,19 @@ export default function HeartbeatSettings() {
     let intervalSeconds = settings.intervalSeconds;
 
     // Set sensible defaults based on frequency
-    if (freq === 'morning' || freq === 'evening') {
+    if (freq === 'morning' || freq === 'evening' || freq === 'work-hours') {
       intervalSeconds = 24 * 60 * 60; // 24 hours
     } else if (freq === 'hourly') {
       intervalSeconds = 3600; // 1 hour default
+    } else if (freq === 'custom') {
+      // Initialize custom schedule with current state
+      void updateSettings({
+        frequency: freq,
+        intervalSeconds,
+        customDays,
+        customTimes: customTimes.sort(),
+      });
+      return;
     }
 
     void updateSettings({ frequency: freq, intervalSeconds });
@@ -43,6 +58,14 @@ export default function HeartbeatSettings() {
   const handleHourlyIntervalChange = (hours: string) => {
     const intervalSeconds = parseInt(hours, 10) * 3600;
     void updateSettings({ intervalSeconds });
+  };
+
+  const handleSaveCustomSchedule = () => {
+    void updateSettings({
+      frequency: 'custom',
+      customDays,
+      customTimes: customTimes.sort(),
+    });
   };
 
   return (
@@ -85,10 +108,11 @@ export default function HeartbeatSettings() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="off">Off</SelectItem>
-            <SelectItem value="morning">Morning only (8am)</SelectItem>
-            <SelectItem value="evening">Evening only (6pm)</SelectItem>
+            <SelectItem value="morning">Morning Focus (M-F at 8am)</SelectItem>
+            <SelectItem value="evening">Evening Focus (Daily at 6pm)</SelectItem>
+            <SelectItem value="work-hours">Work Hours (M-F at 8am, 12pm, 5pm)</SelectItem>
             <SelectItem value="hourly">Every N hours</SelectItem>
-            <SelectItem value="custom">Custom schedule (advanced)</SelectItem>
+            <SelectItem value="custom">Custom schedule</SelectItem>
           </SelectContent>
         </Select>
 
@@ -113,22 +137,22 @@ export default function HeartbeatSettings() {
           </div>
         )}
 
-        {/* Custom cron input */}
+        {/* Custom schedule detail panel (P6-P7) */}
         {settings.frequency === 'custom' && (
-          <div className="mt-4">
-            <Label htmlFor="custom-cron" className="mb-2 block text-sm">
-              Cron Expression
-            </Label>
-            <Input
-              id="custom-cron"
-              type="text"
-              placeholder="0 8 * * *"
-              value={settings.customCron || ''}
-              onChange={(e) => void updateSettings({ customCron: e.target.value })}
-            />
-            <p className="mt-2 text-xs text-muted-foreground">
-              Advanced: Use cron syntax (e.g., "0 8 * * *" for 8am daily)
-            </p>
+          <div className="ml-0 mt-4 space-y-4 rounded-lg bg-muted/50 p-4">
+            <div>
+              <Label className="mb-3 block text-sm font-medium">Run on:</Label>
+              <DayOfWeekSelector value={customDays} onChange={setCustomDays} />
+            </div>
+            <TimePickerList value={customTimes} onChange={setCustomTimes} maxTimes={3} />
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={handleSaveCustomSchedule}
+                className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                Save Schedule
+              </button>
+            </div>
           </div>
         )}
       </div>

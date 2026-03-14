@@ -123,15 +123,12 @@ function startWebHeartbeat(settings: HeartbeatSettings): void {
 function getIntervalSeconds(settings: HeartbeatSettings): number {
   switch (settings.frequency) {
     case 'morning':
-      // Run once at 8am — set 24 hour interval (will check time on each tick)
-      return 24 * 60 * 60;
     case 'evening':
-      // Run once at 6pm — set 24 hour interval
-      return 24 * 60 * 60;
-    case 'hourly':
-      return settings.intervalSeconds;
+    case 'work-hours':
     case 'custom':
-      // For cron, use intervalSeconds as fallback polling interval
+      // For time-based modes, check every minute for precise matching
+      return 60;
+    case 'hourly':
       return settings.intervalSeconds;
     case 'off':
     default:
@@ -274,21 +271,50 @@ async function storeInsight(insight: string, appContext: unknown): Promise<void>
  * Check if heartbeat should run now based on time-of-day settings
  */
 function shouldRunNow(settings: HeartbeatSettings): boolean {
+  if (!settings.enabled || settings.frequency === 'off') {
+    return false;
+  }
+
   const now = new Date();
-  const hour = now.getHours();
+  const currentDay = now.getDay(); // 0=Sunday, 6=Saturday
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
 
   switch (settings.frequency) {
     case 'morning':
-      // Run only between 8am-9am
-      return hour === 8;
+      // M-F at 8:00 AM
+      return [1, 2, 3, 4, 5].includes(currentDay) && currentTime === '08:00';
+
     case 'evening':
-      // Run only between 6pm-7pm
-      return hour === 18;
+      // Daily at 6:00 PM (UX P1-1: 6pm not 8pm)
+      return currentTime === '18:00';
+
+    case 'work-hours': {
+      // M-F at 8am, 12pm, 5pm
+      const isWeekday = [1, 2, 3, 4, 5].includes(currentDay);
+      const isWorkTime = ['08:00', '12:00', '17:00'].includes(currentTime);
+      return isWeekday && isWorkTime;
+    }
+
     case 'hourly':
-    case 'custom':
-      // Always run when timer fires
+      // Always run when timer fires (interval controls frequency)
       return true;
-    case 'off':
+
+    case 'custom':
+      // User-defined days and times
+      if (!settings.customDays || !settings.customTimes) {
+        return false; // Invalid custom config
+      }
+
+      // Check if today is selected
+      if (!settings.customDays.includes(currentDay)) {
+        return false;
+      }
+
+      // Check if current time matches any of the custom times
+      return settings.customTimes.includes(currentTime);
+
     default:
       return false;
   }

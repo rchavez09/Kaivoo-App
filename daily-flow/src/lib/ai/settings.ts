@@ -67,9 +67,16 @@ const HEARTBEAT_KEY = 'kaivoo-heartbeat-settings';
 
 export interface HeartbeatSettings {
   enabled: boolean;
-  frequency: 'off' | 'morning' | 'evening' | 'hourly' | 'custom';
-  intervalSeconds: number; // Used when frequency is 'hourly' or 'custom'
-  customCron?: string; // Used when frequency is 'custom'
+  frequency: 'off' | 'morning' | 'evening' | 'hourly' | 'work-hours' | 'custom';
+  intervalSeconds: number; // Used when frequency is 'hourly'
+
+  // Custom mode (P6-P7):
+  customDays?: number[]; // [0-6] where 0=Sunday, 6=Saturday. e.g. [1,2,3,4,5] = M-F
+  customTimes?: string[]; // ["06:00", "12:00", "20:24"] - 24-hour format, sorted
+
+  // Deprecated (keep for backward compatibility):
+  customCron?: string;
+
   notificationsEnabled: boolean;
 }
 
@@ -77,6 +84,8 @@ const DEFAULT_HEARTBEAT: HeartbeatSettings = {
   enabled: false,
   frequency: 'off',
   intervalSeconds: 3600, // 1 hour default
+  customDays: [1, 2, 3, 4, 5], // Weekdays default (M-F)
+  customTimes: ['08:00'], // 8:00 AM default
   notificationsEnabled: true,
 };
 
