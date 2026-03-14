@@ -15,7 +15,7 @@
 
 import type { SoulConfig, AIDepth, AIMemory, AIConversationSummary } from './types';
 import { format } from 'date-fns';
-import { getMemories, getSummaries } from './memory-service';
+import { getMemories, getSummaries, trackMemoryAccess } from './memory-service';
 import { getSoulConfig, getAISettings } from './settings';
 
 // ─── Layer Builders ───
@@ -60,22 +60,69 @@ function buildUserProfileLayer(soul: SoulConfig | null): string {
   return parts.length > 0 ? `## About the User\n${parts.join('\n')}` : '';
 }
 
-function buildMemoriesLayer(memories: AIMemory[]): string {
-  if (memories.length === 0) return '';
+/** Sprint 38 P2: Max token budget for all memory tiers combined. */
+const MEMORY_TOKEN_BUDGET = 3500;
 
+function formatMemoryGroup(memories: AIMemory[]): string {
   const grouped: Record<string, string[]> = {};
   for (const m of memories) {
     const cat = m.category;
     if (!grouped[cat]) grouped[cat] = [];
     grouped[cat].push(m.content);
   }
+  return Object.entries(grouped)
+    .map(([category, items]) => `**${category}s:** ${items.join('. ')}`)
+    .join('\n');
+}
 
+/**
+ * Sprint 38 P2: Tier-aware memory layer.
+ * - Core Identity: always loaded in full
+ * - Active Context: always loaded in full
+ * - Episodic: relevance-scored, truncated to fit token budget
+ */
+function buildMemoriesLayer(
+  coreMemories: AIMemory[],
+  activeMemories: AIMemory[],
+  episodicMemories: AIMemory[],
+): string {
   const lines: string[] = ['## Things You Remember About the User'];
-  for (const [category, items] of Object.entries(grouped)) {
-    lines.push(`**${category}s:** ${items.join('. ')}`);
+  let usedTokens = estimateTokens(lines[0]);
+
+  // Core Identity — always loaded
+  if (coreMemories.length > 0) {
+    const section = `### Core Identity\n${formatMemoryGroup(coreMemories)}`;
+    usedTokens += estimateTokens(section);
+    lines.push(section);
   }
 
-  return lines.join('\n');
+  // Active Context — always loaded
+  if (activeMemories.length > 0) {
+    const section = `### Active Context\n${formatMemoryGroup(activeMemories)}`;
+    usedTokens += estimateTokens(section);
+    lines.push(section);
+  }
+
+  // Episodic — fill remaining budget
+  if (episodicMemories.length > 0) {
+    const remainingBudget = MEMORY_TOKEN_BUDGET - usedTokens;
+    if (remainingBudget > 50) {
+      const episodicLines: string[] = [];
+      let episodicTokens = 0;
+      for (const m of episodicMemories) {
+        const entry = `- ${m.content}`;
+        const entryTokens = estimateTokens(entry);
+        if (episodicTokens + entryTokens > remainingBudget) break;
+        episodicLines.push(entry);
+        episodicTokens += entryTokens;
+      }
+      if (episodicLines.length > 0) {
+        lines.push(`### Relevant History\n${episodicLines.join('\n')}`);
+      }
+    }
+  }
+
+  return lines.length > 1 ? lines.join('\n\n') : '';
 }
 
 function buildConversationLayer(summaries: AIConversationSummary[]): string {
@@ -222,7 +269,9 @@ function buildBehavioralLayer(depth: AIDepth, hasTools: boolean): string {
 export interface PromptAssemblerInput {
   soul: SoulConfig | null;
   depth: AIDepth;
-  memories: AIMemory[];
+  coreMemories: AIMemory[];
+  activeMemories: AIMemory[];
+  episodicMemories: AIMemory[];
   summaries: AIConversationSummary[];
   appContext: AppContext | null;
   hasTools: boolean;
@@ -232,7 +281,7 @@ export function assembleSystemPrompt(input: PromptAssemblerInput): string {
   const layers = [
     buildIdentityLayer(input.soul),
     buildUserProfileLayer(input.soul),
-    buildMemoriesLayer(input.memories),
+    buildMemoriesLayer(input.coreMemories, input.activeMemories, input.episodicMemories),
     buildConversationLayer(input.summaries),
     buildAppContextLayer(input.appContext),
     buildBehavioralLayer(input.depth, input.hasTools),
@@ -265,17 +314,52 @@ export function estimateTokens(prompt: string): number {
  *   - Conversation summaries (SQLite or localStorage)
  *   - App context (Zustand store snapshot)
  */
+/**
+ * Sprint 38 P2: Score episodic memories by relevance.
+ * Combines recency, access frequency, and importance.
+ */
+function scoreEpisodicMemory(m: AIMemory): number {
+  const now = Date.now();
+  const lastAccess = m.lastAccessedAt ? new Date(m.lastAccessedAt).getTime() : 0;
+  const ageMs = now - lastAccess;
+  const ageDays = ageMs / (1000 * 60 * 60 * 24);
+
+  // Recency: exponential decay over 90 days (1.0 → ~0 at 90 days)
+  const recencyScore = Math.exp(-ageDays / 30);
+  // Frequency: logarithmic (diminishing returns after ~10 accesses)
+  const frequencyScore = Math.log2(1 + m.accessCount) / 5;
+  // Importance: direct weight
+  const importanceWeight = m.importanceScore;
+
+  return recencyScore * 0.3 + frequencyScore * 0.3 + importanceWeight * 0.4;
+}
+
 export async function assembleConciergeContext(appContext: AppContext | null, hasTools = true): Promise<string> {
   const soul = getSoulConfig();
   const settings = getAISettings();
   const allMemories = await getMemories();
-  const activeMemories = allMemories.filter((m) => m.active);
+  const active = allMemories.filter((m) => m.active);
+
+  // Split by tier
+  const coreMemories = active.filter((m) => m.tier === 'core_identity');
+  const activeContextMemories = active.filter((m) => m.tier === 'active_context');
+  const episodicMemories = active
+    .filter((m) => m.tier === 'episodic')
+    .sort((a, b) => scoreEpisodicMemory(b) - scoreEpisodicMemory(a))
+    .slice(0, 10); // Top 10 most relevant
+
+  // Track access for loaded memories
+  const loadedIds = [...coreMemories, ...activeContextMemories, ...episodicMemories].map((m) => m.id);
+  void trackMemoryAccess(loadedIds);
+
   const summaries = await getSummaries();
 
   return assembleSystemPrompt({
     soul,
     depth: settings.depth,
-    memories: activeMemories,
+    coreMemories,
+    activeMemories: activeContextMemories,
+    episodicMemories,
     summaries,
     appContext,
     hasTools,

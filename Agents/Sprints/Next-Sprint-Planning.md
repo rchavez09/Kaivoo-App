@@ -1,7 +1,7 @@
 # Next Sprint Planning
 
-**Updated:** [Date]
-**Last completed:** Sprint 37 (Configurable Heartbeat)
+**Updated:** March 14, 2026
+**Last completed:** Sprint 38 (Neuron Memory V1)
 **Next sprint:** TBD
 **Source:** [CEO sessions, Vision.md, agent docs, deferred items]
 

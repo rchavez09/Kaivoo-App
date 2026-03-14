@@ -147,17 +147,38 @@ async function onHeartbeatTick(): Promise<void> {
 
   try {
     console.log('[Heartbeat] Running AI inference...');
+
+    // Sprint 38 P6: Check quiet hours — still run inference but suppress notifications
+    const inQuietHours = isInQuietHours(settings);
+
     const insight = await runHeartbeatInference();
 
     if (insight) {
       console.log('[Heartbeat] Insight generated:', insight);
 
-      // Trigger notification if enabled
-      if (settings.notificationsEnabled) {
+      // Trigger notification if enabled (and not in quiet hours)
+      if (settings.notificationsEnabled && !inQuietHours) {
         await showHeartbeatNotification(insight);
+      } else if (inQuietHours) {
+        console.log('[Heartbeat] Notification suppressed (quiet hours)');
       }
     } else {
       console.log('[Heartbeat] No actionable insights found (NO_ACTION)');
+    }
+
+    // Sprint 38 P3: Run memory consolidation after insight generation
+    if (settings.memoryConsolidationEnabled) {
+      try {
+        const { runConsolidation, formatConsolidationInsight } = await import('../ai/memory-consolidation');
+        const result = await runConsolidation();
+        const consolidationInsight = formatConsolidationInsight(result);
+        if (consolidationInsight) {
+          console.log('[Heartbeat]', consolidationInsight);
+          await storeInsight(consolidationInsight, null);
+        }
+      } catch (consolErr) {
+        console.error('[Heartbeat] Memory consolidation failed:', consolErr);
+      }
     }
   } catch (e) {
     console.error('[Heartbeat] Tick failed:', e);
@@ -261,6 +282,30 @@ async function storeInsight(insight: string, appContext: unknown): Promise<void>
     }
   } catch (e) {
     console.error('[Heartbeat] Failed to store insight:', e);
+  }
+}
+
+/**
+ * Sprint 38 P6: Check if current time is within quiet hours.
+ * Handles overnight ranges (e.g., 22:00 → 07:00).
+ */
+function isInQuietHours(settings: HeartbeatSettings): boolean {
+  if (!settings.quietHoursEnabled) return false;
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const [startH, startM] = (settings.quietHoursStart ?? '22:00').split(':').map(Number);
+  const [endH, endM] = (settings.quietHoursEnd ?? '07:00').split(':').map(Number);
+  const startMinutes = startH * 60 + startM;
+  const endMinutes = endH * 60 + endM;
+
+  if (startMinutes <= endMinutes) {
+    // Same-day range (e.g., 09:00 → 17:00)
+    return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+  } else {
+    // Overnight range (e.g., 22:00 → 07:00)
+    return currentMinutes >= startMinutes || currentMinutes < endMinutes;
   }
 }
 

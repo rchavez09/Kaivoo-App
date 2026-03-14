@@ -78,6 +78,14 @@ export interface HeartbeatSettings {
   customCron?: string;
 
   notificationsEnabled: boolean;
+
+  // Sprint 38 P3: Memory consolidation during heartbeat
+  memoryConsolidationEnabled: boolean;
+
+  // Sprint 38 P6: Quiet hours / Do Not Disturb
+  quietHoursEnabled: boolean;
+  quietHoursStart: string; // 24-hour format, e.g. "22:00"
+  quietHoursEnd: string; // 24-hour format, e.g. "07:00"
 }
 
 const DEFAULT_HEARTBEAT: HeartbeatSettings = {
@@ -87,6 +95,10 @@ const DEFAULT_HEARTBEAT: HeartbeatSettings = {
   customDays: [1, 2, 3, 4, 5], // Weekdays default (M-F)
   customTimes: ['08:00'], // 8:00 AM default
   notificationsEnabled: true,
+  memoryConsolidationEnabled: true,
+  quietHoursEnabled: false,
+  quietHoursStart: '22:00',
+  quietHoursEnd: '07:00',
 };
 
 // In-memory cache so synchronous getAISettings() works after first async load
