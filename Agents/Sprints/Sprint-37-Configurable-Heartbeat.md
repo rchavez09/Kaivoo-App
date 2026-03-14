@@ -382,4 +382,180 @@ Sprint 37 succeeds when:
 
 ---
 
+## Sprint Retrospective
+
+**Completed:** March 14, 2026
+**Duration:** 3 days (planning + implementation + quality gates)
+**Status:** ✅ **SUCCESS** — All acceptance criteria met, sandbox approved, merged to main
+
+### What We Built
+
+Sprint 37 delivered a complete proactive AI heartbeat system with full user control over scheduling:
+
+**Core Features Delivered:**
+- ✅ Background heartbeat timer (Rust + TypeScript)
+- ✅ Configurable scheduling (Off, Hourly, Custom)
+- ✅ Custom schedule UI with day-of-week selector + multiple time pickers
+- ✅ Auto-save settings (persists to localStorage)
+- ✅ AI inference integration (reads context, generates insights)
+- ✅ Desktop + web notifications
+- ✅ Settings persistence across app restarts
+
+**User Capability:**
+Users can now set heartbeat to run at ANY days + ANY times:
+- Example: M-F at 8:24 PM
+- Example: M-F at 6:00 AM, 12:00 PM, 8:24 PM (3x per day)
+- Example: Every 4 hours (interval-based)
+
+### Scope Evolution
+
+**Original Scope (P1-P4):**
+- Simple presets (Morning, Evening, Hourly)
+- Basic cron input for custom schedules
+
+**Phase 5 Expansion (P5-P7):**
+- User feedback: "I wish there was a way to set the time"
+- Design agent reviews revealed UX gaps
+- Scope expanded to include full day/time control
+- Built DayOfWeekSelector + TimePickerList components
+- Applied all design agent P1 fixes (accessibility, spacing, theming)
+
+**Final Simplification:**
+- Removed redundant presets (Morning, Evening, Work Hours)
+- Simplified to 3 modes: Off, Hourly, Custom
+- Custom mode can recreate all old presets with more flexibility
+
+### Technical Challenges & Solutions
+
+**Challenge 1: Rust Deadlock**
+- **Issue:** Nested `Arc<Mutex>` caused double-lock when stopping heartbeat
+- **Impact:** Desktop app froze when toggling heartbeat off
+- **Solution:** Simplified to `Mutex<Option<Arc<Mutex<bool>>>>`, removed nested lock
+- **Result:** Clean thread shutdown with no blocking
+
+**Challenge 2: Long Stop Delay**
+- **Issue:** Thread slept for full interval (60s) before checking stop flag
+- **Impact:** 60-second freeze when turning off heartbeat
+- **Solution:** Interruptible sleep (checks stop flag every 1 second)
+- **Result:** <1s response time for stop operations
+
+**Challenge 3: Missing npm Package**
+- **Issue:** `@tauri-apps/plugin-notification` not installed
+- **Impact:** Blank screen on desktop launch (import failure)
+- **Solution:** Added package to dependencies
+- **Result:** Desktop app launches cleanly
+
+### Quality Gates Performance
+
+**Phase 4 (Deterministic Checks):**
+- ✅ Format (Prettier)
+- ✅ Lint (0 errors, 896 pre-existing warnings)
+- ✅ Typecheck (TypeScript clean)
+- ✅ Tests (265 passed)
+- ✅ Build (production successful)
+- ✅ Cargo check (Rust clean)
+- ✅ Cargo clippy (1 minor warning - unused mut)
+
+**Phase 4 (Agent Reviews):**
+- ✅ Agent 7 (Code Audit) - PASS with 3 P1 fixes applied
+- ✅ Agent 11 (Feature Integrity) - PASS (no regressions)
+- ✅ Design agents (UX, Accessibility, Visual) - PASS with P1 fixes applied
+
+**Phase 5 (Sandbox Testing):**
+- ✅ Track A (Web) - Approved (tested on deploy preview)
+- ✅ Track B (Desktop) - Approved (tested with tauri dev)
+
+### Metrics
+
+| Metric | Target | Actual |
+|---|---|---|
+| **Code Added** | ~400 lines | ~600 lines (expanded scope) |
+| **Files Created** | 5 | 7 (2 components + 5 backend files) |
+| **Files Modified** | 4 | 6 (settings, integrations) |
+| **Quality Gates** | 100% pass | 100% pass |
+| **Agent Reviews** | 3 (Agent 7, 11, Design) | 6 (Agent 7, 11, UX, A11y, Visual, Implementation Plan) |
+| **Bugs Fixed** | 0 (greenfield) | 3 (Rust deadlock, stop delay, missing package) |
+| **User Approval** | Required | ✅ Granted (sandbox approved) |
+
+### What Went Well
+
+1. **Agile Scope Adjustment**
+   - User feedback in Phase 5 led to better UX
+   - Scope expansion was well-managed (P5-P7 added smoothly)
+   - Final simplification reduced complexity
+
+2. **Design Agent Integration**
+   - 3-agent design review caught UX gaps before sandbox
+   - P1 fixes applied systematically (accessibility, spacing)
+   - Visual polish applied from the start
+
+3. **Rust Bug Fixes**
+   - Deadlock identified and fixed quickly
+   - Interruptible sleep pattern improved responsiveness
+   - Desktop experience is now smooth and reliable
+
+4. **Auto-Save UX**
+   - Removing manual "Save" button improved flow
+   - Settings save instantly on change
+   - Simpler mental model for users
+
+### What Could Improve
+
+1. **Earlier Desktop Testing**
+   - Rust bugs only discovered during sandbox testing
+   - Could have caught deadlock earlier with unit tests
+   - **Action:** Add Rust unit tests for heartbeat module in future sprints
+
+2. **Dependency Management**
+   - Missing npm package caused initial blank screen
+   - Should verify all imports before desktop build
+   - **Action:** Add pre-build dependency check script
+
+3. **Scope Creep Risk**
+   - P5-P7 expansion added 2 days to sprint
+   - Original estimate was 1 day (P1-P4 only)
+   - **Lesson:** Phase 5 feedback can trigger scope expansion - budget time accordingly
+
+### Key Learnings
+
+1. **User Feedback is Gold**
+   - "I wish there was a way to set the time" drove P5-P7 expansion
+   - Listening to user needs led to better product
+   - Sandbox testing is critical for UX validation
+
+2. **Simplification > Feature Bloat**
+   - Removing presets made UI cleaner
+   - Custom mode is more powerful and flexible
+   - Fewer options = better UX
+
+3. **Rust Concurrency is Tricky**
+   - Nested locks are dangerous (deadlock risk)
+   - Interruptible sleep is better than long blocking sleep
+   - Testing desktop features early saves time
+
+### Next Steps
+
+**Immediate:**
+- ✅ Merged to main (PR #24)
+- ✅ Tagged post-sprint-37
+- ✅ Netlify auto-deployed to production
+- ✅ Desktop builds available via tauri dev (unsigned for now)
+
+**Future Enhancements (Not in Scope):**
+- Desktop auto-updater (signed builds)
+- Insight history view (Settings → Proactive Insights → History)
+- Snooze notification feature
+- Smart scheduling (ML-based optimal times)
+
+### Vision Impact
+
+Sprint 37 completes **Vision Phase 1 (Core Intelligence)** by adding proactive AI capabilities. Users no longer need to manually check in - Flow now reaches out proactively when it finds actionable insights.
+
+**Vision Progress:**
+- Phase 1 (Core Intelligence) → **100% Complete** ✅
+- Phase 2 (Context Mastery) → Next focus area
+
+---
+
 *Sprint 37 — Compiled March 11, 2026 by Dev Director*
+*Retrospective Written March 14, 2026 — Post-Merge to Main*
