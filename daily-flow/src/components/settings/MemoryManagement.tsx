@@ -190,7 +190,7 @@ export default function MemoryManagement() {
                   {memory.category} · score {memory.importanceScore.toFixed(1)} · accessed {memory.accessCount}x
                 </p>
               </div>
-              <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                 {/* Promote */}
                 {memory.tier !== 'core_identity' && (
                   <button

@@ -6,7 +6,7 @@
  * Desktop: placeholder (SQLite storage is Phase B).
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Filter } from 'lucide-react';
 
 interface Insight {
@@ -34,6 +34,39 @@ export default function InsightsHistoryModal({ onClose }: Props) {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  // Focus trap
+  const handleFocusTrap = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab' || !dialogRef.current) return;
+    const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }, []);
+
+  // Auto-focus dialog on mount
+  useEffect(() => {
+    dialogRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     void fetchInsights();
@@ -116,12 +149,17 @@ export default function InsightsHistoryModal({ onClose }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       role="dialog"
       aria-modal="true"
-      aria-label="Insights History"
+      aria-labelledby="insights-history-title"
+      ref={dialogRef}
+      tabIndex={-1}
+      onKeyDown={handleFocusTrap}
     >
       <div className="relative mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-xl border border-border bg-background shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold text-foreground">Insights History</h2>
+          <h2 id="insights-history-title" className="text-sm font-semibold text-foreground">
+            Insights History
+          </h2>
           <button
             type="button"
             onClick={onClose}
