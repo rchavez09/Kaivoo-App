@@ -30,6 +30,8 @@ export type {
   ProjectNoteAdapter,
   ConversationAdapter,
   CoherenceLogAdapter,
+  AgentAdapter,
+  SkillAdapter,
   // Input types
   CreateTaskInput,
   UpdateTaskInput,
@@ -59,6 +61,10 @@ export type {
   CreateConversationInput,
   UpdateConversationInput,
   CreateCoherenceSignalInput,
+  CreateAgentInput,
+  UpdateAgentInput,
+  CreateSkillInput,
+  UpdateSkillInput,
   // Auth types
   AuthUser,
   AuthSession,

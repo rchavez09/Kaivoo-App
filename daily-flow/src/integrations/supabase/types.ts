@@ -8,6 +8,78 @@ export type Database = {
   };
   public: {
     Tables: {
+      agent_skills: {
+        Row: {
+          agent_id: string;
+          assigned_at: string | null;
+          skill_id: string;
+        };
+        Insert: {
+          agent_id: string;
+          assigned_at?: string | null;
+          skill_id: string;
+        };
+        Update: {
+          agent_id?: string;
+          assigned_at?: string | null;
+          skill_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'agent_skills_agent_id_fkey';
+            columns: ['agent_id'];
+            isOneToOne: false;
+            referencedRelation: 'agents';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'agent_skills_skill_id_fkey';
+            columns: ['skill_id'];
+            isOneToOne: false;
+            referencedRelation: 'skills';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      agents: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          id: string;
+          is_active: boolean | null;
+          model: string | null;
+          name: string;
+          permissions: Json | null;
+          system_prompt: string | null;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          model?: string | null;
+          name: string;
+          permissions?: Json | null;
+          system_prompt?: string | null;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          model?: string | null;
+          name?: string;
+          permissions?: Json | null;
+          system_prompt?: string | null;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       ai_action_logs: {
         Row: {
           action_data: Json;
@@ -432,6 +504,39 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      skills: {
+        Row: {
+          action_config: Json | null;
+          action_type: string;
+          created_at: string | null;
+          description: string | null;
+          id: string;
+          name: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          action_config?: Json | null;
+          action_type?: string;
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          name: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          action_config?: Json | null;
+          action_type?: string;
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       subtasks: {
         Row: {

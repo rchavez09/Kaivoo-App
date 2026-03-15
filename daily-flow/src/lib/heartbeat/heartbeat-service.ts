@@ -10,6 +10,8 @@ import { getHeartbeatSettings, type HeartbeatSettings } from '../ai/settings';
 
 let heartbeatInterval: number | null = null;
 let tauriUnlisten: (() => void) | null = null;
+let lastErrorToastTime = 0;
+const ERROR_TOAST_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
 /**
  * Start the heartbeat timer.
@@ -183,11 +185,16 @@ async function onHeartbeatTick(): Promise<void> {
   } catch (e) {
     console.error('[Heartbeat] Tick failed:', e);
 
-    // Agent 7 P1-3: Show user-facing error notification for critical failures
-    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
-    if (errorMessage.includes('API key') || errorMessage.includes('unauthorized') || errorMessage.includes('401')) {
-      // Critical: API key issue — notify immediately
-      await showErrorNotification('Heartbeat failed: Check your AI settings');
+    // Agent 7 P1-3: Show user-facing error notification (debounced: 1 per hour max)
+    const now = Date.now();
+    if (now - lastErrorToastTime > ERROR_TOAST_COOLDOWN_MS) {
+      lastErrorToastTime = now;
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      if (errorMessage.includes('API key') || errorMessage.includes('unauthorized') || errorMessage.includes('401')) {
+        await showErrorNotification('Heartbeat failed: Check your AI settings');
+      } else {
+        await showErrorNotification('Proactive insights temporarily unavailable');
+      }
     }
   }
 }

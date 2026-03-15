@@ -252,6 +252,38 @@ CREATE TABLE IF NOT EXISTS ai_coherence_log (
 CREATE INDEX IF NOT EXISTS idx_ai_coherence_log_conv ON ai_coherence_log(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_ai_coherence_log_created ON ai_coherence_log(created_at DESC);
 
+CREATE TABLE IF NOT EXISTS agents (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  model TEXT,
+  system_prompt TEXT,
+  permissions TEXT DEFAULT '[]',
+  is_active INTEGER DEFAULT 1,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS skills (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  action_type TEXT NOT NULL DEFAULT 'prompt' CHECK (action_type IN ('prompt', 'tool', 'composite')),
+  action_config TEXT DEFAULT '{}',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS agent_skills (
+  agent_id TEXT NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
+  skill_id TEXT NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+  assigned_at TEXT DEFAULT (datetime('now')),
+  PRIMARY KEY (agent_id, skill_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_skills_agent ON agent_skills(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_skills_skill ON agent_skills(skill_id);
+
 CREATE TABLE IF NOT EXISTS license (
   id TEXT PRIMARY KEY DEFAULT 'active',
   license_key TEXT NOT NULL,

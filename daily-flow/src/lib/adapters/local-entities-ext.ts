@@ -13,3 +13,4 @@ export { LocalHabitAdapter, LocalHabitCompletionAdapter } from './local-habits';
 export { LocalMeetingAdapter } from './local-meetings';
 export { LocalProjectAdapter, LocalProjectNoteAdapter } from './local-projects';
 export { LocalConversationAdapter, LocalCoherenceLogAdapter } from './local-conversations';
+export { LocalAgentAdapter, LocalSkillAdapter } from './local-orchestrator';

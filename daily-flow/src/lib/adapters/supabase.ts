@@ -63,6 +63,12 @@ import type {
   CreateConversationInput,
   UpdateConversationInput,
   CreateCoherenceSignalInput,
+  AgentAdapter,
+  SkillAdapter,
+  CreateAgentInput,
+  UpdateAgentInput,
+  CreateSkillInput,
+  UpdateSkillInput,
 } from './types';
 
 // Existing service functions — preserved as-is
@@ -544,6 +550,162 @@ class SupabaseCoherenceLogAdapter implements CoherenceLogAdapter {
   }
 }
 
+// ─── Orchestrator: Agents ───
+
+class SupabaseAgentAdapter implements AgentAdapter {
+  constructor(private userId: string) {}
+
+  async fetchAll() {
+    const { data, error } = await supabase
+      .from('agents')
+      .select('*')
+      .eq('user_id', this.userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((r) => this.toAgent(r));
+  }
+
+  async create(input: CreateAgentInput) {
+    const row = {
+      user_id: this.userId,
+      name: input.name,
+      description: input.description ?? null,
+      model: input.model ?? null,
+      system_prompt: input.systemPrompt ?? null,
+      permissions: input.permissions ?? [],
+      is_active: input.isActive !== false,
+    };
+    const { data, error } = await supabase.from('agents').insert(row).select().single();
+    if (error) throw error;
+    return this.toAgent(data);
+  }
+
+  async update(id: string, input: UpdateAgentInput) {
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (input.name !== undefined) updates.name = input.name;
+    if (input.description !== undefined) updates.description = input.description;
+    if (input.model !== undefined) updates.model = input.model;
+    if (input.systemPrompt !== undefined) updates.system_prompt = input.systemPrompt;
+    if (input.permissions !== undefined) updates.permissions = input.permissions;
+    if (input.isActive !== undefined) updates.is_active = input.isActive;
+    const { error } = await supabase.from('agents').update(updates).eq('id', id).eq('user_id', this.userId);
+    if (error) throw error;
+  }
+
+  async delete(id: string) {
+    const { error } = await supabase.from('agents').delete().eq('id', id).eq('user_id', this.userId);
+    if (error) throw error;
+  }
+
+  async getSkills(agentId: string) {
+    const { data, error } = await supabase.from('agent_skills').select('skill_id, skills(*)').eq('agent_id', agentId);
+    if (error) throw error;
+    return (data ?? [])
+      .filter((r) => r.skills)
+      .map((r) => {
+        const s = r.skills as Record<string, unknown>;
+        return {
+          id: s.id as string,
+          name: s.name as string,
+          description: (s.description as string) ?? null,
+          actionType: (s.action_type as import('@/types').SkillActionType) || 'prompt',
+          actionConfig: (s.action_config as Record<string, unknown>) ?? {},
+          createdAt: new Date(s.created_at as string),
+          updatedAt: new Date(s.updated_at as string),
+        };
+      });
+  }
+
+  async assignSkill(agentId: string, skillId: string) {
+    const { error } = await supabase.from('agent_skills').upsert({ agent_id: agentId, skill_id: skillId });
+    if (error) throw error;
+  }
+
+  async removeSkill(agentId: string, skillId: string) {
+    const { error } = await supabase.from('agent_skills').delete().eq('agent_id', agentId).eq('skill_id', skillId);
+    if (error) throw error;
+  }
+
+  private toAgent(r: Record<string, unknown>): import('@/types').Agent {
+    return {
+      id: r.id as string,
+      name: r.name as string,
+      description: (r.description as string) ?? null,
+      model: (r.model as string) ?? null,
+      systemPrompt: (r.system_prompt as string) ?? null,
+      permissions: (r.permissions as string[]) ?? [],
+      isActive: r.is_active as boolean,
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
+    };
+  }
+}
+
+// ─── Orchestrator: Skills ───
+
+class SupabaseSkillAdapter implements SkillAdapter {
+  constructor(private userId: string) {}
+
+  async fetchAll() {
+    const { data, error } = await supabase
+      .from('skills')
+      .select('*')
+      .eq('user_id', this.userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((r) => this.toSkill(r));
+  }
+
+  async create(input: CreateSkillInput) {
+    const row = {
+      user_id: this.userId,
+      name: input.name,
+      description: input.description ?? null,
+      action_type: input.actionType,
+      action_config: input.actionConfig ?? {},
+    };
+    const { data, error } = await supabase.from('skills').insert(row).select().single();
+    if (error) throw error;
+    return this.toSkill(data);
+  }
+
+  async update(id: string, input: UpdateSkillInput) {
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (input.name !== undefined) updates.name = input.name;
+    if (input.description !== undefined) updates.description = input.description;
+    if (input.actionType !== undefined) updates.action_type = input.actionType;
+    if (input.actionConfig !== undefined) updates.action_config = input.actionConfig;
+    const { error } = await supabase.from('skills').update(updates).eq('id', id).eq('user_id', this.userId);
+    if (error) throw error;
+  }
+
+  async delete(id: string) {
+    const { error } = await supabase.from('skills').delete().eq('id', id).eq('user_id', this.userId);
+    if (error) throw error;
+  }
+
+  async getAgentCount(skillId: string) {
+    const { count, error } = await supabase
+      .from('agent_skills')
+      .select('*', { count: 'exact', head: true })
+      .eq('skill_id', skillId);
+    if (error) throw error;
+    return count ?? 0;
+  }
+
+  private toSkill(r: Record<string, unknown>): import('@/types').Skill {
+    return {
+      id: r.id as string,
+      name: r.name as string,
+      description: (r.description as string) ?? null,
+      actionType: (r.action_type as import('@/types').SkillActionType) || 'prompt',
+      actionConfig: (r.action_config as Record<string, unknown>) ?? {},
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
+    };
+  }
+}
+
 // ─── Main DataAdapter ───
 
 export class SupabaseDataAdapter implements DataAdapter {
@@ -564,6 +726,8 @@ export class SupabaseDataAdapter implements DataAdapter {
   projectNotes: ProjectNoteAdapter;
   conversations: ConversationAdapter;
   coherenceLog: CoherenceLogAdapter;
+  agents: AgentAdapter;
+  skills: SkillAdapter;
 
   constructor(private userId: string) {
     this.tasks = new SupabaseTaskAdapter(userId);
@@ -583,6 +747,8 @@ export class SupabaseDataAdapter implements DataAdapter {
     this.projectNotes = new SupabaseProjectNoteAdapter(userId);
     this.conversations = new SupabaseConversationAdapter(userId);
     this.coherenceLog = new SupabaseCoherenceLogAdapter(userId);
+    this.agents = new SupabaseAgentAdapter(userId);
+    this.skills = new SupabaseSkillAdapter(userId);
   }
 
   async initialize() {
