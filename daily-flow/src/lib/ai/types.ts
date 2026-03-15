@@ -92,12 +92,17 @@ export interface SoulConfig {
 
 export type MemoryCategory = 'preference' | 'fact' | 'goal' | 'relationship' | 'pattern';
 export type MemorySource = 'hatching' | 'user_edit' | 'extraction' | 'explicit' | 'pre_compaction_flush';
+export type MemoryTier = 'core_identity' | 'active_context' | 'episodic';
 
 export interface AIMemory {
   id: string;
   content: string;
   category: MemoryCategory;
   source: MemorySource;
+  tier: MemoryTier;
+  importanceScore: number; // 0.0-1.0, used for promotion/demotion
+  lastAccessedAt: string | null;
+  accessCount: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;

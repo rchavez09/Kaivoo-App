@@ -9,7 +9,7 @@
  * substring matching against the in-memory array.
  */
 
-import type { AIMemory, AIConversationSummary, MemoryCategory, MemorySource } from './types';
+import type { AIMemory, AIConversationSummary, MemoryCategory, MemorySource, MemoryTier } from './types';
 
 const MEMORIES_KEY = 'kaivoo-ai-memories';
 const SUMMARIES_KEY = 'kaivoo-ai-summaries';
@@ -65,12 +65,22 @@ export async function getMemories(activeOnly = true): Promise<AIMemory[]> {
   return activeOnly ? memoriesCache.filter((m) => m.active) : [...memoriesCache];
 }
 
-export async function addMemory(content: string, category: MemoryCategory, source: MemorySource): Promise<AIMemory> {
+export async function addMemory(
+  content: string,
+  category: MemoryCategory,
+  source: MemorySource,
+  tier: MemoryTier = 'episodic',
+  importanceScore: number = 0.5,
+): Promise<AIMemory> {
   const memory: AIMemory = {
     id: crypto.randomUUID(),
     content,
     category,
     source,
+    tier,
+    importanceScore,
+    lastAccessedAt: null,
+    accessCount: 0,
     active: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -79,9 +89,20 @@ export async function addMemory(content: string, category: MemoryCategory, sourc
   if (isTauri()) {
     const db = await getDb();
     await db.execute(
-      `INSERT INTO ai_memories (id, content, category, source, active, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, 1, $5, $6)`,
-      [memory.id, memory.content, memory.category, memory.source, memory.createdAt, memory.updatedAt],
+      `INSERT INTO ai_memories (id, content, category, source, tier, importance_score, last_accessed_at, access_count, active, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 1, $9, $10)`,
+      [
+        memory.id,
+        memory.content,
+        memory.category,
+        memory.source,
+        memory.tier,
+        memory.importanceScore,
+        memory.lastAccessedAt,
+        memory.accessCount,
+        memory.createdAt,
+        memory.updatedAt,
+      ],
     );
     // Update FTS index
     await db.execute(
@@ -157,6 +178,81 @@ export async function toggleMemoryActive(id: string, active: boolean): Promise<v
     const idx = memoriesCache.findIndex((m) => m.id === id);
     if (idx >= 0) {
       memoriesCache[idx] = { ...memoriesCache[idx], active, updatedAt: now };
+    }
+    if (!isTauri()) saveToStorage(MEMORIES_KEY, memoriesCache);
+  }
+}
+
+// ─── Tier-Aware Operations (Sprint 38 P1) ───
+
+/** Get memories filtered by tier. */
+export async function getMemoriesByTier(tier: MemoryTier): Promise<AIMemory[]> {
+  const all = await getMemories(true);
+  return all.filter((m) => m.tier === tier);
+}
+
+/** Update a memory's tier (promote/demote). */
+export async function updateMemoryTier(id: string, tier: MemoryTier): Promise<void> {
+  const now = new Date().toISOString();
+
+  if (isTauri()) {
+    const db = await getDb();
+    await db.execute('UPDATE ai_memories SET tier = $1, updated_at = $2 WHERE id = $3', [tier, now, id]);
+  }
+
+  if (memoriesCache) {
+    const idx = memoriesCache.findIndex((m) => m.id === id);
+    if (idx >= 0) {
+      memoriesCache[idx] = { ...memoriesCache[idx], tier, updatedAt: now };
+    }
+    if (!isTauri()) saveToStorage(MEMORIES_KEY, memoriesCache);
+  }
+}
+
+/** Update a memory's importance score. */
+export async function updateMemoryImportance(id: string, importanceScore: number): Promise<void> {
+  const now = new Date().toISOString();
+  const clamped = Math.max(0, Math.min(1, importanceScore));
+
+  if (isTauri()) {
+    const db = await getDb();
+    await db.execute('UPDATE ai_memories SET importance_score = $1, updated_at = $2 WHERE id = $3', [clamped, now, id]);
+  }
+
+  if (memoriesCache) {
+    const idx = memoriesCache.findIndex((m) => m.id === id);
+    if (idx >= 0) {
+      memoriesCache[idx] = { ...memoriesCache[idx], importanceScore: clamped, updatedAt: now };
+    }
+    if (!isTauri()) saveToStorage(MEMORIES_KEY, memoriesCache);
+  }
+}
+
+/** Track that a memory was accessed (increment access_count, update last_accessed_at). */
+export async function trackMemoryAccess(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const now = new Date().toISOString();
+
+  if (isTauri()) {
+    const db = await getDb();
+    for (const id of ids) {
+      await db.execute('UPDATE ai_memories SET access_count = access_count + 1, last_accessed_at = $1 WHERE id = $2', [
+        now,
+        id,
+      ]);
+    }
+  }
+
+  if (memoriesCache) {
+    for (const id of ids) {
+      const idx = memoriesCache.findIndex((m) => m.id === id);
+      if (idx >= 0) {
+        memoriesCache[idx] = {
+          ...memoriesCache[idx],
+          accessCount: memoriesCache[idx].accessCount + 1,
+          lastAccessedAt: now,
+        };
+      }
     }
     if (!isTauri()) saveToStorage(MEMORIES_KEY, memoriesCache);
   }
@@ -241,6 +337,10 @@ function rowToMemory(row: Record<string, unknown>): AIMemory {
     content: row.content as string,
     category: row.category as AIMemory['category'],
     source: row.source as AIMemory['source'],
+    tier: (row.tier as AIMemory['tier']) ?? 'episodic',
+    importanceScore: (row.importance_score as number) ?? 0.5,
+    lastAccessedAt: (row.last_accessed_at as string) ?? null,
+    accessCount: (row.access_count as number) ?? 0,
     active: row.active === 1 || row.active === true,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,

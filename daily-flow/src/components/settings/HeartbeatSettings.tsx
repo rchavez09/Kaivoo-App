@@ -14,9 +14,11 @@ import { getHeartbeatSettings, saveHeartbeatSettings, type HeartbeatSettings } f
 import { restartHeartbeat } from '@/lib/heartbeat/heartbeat-service';
 import { DayOfWeekSelector } from './DayOfWeekSelector';
 import { TimePickerList } from './TimePickerList';
+import InsightsHistoryModal from './InsightsHistoryModal';
 
 export default function HeartbeatSettings() {
   const [settings, setSettings] = useState<HeartbeatSettings>(getHeartbeatSettings());
+  const [showHistory, setShowHistory] = useState(false);
 
   // Derive hourly interval from intervalSeconds (for display)
   const hourlyInterval = Math.floor(settings.intervalSeconds / 3600);
@@ -167,6 +169,71 @@ export default function HeartbeatSettings() {
           onCheckedChange={(enabled) => void updateSettings({ notificationsEnabled: enabled })}
         />
       </div>
+
+      {/* Quiet Hours (Sprint 38 P6) */}
+      <div className="widget-card space-y-3 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label htmlFor="quiet-hours-toggle" className="text-sm font-medium">
+              Do Not Disturb
+            </Label>
+            <p className="text-xs text-muted-foreground">Suppress notifications during quiet hours</p>
+          </div>
+          <Switch
+            id="quiet-hours-toggle"
+            checked={settings.quietHoursEnabled}
+            onCheckedChange={(enabled) => void updateSettings({ quietHoursEnabled: enabled })}
+          />
+        </div>
+        {settings.quietHoursEnabled && (
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <Label htmlFor="quiet-start" className="mb-1 block text-xs text-muted-foreground">
+                Start
+              </Label>
+              <input
+                id="quiet-start"
+                type="time"
+                value={settings.quietHoursStart ?? '22:00'}
+                onChange={(e) => void updateSettings({ quietHoursStart: e.target.value })}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <span className="mt-5 text-muted-foreground">—</span>
+            <div className="flex-1">
+              <Label htmlFor="quiet-end" className="mb-1 block text-xs text-muted-foreground">
+                End
+              </Label>
+              <input
+                id="quiet-end"
+                type="time"
+                value={settings.quietHoursEnd ?? '07:00'}
+                onChange={(e) => void updateSettings({ quietHoursEnd: e.target.value })}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Insights History (Sprint 38 P7) */}
+      <div className="widget-card p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-foreground">Insights History</p>
+            <p className="text-xs text-muted-foreground">View past proactive insights</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowHistory(true)}
+            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary"
+          >
+            View History
+          </button>
+        </div>
+      </div>
+
+      {showHistory && <InsightsHistoryModal onClose={() => setShowHistory(false)} />}
 
       {/* Info box */}
       <div className="rounded-lg bg-secondary/30 p-4">

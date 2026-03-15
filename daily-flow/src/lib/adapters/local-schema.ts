@@ -188,6 +188,10 @@ CREATE TABLE IF NOT EXISTS ai_memories (
   content TEXT NOT NULL,
   category TEXT NOT NULL DEFAULT 'fact',
   source TEXT NOT NULL DEFAULT 'extraction',
+  tier TEXT NOT NULL DEFAULT 'episodic' CHECK (tier IN ('core_identity', 'active_context', 'episodic')),
+  importance_score REAL DEFAULT 0.5 CHECK (importance_score >= 0.0 AND importance_score <= 1.0),
+  last_accessed_at TEXT,
+  access_count INTEGER DEFAULT 0,
   active INTEGER DEFAULT 1,
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
@@ -210,6 +214,15 @@ CREATE VIRTUAL TABLE IF NOT EXISTS ai_memories_fts USING fts5(
   category UNINDEXED,
   tokenize='porter unicode61'
 );
+
+ALTER TABLE ai_memories ADD COLUMN tier TEXT NOT NULL DEFAULT 'episodic';
+ALTER TABLE ai_memories ADD COLUMN importance_score REAL DEFAULT 0.5;
+ALTER TABLE ai_memories ADD COLUMN last_accessed_at TEXT;
+ALTER TABLE ai_memories ADD COLUMN access_count INTEGER DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS idx_ai_memories_tier ON ai_memories(tier);
+CREATE INDEX IF NOT EXISTS idx_ai_memories_importance ON ai_memories(importance_score);
+CREATE INDEX IF NOT EXISTS idx_ai_memories_last_accessed ON ai_memories(last_accessed_at);
 
 ALTER TABLE subtasks ADD COLUMN sort_order INTEGER DEFAULT 0;
 
