@@ -90,86 +90,86 @@ const SkillsTab = () => {
     return <div className="py-12 text-center text-sm text-muted-foreground">Loading skills...</div>;
   }
 
-  if (skills.length === 0) {
-    return (
-      <EmptyState
-        icon={Zap}
-        title="No skills yet"
-        description="Create reusable skills that your agents can perform."
-        action={
-          <Button size="sm" onClick={handleCreate}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            Create Skill
-          </Button>
-        }
-      />
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {skills.length} skill{skills.length !== 1 ? 's' : ''}
-        </p>
-        <Button size="sm" onClick={handleCreate}>
-          <Plus className="mr-1.5 h-4 w-4" />
-          Create Skill
-        </Button>
-      </div>
+    <>
+      {skills.length === 0 ? (
+        <EmptyState
+          icon={Zap}
+          title="No skills yet"
+          description="Create reusable skills that your agents can perform."
+          action={
+            <Button size="sm" onClick={handleCreate}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Create Skill
+            </Button>
+          }
+        />
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {skills.length} skill{skills.length !== 1 ? 's' : ''}
+            </p>
+            <Button size="sm" onClick={handleCreate}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Create Skill
+            </Button>
+          </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {skills.map((skill) => {
-          const count = agentCounts[skill.id] ?? 0;
-          return (
-            <div
-              key={skill.id}
-              className="group relative rounded-lg border bg-card p-4 transition-colors hover:border-primary/30"
-            >
-              <div className="mb-2 flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-amber-500" />
-                  <h3 className="font-medium text-foreground">{skill.name}</h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {skills.map((skill) => {
+              const count = agentCounts[skill.id] ?? 0;
+              return (
+                <div
+                  key={skill.id}
+                  className="group relative rounded-lg border bg-card p-4 transition-colors hover:border-primary/30"
+                >
+                  <div className="mb-2 flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-amber-500" />
+                      <h3 className="font-medium text-foreground">{skill.name}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleEdit(skill)}
+                        aria-label={`Edit ${skill.name}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => setDeleteTarget(skill)}
+                        aria-label={`Delete ${skill.name}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {skill.description && (
+                    <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{skill.description}</p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="secondary">{ACTION_TYPE_LABELS[skill.actionType] ?? skill.actionType}</Badge>
+                    {count > 0 && (
+                      <Badge variant="outline" className="gap-1">
+                        <Bot className="h-3 w-3" />
+                        {count} agent{count !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => handleEdit(skill)}
-                    aria-label={`Edit ${skill.name}`}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive"
-                    onClick={() => setDeleteTarget(skill)}
-                    aria-label={`Delete ${skill.name}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-
-              {skill.description && (
-                <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{skill.description}</p>
-              )}
-
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{ACTION_TYPE_LABELS[skill.actionType] ?? skill.actionType}</Badge>
-                {count > 0 && (
-                  <Badge variant="outline" className="gap-1">
-                    <Bot className="h-3 w-3" />
-                    {count} agent{count !== 1 ? 's' : ''}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {formOpen && (
         <SkillFormDialog open={formOpen} onOpenChange={setFormOpen} skill={editingSkill} onSaved={handleSaved} />
@@ -196,7 +196,7 @@ const SkillsTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 };
 

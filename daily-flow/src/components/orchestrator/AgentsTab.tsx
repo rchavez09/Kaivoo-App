@@ -86,92 +86,92 @@ const AgentsTab = () => {
     return <div className="py-12 text-center text-sm text-muted-foreground">Loading agents...</div>;
   }
 
-  if (agents.length === 0) {
-    return (
-      <EmptyState
-        icon={Bot}
-        title="No agents yet"
-        description="Create your first AI agent to start building your orchestration team."
-        action={
-          <Button size="sm" onClick={handleCreate}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            Create Agent
-          </Button>
-        }
-      />
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {agents.length} agent{agents.length !== 1 ? 's' : ''}
-        </p>
-        <Button size="sm" onClick={handleCreate}>
-          <Plus className="mr-1.5 h-4 w-4" />
-          Create Agent
-        </Button>
-      </div>
+    <>
+      {agents.length === 0 ? (
+        <EmptyState
+          icon={Bot}
+          title="No agents yet"
+          description="Create your first AI agent to start building your orchestration team."
+          action={
+            <Button size="sm" onClick={handleCreate}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Create Agent
+            </Button>
+          }
+        />
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {agents.length} agent{agents.length !== 1 ? 's' : ''}
+            </p>
+            <Button size="sm" onClick={handleCreate}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Create Agent
+            </Button>
+          </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {agents.map((agent) => {
-          const assignedSkills = agentSkillMap[agent.id] ?? [];
-          return (
-            <div
-              key={agent.id}
-              className="group relative rounded-lg border bg-card p-4 transition-colors hover:border-primary/30"
-            >
-              <div className="mb-2 flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-primary" />
-                  <h3 className="font-medium text-foreground">{agent.name}</h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {agents.map((agent) => {
+              const assignedSkills = agentSkillMap[agent.id] ?? [];
+              return (
+                <div
+                  key={agent.id}
+                  className="group relative rounded-lg border bg-card p-4 transition-colors hover:border-primary/30"
+                >
+                  <div className="mb-2 flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bot className="h-5 w-5 text-primary" />
+                      <h3 className="font-medium text-foreground">{agent.name}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleEdit(agent)}
+                        aria-label={`Edit ${agent.name}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => setDeleteTarget(agent)}
+                        aria-label={`Delete ${agent.name}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {agent.description && (
+                    <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{agent.description}</p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {agent.model && <Badge variant="secondary">{agent.model}</Badge>}
+                    {assignedSkills.length > 0 && (
+                      <Badge variant="outline" className="gap-1">
+                        <Zap className="h-3 w-3" />
+                        {assignedSkills.length} skill{assignedSkills.length !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                    {!agent.isActive && (
+                      <Badge variant="outline" className="gap-1 text-muted-foreground">
+                        <PowerOff className="h-3 w-3" />
+                        Inactive
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => handleEdit(agent)}
-                    aria-label={`Edit ${agent.name}`}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive"
-                    onClick={() => setDeleteTarget(agent)}
-                    aria-label={`Delete ${agent.name}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-
-              {agent.description && (
-                <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{agent.description}</p>
-              )}
-
-              <div className="flex flex-wrap items-center gap-2">
-                {agent.model && <Badge variant="secondary">{agent.model}</Badge>}
-                {assignedSkills.length > 0 && (
-                  <Badge variant="outline" className="gap-1">
-                    <Zap className="h-3 w-3" />
-                    {assignedSkills.length} skill{assignedSkills.length !== 1 ? 's' : ''}
-                  </Badge>
-                )}
-                {!agent.isActive && (
-                  <Badge variant="outline" className="gap-1 text-muted-foreground">
-                    <PowerOff className="h-3 w-3" />
-                    Inactive
-                  </Badge>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {formOpen && (
         <AgentFormDialog
@@ -203,7 +203,7 @@ const AgentsTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 };
 
