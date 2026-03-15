@@ -1,7 +1,7 @@
 # Kaivoo — Product Vision
 
-**Version:** 7.9
-**Last Updated:** March 12, 2026
+**Version:** 7.12
+**Last Updated:** March 14, 2026
 **Status:** Living document — updated as phases complete and priorities shift
 
 ---
@@ -730,7 +730,7 @@ Both tracks can run in parallel. Web trial infrastructure is already partially b
 | **AI Execution Tools + Data Awareness** — 19 tools working end-to-end, cross-provider tool schemas (8 providers), argument validation with self-correcting errors, Ollama OpenAI-compat mode, Gemini tool-use round-trips, text fallback extraction | **DONE** (Sprint 35-36) | **Must-have** |
 | **Configurable Heartbeat** — proactive AI that acts without being asked. Background timer (Rust + TypeScript), configurable scheduling (Off, Hourly, Custom days/times), AI inference integration, desktop + web notifications. Reads tasks, calendar, journal, soul file. | **DONE** (Sprint 37) | **Must-have** |
 | **Neuron Memory V1** — 3-tier memory architecture (Core Identity / Active Context / Episodic), memory consolidation during heartbeat (Jaccard dedup, stale pruning, promotion/demotion), context-aware loading with relevance scoring (~3500 token budget), quiet hours, insights history UI, tier-aware memory management settings. | **DONE** (Sprint 38) | **Must-have** |
-| **Orchestrator Page** — 4-tab page: **Flows** (CRUD, scheduling, triggers, step builder), **Agents** (CRUD, model assignment, permissions, assign skills), **Skills** (CRUD, AI skill creation, reusable actions), **Apps** (discover MCPs, connect external platforms, manage credentials). Users define their own AI agent teams and Flows. | PLANNED (Sprints 39-45) | **Must-have** |
+| **Orchestrator Page** — 4-tab page: **Flows** (CRUD, scheduling, triggers, step builder), **Agents** (CRUD, model assignment, permissions, assign skills), **Skills** (CRUD, AI skill creation, reusable actions), **Apps** (discover MCPs, connect external platforms, manage credentials). Users define their own AI agent teams and Flows. | **IN PROGRESS** — Agents + Skills tabs DONE (Sprint 39), Flows tab next (Sprint 40), Apps tab (Sprint 41+) | **Must-have** |
 | **Flow Execution Engine** — multi-model routing, context passing between steps, approval gates, action logging, rate limiting. The orchestrator actually runs Flows autonomously. | PLANNED (Sprints 46-47) | **Must-have** |
 | **Artifact System** — sandboxed iframe widgets. AI generates HTML/CSS/JS, renders in split-pane preview. Persistent custom widgets saveable to library. Addable to Today page and project pages. Export to vault. Editable via conversation. | PLANNED (Sprints 48-49) | **Must-have** |
 | **Safety Layer** — confirmation gates, skill permissions, Flow approval gates, rollback, rate limiting. Safe autonomy as a product principle. | PLANNED (Sprint 50) | **Must-have** |
@@ -1123,6 +1123,9 @@ Why Kaivoo wins where others don't:
 When a milestone moves from PLANNED to DONE, update the Status and Sprint columns. When new milestones are added, place them in the appropriate phase.
 
 ---
+
+*Vision v7.12 — March 14, 2026*
+*v7.12: Sprint 39 (Orchestrator Foundation) complete. 6/6 parcels. Orchestrator Page shipped with `/orchestrator` route, 4-tab layout (Flows, Agents, Skills, Apps), and full CRUD for Agents and Skills tabs. Data model: 3 new tables (agents, skills, agent_skills junction) with SQLite + Supabase adapters following DataAdapter pattern. Agents: card grid, create/edit dialog with model selector (all 8 providers), system prompt, active toggle, skill assignment via badge toggles. Skills: card grid, create/edit with action-type-aware config (prompt template, tool name, composite placeholder). Supabase migration applied with RLS policies. Bug fixes: heartbeat error toast debounce (1hr cooldown), MemoryManagement delete confirmation dialog. Housekeeping: InsightsHistoryModal migrated to shadcn Dialog. Sandbox caught 2 bugs: missing Supabase types (typed client rejected unknown tables) and dialog not opening from empty state (early return bypassed dialog JSX) — both fixed. 295 tests, 22/22 E2E. Orchestrator milestone updated to IN PROGRESS. See `Sprints/Sprint-39-Orchestrator-Foundation.md`.*
 
 *Vision v7.11 — March 14, 2026*
 *v7.11: Sprint 38 (Neuron Memory V1) complete. 7/7 parcels. 3-tier memory architecture (core_identity / active_context / episodic) with SQLite + Supabase migrations. Context-aware loading with relevance scoring (recency × frequency × importance) and 3500-token budget enforcement. Memory consolidation pipeline: Jaccard word-similarity dedup (≥0.7 threshold, same category), stale pruning (>90 days + low access + low importance), promotion (episodic→active_context on high access/importance), demotion (active_context→episodic on staleness). Quiet hours / DND for heartbeat notifications (overnight range support). Insights history modal with date filters, actionable toggle, pagination. Tier-aware Memory Management settings UI with token budget bar, promote/demote/delete per memory. Fixed pre-existing await-thenable lint errors (CI blocker) and schema index ordering bug (desktop crash). 30 new tests (295 total). 22/22 E2E passed. Desktop + web sandbox approved. See Sprints/Sprint-38-Neuron-Memory.md.*
