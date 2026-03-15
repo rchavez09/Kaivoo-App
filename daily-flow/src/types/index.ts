@@ -203,6 +203,37 @@ export interface Meeting {
   source?: 'google' | 'outlook' | 'manual';
 }
 
+// Orchestrator types (Sprint 39)
+export type SkillActionType = 'prompt' | 'tool' | 'composite';
+
+export interface Agent {
+  id: string;
+  name: string;
+  description: string | null;
+  model: string | null;
+  systemPrompt: string | null;
+  permissions: string[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  description: string | null;
+  actionType: SkillActionType;
+  actionConfig: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AgentSkill {
+  agentId: string;
+  skillId: string;
+  assignedAt: Date;
+}
+
 export interface DailyPlan {
   id: string;
   date: string; // YYYY-MM-DD

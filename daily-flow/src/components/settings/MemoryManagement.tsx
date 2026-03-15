@@ -15,6 +15,16 @@ import { getMemories, deleteMemory, updateMemoryTier } from '@/lib/ai/memory-ser
 import { runConsolidation, formatConsolidationInsight } from '@/lib/ai/memory-consolidation';
 import { estimateTokens } from '@/lib/ai/prompt-assembler';
 import { getHeartbeatSettings, saveHeartbeatSettings } from '@/lib/ai/settings';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import type { AIMemory, MemoryTier } from '@/lib/ai/types';
 
 const TIERS: Array<{ key: MemoryTier; label: string; description: string }> = [
@@ -36,6 +46,7 @@ export default function MemoryManagement() {
   const [consolidationEnabled, setConsolidationEnabled] = useState(
     () => getHeartbeatSettings().memoryConsolidationEnabled,
   );
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const all = await getMemories(false);
@@ -57,8 +68,10 @@ export default function MemoryManagement() {
   const totalTokens = estimateTokens(memories.map((m) => m.content).join(' '));
   const budgetPercent = Math.min(100, Math.round((totalTokens / MEMORY_TOKEN_BUDGET) * 100));
 
-  const handleDelete = async (id: string) => {
-    await deleteMemory(id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    await deleteMemory(deleteTarget);
+    setDeleteTarget(null);
     await refresh();
     toast.success('Memory deleted');
   };
@@ -218,7 +231,7 @@ export default function MemoryManagement() {
                 {/* Delete */}
                 <button
                   type="button"
-                  onClick={() => void handleDelete(memory.id)}
+                  onClick={() => setDeleteTarget(memory.id)}
                   className="min-h-[36px] min-w-[36px] rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   aria-label="Delete memory"
                   title="Delete"
@@ -266,6 +279,27 @@ export default function MemoryManagement() {
           )}
         </Button>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete memory?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This memory will be permanently removed. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void handleDelete()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

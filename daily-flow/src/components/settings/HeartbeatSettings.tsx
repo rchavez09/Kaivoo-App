@@ -233,7 +233,7 @@ export default function HeartbeatSettings() {
         </div>
       </div>
 
-      {showHistory && <InsightsHistoryModal onClose={() => setShowHistory(false)} />}
+      <InsightsHistoryModal open={showHistory} onOpenChange={setShowHistory} />
 
       {/* Info box */}
       <div className="rounded-lg bg-secondary/30 p-4">

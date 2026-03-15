@@ -1,13 +1,14 @@
 /**
- * Insights History Modal — Sprint 38 P7
+ * Insights History Modal — Sprint 38 P7 (Sprint 39: migrated to shadcn Dialog)
  *
  * Shows past heartbeat insights with filters and pagination.
  * Web: fetches from Supabase heartbeat_insights table.
  * Desktop: placeholder (SQLite storage is Phase B).
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Filter } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Insight {
   id: string;
@@ -21,12 +22,13 @@ interface Insight {
 type DateFilter = '7d' | '30d' | 'all';
 
 interface Props {
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const PAGE_SIZE = 20;
 
-export default function InsightsHistoryModal({ onClose }: Props) {
+export default function InsightsHistoryModal({ open, onOpenChange }: Props) {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState<DateFilter>('7d');
@@ -34,51 +36,18 @@ export default function InsightsHistoryModal({ onClose }: Props) {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-
-  // Escape key handler
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  // Focus trap
-  const handleFocusTrap = useCallback((e: React.KeyboardEvent) => {
-    if (e.key !== 'Tab' || !dialogRef.current) return;
-    const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  }, []);
-
-  // Auto-focus dialog on mount
-  useEffect(() => {
-    dialogRef.current?.focus();
-  }, []);
 
   useEffect(() => {
+    if (!open) return;
     void fetchInsights();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateFilter, actionableOnly, page]);
+  }, [open, dateFilter, actionableOnly, page]);
 
   const fetchInsights = async () => {
     setLoading(true);
     const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
     if (isTauri) {
-      // Desktop: SQLite storage not yet implemented (Phase B)
       setInsights([]);
       setHasMore(false);
       setLoading(false);
@@ -101,6 +70,10 @@ export default function InsightsHistoryModal({ onClose }: Props) {
         'heartbeat_insights',
       ) as unknown as {
         select: (cols: string) => unknown;
+        eq: (col: string, val: unknown) => unknown;
+        gte: (col: string, val: string) => unknown;
+        order: (col: string, opts: { ascending: boolean }) => unknown;
+        range: (from: number, to: number) => Promise<{ data: Insight[] | null; error: unknown }>;
       };
 
       let builder = query.select('*') as unknown as {
@@ -110,14 +83,12 @@ export default function InsightsHistoryModal({ onClose }: Props) {
         range: (from: number, to: number) => Promise<{ data: Insight[] | null; error: unknown }>;
       };
 
-      // Apply date filter
       if (dateFilter !== 'all') {
         const days = dateFilter === '7d' ? 7 : 30;
         const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
         builder = builder.gte('created_at', since) as typeof builder;
       }
 
-      // Actionable filter
       if (actionableOnly) {
         builder = builder.eq('is_actionable', true) as typeof builder;
       }
@@ -145,33 +116,14 @@ export default function InsightsHistoryModal({ onClose }: Props) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="insights-history-title"
-      ref={dialogRef}
-      tabIndex={-1}
-      onKeyDown={handleFocusTrap}
-    >
-      <div className="relative mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-xl border border-border bg-background shadow-lg">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 id="insights-history-title" className="text-sm font-semibold text-foreground">
-            Insights History
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Insights History</DialogTitle>
+        </DialogHeader>
 
         {/* Filters */}
-        <div className="flex items-center gap-2 border-b border-border px-4 py-2">
+        <div className="flex items-center gap-2 border-b border-border pb-2">
           <Filter className="h-3 w-3 text-muted-foreground" />
           <div className="flex gap-1">
             {(['7d', '30d', 'all'] as DateFilter[]).map((f) => (
@@ -207,7 +159,7 @@ export default function InsightsHistoryModal({ onClose }: Props) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-3">
+        <div className="flex-1 overflow-y-auto">
           {loading ? (
             <p className="py-8 text-center text-sm text-muted-foreground">Loading...</p>
           ) : insights.length === 0 ? (
@@ -239,7 +191,7 @@ export default function InsightsHistoryModal({ onClose }: Props) {
 
         {/* Pagination */}
         {(page > 0 || hasMore) && (
-          <div className="flex items-center justify-between border-t border-border px-4 py-2">
+          <div className="flex items-center justify-between border-t border-border pt-2">
             <button
               type="button"
               onClick={() => setPage(Math.max(0, page - 1))}
@@ -259,7 +211,7 @@ export default function InsightsHistoryModal({ onClose }: Props) {
             </button>
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

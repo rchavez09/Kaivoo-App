@@ -1,15 +1,15 @@
 # Next Sprint Planning
 
 **Updated:** March 14, 2026
-**Last completed:** Sprint 38 (Neuron Memory V1)
-**Next sprint:** TBD
-**Source:** [CEO sessions, Vision.md, agent docs, deferred items]
+**Last completed:** Sprint 39 (Orchestrator Foundation)
+**Next sprint:** Sprint 40 — Flows Tab (data model, CRUD, scheduling, triggers)
+**Source:** [Vision.md, Sprint 39 deferred items]
 
 ---
 
 ## Sprint Overview
 
-[To be filled during next planning session]
+Sprint 40 will tackle the **Flows tab** — the most complex Orchestrator tab. Flows are scheduled processes that chain agents and skills into autonomous workflows. This sprint needs the Flow data model (steps, schedules, triggers, approval gates), CRUD UI, and basic scheduling configuration.
 
 ---
 
@@ -17,9 +17,9 @@
 
 | Source | Key Takeaways |
 |---|---|
-| Vision.md | [Roadmap position, phase status] |
-| Agent Docs | [Active concerns from agent Docs/ folders] |
-| Previous Sprint Deferred | [Items deferred from last sprint] |
+| Vision.md | Flows: CRUD, scheduling, triggers, step builder. Sprints 39-45 for full Orchestrator. |
+| Sprint 39 Deferred | Flows tab CRUD, Apps tab, AI skill creation, Flow step builder |
+| Agent Docs | [To be scanned during planning] |
 
 ---
 

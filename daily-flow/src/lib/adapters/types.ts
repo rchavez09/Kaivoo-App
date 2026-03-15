@@ -438,6 +438,58 @@ export interface CoherenceLogAdapter {
   create(input: CreateCoherenceSignalInput): Promise<import('@/lib/ai/coherence-monitor').CoherenceSignal>;
 }
 
+// ─── Orchestrator (Sprint 39) ───
+
+export interface CreateAgentInput {
+  name: string;
+  description?: string;
+  model?: string;
+  systemPrompt?: string;
+  permissions?: string[];
+  isActive?: boolean;
+}
+
+export interface UpdateAgentInput {
+  name?: string;
+  description?: string | null;
+  model?: string | null;
+  systemPrompt?: string | null;
+  permissions?: string[];
+  isActive?: boolean;
+}
+
+export interface CreateSkillInput {
+  name: string;
+  description?: string;
+  actionType: import('@/types').SkillActionType;
+  actionConfig?: Record<string, unknown>;
+}
+
+export interface UpdateSkillInput {
+  name?: string;
+  description?: string | null;
+  actionType?: import('@/types').SkillActionType;
+  actionConfig?: Record<string, unknown>;
+}
+
+export interface AgentAdapter {
+  fetchAll(): Promise<import('@/types').Agent[]>;
+  create(input: CreateAgentInput): Promise<import('@/types').Agent>;
+  update(id: string, input: UpdateAgentInput): Promise<void>;
+  delete(id: string): Promise<void>;
+  getSkills(agentId: string): Promise<import('@/types').Skill[]>;
+  assignSkill(agentId: string, skillId: string): Promise<void>;
+  removeSkill(agentId: string, skillId: string): Promise<void>;
+}
+
+export interface SkillAdapter {
+  fetchAll(): Promise<import('@/types').Skill[]>;
+  create(input: CreateSkillInput): Promise<import('@/types').Skill>;
+  update(id: string, input: UpdateSkillInput): Promise<void>;
+  delete(id: string): Promise<void>;
+  getAgentCount(skillId: string): Promise<number>;
+}
+
 // ═══════════════════════════════════════════════════════
 // Top-Level Adapter Interfaces
 // ═══════════════════════════════════════════════════════
@@ -474,6 +526,8 @@ export interface DataAdapter {
   projectNotes: ProjectNoteAdapter;
   conversations: ConversationAdapter;
   coherenceLog: CoherenceLogAdapter;
+  agents: AgentAdapter;
+  skills: SkillAdapter;
 }
 
 /**
