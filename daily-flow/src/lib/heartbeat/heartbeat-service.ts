@@ -359,7 +359,7 @@ async function showHeartbeatNotification(insight: string): Promise<void> {
     // Desktop: Use Tauri notification
     try {
       const { sendNotification } = await import('@tauri-apps/plugin-notification');
-      await sendNotification({
+      sendNotification({
         title: 'Proactive Insight',
         body: insight,
       });
@@ -417,7 +417,7 @@ async function showErrorNotification(message: string): Promise<void> {
     // Desktop: Use Tauri notification
     try {
       const { sendNotification } = await import('@tauri-apps/plugin-notification');
-      await sendNotification({
+      sendNotification({
         title: 'Proactive Insights Error',
         body: message,
       });
