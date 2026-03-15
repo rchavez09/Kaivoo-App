@@ -207,9 +207,6 @@ CREATE TABLE IF NOT EXISTS ai_conversation_summaries (
 
 CREATE INDEX IF NOT EXISTS idx_ai_memories_category ON ai_memories(category);
 CREATE INDEX IF NOT EXISTS idx_ai_memories_active ON ai_memories(active);
-CREATE INDEX IF NOT EXISTS idx_ai_memories_tier ON ai_memories(tier);
-CREATE INDEX IF NOT EXISTS idx_ai_memories_importance ON ai_memories(importance_score);
-CREATE INDEX IF NOT EXISTS idx_ai_memories_last_accessed ON ai_memories(last_accessed_at);
 CREATE INDEX IF NOT EXISTS idx_ai_conv_summaries_conv ON ai_conversation_summaries(conversation_id);
 
 CREATE VIRTUAL TABLE IF NOT EXISTS ai_memories_fts USING fts5(
@@ -222,6 +219,10 @@ ALTER TABLE ai_memories ADD COLUMN tier TEXT NOT NULL DEFAULT 'episodic';
 ALTER TABLE ai_memories ADD COLUMN importance_score REAL DEFAULT 0.5;
 ALTER TABLE ai_memories ADD COLUMN last_accessed_at TEXT;
 ALTER TABLE ai_memories ADD COLUMN access_count INTEGER DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS idx_ai_memories_tier ON ai_memories(tier);
+CREATE INDEX IF NOT EXISTS idx_ai_memories_importance ON ai_memories(importance_score);
+CREATE INDEX IF NOT EXISTS idx_ai_memories_last_accessed ON ai_memories(last_accessed_at);
 
 ALTER TABLE subtasks ADD COLUMN sort_order INTEGER DEFAULT 0;
 
