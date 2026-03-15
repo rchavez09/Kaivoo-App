@@ -425,3 +425,62 @@ Sprint 38 succeeds when:
 
 *Sprint 38 — Compiled March 14, 2026 by Dev Director*
 *Approved March 14, 2026 — Ready to execute*
+
+---
+
+## Sprint 38 Retrospective
+
+**Written:** March 14, 2026 (post-merge)
+**Merged:** PR #25 → `main` (squash merge `668e8f95`)
+**Duration:** 1 session (resumed after crash)
+
+### Delivery Summary
+
+| Metric | Target | Actual |
+|---|---|---|
+| Parcels | 7 | **7/7 delivered** |
+| Code added | ~800-1000 lines | **~2000 lines** (includes tests + UI) |
+| Files created | ~5 | **7** (consolidation service, 2 UI components, migration SQL, 2 test files) |
+| Files modified | ~10 | **9** (types, memory-service, prompt-assembler, settings, heartbeat-service, local-schema, AIProviderSettings, HeartbeatSettings, Next-Sprint-Planning) |
+| Tests | 265+ | **295** (30 new across 2 test files) |
+| Token budget | ≤ 3500 | **3500 enforced** with truncation |
+| Build | PASS | PASS (2.58s) |
+| E2E | PASS | **22/22 passed** against deploy preview |
+
+### What Went Well
+
+1. **Clean architecture.** The 3-tier model (core_identity / active_context / episodic) maps cleanly to the existing memory service pattern. No Zustand store needed — the service-layer cache was sufficient.
+
+2. **Consolidation pipeline is solid.** Jaccard dedup + stale pruning + promotion/demotion all work correctly. The 24-hour throttle prevents runaway consolidation. Integration with heartbeat was seamless.
+
+3. **Token budget enforcement works.** Core and active memories always load. Episodic fills remaining budget with relevance-scored ranking (recency × frequency × importance). Budget is respected even with many memories.
+
+4. **Phase 4 gates caught real issues.** Agent 7 found the schema index ordering bug (CREATE INDEX before ALTER TABLE — crashed desktop). Design review caught missing focus trap and keyboard accessibility. Both fixed before merge.
+
+5. **E2E + desktop sandbox validation.** Web deploy preview passed 22/22 E2E tests. Desktop caught the schema ordering bug that wouldn't have surfaced in web-only testing.
+
+### What Went Wrong
+
+1. **Schema index ordering bug.** The `CREATE INDEX IF NOT EXISTS idx_ai_memories_tier` ran before `ALTER TABLE ai_memories ADD COLUMN tier` — crashed existing desktop installs. Root cause: the new indexes were placed adjacent to existing indexes in the schema file, but needed to be after the ALTER TABLE block. Fixed by reordering.
+
+2. **Pre-existing lint errors blocked CI.** Two `await-thenable` errors in heartbeat-service.ts (from Sprint 37) caused CI to exit non-zero. These weren't from Sprint 38 but blocked the PR. Fixed by removing unnecessary `await` on Tauri's synchronous `sendNotification()`.
+
+3. **Context crashed mid-sprint.** The session ran out of context during implementation, requiring a resume with `/compact`. Lost some working state but the compaction summary was comprehensive enough to continue cleanly.
+
+### Observations
+
+- **Agent 7 false positive rate:** 1 of 2 P0s was a false positive (ALTER TABLE errors are swallowed in `local.ts`). The other P0 (`assembleAppContext` import) was real but pre-existing. Agent 7 needs better context on pre-existing vs new issues.
+
+- **Desktop testing is critical.** The schema ordering bug would never appear in web testing (Supabase handles migrations differently). Desktop sandbox should always be part of the gate sequence for DB-touching sprints.
+
+- **Memory service pattern scales well.** Adding 4 new tier-aware functions (`getMemoriesByTier`, `updateMemoryTier`, `updateMemoryImportance`, `trackMemoryAccess`) to the existing service was clean. No store refactoring needed.
+
+### Deferred Items (→ Sprint 39+)
+
+- Memory export (JSON/Markdown)
+- Memory search UI (search across all tiers)
+- Notification batching (daily digest mode)
+- Delete confirmation dialog in MemoryManagement
+- Supabase type generation for `heartbeat_insights` table
+- InsightsHistoryModal: replace hand-rolled modal with shadcn Dialog
+- Token budget estimate accuracy (include formatting overhead)
